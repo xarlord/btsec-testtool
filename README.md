@@ -1,5 +1,10 @@
 # BTSec Test Tool - Android Bluetooth Security Testing Application
 
+[![CI](https://github.com/xarlord/btsec-testtool/actions/workflows/ci.yml/badge.svg)](https://github.com/xarlord/btsec-testtool/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/xarlord/btsec-testtool/blob/main/TEST_COVERAGE_REPORT.md)
+[![License](https://img.shields.io/badge/license-MIT%20with%20restrictions-blue)](LICENSE)
+[![Version](https://img.shields.io/badge/v-1.0.0-4.5-brightgreen)](https://github.com/xarlord/btsec-testtool/releases/tag/v1.0.0)
+
 **Version:** 1.0.0
 **Status:** Planning Complete - Ready for Implementation
 **Last Updated:** February 7, 2026
