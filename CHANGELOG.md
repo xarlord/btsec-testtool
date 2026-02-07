@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/xarlord/btsec-testtool/compare/v1.0.1...v1.1.0) (2026-02-07)
+
+
+### Features
+
+* Add Jacoco and OWASP Dependency Check configuration ([0eed649](https://github.com/xarlord/btsec-testtool/commit/0eed649e303537ddb9f4546bb37f81a1351af846))
+
 ## [1.0.1](https://github.com/xarlord/btsec-testtool/compare/v1.0.0...v1.0.1) (2026-02-07)
 
 
