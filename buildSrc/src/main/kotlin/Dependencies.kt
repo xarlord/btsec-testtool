@@ -23,7 +23,7 @@ object Versions {
     const val composeBom = "2023.10.01"
     const val room = "2.6.1"
     const val work = "2.8.1"
-    const val startup = "1.1.2"
+    const val startup = "1.1.1"
     const val dataStore = "1.0.0"
     const val security = "1.1.0-alpha06"
 
