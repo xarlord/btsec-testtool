@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/xarlord/btsec-testtool/compare/v1.1.2...v1.1.3) (2026-02-07)
+
+
+### Bug Fixes
+
+* Update CI workflow to use correct test task names for product flavors ([65917ce](https://github.com/xarlord/btsec-testtool/commit/65917ce6d43a7eed11fc341b15496b3b0a749af0))
+
 ## [1.1.2](https://github.com/xarlord/btsec-testtool/compare/v1.1.1...v1.1.2) (2026-02-07)
 
 
