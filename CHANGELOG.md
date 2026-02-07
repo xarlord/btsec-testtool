@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/xarlord/btsec-testtool/compare/v1.1.0...v1.1.1) (2026-02-07)
+
+
+### Bug Fixes
+
+* Correct dependency check configuration type mismatches ([10d9dda](https://github.com/xarlord/btsec-testtool/commit/10d9dda33f8d5cd52861b65d4e0948326279fbdb))
+
 # [1.1.0](https://github.com/xarlord/btsec-testtool/compare/v1.0.1...v1.1.0) (2026-02-07)
 
 
