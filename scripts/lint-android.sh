@@ -53,10 +53,10 @@ cd "$PROJECT_ROOT"
 
 # Run Android lint
 echo_section "Running Android Lint"
-echo_info "Running: ./gradlew lintDebug"
+echo_info "Running: ./gradlew lintDevDebug lintProdDebug"
 
 LINT_EXIT_CODE=0
-if ./gradlew lintDebug 2>&1 | tee "$REPORT_DIR/android-lint-output.log"; then
+if ./gradlew lintDevDebug lintProdDebug 2>&1 | tee "$REPORT_DIR/android-lint-output.log"; then
     echo_success "Android lint completed"
 else
     echo_error "Android lint failed"

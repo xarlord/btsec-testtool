@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# Unit Tests with Coverage
-# Replicates unit-tests job from .github/workflows/ci.yml
-###########################################
+:: ###########################################
+:: Unit Tests with Coverage
+:: Replicates unit-tests job from .github/workflows/ci.yml
+:: ###########################################
 
 setlocal enabledelayedexpansion
 
@@ -42,7 +42,7 @@ echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━
 echo.
 echo %BLUE%ℹ%NC% Running: gradlew.bat test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
 
-call gradlew.bat test testDevDebugUnitTest testProdDebugUnitTest --stacktrace > "%REPORT_DIR%\test-output.log" 2>&1
+call "%PROJECT_ROOT%\gradlew.bat" test testDevDebugUnitTest testProdDebugUnitTest --stacktrace > "%REPORT_DIR%\test-output.log" 2>&1
 set "TEST_EXIT_CODE=%ERRORLEVEL%"
 
 if %TEST_EXIT_CODE% EQU 0 (
@@ -60,7 +60,7 @@ echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━
 echo.
 echo %BLUE%ℹ%NC% Running: gradlew.bat jacocoTestReport
 
-call gradlew.bat jacocoTestReport >> "%REPORT_DIR%\test-output.log" 2>&1
+call "%PROJECT_ROOT%\gradlew.bat" jacocoTestReport >> "%REPORT_DIR%\test-output.log" 2>&1
 if errorlevel 1 (
     echo %YELLOW%⚠%NC% Coverage report generation failed ^(continuing anyway^)
 ) else (

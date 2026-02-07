@@ -9,6 +9,23 @@ plugins {
     id("org.owasp.dependencycheck") version "9.0.9" apply false
 }
 
+// Force Java 17 toolchain for all projects
+allprojects {
+    plugins.withType<JavaPlugin> {
+        extensions.configure<JavaPluginExtension> {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(17))
+            }
+        }
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+}
+
 tasks.register("clean", Delete::class) {
     delete(rootProject.layout.buildDirectory)
 }

@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# OWASP Dependency Check
-# Replicates dependency-check job from .github/workflows/ci.yml
-###########################################
+:: ###########################################
+:: OWASP Dependency Check
+:: Replicates dependency-check job from .github/workflows/ci.yml
+:: ###########################################
 
 setlocal enabledelayedexpansion
 
@@ -42,7 +42,7 @@ echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━
 echo.
 echo %BLUE%ℹ%NC% Running: gradlew.bat dependencyCheckAnalyze
 
-call gradlew.bat dependencyCheckAnalyze > "%REPORT_DIR%\dep-check-output.log" 2>&1
+call "%PROJECT_ROOT%\gradlew.bat" dependencyCheckAnalyze > "%REPORT_DIR%\dep-check-output.log" 2>&1
 set "DEP_EXIT_CODE=%ERRORLEVEL%"
 
 if %DEP_EXIT_CODE% EQU 0 (

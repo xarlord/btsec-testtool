@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# Android Lint
-# Replicates android-lint job from .github/workflows/ci.yml
-###########################################
+:: ###########################################
+:: Android Lint
+:: Replicates android-lint job from .github/workflows/ci.yml
+:: ###########################################
 
 setlocal enabledelayedexpansion
 
@@ -40,9 +40,9 @@ echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━
 echo %BLUE%^|Running Android Lint                      ^|%NC%
 echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%NC%
 echo.
-echo %BLUE%ℹ%NC% Running: gradlew.bat lintDebug
+echo %BLUE%ℹ%NC% Running: gradlew.bat lintDevDebug lintProdDebug
 
-call gradlew.bat lintDebug > "%REPORT_DIR%\android-lint-output.log" 2>&1
+call "%PROJECT_ROOT%\gradlew.bat" lintDevDebug lintProdDebug > "%REPORT_DIR%\android-lint-output.log" 2>&1
 set "LINT_EXIT_CODE=%ERRORLEVEL%"
 
 if %LINT_EXIT_CODE% EQU 0 (

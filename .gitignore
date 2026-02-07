@@ -82,3 +82,9 @@ Thumbs.db
 # Test results
 test-results/
 androidTest-results/
+
+# Local CI scripts downloads
+scripts/ktlint.jar
+scripts/ktlint.exe
+scripts/ktlint/
+ktlint/

@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# Combined Lint Checks
-# Runs ktlint and Android lint
-###########################################
+:: ###########################################
+:: Combined Lint Checks
+:: Runs ktlint and Android lint
+:: ###########################################
 
 setlocal enabledelayedexpansion
 

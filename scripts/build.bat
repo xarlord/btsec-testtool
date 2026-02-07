@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# Build APKs - Debug and Release
-# Replicates build job from .github/workflows/ci.yml
-###########################################
+:: ###########################################
+:: Build APKs - Debug and Release
+:: Replicates build job from .github/workflows/ci.yml
+:: ###########################################
 
 setlocal enabledelayedexpansion
 
@@ -56,7 +56,7 @@ echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━
 echo.
 echo %BLUE%ℹ%NC% Running: gradlew.bat assembleDebug
 
-call gradlew.bat assembleDebug --stacktrace > "%REPORT_DIR%\build-debug.log" 2>&1
+call "%PROJECT_ROOT%\gradlew.bat" assembleDebug --stacktrace > "%REPORT_DIR%\build-debug.log" 2>&1
 if errorlevel 1 (
     echo %RED%✗%NC% Debug APK build failed
     echo Check log: %REPORT_DIR%\build-debug.log
@@ -84,7 +84,7 @@ echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━
 echo.
 echo %BLUE%ℹ%NC% Running: gradlew.bat assembleRelease
 
-call gradlew.bat assembleRelease --stacktrace > "%REPORT_DIR%\build-release.log" 2>&1
+call "%PROJECT_ROOT%\gradlew.bat" assembleRelease --stacktrace > "%REPORT_DIR%\build-release.log" 2>&1
 if errorlevel 1 (
     echo %RED%✗%NC% Release APK build failed
     echo Check log: %REPORT_DIR%\build-release.log

@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# Security Checklist
-# Replicates security-checklist job from .github/workflows/ci.yml
-###########################################
+:: ###########################################
+:: Security Checklist
+:: Replicates security-checklist job from .github/workflows/ci.yml
+:: ###########################################
 
 setlocal enabledelayedexpansion
 

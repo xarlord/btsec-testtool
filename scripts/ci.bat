@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# Master CI/CD Orchestration Script
-# Runs all CI checks in sequence
-###########################################
+:: ###########################################
+:: Master CI/CD Orchestration Script
+:: Runs all CI checks in sequence
+:: ###########################################
 
 setlocal enabledelayedexpansion
 

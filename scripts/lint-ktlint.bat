@@ -1,8 +1,8 @@
 @echo off
-###########################################
-# ktlint - Kotlin Code Style Linter
-# Replicates ktlint job from .github/workflows/ci.yml
-###########################################
+:: ###########################################
+:: ktlint - Kotlin Code Style Linter
+:: Replicates ktlint job from .github/workflows/ci.yml
+:: ###########################################
 
 setlocal enabledelayedexpansion
 
@@ -13,8 +13,8 @@ set "REPORT_DIR=%PROJECT_ROOT%\build\local-ci-reports\lint\ktlint"
 
 :: Configuration
 set "KTLINT_VERSION=1.0.1"
-set "KTLINT_URL=https://github.com/pinterest/ktlint/releases/download/%KTLINT_VERSION%/ktlint"
-set "KTLINT_BIN=%SCRIPT_DIR%\ktlint.exe"
+set "KTLINT_URL=https://github.com/pinterest/ktlint/releases/download/%KTLINT_VERSION%/ktlint.jar"
+set "KTLINT_BIN=%SCRIPT_DIR%\ktlint.jar"
 
 :: ANSI color codes
 for /F %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -43,14 +43,24 @@ cd /d "%PROJECT_ROOT%"
 if not exist "%KTLINT_BIN%" (
     echo %BLUE%ℹ%NC% Downloading ktlint %KTLINT_VERSION%...
 
-    if exist curl (
+    :: Try curl
+    where curl >nul 2>&1
+    if %errorlevel% equ 0 (
         curl -sSL "%KTLINT_URL%" -o "%KTLINT_BIN%"
-    ) else if exist wget (
-        wget -q "%KTLINT_URL%" -O "%KTLINT_BIN%"
-    ) else if exist powershell (
-        powershell -Command "Invoke-WebRequest -Uri '%KTLINT_URL%' -OutFile '%KTLINT_BIN%'"
     ) else (
-        echo %RED%✗%NC% Neither curl, wget, nor PowerShell available
+        :: Try wget
+        where wget >nul 2>&1
+        if %errorlevel% equ 0 (
+            wget -q "%KTLINT_URL%" -O "%KTLINT_BIN%"
+        ) else (
+            :: Use PowerShell (always available on Windows)
+            echo %BLUE%ℹ%NC% Using PowerShell to download...
+            powershell -Command "Invoke-WebRequest -Uri '%KTLINT_URL%' -OutFile '%KTLINT_BIN%'"
+        )
+    )
+
+    if not exist "%KTLINT_BIN%" (
+        echo %RED%✗%NC% Failed to download ktlint
         echo Please download ktlint manually:
         echo   %KTLINT_URL%
         echo   Place it in: %KTLINT_BIN%
@@ -70,7 +80,7 @@ echo %BLUE%━━━━━━━━━━━━━━━━━━━━━━━
 echo.
 echo %BLUE%ℹ%NC% Scanning Kotlin files...
 
-"%KTLINT_BIN%" --reporter=checkstyle,output="%REPORT_DIR%\ktlint-report.xml" "**/*.kt" "**/*.kts" > "%REPORT_DIR%\ktlint-output.log" 2>&1
+java -jar "%KTLINT_BIN%" --reporter=checkstyle,output="%REPORT_DIR%\ktlint-report.xml" "**/*.kt" "**/*.kts" > "%REPORT_DIR%\ktlint-output.log" 2>&1
 set "KTLINT_EXIT_CODE=%ERRORLEVEL%"
 
 if %KTLINT_EXIT_CODE% EQU 0 (
