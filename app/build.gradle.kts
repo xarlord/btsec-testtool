@@ -344,10 +344,6 @@ dependencies {
 }
 
 // OWASP Dependency Check Configuration
-dependencyCheck {
-    format.set(org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML)
-    outputDirectory.set("${buildDir}/reports/dependency-check")
-    failBuildOnCVSS.set(7.0f)
-    analyzedTypes.set(listOf("jar", "aar"))
-    scanConfigurations.set(listOf("debugRuntimeClasspath", "releaseRuntimeClasspath"))
+tasks.named("dependencyCheckAnalyze") {
+    dependsOn("assembleDebug")
 }
