@@ -13,6 +13,7 @@ import com.btsec.testtool.domain.repository.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.Instant
+import javax.inject.Inject
 
 /**
  * Use case for authorization management.
@@ -20,7 +21,7 @@ import java.time.Instant
  * This is the CRITICAL security component - all testing operations
  * must pass through authorization checks before execution.
  */
-class AuthorizationUseCase(
+class AuthorizationUseCase @Inject constructor(
     private val authorizationRepository: AuthorizationRepository,
     private val consentRepository: ConsentRepository
 ) {

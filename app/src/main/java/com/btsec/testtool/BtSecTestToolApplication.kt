@@ -14,7 +14,6 @@ import android.app.NotificationManager
 import android.os.Build
 import androidx.hilt.work.HiltAndroidApp
 import androidx.work.Configuration
-import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,7 +48,8 @@ class BtSecTestToolApplication : Application() {
 
         Timber.d("BTSec Test Tool initialized")
         Timber.d("Version: ${BuildConfig.VERSION_NAME}")
-        Timber.d("Build: ${BuildConfig.DEBUG ? "DEBUG" : "RELEASE"}")
+        val buildType = if (BuildConfig.DEBUG) "DEBUG" else "RELEASE"
+        Timber.d("Build: $buildType")
         Timber.d("Environment: ${BuildConfig.ENVIRONMENT}")
     }
 

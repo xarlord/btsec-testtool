@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -178,7 +179,7 @@ private fun AuthorizationContent(
  */
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
-    private val authorizationUseCase: com.btsec.testtool.domain.usecase.AuthorizationUseCase
+    private val authorizationUseCase: AuthorizationUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthorizationUiState())

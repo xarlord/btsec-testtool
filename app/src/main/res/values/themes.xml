@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material 3 Theme -->
-    <style name="Theme.BTSecStart" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Material3 Theme using AppCompat parent for XML compatibility -->
+    <style name="Theme.BTSecTestTool" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/btsec_primary</item>
-        <item name="colorOnPrimary">@color/btsec_on_primary</item>
-        <item name="colorPrimaryContainer">@color/btsec_primary</item>
-        <item name="colorOnPrimaryContainer">@color/btsec_on_primary</item>
-
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/btsec_secondary</item>
-        <item name="colorOnSecondary">@color/btsec_on_secondary</item>
-        <item name="colorSecondaryContainer">@color/btsec_secondary</item>
-        <item name="colorOnSecondaryContainer">@color/btsec_on_secondary</item>
+        <item name="colorPrimaryDark">@color/btsec_primary_dark</item>
+        <item name="colorAccent">@color/btsec_secondary</item>
 
         <!-- Status bar color -->
         <item name="android:statusBarColor">@color/btsec_primary_dark</item>
@@ -20,22 +13,10 @@
 
         <!-- Background color -->
         <item name="android:colorBackground">@color/btsec_background</item>
-        <item name="colorOnBackground">@color/btsec_on_background</item>
-        <item name="colorSurface">@color/btsec_surface</item>
-        <item name="colorOnSurface">@color/btsec_on_surface</item>
+        <item name="android:textColorPrimary">@color/btsec_on_background</item>
+        <item name="android:textColorSecondary">@color/btsec_on_surface</item>
 
         <!-- Error color -->
-        <item name="colorError">@color/btsec_critical</item>
-        <item name="colorOnError">@color/white</item>
-
-        <!-- Typography -->
-        <item name="textAppearanceTitleLarge">@style/TextAppearance.Material3.TitleLarge
-        </item>
-        <item name="textAppearanceTitleMedium">@style/TextAppearance.Material3.TitleMedium
-        </item>
-        <item name="textAppearanceBodyLarge">@style/TextAppearance.Material3.BodyLarge
-        </item>
-        <item name="textAppearanceBodyMedium">@style/TextAppearance.Material3.BodyMedium
-        </item>
+        <item name="android:textColorPrimary">@color/btsec_critical</item>
     </style>
 </resources>

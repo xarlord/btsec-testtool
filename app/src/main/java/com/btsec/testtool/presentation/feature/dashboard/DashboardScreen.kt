@@ -66,7 +66,8 @@ fun DashboardScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AuthorizationInfoCard(authId = authId)
-            FeatureGrid(...)
+            // TODO: Implement FeatureGrid
+            // FeatureGrid(...)
         }
     }
 }

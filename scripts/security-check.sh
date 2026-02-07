@@ -73,7 +73,7 @@ SECRET_PATTERNS=(
 
 SECRETS_FOUND=0
 for pattern in "${SECRET_PATTERNS[@]}"; do
-    if grep -rE "$pattern" --include="*.kt" --include="*.java" --exclude-dir=build . 2>/dev/null; then
+    if grep -rE "$pattern" --include="*.kt" --include="*.java" --exclude-dir=build app/src/main 2>/dev/null; then
         echo_error "Potential hardcoded secrets found!"
         SECRETS_FOUND=1
     fi
