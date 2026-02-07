@@ -169,7 +169,7 @@
     <string name="delete">Delete</string>
     <string name="share">Share</string>
     <string name="export">Export</string>
-    <string name="import">Import</string>
+    <string name="import_action">Import</string>
     <string name="confirm">Confirm</string>
     <string name="close">Close</string>
     <string name="done">Done</string>
@@ -187,7 +187,7 @@
     <string name="clear_all">Clear All</string>
     <string name="apply">Apply</string>
     <string name="reset">Reset</string>
-    <string name="continue">Continue</string>
+    <string name="continue_action">Continue</string>
     <string name="back">Back</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>

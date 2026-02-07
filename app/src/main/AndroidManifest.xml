@@ -86,7 +86,8 @@
             tools:node="replace">
             <meta-data
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"
-                android:value="EmojiCompatInitializer" />
+                android:value="EmojiCompatInitializer"
+                tools:replace="android:value" />
         </provider>
 
         <!-- Main activity (single activity architecture) -->
