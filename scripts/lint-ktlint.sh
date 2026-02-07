@@ -36,6 +36,10 @@ echo_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
+echo_warning() {
+    echo -e "${YELLOW}⚠${NC} $1"
+}
+
 echo_section() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -59,12 +63,20 @@ cd "$PROJECT_ROOT"
 # Download ktlint if not present
 if [ ! -f "$KTLINT_BIN" ]; then
     echo_info "Downloading ktlint ${KTLINT_VERSION}..."
-    if command -v curl &> /dev/null; then
-        curl -sSLO "$KTLINT_URL" -o "$KTLINT_BIN"
+
+    # Try PowerShell first (best for Windows/Git Bash)
+    if command -v powershell &> /dev/null; then
+        # Convert Unix path to Windows path for PowerShell
+        KTLINT_WIN=$(cygpath -w "$KTLINT_BIN" 2>/dev/null || echo "$KTLINT_BIN")
+        powershell -Command "Invoke-WebRequest -Uri '$KTLINT_URL' -OutFile '$KTLINT_WIN'"
+    # Try curl (Unix/Linux/macOS)
+    elif command -v curl &> /dev/null; then
+        curl -sSL "$KTLINT_URL" -o "$KTLINT_BIN"
+    # Try wget (alternative)
     elif command -v wget &> /dev/null; then
         wget -q "$KTLINT_URL" -O "$KTLINT_BIN"
     else
-        echo_error "Neither curl nor wget available. Please download ktlint manually:"
+        echo_error "No download tool available. Please download ktlint manually:"
         echo "  $KTLINT_URL"
         echo "  Place it in: $KTLINT_BIN"
         exit 2
