@@ -87,38 +87,8 @@ abstract class RepositoryModule {
 
 /**
  * Hilt dependency injection module for use cases.
+ *
+ * NOTE: UseCaseModule has been removed because all use cases are concrete classes
+ * with @Inject constructors. Hilt can automatically provide them without @Binds methods.
+ * @Binds is only needed when binding an interface to an implementation.
  */
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class UseCaseModule {
-
-    @Binds
-    abstract fun bindAuthorizationUseCase(
-        impl: AuthorizationUseCase
-    ): AuthorizationUseCase
-
-    @Binds
-    abstract fun bindBluetoothScanningUseCase(
-        impl: BluetoothScanningUseCase
-    ): BluetoothScanningUseCase
-
-    @Binds
-    abstract fun bindFuzzingUseCase(
-        impl: FuzzingUseCase
-    ): FuzzingUseCase
-
-    @Binds
-    abstract fun bindKeyExtractionUseCase(
-        impl: KeyExtractionUseCase
-    ): KeyExtractionUseCase
-
-    @Binds
-    abstract fun bindReportGenerationUseCase(
-        impl: ReportGenerationUseCase
-    ): ReportGenerationUseCase
-
-    @Binds
-    abstract fun bindVulnerabilityScanningUseCase(
-        impl: VulnerabilityScanningUseCase
-    ): VulnerabilityScanningUseCase
-}

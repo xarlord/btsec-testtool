@@ -13,6 +13,7 @@ import com.btsec.testtool.domain.repository.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /**
  * Use case for Bluetooth fuzzing operations.
@@ -20,7 +21,7 @@ import kotlinx.coroutines.flow.map
  * Fuzzing sends malformed/mutated packets to discover vulnerabilities.
  * All fuzzing operations require authorization and user consent.
  */
-class FuzzingUseCase(
+class FuzzingUseCase @Inject constructor(
     private val fuzzingRepository: FuzzingRepository,
     private val bluetoothRepository: BluetoothRepository,
     private val authorizationUseCase: AuthorizationUseCase,

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.File
+import javax.inject.Inject
 
 /**
  * Use case for security report generation and management.
@@ -21,7 +22,7 @@ import java.io.File
  * Handles creation, storage, export, and sharing of security assessment reports.
  * All reports are tied to an authorization ID for audit purposes.
  */
-class ReportGenerationUseCase(
+class ReportGenerationUseCase @Inject constructor(
     private val reportRepository: ReportRepository,
     private val vulnerabilityRepository: VulnerabilityRepository,
     private val fuzzingRepository: FuzzingRepository,

@@ -108,6 +108,83 @@ Created detailed task breakdown using TaskCreate tool:
 - N/A (no visual/browser content in this session)
 
 ---
+
+## Session: Fix Remaining Items - 2026-02-08 (CONTINUED)
+
+### Root Cause Identified - DI Configuration Issues
+
+**Issue 1: Self-binding @Binds annotations**
+- UseCaseModule had @Binds methods binding concrete classes to themselves
+- Example: `bindAuthorizationUseCase(impl: AuthorizationUseCase): AuthorizationUseCase`
+- This is incorrect - @Binds is for interface-to-implementation binding
+- **Fix:** Removed entire UseCaseModule from ViewModelModule.kt
+
+**Issue 2: Missing @Inject annotations**
+- All use cases except AuthorizationUseCase were missing @Inject on constructors
+- KSP couldn't generate factory classes for them
+- **Fix:** Added `@Inject constructor(` to all use cases:
+  - BluetoothScanningUseCase
+  - FuzzingUseCase
+  - KeyExtractionUseCase
+  - ReportGenerationUseCase
+  - VulnerabilityScanningUseCase
+
+**Issue 3: Missing import statement**
+- AuthorizationScreen.kt referenced AuthorizationUseCase without importing it
+- KSP reported as "error.NonExistentClass"
+- **Fix:** Added `import com.btsec.testtool.domain.usecase.AuthorizationUseCase`
+
+**Issue 4: Compose Compiler version incompatibility**
+- Compose Compiler 1.5.4 requires Kotlin 1.9.20
+- Project has Kotlin 1.9.21
+- **Fix:** Upgraded Compose Compiler to 1.5.6 in:
+  - buildSrc/src/main/kotlin/Dependencies.kt (line 22)
+  - app/build.gradle.kts (line 129)
+
+### Current Status: Domain Layer Incomplete
+
+**391 Kotlin compilation errors remain**
+
+The codebase appears to be a skeletal implementation with many TODO items. Common error types:
+
+1. **Missing domain model classes** (BluetoothState, ScanResult, etc.)
+2. **Incomplete repository implementations** (return type mismatches)
+3. **Missing imports** (HiltAndroidApp, domain models)
+4. **Stub methods with incorrect signatures**
+
+This is NOT a CI/CD script issue - it's incomplete application code.
+
+### Options for Moving Forward
+
+**Option A: Stub Implementation**
+- Add stub implementations for missing domain models
+- Fix compilation errors with minimal functionality
+- Goal: Get CI pipeline to pass
+- Risk: Application won't run meaningfully
+
+**Option B: Document Known Issues**
+- Document that codebase is incomplete
+- CI scripts are working correctly
+- Application development is ongoing
+- CI should focus on what IS implemented
+
+**Option C: Selective Implementation**
+- Implement only critical paths (authorization flow)
+- Stub out non-critical features
+- More realistic but time-consuming
+
+---
+
+## Technical Decisions (New Session)
+| Decision | Rationale |
+|----------|-----------|
+| Removed UseCaseModule @Binds methods | Concrete classes with @Inject don't need @Binds - only interface-to-implementation bindings require it |
+| Added @Inject to all use case constructors | KSP requires @Inject to generate dependency injection factories |
+| Added import for AuthorizationUseCase | Unresolved reference caused "error.NonExistentClass" in KSP |
+| Upgraded Compose Compiler to 1.5.6 | Kotlin 1.9.21 requires Compose Compiler 1.5.6+ for compatibility |
+| TBA | TBA |
+
+---
 ## Script Structure Plan
 ### Directory Structure
 ```

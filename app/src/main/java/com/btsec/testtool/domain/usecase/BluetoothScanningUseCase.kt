@@ -13,13 +13,14 @@ import com.btsec.testtool.domain.repository.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /**
  * Use case for Bluetooth device scanning.
  *
  * All scanning operations require valid authorization and consent.
  */
-class BluetoothScanningUseCase(
+class BluetoothScanningUseCase @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
     private val authorizationUseCase: AuthorizationUseCase,
     private val consentRepository: ConsentRepository

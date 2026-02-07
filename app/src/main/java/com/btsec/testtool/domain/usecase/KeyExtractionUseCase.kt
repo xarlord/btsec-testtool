@@ -13,6 +13,7 @@ import com.btsec.testtool.domain.repository.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /**
  * Use case for Bluetooth key extraction operations.
@@ -22,7 +23,7 @@ import kotlinx.coroutines.flow.map
  *
  * WARNING: Key extraction is sensitive - all operations are logged.
  */
-class KeyExtractionUseCase(
+class KeyExtractionUseCase @Inject constructor(
     private val keyExtractionRepository: KeyExtractionRepository,
     private val authorizationUseCase: AuthorizationUseCase,
     private val consentRepository: ConsentRepository
