@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/xarlord/btsec-testtool/compare/v1.1.3...v1.1.4) (2026-02-07)
+
+
+### Bug Fixes
+
+* Update androidx.startup runtime version to valid release ([3730d44](https://github.com/xarlord/btsec-testtool/commit/3730d44dda922a9578138c3b497a71be2075650e))
+
 ## [1.1.3](https://github.com/xarlord/btsec-testtool/compare/v1.1.2...v1.1.3) (2026-02-07)
 
 
