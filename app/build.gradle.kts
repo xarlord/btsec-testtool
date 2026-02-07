@@ -12,6 +12,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("jacoco")
+    id("org.owasp.dependencycheck")
 }
 
 kotlin {
@@ -187,6 +189,48 @@ android {
     }
 }
 
+// Jacoco Test Coverage Configuration
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/databinding/**",
+        "**/android/databinding/**",
+        "**/androidx/databinding/**",
+        "**/*_Factory.class",
+        "**/*_MembersInjector.class",
+        "**/Dagger*Component*.*",
+        "**/*Hilt*.*",
+        "**/*DI*.*",
+        "**/di/**"
+    )
+
+    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    val mainSrc = "${project.projectDir}/src/main/java"
+    val mainKotlinSrc = "${project.projectDir}/src/main/kotlin"
+
+    sourceDirectories.setFrom(files(listOf(mainSrc, mainKotlinSrc)))
+    classDirectories.setFrom(files(listOf(debugTree)))
+    executionData.setFrom(fileTree(buildDir) {
+        include(listOf("**/*.exec", "**/*.ec"))
+    })
+}
+
 dependencies {
     // Core Android
     implementation("androidx.core:core-ktx:${Versions.coreKtx}")
@@ -297,4 +341,14 @@ dependencies {
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// OWASP Dependency Check Configuration
+dependencyCheck {
+    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML
+    outputDirectory = file("${buildDir}/reports/dependency-check")
+    suppressionFile = file("${rootProject.rootDir}/dependency-check-suppressions.xml")
+    failBuildOnCVSS = 7.0f
+    analyzedTypes = listOf("jar", "aar")
+    scanConfigurations = listOf("debugRuntimeClasspath", "releaseRuntimeClasspath")
 }
