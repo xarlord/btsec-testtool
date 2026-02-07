@@ -297,7 +297,7 @@ dependencies {
     // Work Manager
     implementation("androidx.work:work-runtime-ktx:${Versions.work}")
     implementation("androidx.hilt:hilt-work:${Versions.hiltWork}")
-    ksp("androidx.hilt:hilt-compiler:${Versions.hilt}")
+    ksp("androidx.hilt:hilt-compiler:${Versions.hiltAndroidX}")
 
     // Startup
     implementation("androidx.startup:startup-runtime:${Versions.startup}")
