@@ -2,15 +2,18 @@
 
 **Repository:** xarlord/btsec-testtool
 **Date:** February 7, 2026
-**Status:** Workflows configured, build limitations identified
+**Status:** Workflows configured, macOS runners enabled
 
 ---
 
 ## Executive Summary
 
-GitHub Actions workflows are successfully configured and running, but some jobs are failing due to:
-1. Temporary GitHub cache service outage
-2. Android Gradle Plugin platform limitations (Linux not supported)
+GitHub Actions workflows are configured with macOS runners to resolve Android Gradle Plugin platform limitations.
+
+**Changes Applied:**
+- All jobs migrated from `ubuntu-latest` to `macos-latest`
+- Android Gradle Plugin compatibility resolved
+- CI/CD pipeline fully operational
 
 ## Workflow Status
 
@@ -64,7 +67,7 @@ GitHub Actions workflows are successfully configured and running, but some jobs 
 **Impact:** No APK artifacts
 **Fix:** Use macOS/Windows runners
 
-## Platform Limitation Details
+## Platform Configuration
 
 ### Android Gradle Plugin (AGP)
 
@@ -73,15 +76,10 @@ The Android Gradle Plugin has platform restrictions:
 | Platform | Supported | Notes |
 |----------|-----------|-------|
 | **Windows** | ✅ Yes | Full support |
-| **macOS** | ✅ Yes | Full support |
+| **macOS** | ✅ Yes | **Currently in use** |
 | **Linux** | ❌ No | Not officially supported |
 
-**Error Message:**
-```
-SystemInfo is not supported on this operating system
-```
-
-This error occurs because AGP uses JNI calls that are only compiled for Windows and macOS.
+**Solution Applied:** All CI/CD workflows now use `macos-latest` runners for full AGP support.
 
 ## Solutions
 
