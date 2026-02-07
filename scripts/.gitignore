@@ -1,0 +1,16 @@
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.log
+
+# Ignore downloaded binaries (ktlint will be downloaded when needed)
+ktlint
+ktlint.exe
+
+# Ignore local configuration overrides
+*.local
