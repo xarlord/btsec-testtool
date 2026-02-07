@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Application Name -->
+    <string name="app_name">BTSec Test Tool</string>
+
+    <!-- Authorization -->
+    <string name="authorization_title">Authorization Required</string>
+    <string name="authorization_subtitle">Bluetooth Security Testing Tool</string>
+    <string name="authorization_description">This tool performs authorized security testing only. Please enter your authorization ID to continue.</string>
+    <string name="authorization_id_hint">BTSEC-YYYYMMDD-XXXXXXXX</string>
+    <string name="authorization_verify">Verify Authorization</string>
+    <string name="authorization_verifying">Verifying…</string>
+    <string name="authorization_success">Authorization verified</string>
+    <string name="authorization_failed">Authorization failed</string>
+    <string name="authorization_invalid_format">Invalid format. Expected: BTSEC-YYYYMMDD-XXXXXXXX</string>
+    <string name="authorization_expired">Authorization has expired</string>
+    <string name="authorization_not_found">Authorization not found</string>
+
+    <!-- Legal Notices -->
+    <string name="legal_warning_title">⚠️ CRITICAL NOTICE</string>
+    <string name="legal_warning_text">This tool is for authorized security testing only. You must have explicit written authorization before proceeding.</string>
+    <string name="legal_unauthorized_warning">Unauthorized testing is illegal and can result in:\n• Criminal prosecution\n• Civil liability\n• Professional sanctions</string>
+    <string name="legal_understand">I Understand - Continue</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">BTSec Dashboard</string>
+    <string name="dashboard_welcome">Welcome, %1$s</string>
+    <string name="dashboard_auth_id">Authorization: %1$s</string>
+    <string name="dashboard_expires">Expires: %1$s</string>
+    <string name="dashboard_scope">Scope: %1$d devices</string>
+
+    <!-- Navigation -->
+    <string name="nav_scanner">Scanner</string>
+    <string name="nav_fuzzer">Fuzzer</string>
+    <string name="nav_keys">Key Extraction</string>
+    <string name="nav_vulns">Vulnerabilities</string>
+    <string name="nav_reports">Reports</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Scanner -->
+    <string name="scanner_title">Device Scanner</string>
+    <string name="scanner_start">Start Scan</string>
+    <string name="scanner_stop">Stop Scan</string>
+    <string name="scanner_scanning">Scanning…</string>
+    <string name="scanner_devices_found">%1$d devices found</string>
+    <string name="scanner_no_devices">No devices found</string>
+    <string name="scanner_permission_required">Location permission required for scanning</string>
+    <string name="scanner_bluetooth_disabled">Bluetooth is disabled</string>
+    <string name="scanner_bluetooth_unavailable">Bluetooth not available on this device</string>
+
+    <!-- Device Details -->
+    <string name="device_name">Name: %1$s</string>
+    <string name="device_address">Address: %1$s</string>
+    <string name="device_type">Type: %1$s</string>
+    <string name="device_rssi">Signal: %1$d dBm</string>
+    <string name="device_paired">Paired</string>
+    <string name="device_not_paired">Not paired</string>
+    <string name="device_connect">Connect</string>
+    <string name="device_disconnect">Disconnect</string>
+    <string name="device_test">Test Device</string>
+
+    <!-- Vulnerability Scanner -->
+    <string name="vuln_title">Vulnerability Scanner</string>
+    <string name="vuln_scan_device">Scan Device</string>
+    <string name="vuln_scanning">Scanning for vulnerabilities…</string>
+    <string name="vuln_complete">Scan complete</string>
+    <string name="vuln_found">%1$d vulnerabilities found</string>
+    <string name="vuln_none">No vulnerabilities found</string>
+    <string name="vuln_critical">Critical</string>
+    <string name="vuln_high">High</string>
+    <string name="vuln_medium">Medium</string>
+    <string name="vuln_low">Low</string>
+    <string name="vuln_info">Info</string>
+    <string name="vuln_cvss">CVSS: %1$.1f</string>
+    <string name="vuln_exploitable">Exploitable</string>
+    <string name="vuln_not_exploitable">Not exploitable</string>
+    <string name="vuln_remediation">Remediation: %1$s</string>
+
+    <!-- Fuzzer -->
+    <string name="fuzzer_title">Fuzzing Engine</string>
+    <string name="fuzzer_configure">Configure Fuzzing</string>
+    <string name="fuzzer_start">Start Fuzzing</string>
+    <string name="fuzzer_stop">Stop Fuzzing</string>
+    <string name="fuzzer_pause">Pause</string>
+    <string name="fuzzer_resume">Resume</string>
+    <string name="fuzzer_running">Fuzzing…</string>
+    <string name="fuzzer_complete">Fuzzing complete</string>
+    <string name="fuzzer_packets_sent">Packets sent: %1$d</string>
+    <string name="fuzzer_crashes">Crashes: %1$d</string>
+    <string name="fuzzer_anomalies">Anomalies: %1$d</string>
+    <string name="fuzzer_rate">Rate: %1$d pps</string>
+    <string name="fuzzer_protocol">Protocol</string>
+    <string name="fuzzer_mutation">Mutation</string>
+    <string name="fuzzer_duration">Duration</string>
+    <string name="fuzzer_max_packets">Max packets</string>
+    <string name="fuzzer_stop_on_crash">Stop on crash</string>
+
+    <!-- Key Extraction -->
+    <string name="keys_title">Key Extraction</string>
+    <string name="keys_analyze">Analyze Keys</string>
+    <string name="keys_analyzing">Analyzing key material…</string>
+    <string name="keys_complete">Analysis complete</string>
+    <string name="keys_found">Keys found: %1$d</string>
+    <string name="keys_none">No keys extracted</string>
+    <string name="keys_irk">IRK</string>
+    <string name="keys_ltk">LTK</string>
+    <string name="keys_csrk">CSRK</string>
+    <string name="keys_link">Link Key</string>
+    <string name="keys_entropy">Entropy: %1$.2f bits</string>
+    <string name="keys_strength">Strength: %1$s</string>
+    <string name="keys_strong">Strong</string>
+    <string name="keys_weak">Weak</string>
+    <string name="keys_unknown">Unknown</string>
+
+    <!-- Reports -->
+    <string name="reports_title">Reports</string>
+    <string name="reports_generate">Generate Report</string>
+    <string name="reports_view">View Report</string>
+    <string name="reports_delete">Delete</string>
+    <string name="reports_export">Export</string>
+    <string name="reports_share">Share</string>
+    <string name="reports_no_reports">No reports yet</string>
+    <string name="reports_date">%1$s at %2$s</string>
+    <string name="reports_device">Device: %1$s</string>
+    <string name="reports_type">Type: %1$s</string>
+
+    <!-- Report Types -->
+    <string name="report_executive">Executive Summary</string>
+    <string name="report_technical">Technical Report</string>
+    <string name="report_vulnerabilities">Vulnerability Report</string>
+    <string name="report_keys">Key Analysis Report</string>
+    <string name="report_fuzzing">Fuzzing Report</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_general">General</string>
+    <string name="settings_scanner">Scanner Settings</string>
+    <string name="settings_fuzzer">Fuzzer Settings</string>
+    <string name="settings_reports">Report Settings</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_license">License</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="settings_terms">Terms of Service</string>
+
+    <!-- Errors -->
+    <string name="error_generic">An error occurred</string>
+    <string name="error_network">Network error</string>
+    <string name="error_bluetooth">Bluetooth error</string>
+    <string name="error_permission">Permission denied</string>
+    <string name="error_scope">Scope violation</string>
+    <string name="error_unauthorized">Unauthorized action</string>
+    <string name="error_timeout">Operation timed out</string>
+    <string name="error_connection_failed">Connection failed</string>
+
+    <!-- Success Messages -->
+    <string name="success_scan_complete">Scan complete</string>
+    <string name="success_report_generated">Report generated</string>
+    <string name="success_exported">Exported successfully</string>
+
+    <!-- Warnings -->
+    <string name="warning_scope_violation">This action is outside your authorized scope</string>
+    <string name="warning_rate_limit">Rate limit exceeded</string>
+    <string name="warning_time_constraint">Outside authorized time window</string>
+
+    <!-- Common -->
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
+    <string name="export">Export</string>
+    <string name="import">Import</string>
+    <string name="confirm">Confirm</string>
+    <string name="close">Close</string>
+    <string name="done">Done</string>
+    <string name="retry">Retry</string>
+    <string name="loading">Loading…</string>
+    <string name="search">Search</string>
+    <string name="filter">Filter</string>
+    <string name="sort">Sort</string>
+    <string name="refresh">Refresh</string>
+    <string name="more">More</string>
+    <string name="less">Less</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
+    <string name="select_all">Select All</string>
+    <string name="clear_all">Clear All</string>
+    <string name="apply">Apply</string>
+    <string name="reset">Reset</string>
+    <string name="continue">Continue</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="finish">Finish</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+
+    <!-- Device Types -->
+    <string name="device_type_ble">BLE</string>
+    <string name="device_type_classic">Classic</string>
+    <string name="device_type_dual">Dual Mode</string>
+    <string name="device_type_unknown">Unknown</string>
+
+    <!-- Device Classes -->
+    <string name="device_class_phone">Phone</string>
+    <string name="device_class_computer">Computer</string>
+    <string name="device_class_audio">Audio</string>
+    <string name="device_class_peripheral">Peripheral</string>
+    <string name="device_class_wearable">Wearable</string>
+    <string name="device_class_vehicle">Vehicle</string>
+    <string name="device_class_iot">IoT Device</string>
+
+    <!-- Protocols -->
+    <string name="protocol_gatt">GATT</string>
+    <string name="protocol_smp">SMP</string>
+    <string name="protocol_l2cap">L2CAP</string>
+    <string name="protocol_sdp">SDP</string>
+    <string name="protocol_rfcomm">RFCOMM</string>
+
+    <!-- Test Actions -->
+    <string name="action_scan">Scan Devices</string>
+    <string name="action_connect">Connect Device</string>
+    <string name="action_fuzz">Start Fuzzing</string>
+    <string name="action_extract_keys">Extract Keys</string>
+    <string name="action_scan_vulns">Scan Vulnerabilities</string>
+    <string name="action_generate_report">Generate Report</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_bluetooth">Bluetooth</string>
+    <string name="cd_security">Security</string>
+    <string name="cd_warning">Warning</string>
+    <string name="cd_error">Error</string>
+    <string name="cd_success">Success</string>
+    <string name="cd_info">Information</string>
+    <string name="cd_more_options">More options</string>
+    <string name="cd_menu">Menu</string>
+    <string name="cd_navigate_up">Navigate up</string>
+    <string name="cd_refresh">Refresh</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_share">Share</string>
+    <string name="cd_export">Export</string>
+</resources>

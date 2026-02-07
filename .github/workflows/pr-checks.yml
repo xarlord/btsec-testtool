@@ -1,0 +1,283 @@
+# Pull Request Checks
+# Additional checks specific to pull requests
+
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  # ============================================
+  # PR Description Validation
+  # ============================================
+  validate-description:
+    name: Validate PR Description
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const maxLength = 10000;
+
+            // Check if PR has description
+            if (body.length < 10) {
+              core.setFailed('PR description is too short. Please provide details about your changes.');
+              return;
+            }
+
+            // Check description length
+            if (body.length > maxLength) {
+              core.warning(`PR description is very long (${body.length} chars). Consider summarizing.`);
+            }
+
+            // Check for common PR description sections
+            const hasChanges = body.toLowerCase().includes('change');
+            const hasTesting = body.toLowerCase().includes('test');
+            const hasBreaking = body.toLowerCase().includes('breaking') || body.toLowerCase().includes('breaking change');
+
+            if (!hasChanges && !hasTesting) {
+              core.warning('PR description should include what changed and how it was tested.');
+            }
+
+            if (hasBreaking) {
+              core.warning('Breaking changes detected. Ensure this is documented in the release notes.');
+            }
+
+            core.info('PR description validation passed');
+
+  # ============================================
+  # Legal & Authorization Check
+  # ============================================
+  legal-check:
+    name: Legal & Authorization Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for legal disclaimers in new files
+        run: |
+          echo "Checking legal disclaimers in modified files..."
+
+          # Get list of changed Kotlin files
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
+
+          # Check each file for disclaimer
+          missing_disclaimer=0
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              if ! grep -q "AUTHORIZED security testing" "$file"; then
+                echo "::warning file=$file::Missing legal disclaimer"
+                missing_disclaimer=$((missing_disclaimer + 1))
+              fi
+            fi
+          done < /tmp/changed_files.txt
+
+          if [ $missing_disclaimer -gt 0 ]; then
+            echo "::error::$missing_disclaimer file(s) missing legal disclaimer"
+            exit 1
+          fi
+
+          echo "All files have proper legal disclaimers"
+
+      - name: Verify authorization enforcement
+        run: |
+          echo "Checking for authorization enforcement in new code..."
+
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
+
+          # Check use case files for authorization
+          usecase_files=$(grep -l "UseCase" /tmp/changed_files.txt 2>/dev/null || echo "")
+
+          if [ -n "$usecase_files" ]; then
+            for file in $usecase_files; do
+              if [ -f "$file" ]; then
+                if ! grep -q "requestActionAuthorization" "$file"; then
+                  echo "::warning file=$file::Use case may be missing authorization check"
+                fi
+              fi
+            done
+          fi
+
+          echo "Authorization enforcement check complete"
+
+      - name: Check for security concerns
+        run: |
+          echo "Checking for potential security issues..."
+
+          git diff origin/${{ github.base_ref }}...HEAD > /tmp/pr.diff
+
+          # Check for suspicious patterns
+          if grep -iE "TODO.*auth|FIXME.*security|hack|workaround.*security" /tmp/pr.diff; then
+            echo "::warning::Potential security concerns marked with TODO/FIXME"
+          fi
+
+          # Check for disabled security checks
+          if grep -iE ".*//.*disable.*security|.*//.*bypass.*check" /tmp/pr.diff; then
+            echo "::error::Possible security bypass detected"
+            exit 1
+          fi
+
+          echo "Security check passed"
+
+  # ============================================
+  # Test Coverage Check
+  # ============================================
+  coverage-check:
+    name: Test Coverage Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests with coverage
+        run: ./gradlew test jacocoTestCoverageVerification
+
+      - name: Check coverage threshold
+        run: |
+          # Verify minimum coverage (80%)
+          coverage=$(./gradlew jacocoTestReport | grep -oP 'Total.*?\K\d+(?=%)' || echo "0")
+          if [ "$coverage" -lt 80 ]; then
+            echo "::error::Test coverage below 80% (current: $coverage%)"
+            exit 1
+          fi
+          echo "Test coverage: $coverage%"
+
+  # ============================================
+  # Breaking Change Detection
+  # ============================================
+  breaking-change-check:
+    name: Breaking Change Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for API changes
+        run: |
+          echo "Checking for breaking API changes..."
+
+          # Get changed files
+          git diff --name-only origin/${{ github.base_ref }}...HEAD > /tmp/changed_files.txt
+
+          # Check for changes in public API
+          api_changed=0
+          while IFS= read -r file; do
+            case "$file" in
+              *domain/model*)
+                echo "::notice file=$file::Domain model changed - may affect API"
+                api_changed=1
+                ;;
+              *domain/repository/*Repository.kt)
+                echo "::notice file=$file::Repository interface changed - breaking change"
+                api_changed=1
+                ;;
+              *domain/usecase/*UseCase.kt)
+                echo "::notice file=$file::Use case interface changed - breaking change"
+                api_changed=1
+                ;;
+            esac
+          done < /tmp/changed_files.txt
+
+          if [ $api_changed -eq 1 ]; then
+            echo "::warning::API changes detected. Ensure PR description includes migration notes."
+          fi
+
+      - name: Check for test removal
+        run: |
+          echo "Checking for removed or disabled tests..."
+
+          # Count deleted test files
+          deleted_tests=$(git diff origin/${{ github.base_ref }}...HEAD --diff-filter=D --name-only | grep 'Test.kt' | wc -l)
+
+          if [ $deleted_tests -gt 0 ]; then
+            echo "::warning::$deleted_tests test file(s) deleted"
+          fi
+
+          # Check for disabled/skipped tests
+          git diff origin/${{ github.base_ref }}...HEAD | grep -E "@Disabled|@Ignore" > /tmp/disabled_tests.txt || true
+
+          if [ -s /tmp/disabled_tests.txt ]; then
+            echo "::warning::Tests have been disabled/skipped in this PR"
+          fi
+
+  # ============================================
+  # Documentation Check
+  # ============================================
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for README updates
+        run: |
+          if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q 'README.md'; then
+            echo "README.md updated"
+          else
+            echo "::notice::Consider updating README.md if this PR changes user-facing functionality"
+          fi
+
+      - name: Check for test coverage report updates
+        run: |
+          if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q 'TEST_COVERAGE_REPORT.md'; then
+            echo "TEST_COVERAGE_REPORT.md updated"
+          else
+            if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q '\.kt$'; then
+              echo "::warning::Kotlin files changed but TEST_COVERAGE_REPORT.md not updated"
+            fi
+          fi
+
+  # ============================================
+  # PR Labeler
+  # ============================================
+  label-pr:
+    name: Label PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Label based on files changed
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true

@@ -1,0 +1,111 @@
+# Semantic Release Workflow
+# Automatically creates releases based on conventional commits
+
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install semantic-release dependencies
+        run: |
+          npm install -g \
+            semantic-release@^22 \
+            @semantic-release/git@^10 \
+            @semantic-release/changelog@^6 \
+            @semantic-release/commit-analyzer@^11 \
+            @semantic-release/release-notes-generator@^11
+
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: |
+          npx semantic-release \
+            --branches main \
+            --tag-format 'v${version}' \
+            --plugins "@semantic-release/commit-analyzer,@semantic-release/release-notes-generator,@semantic-release/changelog,@semantic-release/git,@semantic-release/github"
+
+  # Build and attach APKs to release
+  release-apks:
+    name: Build Release APKs
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.result == 'success'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Get latest release tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+            ./gradlew assembleRelease -PKEYSTORE_FILE="$KEYSTORE_FILE" \
+              -PKEYSTORE_PASSWORD="$KEYSTORE_PASSWORD" \
+              -PKEY_ALIAS="$KEY_ALIAS" \
+              -PKEY_PASSWORD="$KEY_PASSWORD"
+          else
+            ./gradlew assembleRelease
+          fi
+
+      - name: Rename APK with version
+        run: |
+          VERSION=${{ steps.get_tag.outputs.tag }}
+          mv app/build/outputs/apk/release/*.apk \
+             app/build/outputs/apk/release/btsec-testtool-$VERSION-release.apk
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            app/build/outputs/apk/release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

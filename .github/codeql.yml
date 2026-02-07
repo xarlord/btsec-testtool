@@ -1,0 +1,95 @@
+# CodeQL Configuration
+# Customizes CodeQL security scanning
+
+version: 2
+
+query-filters:
+  - exclude:
+      id: java/unused-local-variable
+  - exclude:
+      id: kotlin/unused-local-variable
+
+paths:
+  include:
+    - app/src/main
+    - domain/src/main
+    - data/src/main
+  exclude:
+    - build/
+    - **/test/**
+    - **/androidTest/**
+
+packs:
+  javascript:
+    - codeql/javascript-queries:Alerts.ql
+    - codeql/javascript-queries:Security.ql
+  java:
+    - codeql/java-queries:Security.ql
+    - codeql/java-queries:Alerts.ql
+  kotlin:
+    - codeql/kotlin-queries:Security.ql
+    - codeql/kotlin-queries:Alerts.ql
+
+# Security query suites
+query-suited:
+  - name: Security-Extended
+    description: Extended security queries for Bluetooth security testing
+    use:
+      - codeql/java-queries:Security/CWE/CWE-022.ql
+      - codeql/java-queries:Security/CWE/CWE-079.ql
+      - codeql/java-queries:Security/CWE/CWE-089.ql
+      - codeql/java-queries:Security/CWE/CWE-200.ql
+      - codeql/java-queries:Security/CWE/CWE-215.ql
+      - codeql/java-queries:Security/CWE/CWE-250.ql
+      - codeql/java-queries:Security/CWE/CWE-255.ql
+      - codeql/java-queries:Security/CWE/CWE-259.ql
+      - codeql/java-queries:Security/CWE/CWE-276.ql
+      - codeql/java-queries:Security/CWE/CWE-287.ql
+      - codeql/java-queries:Security/CWE/CWE-295.ql
+      - codeql/java-queries:Security/CWE/CWE-310.ql
+      - codeql/java-queries:Security/CWE/CWE-311.ql
+      - codeql/java-queries:Security/CWE/CWE-312.ql
+      - codeql/java-queries:Security/CWE/CWE-319.ql
+      - codeql/java-queries:Security/CWE/CWE-326.ql
+      - codeql/java-queries:Security/CWE/CWE-327.ql
+      - codeql/java-queries:Security/CWE/CWE-359.ql
+      - codeql/java-queries:Security/CWE/CWE-384.ql
+      - codeql/java-queries:Security/CWE/CWE-502.ql
+
+# Custom queries for Bluetooth security
+custom-queries:
+  - name: CheckAuthorizationInUseCases
+    description: Ensures all use cases check authorization
+    query: |
+      from Callable useCase, Callable authCheck
+      where
+        useCase.getName().matches("%UseCase") and
+        not authCheck.getName().matches("requestActionAuthorization") and
+        not exists(Parameter p | p.getType().toString() = "ActionAuthorizationResult")
+      select useCase, "Use case should verify authorization before executing security operations"
+  - name: CheckConsentTracking
+    description: Ensures consent is tracked for all operations
+    query: |
+      from Method m, Method consentCall
+      where
+        m.getName().matches("%start%") and
+        m.getDeclaringType().getName().matches("%Repository%") and
+        not exists(consentCall | consentCall.getName() = "logAuditEvent")
+      select m, "Security operations should log consent/audit events"
+  - name: CheckInputValidation
+    description: Checks for proper input validation in security-sensitive functions
+    query: |
+      from Parameter p
+      where
+        p.getCallable().getName().matches("%scan%") and
+        not exists(ValidationCheck v | v.validates(p))
+      select p, "Parameters should be validated before use in security operations"
+  - name: NoHardcodedSecrets
+    description: Detects hardcoded secrets and API keys
+    query: |
+      from Literal string, string value
+      where
+        value.matches("%(sk_|pk_|api[_-]?key|secret|password|token)%") and
+        value.length() > 10 and
+        not string.getFile().getName().matches("%test%")
+      select string, "Possible hardcoded secret detected"

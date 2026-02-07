@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Brand Colors -->
+    <color name="btsec_primary">#1B5E20</color>
+    <color name="btsec_primary_dark">#144A17</color>
+    <color name="btsec_primary_light">#4C8C52</color>
+
+    <!-- Secondary Brand Colors -->
+    <color name="btsec_secondary">#0288D1</color>
+    <color name="btsec_secondary_dark">#015F8F</color>
+    <color name="btsec_secondary_light="#4FC3F7</color>
+
+    <!-- Accent Colors -->
+    <color name="btsec_accent">#FF6D00</color>
+    <color name="btsec_accent_dark">#E65100</color>
+    <color name="btsec_accent_light">#FF9E40</color>
+
+    <!-- Security/Warning Colors -->
+    <color name="btsec_critical">#D32F2F</color>
+    <color name="btsec_high">#F57C00</color>
+    <color name="btsec_medium">#FBC02D</color>
+    <color name="btsec_low">#388E3C</color>
+    <color name="btsec_info">#1976D2</color>
+
+    <!-- Status Colors -->
+    <color name="status_success">#4CAF50</color>
+    <color name="status_warning">#FF9800</color>
+    <color name="status_error">#F44336</color>
+    <color name="status_info">#2196F3</color>
+
+    <!-- Neutral Colors -->
+    <color name="btsec_background">#FFFFFF</color>
+    <color name="btsec_background_dark">#121212</color>
+    <color name="btsec_surface">#FFFFFF</color>
+    <color name="btsec_surface_dark">#1E1E1E</color>
+    <color name="btsec_surface_variant">#E0E0E0</color>
+    <color name="btsec_surface_variant_dark">#2D2D2D</color>
+
+    <!-- Text Colors -->
+    <color name="btsec_on_primary">#FFFFFF</color>
+    <color name="btsec_on_secondary">#FFFFFF</color>
+    <color name="btsec_on_background">#000000</color>
+    <color name="btsec_on_background_dark">#FFFFFF</color>
+    <color name="btsec_on_surface">#000000</color>
+    <color name="btsec_on_surface_dark">#FFFFFF</color>
+    <color name="btsec_on_surface_variant">#000000</color>
+    <color name="btsec_on_surface_variant_dark">#FFFFFF</color>
+
+    <!-- Divider Colors -->
+    <color name="btsec_outline">#B0B0B0</color>
+    <color name="btsec_outline_dark">#404040</color>
+
+    <!-- Overlay Colors -->
+    <color name="btsec_scrim">#80000000</color>
+    <color name="btsec_scrim_background">#60000000</color>
+
+    <!-- Bluetooth Signal Strength Colors -->
+    <color name="rssi_excellent">#4CAF50</color>
+    <color name="rssi_good">#8BC34A</color>
+    <color name="rssi_fair">#FFC107</color>
+    <color name="rssi_weak">#FF5722</color>
+
+    <!-- Common Colors -->
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray_50">#FAFAFA</color>
+    <color name="gray_100">#F5F5F5</color>
+    <color name="gray_200">#EEEEEE</color>
+    <color name="gray_300">#E0E0E0</color>
+    <color name="gray_400">#BDBDBD</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="gray_600">#757575</color>
+    <color name="gray_700">#616161</color>
+    <color name="gray_800">#424242</color>
+    <color name="gray_900">#212121</color>
+</resources>

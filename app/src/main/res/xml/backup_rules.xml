@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude sensitive data from full backup -->
+    <exclude domain="sharedpref" path="authorization.xml"/>
+    <exclude domain="database" path="*.db"/>
+    <exclude domain="file" path="consent_logs/"/>
+    <exclude domain="file" path="audit_logs/"/>
+    <exclude domain="file" path="reports/"/>
+    <exclude domain="file" path="keys/"/>
+</full-backup-content>

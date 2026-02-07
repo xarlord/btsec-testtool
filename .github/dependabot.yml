@@ -1,0 +1,87 @@
+# Dependabot Configuration
+# Automated dependency updates
+
+version: 2
+updates:
+  # Gradle dependencies
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "gradle"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    reviewers:
+      - "security-researcher"
+    assignees:
+      - "security-researcher"
+    versioning-strategy: "increase"
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "ci-cd"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Docker dependencies (if any)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+groups:
+  # Group all AndroidX updates together
+  androidx:
+    patterns:
+      - "androidx.*"
+    exclude-patterns:
+      - "androidx.compose.*"
+
+  # Group Compose updates separately
+  compose:
+    patterns:
+      - "androidx.compose.*"
+
+  # Group Kotlin updates
+  kotlin:
+    patterns:
+      - "org.jetbrains.kotlin.*"
+
+  # Group security-related updates
+  security:
+    patterns:
+      - "*security*"
+      - "*crypto*"
+    update-types:
+      - "security"
+
+# Security alerts configuration
+security-updates:
+  enabled: true
+  open-pull-requests-limit: 10
+  target-branch: "main"
+  labels:
+    - "security"
+    - "dependencies"
+  assignees:
+    - "security-researcher"

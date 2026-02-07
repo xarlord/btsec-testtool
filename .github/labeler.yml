@@ -1,0 +1,68 @@
+# PR Labeler Configuration
+# Automatically labels PRs based on changed files
+
+documentation:
+  - *.md
+  - docs/**
+
+security:
+  - SECURITY.md
+  - **/security/**
+
+tests:
+  - **/test/**
+  - **/*Test.kt
+  - **/*Test.java
+  - **/androidTest/**
+
+ci-cd:
+  - .github/workflows/**
+  - .github/actions/**
+  - Dockerfile
+  - docker-compose.yml
+
+dependencies:
+  - build.gradle.kts
+  - app/build.gradle.kts
+  - buildSrc/**/*.kt
+  - gradle/libs.versions.toml
+
+domain:
+  - domain/model/**
+  - domain/repository/**
+  - domain/usecase/**
+
+data:
+  - data/**
+
+presentation:
+  - presentation/**
+  - ui/**
+
+android:
+  - app/src/main/**
+  - AndroidManifest.xml
+
+vulnerability:
+  - **/vulnerability/**
+  - **/vuln/**
+
+fuzzing:
+  - **/fuzzing/**
+  - **/fuzz/**
+
+key-extraction:
+  - **/keyextraction/**
+  - **/keys/**
+
+reporting:
+  - **/report/**
+  - **/reports/**
+
+authorization:
+  - **/authorization/**
+  - **/auth/**
+
+bluetooth:
+  - **/bluetooth/**
+  - **/ble/**
