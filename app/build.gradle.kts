@@ -345,10 +345,9 @@ dependencies {
 
 // OWASP Dependency Check Configuration
 dependencyCheck {
-    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML
-    outputDirectory = file("${buildDir}/reports/dependency-check")
-    suppressionFile = file("${rootProject.rootDir}/dependency-check-suppressions.xml")
-    failBuildOnCVSS = 7.0f
-    analyzedTypes = listOf("jar", "aar")
-    scanConfigurations = listOf("debugRuntimeClasspath", "releaseRuntimeClasspath")
+    format.set(org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML)
+    outputDirectory.set("${buildDir}/reports/dependency-check")
+    failBuildOnCVSS.set(7.0f)
+    analyzedTypes.set(listOf("jar", "aar"))
+    scanConfigurations.set(listOf("debugRuntimeClasspath", "releaseRuntimeClasspath"))
 }
