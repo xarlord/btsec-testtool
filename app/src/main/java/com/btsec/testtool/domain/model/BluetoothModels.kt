@@ -8,17 +8,15 @@
  */
 package com.btsec.testtool.domain.model
 
-import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
  * Represents a discovered Bluetooth device.
  */
-@Serializable
 data class BluetoothDevice(
     val address: String,              // MAC address
     val name: String?,                 // Device name (nullable)
-    val type: DeviceType,              // BLE, Classic, Dual Mode
+    val type: BluetoothType,              // BLE, Classic, Dual Mode
     val deviceClass: DeviceClass?,     // Bluetooth device class
     val bondState: BondState,          // Pairing state
     val rssi: Int?,                    // Signal strength (dBm)
@@ -32,12 +30,12 @@ data class BluetoothDevice(
     /**
      * Check if this is a BLE device.
      */
-    fun isBle(): Boolean = type == DeviceType.BLE || type == DeviceType.DUAL_MODE
+    fun isBle(): Boolean = type == BluetoothType.BLE || type == BluetoothType.DUAL_MODE
 
     /**
      * Check if this is a Classic Bluetooth device.
      */
-    fun isClassic(): Boolean = type == DeviceType.CLASSIC || type == DeviceType.DUAL_MODE
+    fun isClassic(): Boolean = type == BluetoothType.CLASSIC || type == BluetoothType.DUAL_MODE
 
     /**
      * Check if device is bonded/paired.
@@ -48,8 +46,7 @@ data class BluetoothDevice(
 /**
  * Bluetooth device type enumeration.
  */
-@Serializable
-enum class DeviceType {
+enum class BluetoothType {
     BLE,           // Bluetooth Low Energy only
     CLASSIC,       // Classic Bluetooth only
     DUAL_MODE,     // Both BLE and Classic
@@ -59,7 +56,6 @@ enum class DeviceType {
 /**
  * Bluetooth device class categories.
  */
-@Serializable
 enum class DeviceClass {
     COMPUTER,
     PHONE,
@@ -77,7 +73,6 @@ enum class DeviceClass {
 /**
  * Bond (pairing) state enumeration.
  */
-@Serializable
 enum class BondState {
     NONE,      // Not paired
     BONDING,   // Pairing in progress
@@ -87,28 +82,21 @@ enum class BondState {
 /**
  * Connection state sealed class.
  */
-@Serializable
 sealed class ConnectionState {
-    @Serializable
     data object Disconnected : ConnectionState()
 
-    @Serializable
     data object Connecting : ConnectionState()
 
-    @Serializable
     data object Connected : ConnectionState()
 
-    @Serializable
     data object Disconnecting : ConnectionState()
 
-    @Serializable
     data class Error(val message: String) : ConnectionState()
 }
 
 /**
  * BLE Service information.
  */
-@Serializable
 data class BleService(
     val uuid: String,                  // Service UUID
     val primary: Boolean,              // Is primary service
@@ -118,7 +106,6 @@ data class BleService(
 /**
  * BLE Characteristic information.
  */
-@Serializable
 data class BleCharacteristic(
     val uuid: String,                  // Characteristic UUID
     val properties: CharacteristicProperties,  // Read/write/notify properties
@@ -145,7 +132,6 @@ data class BleCharacteristic(
 /**
  * Characteristic properties.
  */
-@Serializable
 data class CharacteristicProperties(
     val read: Boolean = false,
     val write: Boolean = false,
@@ -159,7 +145,6 @@ data class CharacteristicProperties(
 /**
  * Characteristic permissions.
  */
-@Serializable
 data class CharacteristicPermissions(
     val readAllowed: Boolean = true,
     val readEncrypted: Boolean = false,
@@ -174,7 +159,6 @@ data class CharacteristicPermissions(
 /**
  * BLE Descriptor information.
  */
-@Serializable
 data class BleDescriptor(
     val uuid: String,
     val value: ByteArray? = null
@@ -183,7 +167,6 @@ data class BleDescriptor(
 /**
  * Vulnerability severity levels (CVSS-based).
  */
-@Serializable
 enum class VulnerabilitySeverity {
     CRITICAL,     // CVSS 9.0-10.0
     HIGH,         // CVSS 7.0-8.9
@@ -196,7 +179,6 @@ enum class VulnerabilitySeverity {
 /**
  * Vulnerability information.
  */
-@Serializable
 data class Vulnerability(
     val id: String,                    // Unique identifier
     val cveId: String?,                // CVE identifier (e.g., CVE-2020-12345)
@@ -217,7 +199,6 @@ data class Vulnerability(
 /**
  * Vulnerability categories.
  */
-@Serializable
 enum class VulnerabilityCategory {
     PAIRING,           // Pairing/flaw vulnerabilities
     ENCRYPTION,        // Encryption weaknesses
@@ -235,7 +216,6 @@ enum class VulnerabilityCategory {
 /**
  * Known vulnerability definitions.
  */
-@Serializable
 data class VulnerabilityDefinition(
     val cveId: String,
     val name: String,
@@ -254,7 +234,6 @@ data class VulnerabilityDefinition(
 /**
  * Fuzzing configuration.
  */
-@Serializable
 data class FuzzConfig(
     val targetDevice: BluetoothDevice,
     val targetService: BleService?,    // Service to fuzz (null = all)
@@ -274,7 +253,6 @@ data class FuzzConfig(
 /**
  * Fuzzing methods.
  */
-@Serializable
 enum class FuzzMethod {
     BIT_FLIP,              // Flip individual bits
     BYTE_FLIP,             // Flip entire bytes
@@ -293,7 +271,6 @@ enum class FuzzMethod {
 /**
  * Fuzzing data patterns.
  */
-@Serializable
 data class FuzzDataPattern(
     val name: String,
     val description: String,
@@ -305,7 +282,6 @@ data class FuzzDataPattern(
 /**
  * Pattern types for fuzzing.
  */
-@Serializable
 enum class PatternType {
     MALFORMED,         // Malformed data
     OVERLONG,          // Excessively long data
@@ -321,7 +297,6 @@ enum class PatternType {
 /**
  * Fuzzing test result.
  */
-@Serializable
 data class FuzzResult(
     val id: String,
     val config: FuzzConfig,
@@ -357,7 +332,6 @@ data class FuzzResult(
 /**
  * Fuzzing status.
  */
-@Serializable
 enum class FuzzStatus {
     PENDING,
     RUNNING,
@@ -369,7 +343,6 @@ enum class FuzzStatus {
 /**
  * Fuzzing error record.
  */
-@Serializable
 data class FuzzError(
     val timestamp: Instant,
     val packetNumber: Int,
@@ -382,7 +355,6 @@ data class FuzzError(
 /**
  * Error severity levels.
  */
-@Serializable
 enum class ErrorSeverity {
     CRITICAL,     // Device crashed/rebooted
     HIGH,         // Device disconnected/error state
@@ -394,7 +366,6 @@ enum class ErrorSeverity {
 /**
  * Fuzzing finding (potential vulnerability).
  */
-@Serializable
 data class FuzzFinding(
     val timestamp: Instant,
     val packetNumber: Int,
@@ -410,7 +381,6 @@ data class FuzzFinding(
 /**
  * Finding categories from fuzzing.
  */
-@Serializable
 enum class FindingCategory {
     CRASH,              // Device/service crash
     HANG,               // Device/service hang
@@ -427,7 +397,6 @@ enum class FindingCategory {
 /**
  * Key extraction target types.
  */
-@Serializable
 enum class KeyType {
     IRK,           // Identity Resolving Key
     LTK,           // Long Term Key
@@ -439,7 +408,6 @@ enum class KeyType {
 /**
  * Key extraction result.
  */
-@Serializable
 data class KeyExtractionResult(
     val id: String,
     val targetDevice: BluetoothDevice,
@@ -460,7 +428,6 @@ data class KeyExtractionResult(
 /**
  * Key extraction methods.
  */
-@Serializable
 enum class ExtractionMethod {
     PASSIVE_MONITORING,     // Monitor pairing traffic
     ACTIVE_PROMPT,          // Prompt device during pairing
@@ -476,7 +443,6 @@ enum class ExtractionMethod {
 /**
  * Extraction confidence levels.
  */
-@Serializable
 enum class ExtractionConfidence {
     CERTAIN,         // Definitely correct
     HIGH,            // Very likely correct
@@ -488,7 +454,6 @@ enum class ExtractionConfidence {
 /**
  * Packet capture data.
  */
-@Serializable
 data class PacketCapture(
     val id: String,
     val deviceAddress: String,
@@ -505,7 +470,6 @@ data class PacketCapture(
 /**
  * Packet capture file types.
  */
-@Serializable
 enum class CaptureFileType {
     PCAP,          // Wireshark PCAP
     PCAPNG,        // Wireshark PCAPNG
@@ -517,7 +481,6 @@ enum class CaptureFileType {
 /**
  * Security assessment report.
  */
-@Serializable
 data class SecurityReport(
     val id: String,
     val authId: String,
@@ -538,7 +501,6 @@ data class SecurityReport(
 /**
  * Report time period.
  */
-@Serializable
 data class ReportPeriod(
     val start: Instant,
     val end: Instant
@@ -547,7 +509,6 @@ data class ReportPeriod(
 /**
  * Report finding summary.
  */
-@Serializable
 data class ReportFinding(
     val category: FindingCategory,
     val severity: VulnerabilitySeverity,
@@ -559,7 +520,6 @@ data class ReportFinding(
 /**
  * Security recommendations.
  */
-@Serializable
 data class Recommendation(
     val priority: RecommendationPriority,
     val title: String,
@@ -572,7 +532,6 @@ data class Recommendation(
 /**
  * Recommendation priority levels.
  */
-@Serializable
 enum class RecommendationPriority {
     CRITICAL,
     HIGH,
@@ -583,7 +542,6 @@ enum class RecommendationPriority {
 /**
  * Report appendix information.
  */
-@Serializable
 data class ReportAppendix(
     val toolsUsed: List<String>,
     val testMethodology: String,
@@ -595,10 +553,11 @@ data class ReportAppendix(
 /**
  * Report status.
  */
-@Serializable
 enum class ReportStatus {
     DRAFT,
     REVIEW,
     FINAL,
     ARCHIVED
 }
+
+

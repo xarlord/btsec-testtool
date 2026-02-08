@@ -232,7 +232,7 @@ class FuzzingUseCase @Inject constructor(
             FuzzDataPattern(
                 name = "Format String",
                 description = "Format string patterns",
-                patternType = PatternType.FORMAT_STRING,
+                patternType = PatternType.SPECIAL_CHARS,
                 data = "%s%s%s%s%n%n%n".toByteArray()
             )
         )
@@ -260,7 +260,7 @@ class FuzzingUseCase @Inject constructor(
                 name = "Boundary Values",
                 description = "Test boundary conditions",
                 patternType = PatternType.EDGE_CASE,
-                data = byteArrayOf(0x00, 0x01, 0x7F, 0x80, 0xFF.toByte())
+                data = byteArrayOf(0x00, 0x01, 0x7F, 0x80.toByte(), 0xFF.toByte())
             )
         )
     }

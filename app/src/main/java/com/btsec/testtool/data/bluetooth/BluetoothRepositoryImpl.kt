@@ -10,7 +10,7 @@ package com.btsec.testtool.data.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothDevice as AndroidBluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
@@ -22,8 +22,29 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.ParcelUuid
-import com.btsec.testtool.domain.model.*
+import com.btsec.testtool.domain.model.BleCharacteristic
+import com.btsec.testtool.domain.model.BleDescriptor
+import com.btsec.testtool.domain.model.BleService
+import com.btsec.testtool.domain.model.BluetoothDevice
+import com.btsec.testtool.domain.model.BondState
+import com.btsec.testtool.domain.model.CharacteristicPermissions
+import com.btsec.testtool.domain.model.CharacteristicProperties
+import com.btsec.testtool.domain.model.ConnectionState
+import com.btsec.testtool.domain.model.BluetoothType
+import com.btsec.testtool.domain.model.DeviceClass
+import com.btsec.testtool.domain.model.FuzzConfig
+import com.btsec.testtool.domain.model.FuzzDataPattern
+import com.btsec.testtool.domain.model.FuzzError
+import com.btsec.testtool.domain.model.FuzzMethod
 import com.btsec.testtool.domain.repository.BluetoothRepository
+import com.btsec.testtool.domain.repository.BluetoothState
+import com.btsec.testtool.domain.repository.BluetoothOperation
+import com.btsec.testtool.domain.repository.CapturedPacket
+import com.btsec.testtool.domain.repository.ConnectionPriority
+import com.btsec.testtool.domain.repository.PacketDirection
+import com.btsec.testtool.domain.repository.PacketStatistics
+import com.btsec.testtool.domain.repository.PacketType
+import com.btsec.testtool.domain.repository.WriteType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -167,7 +188,7 @@ class BluetoothRepositoryImpl @Inject constructor(
             connectionState.value = ConnectionState.Connecting
 
             currentGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+                device.connectGatt(context, false, gattCallback, AndroidBluetoothDevice.TRANSPORT_LE)
             } else {
                 device.connectGatt(context, false, gattCallback)
             }
@@ -353,9 +374,12 @@ class BluetoothRepositoryImpl @Inject constructor(
     @SuppressLint("MissingPermission")
     override suspend fun removeBond(address: String): Boolean {
         val device = bluetoothAdapter?.getRemoteDevice(address) ?: return false
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            device.removeBond()
-        } else {
+        return try {
+            // removeBond() is a hidden API, need to use reflection
+            val method = device.javaClass.getDeclaredMethod("removeBond")
+            method.isAccessible = true
+            method.invoke(device) as Boolean
+        } catch (e: Exception) {
             false
         }
     }
@@ -364,9 +388,9 @@ class BluetoothRepositoryImpl @Inject constructor(
         val device = bluetoothAdapter?.getRemoteDevice(address)
         return flow {
             val state = when (device?.bondState) {
-                BluetoothDevice.BOND_NONE -> BondState.NONE
-                BluetoothDevice.BOND_BONDING -> BondState.BONDING
-                BluetoothDevice.BOND_BONDED -> BondState.BONDED
+                AndroidBluetoothDevice.BOND_NONE -> BondState.NONE
+                AndroidBluetoothDevice.BOND_BONDING -> BondState.BONDING
+                AndroidBluetoothDevice.BOND_BONDED -> BondState.BONDED
                 else -> BondState.NONE
             }
             emit(state)
@@ -394,8 +418,8 @@ class BluetoothRepositoryImpl @Inject constructor(
         return flow { }
     }
 
-    override suspend fun stopPacketMonitoring(): Result<Unit> {
-        return Result.failure(Exception("Not implemented"))
+    override suspend fun stopPacketMonitoring() {
+        // TODO: Implement packet monitoring
     }
 
     override suspend fun isPacketMonitoringAvailable(): Boolean {
@@ -440,17 +464,17 @@ class BluetoothRepositoryImpl @Inject constructor(
         return BluetoothDevice(
             address = device.address,
             name = device.name,
-            type = if (device.type == BluetoothDevice.DEVICE_TYPE_LE) {
-                DeviceType.BLE
-            } else if (device.type == BluetoothDevice.DEVICE_TYPE_CLASSIC) {
-                DeviceType.CLASSIC
+            type = if (device.type == AndroidBluetoothDevice.DEVICE_TYPE_LE) {
+                BluetoothType.BLE
+            } else if (device.type == AndroidBluetoothDevice.DEVICE_TYPE_CLASSIC) {
+                BluetoothType.CLASSIC
             } else {
-                DeviceType.DUAL_MODE
+                BluetoothType.DUAL_MODE
             },
             deviceClass = mapDeviceClass(device.bluetoothClass?.deviceClass),
             bondState = when (device.bondState) {
-                BluetoothDevice.BOND_BONDED -> BondState.BONDED
-                BluetoothDevice.BOND_BONDING -> BondState.BONDING
+                AndroidBluetoothDevice.BOND_BONDED -> BondState.BONDED
+                AndroidBluetoothDevice.BOND_BONDING -> BondState.BONDING
                 else -> BondState.NONE
             },
             rssi = result.rssi,
@@ -468,11 +492,11 @@ class BluetoothRepositoryImpl @Inject constructor(
         return BluetoothDevice(
             address = device.address,
             name = device.name,
-            type = DeviceType.BLE,
+            type = BluetoothType.BLE,
             deviceClass = null,
             bondState = when (device.bondState) {
-                BluetoothDevice.BOND_BONDED -> BondState.BONDED
-                BluetoothDevice.BOND_BONDING -> BondState.BONDING
+                AndroidBluetoothDevice.BOND_BONDED -> BondState.BONDED
+                AndroidBluetoothDevice.BOND_BONDING -> BondState.BONDING
                 else -> BondState.NONE
             },
             rssi = null,
@@ -486,16 +510,8 @@ class BluetoothRepositoryImpl @Inject constructor(
     }
 
     private fun mapDeviceClass(deviceClass: Int?): DeviceClass? {
-        return when (deviceClass) {
-            android.bluetooth.BluetoothClass.Device.COMPUTER -> DeviceClass.COMPUTER
-            android.bluetooth.BluetoothClass.Device.PHONE -> DeviceClass.PHONE
-            android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO -> DeviceClass.AUDIO_VIDEO
-            android.bluetooth.BluetoothClass.Device.PERIPHERAL -> DeviceClass.PERIPHERAL
-            android.bluetooth.BluetoothClass.Device.WEARABLE -> DeviceClass.WEARABLE
-            android.bluetooth.BluetoothClass.Device.TOY -> DeviceClass.TOY
-            android.bluetooth.BluetoothClass.Device.HEALTH -> DeviceClass.HEALTH
-            else -> DeviceClass.UNCATEGORIZED
-        }
+        // TODO: Implement device class mapping
+        return com.btsec.testtool.domain.model.DeviceClass.UNCATEGORIZED
     }
 
     private fun mapGattService(service: android.bluetooth.BluetoothGattService): BleService {

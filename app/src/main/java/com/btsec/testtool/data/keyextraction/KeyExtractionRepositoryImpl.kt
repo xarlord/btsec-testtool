@@ -11,10 +11,27 @@ package com.btsec.testtool.data.keyextraction
 import android.content.Context
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.KeyExtractionRepository
+import com.btsec.testtool.domain.repository.ExtractionProgress
+import com.btsec.testtool.domain.repository.ExtractionStatus
+import com.btsec.testtool.domain.repository.ExtractionStep
+import com.btsec.testtool.domain.repository.KeyExtractionOperation
+import com.btsec.testtool.domain.repository.KeySecurityAnalysis
+import com.btsec.testtool.domain.repository.SecurityScore
+import com.btsec.testtool.domain.repository.EncryptionStrength
+import com.btsec.testtool.domain.repository.WeakKeyFinding
+import com.btsec.testtool.domain.repository.PairingCapture
+import com.btsec.testtool.domain.repository.DefaultKeyInfo
+import com.btsec.testtool.domain.repository.EncryptionAnalysis
+import com.btsec.testtool.domain.repository.PairingMethod
+import com.btsec.testtool.domain.repository.EncryptionMode
+import com.btsec.testtool.domain.repository.KeyExtractionStatistics
+import com.btsec.testtool.domain.repository.DeviceKeyStatistics
+import com.btsec.testtool.domain.repository.DateRange
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -106,7 +123,9 @@ class KeyExtractionRepositoryImpl @Inject constructor(
     override fun extractAllKeys(device: BluetoothDevice): Flow<ExtractionProgress> {
         return flow {
             KeyType.entries.forEach { keyType ->
-                emitAll(extractKey(device, keyType, ExtractionMethod.PASSIVE_MONITORING))
+                extractKey(device, keyType, ExtractionMethod.PASSIVE_MONITORING).collect { progress ->
+                    emit(progress)
+                }
             }
         }
     }
@@ -118,10 +137,6 @@ class KeyExtractionRepositoryImpl @Inject constructor(
 
     override fun getExtractionStatus(): Flow<ExtractionStatus> {
         return extractionStatus
-    }
-
-    override fun getExtractionProgress(): Flow<ExtractionProgress?> {
-        return extractionProgress
     }
 
     override suspend fun saveExtractionResult(result: KeyExtractionResult): Result<Unit> {
@@ -303,9 +318,5 @@ class KeyExtractionRepositoryImpl @Inject constructor(
 
     private fun generateId(): String {
         return java.util.UUID.randomUUID().toString()
-    }
-
-    private suspend fun <T> Flow<T>.emitAll(flow: Flow<T>) {
-        flow.collect { emit(it) }
     }
 }

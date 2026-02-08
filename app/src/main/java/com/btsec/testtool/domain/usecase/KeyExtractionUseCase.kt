@@ -117,9 +117,10 @@ class KeyExtractionUseCase @Inject constructor(
 
     /**
      * Get extraction progress.
+     * Returns the extraction status which includes progress information.
      */
-    fun getExtractionProgress(): Flow<ExtractionProgress?> {
-        return keyExtractionRepository.getExtractionProgress()
+    fun getExtractionProgress(): Flow<ExtractionStatus> {
+        return keyExtractionRepository.getExtractionStatus()
     }
 
     /**

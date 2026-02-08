@@ -8,7 +8,7 @@
     <!-- Secondary Brand Colors -->
     <color name="btsec_secondary">#0288D1</color>
     <color name="btsec_secondary_dark">#015F8F</color>
-    <color name="btsec_secondary_light="#4FC3F7</color>
+    <color name="btsec_secondary_light">#4FC3F7</color>
 
     <!-- Accent Colors -->
     <color name="btsec_accent">#FF6D00</color>

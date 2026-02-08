@@ -9,6 +9,10 @@
 package com.btsec.testtool.presentation.feature.scanner
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.R
 import com.btsec.testtool.domain.model.BluetoothDevice
 import com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
+import com.btsec.testtool.domain.usecase.ScanResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +49,10 @@ fun ScannerScreen(
                 title = { Text(stringResource(R.string.scanner_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack)
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
                     }
                 }
             )

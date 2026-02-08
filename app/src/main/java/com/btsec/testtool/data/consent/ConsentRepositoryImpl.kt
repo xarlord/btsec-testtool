@@ -16,8 +16,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
-import java.io.Path
-import java.nio.file.Paths
+import kotlinx.coroutines.flow.map
+import java.io.File
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -301,9 +301,9 @@ class ConsentRepositoryImpl @Inject constructor(
     override suspend fun exportAuditLog(
         outputPath: String,
         format: AuditExportFormat
-    ): Result<Path> {
+    ): Result<File> {
         // In production, would write to file
-        return Result.success(Paths.get(outputPath))
+        return Result.success(File(outputPath))
     }
 
     private fun generateId(): String {

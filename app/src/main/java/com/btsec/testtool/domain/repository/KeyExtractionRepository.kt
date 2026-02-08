@@ -289,7 +289,7 @@ data class KeySecurityAnalysis(
     val deviceName: String?,
     val analysisDate: java.time.Instant,
     val overallScore: SecurityScore,
-    const val findings: List<KeySecurityFinding>,
+    val findings: List<KeySecurityFinding>,
     val extractedKeys: List<KeyType>,
     val encryptionStrength: EncryptionStrength,
     val recommendations: List<String>
@@ -337,7 +337,7 @@ enum class KeyFindingCategory {
     REUSED_KEY,
     KEY_EXPOSURE,
     PROTOCOL_WEAKNESS,
-    IMPLEMENTATION_FLAw,
+    IMPLEMENTATION_FLAW,
     MISSING_SECURE_CONNECTIONS,
     SHORT_KEY_LENGTH
 }

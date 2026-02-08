@@ -11,10 +11,16 @@ package com.btsec.testtool.data.fuzzing
 import android.content.Context
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.FuzzingRepository
+import com.btsec.testtool.domain.repository.FuzzProgress
+import com.btsec.testtool.domain.repository.FuzzingOperation
+import com.btsec.testtool.domain.repository.FuzzingStatistics
+import com.btsec.testtool.domain.repository.DeviceFuzzingStatistics
+import com.btsec.testtool.domain.repository.DateRange
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -51,8 +57,8 @@ class FuzzingRepositoryImpl @Inject constructor(
                 status = FuzzStatus.RUNNING,
                 packetsSent = 0,
                 packetsReceived = 0,
-                errors = emptyList(),
-                findings = emptyList(),
+                errors = 0,
+                findings = 0,
                 startTime = Instant.now(),
                 estimatedCompletionTime = Instant.now().plusSeconds(config.durationSeconds?.toLong() ?: 300),
                 currentPacketNumber = 0,
@@ -70,8 +76,8 @@ class FuzzingRepositoryImpl @Inject constructor(
                     status = FuzzStatus.RUNNING,
                     packetsSent = packetsSent,
                     packetsReceived = packetsReceived,
-                    errors = emptyList(),
-                    findings = emptyList(),
+                    errors = 0,
+                    findings = 0,
                     startTime = Instant.now(),
                     estimatedCompletionTime = Instant.now().plusSeconds(300),
                     currentPacketNumber = i + 1,
@@ -137,14 +143,14 @@ class FuzzingRepositoryImpl @Inject constructor(
     }
 
     override fun getFuzzingResultsForDevice(deviceAddress: String): Flow<List<FuzzResult>> {
-        return fuzzingResults.map { it.filter { it.config.targetDevice.address == deviceAddress } }
+        return fuzzingResults.map { results -> results.filter { result -> result.config.targetDevice.address == deviceAddress } }
     }
 
     override fun getFuzzingResultsInRange(
         start: Instant,
         end: Instant
     ): Flow<List<FuzzResult>> {
-        return fuzzingResults.map { it.filter { it.startTime in start..end } }
+        return fuzzingResults.map { results -> results.filter { result -> result.startTime in start..end } }
     }
 
     override suspend fun deleteFuzzingResult(id: String): Result<Unit> {
@@ -213,7 +219,7 @@ class FuzzingRepositoryImpl @Inject constructor(
             FuzzDataPattern(
                 name = "Format String",
                 description = "Classic format string",
-                patternType = PatternType.FORMAT_STRING,
+                patternType = PatternType.SPECIAL_CHARS,
                 data = "%s%n%x".toByteArray()
             )
         )

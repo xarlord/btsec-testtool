@@ -99,7 +99,7 @@ class BluetoothScanningUseCase @Inject constructor(
     /**
      * Get devices grouped by type.
      */
-    fun getDevicesByType(): Flow<Map<DeviceType, List<BluetoothDevice>>> {
+    fun getDevicesByType(): Flow<Map<BluetoothType, List<BluetoothDevice>>> {
         return bluetoothRepository.getScanResults()
             .map { devices -> devices.groupBy { it.type } }
     }

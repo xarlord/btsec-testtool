@@ -11,14 +11,14 @@ package com.btsec.testtool
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Context
 import android.os.Build
-import androidx.hilt.work.HiltAndroidApp
+import dagger.hilt.android.HiltAndroidApp
 import androidx.work.Configuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import timber.log.Timber
-import javax.inject.Inject
 
 /**
  * Main Application class for BTSec Test Tool.
@@ -32,11 +32,13 @@ class BtSecTestToolApplication : Application() {
     // Application scope for coroutines
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    @Inject
-    lateinit var notificationManager: NotificationManager
+    private lateinit var notificationManager: NotificationManager
 
     override fun onCreate() {
         super.onCreate()
+
+        // Get NotificationManager from system services
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Initialize Timber logging (only in debug builds)
         if (BuildConfig.DEBUG) {
@@ -76,7 +78,7 @@ class BtSecTestToolApplication : Application() {
             ).apply {
                 description = "Background service notifications for scanning"
                 setShowBadge(false)
-                setSound(null)
+                setSound(null, null)
             }
 
             // Testing notifications channel

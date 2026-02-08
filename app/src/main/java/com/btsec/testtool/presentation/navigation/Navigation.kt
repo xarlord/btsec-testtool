@@ -11,7 +11,6 @@ package com.btsec.testtool.presentation.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -63,10 +62,7 @@ fun BTSecNavGraph(
         }
 
         // Dashboard screen - Main hub
-        composable(
-            route = "${Routes.DASHBOARD}/{authId}",
-            arguments = listOf(navArgument("authId") { type = NavType.String })
-        ) { backStackEntry ->
+        composable(route = "${Routes.DASHBOARD}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             DashboardScreen(
@@ -96,10 +92,7 @@ fun BTSecNavGraph(
         }
 
         // Scanner screen
-        composable(
-            route = "${Routes.SCANNER}/{authId}",
-            arguments = listOf(navArgument("authId") { type = NavType.String })
-        ) { backStackEntry ->
+        composable(route = "${Routes.SCANNER}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             ScannerScreen(
@@ -109,40 +102,28 @@ fun BTSecNavGraph(
         }
 
         // Fuzzer screen
-        composable(
-            route = "${Routes.FUZZER}/{authId}",
-            arguments = listOf(navArgument("authId") { type = NavType.String })
-        ) { backStackEntry ->
+        composable(route = "${Routes.FUZZER}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             TODO("Implement FuzzerScreen")
         }
 
         // Key Extraction screen
-        composable(
-            route = "${Routes.KEYS}/{authId}",
-            arguments = listOf(navArgument("authId") { type = NavType.String })
-        ) { backStackEntry ->
+        composable(route = "${Routes.KEYS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             TODO("Implement KeyExtractionScreen")
         }
 
         // Vulnerability Scanner screen
-        composable(
-            route = "${Routes.VULNS}/{authId}",
-            arguments = listOf(navArgument("authId") { type = NavType.String })
-        ) { backStackEntry ->
+        composable(route = "${Routes.VULNS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             TODO("Implement VulnScannerScreen")
         }
 
         // Reports screen
-        composable(
-            route = "${Routes.REPORTS}/{authId}",
-            arguments = listOf(navArgument("authId") { type = NavType.String })
-        ) { backStackEntry ->
+        composable(route = "${Routes.REPORTS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             TODO("Implement ReportsScreen")

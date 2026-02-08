@@ -12,13 +12,24 @@ import android.content.Context
 import android.net.Uri
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ReportRepository
+import com.btsec.testtool.domain.repository.ReportTemplate
+import com.btsec.testtool.domain.repository.ReportOperation
+import com.btsec.testtool.domain.repository.ReportConfig
+import com.btsec.testtool.domain.repository.ReportGenerationProgress
+import com.btsec.testtool.domain.repository.ReportGenerationStatus
+import com.btsec.testtool.domain.repository.GenerationStep
+import com.btsec.testtool.domain.repository.ExportFormat
+import com.btsec.testtool.domain.repository.ReportStatistics
+import com.btsec.testtool.domain.repository.ReportsSummary
+import com.btsec.testtool.domain.repository.DateRange
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.io.File
-import java.nio.file.Paths
 import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -345,7 +356,8 @@ class ReportRepositoryImpl @Inject constructor(
                 totalReports = allReports.size,
                 reportsByStatus = allReports.groupBy { it.status }.mapValues { it.value.size },
                 reportsByMonth = allReports.groupBy {
-                    "${it.generatedAt.atZone(java.time.ZoneId.UTC).year}-${it.generatedAt.atZone(java.time.ZoneId.UTC).monthValue}"
+                    val instant = it.generatedAt
+                    "${instant.toString().substring(0, 7)}" // YYYY-MM format
                 }.mapValues { it.value.size },
                 averageVulnerabilitiesPerReport = allReports.map { it.vulnerabilities.size }.average(),
                 mostCommonSeverity = VulnerabilitySeverity.MEDIUM,

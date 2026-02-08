@@ -10,7 +10,13 @@ package com.btsec.testtool.presentation.feature.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Scanner
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Science
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,7 +58,10 @@ fun DashboardScreen(
                 title = { Text(stringResource(R.string.dashboard_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack)
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
                     }
                 }
             )

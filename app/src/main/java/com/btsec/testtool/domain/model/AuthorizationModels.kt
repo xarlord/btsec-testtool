@@ -8,7 +8,6 @@
  */
 package com.btsec.testtool.domain.model
 
-import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
@@ -26,7 +25,6 @@ import java.time.Instant
  * @property scope Testing scope definition
  * @property signature Digital signature for verification
  */
-@Serializable
 data class Authorization(
     val authId: String,
     val issuedTo: String,
@@ -42,7 +40,6 @@ data class Authorization(
 /**
  * Types of testing actions that can be authorized.
  */
-@Serializable
 enum class TestAction {
     SCAN_DEVICES,
     CONNECT_DEVICE,
@@ -60,7 +57,6 @@ enum class TestAction {
  * Defines what targets may be tested, what actions are allowed,
  * and time/other constraints.
  */
-@Serializable
 data class TestScope(
     val authId: String,
     val authorizedTargets: List<TargetDevice>,
@@ -118,7 +114,6 @@ data class TestScope(
 /**
  * Represents a target device for testing.
  */
-@Serializable
 data class TargetDevice(
     val identifier: String,      // MAC address or pattern
     val deviceType: DeviceType,
@@ -130,7 +125,6 @@ data class TargetDevice(
 /**
  * Device types for testing classification.
  */
-@Serializable
 enum class DeviceType {
     PHONE,
     TABLET,
@@ -145,7 +139,6 @@ enum class DeviceType {
 /**
  * Consent record for tracking user consent.
  */
-@Serializable
 data class ConsentRecord(
     val id: String,
     val authId: String,
@@ -159,11 +152,10 @@ data class ConsentRecord(
 /**
  * Device information for logging.
  */
-@Serializable
 data class DeviceInfo(
     val platform: String,
     val model: String,
-    androidVersion: String,
+    val androidVersion: String,
     val appVersion: String,
     val bluetoothAddress: String
 )

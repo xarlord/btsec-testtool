@@ -245,7 +245,7 @@ interface ConsentRepository {
     suspend fun exportAuditLog(
         outputPath: String,
         format: AuditExportFormat
-    ): Result<kotlin.io.path.Path>
+    ): Result<java.io.File>
 }
 
 /**

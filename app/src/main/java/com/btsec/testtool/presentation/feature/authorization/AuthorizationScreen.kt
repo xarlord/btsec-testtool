@@ -9,18 +9,21 @@
 package com.btsec.testtool.presentation.feature.authorization
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.R
 import com.btsec.testtool.domain.usecase.AuthorizationUseCase
+import com.btsec.testtool.domain.usecase.AuthorizationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,7 +84,7 @@ private fun AuthorizationContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Icon(
-                imageVector = Icons.Security,
+                imageVector = Icons.Default.Security,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.error
@@ -107,11 +110,7 @@ private fun AuthorizationContent(
                 placeholder = { Text("BTSEC-20260207-A1B2C3D4") },
                 isError = authIdError != null,
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Characters,
-                    autoCorrect = false
-                )
+                modifier = Modifier.fillMaxWidth()
             )
 
             if (authIdError != null) {
