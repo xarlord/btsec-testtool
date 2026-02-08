@@ -46,7 +46,7 @@ steps:
       - echo "🔍 Running Kotlin Linting (ktlint)..."
       - curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.0.1/ktlint
       - chmod +x ktlint
-      - ./ktlint --reporter=checkstyle,output=build/ktlint-report.xml "**/*.kt" "**/*.kts" || true
+      - ./ktlint --reporter=checkstyle,output=build/ktlint-report.xml "**/*.kt" "**/*.kts"
       - echo "✅ ktlint complete - report saved to build/ktlint-report.xml"
     secrets: [ ]
 
@@ -161,7 +161,7 @@ steps:
     commands:
       - echo "🧪 Running unit tests..."
       - chmod +x gradlew
-      - ./gradlew nonexistentTaskThatWillCauseFailure --stacktrace || true
+      - ./gradlew nonexistentTaskThatWillCauseFailure --stacktrace
       - echo "✅ Unit tests complete"
     secrets: [ ]
 
