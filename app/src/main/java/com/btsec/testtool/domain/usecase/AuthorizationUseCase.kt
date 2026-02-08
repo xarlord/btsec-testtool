@@ -52,8 +52,8 @@ class AuthorizationUseCase @Inject constructor(
             return AuthorizationResult.Error("Authorization has expired")
         }
 
-        // Check if within valid window
-        if (!authorizationRepository.isWithinValidWindow()) {
+        // Check if within valid window (check the authorization itself, not stored one)
+        if (!authorization.scope.isWithinValidWindow()) {
             return AuthorizationResult.Error("Authorization is not within valid testing window")
         }
 
