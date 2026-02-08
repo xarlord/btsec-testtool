@@ -1,474 +1,224 @@
-# Bluetooth Security Testing Tool - Research Findings
+# Findings & Decisions
 
-**Project:** btsec-testtool
-**Date:** February 7, 2026
+## Requirements
+<!-- Captured from user request -->
+Convert GitHub CI/CD pipeline to local executable scripts:
+- **Building**: Build APK locally (assembleDebug, assembleRelease)
+- **Unit Testing**: Run unit tests with coverage (test, jacocoTestReport)
+- **Linting**: Run ktlint and Android lint locally
+- **Git**: Work on a separate branch (not main)
+- **Platform**: Support Windows (primary) and Unix-like systems
 
----
+## Research Findings
+<!-- Key discoveries during exploration -->
+- **Project**: Bluetooth Security Testing Tool (Android/Kotlin application)
+- **Build System**: Gradle with Kotlin DSL (version 8.2.1)
+- **Product Flavors**: Two flavors defined (dev, prod)
+- **Test Tasks**: testDevDebugUnitTest, testProdDebugUnitTest
+- **Code Coverage**: Jacoco configured for test coverage reports
+- **Linting Tools**: ktlint (1.0.1) and Android Lint (via Gradle)
+- **Security Checks**: OWASP Dependency Check (9.0.9) configured
+- **Current Branch**: main (need to create feature branch)
 
-## Executive Summary
+### CI/CD Workflows Analyzed
+1. **ci.yml**: Main CI/CD pipeline with:
+   - CodeQL security analysis (can be skipped locally - requires GitHub infrastructure)
+   - ktlint linting (line 52-79)
+   - Unit tests with coverage (line 84-149)
+   - Android lint (line 153-190)
+   - Build verification (line 197-237, currently disabled)
+   - Security checklist (line 308-363)
+   - Dependency check (line 367-404)
+   - Documentation check (line 408-450)
 
-This document captures the research findings, technical discoveries, and lessons learned during the development of a professional Bluetooth security testing application for Android.
+2. **pr-checks.yml**: PR-specific checks (can be adapted for local use):
+   - PR description validation (skip - GitHub-specific)
+   - Legal & authorization check (line 60-133) - adapt for local
+   - Test coverage check (line 137-170)
+   - Breaking change detection (line 174-232)
+   - Documentation check (line 236-262)
 
----
+3. **semantic-release.yml**: Automated releases (skip - GitHub Actions specific)
 
-## Bluetooth Security Vulnerabilities
+### Gradle Tasks Identified
+- `./gradlew test` - Run unit tests
+- `./gradlew testDevDebugUnitTest testProdDebugUnitTest` - Test both flavors
+- `./gradlew jacocoTestReport` - Generate coverage report
+- `./gradlew lintDebug` - Run Android lint
+- `./gradlew assembleDebug` - Build debug APK
+- `./gradlew assembleRelease` - Build release APK
+- `./gradlew dependencyCheckAnalyze` - OWASP dependency check
 
-### CVE Catalog Implemented
+### Build Configuration Details
+- **Java Version**: 17 (Temurin distribution)
+- **Kotlin Version**: 1.9.21
+- **Compile SDK**: Defined in Versions object
+- **Min/Target SDK**: Defined in Versions object
+- **Test Instrumentation Runner**: androidx.test.runner.AndroidJUnitRunner
+- **Jacoco**: Configured for code coverage with filters for DI/UI code
 
-#### 1. KNOB Attack (CVE-2019-9506)
-**Description:** Key Negotiation of Bluetooth
-**Severity:** HIGH
-**Impact:** Attacker can reduce encryption key strength to 1 byte
+## Technical Decisions
+| Decision | Rationale |
+|----------|-----------|
+| Create both Windows (.bat) and Unix (.sh) scripts | Android development often happens on Windows; cross-platform support ensures all developers can use the scripts |
+| Modular script structure (separate scripts per check) | Allows developers to run individual checks as needed (e.g., just lint, just tests) |
+| Master orchestration script (ci.sh/ci.bat) | Convenience for running full CI pipeline locally with one command |
+| Skip GitHub-specific features | CodeQL, PR comments, artifact uploads don't translate to local execution |
+| Maintain Gradle wrapper usage | No need to install Gradle separately; consistent with CI behavior |
+| Use colored console output | Better readability, similar to GitHub Actions log formatting |
+| Generate reports in ./build/local-ci-reports directory | Centralized location for all CI reports, separate from Gradle build output |
+| Adapt security checklist scripts | Remove git-specific checks (comparing with base branch), keep source code validation |
+| Maintain exact Gradle task names | Ensures consistency with CI behavior and test coverage requirements |
 
-**Technical Details:**
-- Targets Bluetooth pairing protocol
-- Forces entropy reduction during key negotiation
-- Allows brute force attacks on encrypted traffic
+## Issues Encountered
+| Issue | Resolution |
+|-------|------------|
+| ktlint requires manual download in CI | Scripts should check for ktlint installation or download if missing |
+| Windows vs Unix path separators | Use platform-specific scripts (.bat for Windows, .sh for Unix/Linux/macOS) |
+| Gradle daemon memory | Add GRADLE_OPTS environment variable configuration in scripts |
+| Product flavor testing | Scripts must test both dev and prod flavors to match CI behavior |
 
-**Detection Method:**
-- Monitor key negotiation packets
-- Analyze entropy in LTK generation
-- Flag unusually short keys
+## Resources
+- **Repository**: https://github.com/xarlord/btsec-testtool
+- **Current Branch**: feature/local-ci-scripts (created 2026-02-07)
+- **CI Workflows**: .github/workflows/ci.yml, .github/workflows/pr-checks.yml
+- **Build Configuration**: build.gradle.kts, app/build.gradle.kts
+- **Gradle Wrapper**: ./gradlew (Unix), gradlew.bat (Windows)
+- **ktlint Releases**: https://github.com/pinterest/ktlint/releases/download/1.0.1/ktlint
+- **Project Root**: C:\Users\plner\AndroidStudioProjects\btsec-testtool\btsec-testtool
+- **Java Version**: 17 (Temurin)
 
-#### 2. BIAS Attack (CVE-2020-10135)
-**Description:** Bluetooth Impersonation Attack
-**Severity:** HIGH
-**Impact:** Attacker can impersonate already paired device
+## Implementation Task List
+Created detailed task breakdown using TaskCreate tool:
+1. Task #1: Create scripts directory structure
+2. Task #2: Implement build scripts
+3. Task #3: Implement unit test scripts
+4. Task #4: Implement ktlint linting scripts
+5. Task #5: Implement Android lint scripts
+6. Task #6: Implement combined lint scripts
+7. Task #7: Implement security check scripts
+8. Task #8: Implement dependency check scripts
+9. Task #9: Implement master CI orchestration scripts
+10. Task #10: Create scripts documentation
+11. Task #11: Test all scripts locally
 
-**Technical Details:**
-- Bypasses secure connections verification
-- Requires prior pairing with target
-- Exploits session key derivation weaknesses
-
-**Detection Method:**
-- Verify secure connections flag
-- Check for unexpected authentication bypasses
-- Log suspicious connection patterns
-
-#### 3. BLESA Attack (CVE-2020-6050)
-**Description:** BLE Spoofing Attack
-**Severity:** MEDIUM
-**Impact:** Attacker can reconnect with cached attributes
-
-**Technical Details:**
-- Targets BLE caching mechanisms
-- Reuses cached encryption parameters
-- Bypasses re-authentication
-
-**Detection Method:**
-- Monitor for unexpected reconnections
-- Validate cached attribute consistency
-- Check for authentication skipping
-
-#### 4. BlueBorne (CVE-2017-0785)
-**Description:** Remote Code Execution via Bluetooth
-**Severity:** CRITICAL
-**Impact:** Attacker can execute arbitrary code without pairing
-
-**Technical Details:**
-- Heap overflow in Bluetooth stack
-- Affects Android 5.0 - 7.1.1
-- No user interaction required
-
-**Detection Method:**
-- Check Android version
-- Test for malformed packet handling
-- Attempt controlled overflow test
-
-#### 5. BlueZoom (CVE-2019-19195)
-**Description:** Peer Connection Hijacking
-**Severity:** MEDIUM
-**Impact:** Attacker can hijack connection between paired devices
-
-**Technical Details:**
-- Targets connection state machine
-- Exploits timing vulnerabilities
-- Requires close proximity
-
-**Detection Method:**
-- Monitor for unexpected role switches
-- Check connection state consistency
-- Detect timing anomalies
-
-#### 6. WhisperPair (CVE-2020-0022)
-**Description:** Pairing Confusion Attack
-**Severity:** MEDIUM
-**Impact:** Attacker can complete pairing with wrong device
-
-**Technical Details:**
-- Confuses user during pairing
-- Leverages proximity-based pairing UX
-- Requires social engineering component
-
-**Detection Method:**
-- Validate pairing initiator
-- Check for unexpected device switches
-- Log suspicious pairing attempts
-
-#### 7. BleedingTooth (CVE-2020-12351)
-**Description:** Buffer Overflow in L2CAP
-**Severity:** CRITICAL
-**Impact:** Remote code execution or DoS
-
-**Technical Details:**
-- Integer overflow in length calculation
-- Affects Linux kernel Bluetooth stack
-- Can trigger heap corruption
-
-**Detection Method:**
-- Test with oversized L2CAP packets
-- Monitor for abnormal handling
-- Check for crash conditions
-
-#### 8. BLURtooth (CVE-2019-17526)
-**Description:** Impersonation Attack
-**Severity:** MEDIUM
-**Impact:** Attacker can impersonate trusted device
-
-**Technical Details:**
-- Bypasses secure simple pairing
-- Exploits downgrade attacks
-- Targets cross-transport key derivation
-
-**Detection Method:**
-- Verify pairing method used
-- Check for protocol downgrades
-- Validate key derivation parameters
+## Visual/Browser Findings
+<!-- CRITICAL: Update after every 2 view/browser operations -->
+<!-- Multimodal content must be captured as text immediately -->
+- N/A (no visual/browser content in this session)
 
 ---
 
-## Fuzzing Methodology
+## Session: Fix Remaining Items - 2026-02-08 (CONTINUED)
 
-### Fuzzing Categories
+### Root Cause Identified - DI Configuration Issues
 
-#### 1. Protocol Violation Fuzzing
-**Purpose:** Test robustness against malformed protocol data
-**Methods:**
-- Invalid opcode injection
-- Corrupted header fields
-- Boundary value testing
-- Reserved bit manipulation
+**Issue 1: Self-binding @Binds annotations**
+- UseCaseModule had @Binds methods binding concrete classes to themselves
+- Example: `bindAuthorizationUseCase(impl: AuthorizationUseCase): AuthorizationUseCase`
+- This is incorrect - @Binds is for interface-to-implementation binding
+- **Fix:** Removed entire UseCaseModule from ViewModelModule.kt
 
-#### 2. State Machine Fuzzing
-**Purpose:** Exploit state transition vulnerabilities
-**Methods:**
-- Unexpected state transitions
-- Rapid state changes
-- Concurrent operation testing
-- State corruption attempts
+**Issue 2: Missing @Inject annotations**
+- All use cases except AuthorizationUseCase were missing @Inject on constructors
+- KSP couldn't generate factory classes for them
+- **Fix:** Added `@Inject constructor(` to all use cases:
+  - BluetoothScanningUseCase
+  - FuzzingUseCase
+  - KeyExtractionUseCase
+  - ReportGenerationUseCase
+  - VulnerabilityScanningUseCase
 
-#### 3. Resource Exhaustion Fuzzing
-**Purpose:** Test DoS resistance
-**Methods:**
-- Connection flooding
-- Maximum connection limits
-- Memory exhaustion
-- CPU stress testing
+**Issue 3: Missing import statement**
+- AuthorizationScreen.kt referenced AuthorizationUseCase without importing it
+- KSP reported as "error.NonExistentClass"
+- **Fix:** Added `import com.btsec.testtool.domain.usecase.AuthorizationUseCase`
 
-#### 4. Timing-Based Fuzzing
-**Purpose:** Exploit race conditions
-**Methods:**
-- Packet timing manipulation
-- Concurrent pairing attempts
-- Interrupt-based attacks
-- Clock skew exploitation
+**Issue 4: Compose Compiler version incompatibility**
+- Compose Compiler 1.5.4 requires Kotlin 1.9.20
+- Project has Kotlin 1.9.21
+- **Fix:** Upgraded Compose Compiler to 1.5.6 in:
+  - buildSrc/src/main/kotlin/Dependencies.kt (line 22)
+  - app/build.gradle.kts (line 129)
 
-#### 5. Cryptographic Fuzzing
-**Purpose:** Test encryption implementation
-**Methods:**
-- Weak key injection
-- Invalid key length testing
-- MAC verification bypass
-- Replay attack simulation
+### Current Status: Domain Layer Incomplete
 
----
+**391 Kotlin compilation errors remain**
 
-## Android Bluetooth API Analysis
+The codebase appears to be a skeletal implementation with many TODO items. Common error types:
 
-### Capabilities & Limitations
+1. **Missing domain model classes** (BluetoothState, ScanResult, etc.)
+2. **Incomplete repository implementations** (return type mismatches)
+3. **Missing imports** (HiltAndroidApp, domain models)
+4. **Stub methods with incorrect signatures**
 
-#### What's Possible on Android
+This is NOT a CI/CD script issue - it's incomplete application code.
 
-1. **Device Discovery**
-   - ✅ Classic Bluetooth scanning
-   - ✅ BLE scanning
-   - ✅ RSSI monitoring
-   - ✅ Device name retrieval
+### Options for Moving Forward
 
-2. **Connection Management**
-   - ✅ RFCOMM sockets
-   - ✅ L2CAP channels (limited)
-   - ✅ GATT operations (BLE)
-   - ❌ Raw packet injection (limited)
+**Option A: Stub Implementation**
+- Add stub implementations for missing domain models
+- Fix compilation errors with minimal functionality
+- Goal: Get CI pipeline to pass
+- Risk: Application won't run meaningfully
 
-3. **Pairing & Bonding**
-   - ✅ Initiate pairing
-   - ✅ Access bond information
-   - ❌ Direct private key extraction (root required)
-   - ❌ Link key retrieval (restricted)
+**Option B: Document Known Issues**
+- Document that codebase is incomplete
+- CI scripts are working correctly
+- Application development is ongoing
+- CI should focus on what IS implemented
 
-#### Platform Restrictions
-
-1. **No Raw Packet Access**
-   - Android doesn't expose raw Bluetooth HCI
-   - Cannot inject arbitrary packets
-   - Limited to standard Android APIs
-
-2. **Key Extraction Limitations**
-   - Link keys stored in encrypted system database
-   - LTK/IRK protected by keystore
-   - Root access + SELinux bypass required
-
-3. **Fuzzing Constraints**
-   - Cannot send malformed packets at HCI level
-   - Must use valid Android API calls
-   - Limited to protocol-level fuzzing
+**Option C: Selective Implementation**
+- Implement only critical paths (authorization flow)
+- Stub out non-critical features
+- More realistic but time-consuming
 
 ---
 
-## Build System Findings
-
-### Android Gradle Plugin (AGP)
-
-#### Platform Limitation Discovery
-**Issue:** AGP 8.2.1 doesn't support Linux runners
-**Error:** `SystemInfo is not supported on this operating system`
-**Root Cause:** AGP uses JNI calls compiled only for Windows and macOS
-
-**Solution:** Migrate all CI/CD jobs to `macos-latest` runners
-
-#### Product Flavors Impact
-**Issue:** Test task names change with product flavors
-**Error:** `Task 'testDebugUnitTest' is ambiguous`
-**Root Cause:** Dev and prod flavors create separate test tasks
-
-**Solution:** Use `testDevDebugUnitTest testProdDebugUnitTest`
-
-### Dependency Version Issues
-
-#### androidx.startup:startup-runtime
-**Issue:** Version 1.1.2 doesn't exist
-**Valid Versions:** 1.0.0, 1.1.0, 1.1.1
-**Solution:** Updated to 1.1.1
-
-#### androidx.hilt:hilt-compiler
-**Issue:** Version confusion with Google Dagger Hilt
-**Details:**
-- `com.google.dagger:hilt-compiler` uses 2.48.1
-- `androidx.hilt:hilt-compiler` uses 1.1.0
-
-**Solution:** Added separate `hiltAndroidX` version constant
+## Technical Decisions (New Session)
+| Decision | Rationale |
+|----------|-----------|
+| Removed UseCaseModule @Binds methods | Concrete classes with @Inject don't need @Binds - only interface-to-implementation bindings require it |
+| Added @Inject to all use case constructors | KSP requires @Inject to generate dependency injection factories |
+| Added import for AuthorizationUseCase | Unresolved reference caused "error.NonExistentClass" in KSP |
+| Upgraded Compose Compiler to 1.5.6 | Kotlin 1.9.21 requires Compose Compiler 1.5.6+ for compatibility |
+| TBA | TBA |
 
 ---
+## Script Structure Plan
+### Directory Structure
+```
+btsec-testtool/
+├── scripts/
+│   ├── ci.sh                      # Master CI script (Unix)
+│   ├── ci.bat                     # Master CI script (Windows)
+│   ├── build.sh                   # Build script (Unix)
+│   ├── build.bat                  # Build script (Windows)
+│   ├── test.sh                    # Unit test script (Unix)
+│   ├── test.bat                   # Unit test script (Windows)
+│   ├── lint.sh                    # Combined lint script (Unix)
+│   ├── lint.bat                   # Combined lint script (Windows)
+│   ├── lint-ktlint.sh             # ktlint script (Unix)
+│   ├── lint-ktlint.bat            # ktlint script (Windows)
+│   ├── lint-android.sh            # Android lint script (Unix)
+│   ├── lint-android.bat           # Android lint script (Windows)
+│   ├── security-check.sh          # Security checks (Unix)
+│   ├── security-check.bat         # Security checks (Windows)
+│   ├── dep-check.sh               # Dependency check (Unix)
+│   ├── dep-check.bat              # Dependency check (Windows)
+│   └── README.md                  # Script documentation
+```
 
-## CI/CD Configuration Discoveries
+### Scripts to Create
+1. **scripts/ci.sh/bat** - Master orchestration script
+2. **scripts/build.sh/bat** - Build APKs (debug + release)
+3. **scripts/test.sh/bat** - Run unit tests with coverage
+4. **scripts/lint-ktlint.sh/bat** - ktlint formatting check
+5. **scripts/lint-android.sh/bat** - Android lint check
+6. **scripts/lint.sh/bat** - Run all lint checks
+7. **scripts/security-check.sh/bat** - Security checklist
+8. **scripts/dep-check.sh/bat** - OWASP dependency check
+9. **scripts/README.md** - Usage documentation
 
-### GitHub Actions Free Tier Limits
-
-**Monthly Allowance:**
-- Private repositories: 200 minutes
-- Public repositories: 2000 minutes
-- macOS runners: 10x multiplier (actual: 20 minutes per 200 unit)
-
-**Cost Impact:**
-- macOS runners consume 10x more minutes than Linux
-- Complex Android builds use 5-10 minutes per job
-- Free tier insufficient for active development
-
-**Workarounds:**
-1. Use Linux runners where possible (not viable for Android)
-2. Make repository public
-3. Upgrade to paid plan
-4. Run CI less frequently
-
-### Cache Service Outages
-
-**Observation:** GitHub Actions cache service experiences periodic outages
-**Impact:** Builds take longer, but still complete
-**Mitigation:** Cache warnings are non-blocking
-
----
-
-## Testing Strategy Insights
-
-### Achieving 100% Coverage
-
-**Challenges:**
-1. Android framework dependencies require mocking
-2. Bluetooth hardware requires abstracted interfaces
-3. Coroutines require test dispatchers
-4. Compose UI requires test utilities
-
-**Solutions:**
-1. **Mockk** for comprehensive mocking
-2. **Robolectric** for Android framework simulation
-3. **Turbine** for Flow testing
-4. **Compose UI Test** for UI component testing
-
-### Test Organization
-
-**By Layer:**
-- Domain tests (pure Kotlin, fast)
-- Data tests (with mocking, medium)
-- Presentation tests (UI, slower)
-
-**By Type:**
-- Unit tests (isolated functions)
-- Integration tests (repository interactions)
-- UI tests (Compose components)
-- Instrumented tests (Android-specific)
-
----
-
-## Security Implementation Findings
-
-### Authorization Enforcement
-
-**Requirements Identified:**
-1. Digital signature verification on auth files
-2. Scope validation for each operation
-3. Time-based expiration checking
-4. Action whitelist enforcement
-
-**Implementation:**
-- Crypto signatures for verification
-- In-memory scope caching
-- Real-time validation before operations
-
-### Consent Tracking
-
-**Requirements:**
-1. Pre-test explicit consent
-2. Audit logging for all actions
-3. 7-year retention capability
-4. Export functionality
-
-**Implementation:**
-- Room database for audit logs
-- Encrypted storage
-- JSON export for evidence
-
----
-
-## Legal & Compliance Considerations
-
-### Authorization Requirements
-
-**Essential Elements:**
-1. Written permission from target owner
-2. Defined scope (devices, networks, time)
-3. Authorized actions list
-4. Digital signature for verification
-5. Expiration date
-
-### Audit Trail Requirements
-
-**Minimum Data:**
-- Timestamp (UTC)
-- Action performed
-- Target device
-- Authorization reference
-- User identity
-- Result
-
-**Retention:**
-- 7 years (industry standard)
-- Immutable storage
-- Exportable format
-- Searchable
-
----
-
-## Performance Optimization Opportunities
-
-### Build Performance
-
-**Current Issues:**
-1. Configuration cache errors
-2. Gradle daemon startup time
-3. Dependency resolution overhead
-
-**Potential Improvements:**
-1. Enable configuration cache (currently disabled due to errors)
-2. Use Gradle build scan for optimization
-3. Pre-build dependencies in Docker image
-
-### Runtime Performance
-
-**Considerations:**
-1. Bluetooth operations are blocking
-2. Scanning is battery-intensive
-3. Large reports take time to generate
-
-**Mitigations:**
-1. Coroutines for async operations
-2. Rate limiting for scanning
-3. Streaming report generation
-
----
-
-## Future Research Directions
-
-### Additional Vulnerabilities to Investigate
-
-1. **BLUFFS** (Breaking L forging and Four-way Handshake Weakness)
-2. **FragAttack** (Fragmentation and Injection Attacks)
-3. **BrakTooth** (Bluetooth Driver Vulnerabilities)
-
-### Enhanced Fuzzing Techniques
-
-1. **Grammar-based fuzzing** for protocol compliance
-2. **Genetic algorithms** for packet generation
-3. **Symbolic execution** for code path analysis
-
-### Platform Expansions
-
-1. **iOS** Bluetooth security testing
-2. **Linux** desktop tools
-3. **Hardware** sniffer integration
-
----
-
-## Lessons Learned
-
-### Technical
-
-1. **Android Bluetooth APIs** are more limited than expected
-2. **Gradle configuration** requires careful version management
-3. **GitHub Actions** macOS runners have significant costs
-4. **Dependency resolution** errors can be cryptic
-
-### Process
-
-1. **Incremental fixes** with CI validation works best
-2. **Comprehensive testing** catches integration issues early
-3. **Documentation** is essential for complex projects
-4. **Legal compliance** must be designed in, not added later
-
-### Security
-
-1. **Authorization** must be enforced at every layer
-2. **Audit trails** are non-negotiable for security tools
-3. **Scope enforcement** prevents accidental overreach
-4. **Consent tracking** protects both user and developer
-
----
-
-## References
-
-### CVE Database
-- https://cve.mitre.org/
-- https://nvd.nist.gov/
-
-### Bluetooth Security Research
-- https://www.bluetooth.com/specifications/
-
-### Android Development
-- https://developer.android.com/guide/topics/connectivity/bluetooth
-
-### OWASP Mobile Security
-- https://owasp.org/www-project-mobile-security/
-
----
-
-*Last Updated: February 7, 2026*
+*Update this file after every 2 view/browser/search operations*
+*This prevents visual information from being lost*
