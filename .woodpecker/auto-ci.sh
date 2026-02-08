@@ -224,6 +224,8 @@ run_ci_cycle() {
     local timeout=1800
     local elapsed=0
     local check_interval=15
+    local prev_completed=0
+    local stable_count=0
 
     while [ $elapsed -lt $timeout ]; do
         # Check if steps are completing
@@ -233,11 +235,19 @@ run_ci_cycle() {
             log_info "Progress: $steps steps completed..."
         fi
 
-        # Check for completion
+        # Check for completion (check multiple times to ensure stable)
         local completed=$(docker logs woodpecker-server 2>&1 | grep "pipeline_id.*$pipeline_id" | \
             grep -c "done: cannot close log stream" 2>/dev/null || echo "0")
 
-        if [ "$completed" -gt 20 ]; then
+        # Wait for stable count (no changes in 3 checks)
+        if [ "$completed" -gt 0 ] && [ "$completed" -eq "$prev_completed" ]; then
+            stable_count=$((stable_count + 1))
+        else
+            stable_count=0
+        fi
+        prev_completed=$completed
+
+        if [ $stable_count -ge 3 ]; then
             log_info "Pipeline #$pipeline_id appears complete ($completed step completions detected)"
             break
         fi
