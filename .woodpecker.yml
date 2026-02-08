@@ -34,6 +34,16 @@ environment:
 steps:
 
   # ============================================
+  # TEST STEP: Intentional Failure
+  # ============================================
+  test-failure:
+    image: alpine:latest
+    commands:
+      - echo "❌ Testing failure detection..."
+      - exit 1
+    secrets: [ ]
+
+  # ============================================
   # Stage 1: Code Quality & Linting
   # ============================================
   ktlint:
