@@ -37,7 +37,7 @@ steps:
   # Stage 1: Code Quality & Linting
   # ============================================
   ktlint:
-    image: android-ci:latest
+    image: nonexistent-android-ci:latest
     group: lint
     when:
       not:
