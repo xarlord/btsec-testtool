@@ -26,22 +26,13 @@ environment:
   JAVA_VERSION: "17"
   JAVA_DISTRIBUTION: "temurin"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2"
-  ANDROID_HOME: "/opt/android-sdk"
+  ANDROID_HOME: "/opt/android-sdk
+  INVALID_SYNTAX: true
 
 # ============================================
 # Pipeline Stages
 # ============================================
 steps:
-
-  # ============================================
-  # TEST STEP: Intentional Failure
-  # ============================================
-  test-failure:
-    image: alpine:latest
-    commands:
-      - echo "❌ Testing failure detection..."
-      - exit 1
-    secrets: [ ]
 
   # ============================================
   # Stage 1: Code Quality & Linting
