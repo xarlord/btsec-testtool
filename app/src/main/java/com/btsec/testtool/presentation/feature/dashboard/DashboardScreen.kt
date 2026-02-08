@@ -75,8 +75,13 @@ fun DashboardScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AuthorizationInfoCard(authId = authId)
-            // TODO: Implement FeatureGrid
-            // FeatureGrid(...)
+            FeatureGrid(
+                onNavigateToScanner = onNavigateToScanner,
+                onNavigateToFuzzer = onNavigateToFuzzer,
+                onNavigateToKeys = onNavigateToKeys,
+                onNavigateToVulns = onNavigateToVulns,
+                onNavigateToReports = onNavigateToReports
+            )
         }
     }
 }
