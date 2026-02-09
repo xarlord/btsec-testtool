@@ -1,0 +1,156 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    [Application_Name] - AGENT CONTEXT                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📱 PROJECT: [Project Description]
+🔗 REPO: https://github.com/xarlord/[Application_Name]
+📅 UPDATED: 2026-02-09
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ CI/CD ARCHITECTURE                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+PLATFORM: Jenkins Multi-Agent
+┌─────────────┬──────────────┬─────────────┬──────────────────────────────────┐
+│ AGENT       │ LABEL        │ EXECUTORS   │ PURPOSE                          │
+├─────────────┼──────────────┼─────────────┼──────────────────────────────────┤
+│ agent-build │ android build│ 2           │ Build APKs                       │
+│ agent-test  │ android test │ 2           │ Run tests (unit, instrumented)   │
+│ agent-util  │ android util │ 2           │ Quality checks (lint, format)    │
+└─────────────┴──────────────┴─────────────┴──────────────────────────────────┘
+
+PIPELINE: Jenkinsfile (8 stages)
+1. Pre-Flight Checks → 2. Checkout → 3. Security Scan → 4. Build APK
+5. Test Execution → 6. Android Lint → 7. Quality Gates → 8. Self-Healing
+
+COVERAGE TARGET: 95% (enforced)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ACCESS CREDENTIALS                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+LOCAL ACCESS:
+  Jenkins:   http://localhost:8080
+  Grafana:   http://localhost:3001 (admin/admin)
+  Prometheus: http://localhost:9090
+
+REMOTE ACCESS (Tailscale):
+  MagicDNS: pepe-pc.tail5e0de4.ts.net
+  Jenkins:   http://pepe-pc.tail5e0de4.ts.net:8080
+  Grafana:   http://pepe-pc.tail5e0de4.ts.net:3001
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ KEY FILES & DIRECTORIES                                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+ROOT:
+  Jenkinsfile                    # Multi-agent pipeline
+  .version                       # Current semantic version
+  CHANGELOG.md                   # Release notes
+  build.gradle.kts               # Project build config
+
+AUTOMATION (pipeline-utils/scripts/):
+  orchestrate-release.sh         # Full release automation
+  auto-cleanup.sh                # Repository cleanup
+  auto-triage-issues.sh          # Issue classification
+  bump-version.sh                # Semantic versioning
+  generate-changelog.sh          # Changelog generation
+  sign-apk.sh                    # APK signing
+  create-github-release.sh       # GitHub release
+  deploy-play-store.sh           # Play Store deployment
+  pre-commit-*.sh                # Pre-commit hooks
+
+MONITORING (jenkins/monitoring/):
+  docker-compose.yml             # Prometheus, Grafana, Alertmanager
+  grafana/dashboards/            # 6 dashboards (JSON)
+  prometheus/alerts/             # Alert rules
+
+GITHUB ACTIONS (.github/workflows/):
+  auto-triage.yml                # Daily issue triage
+  auto-cleanup.yml               # Weekly cleanup
+  sync-to-jenkins.yml            # Trigger Jenkins builds
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ COMMON COMMANDS                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+BUILD & TEST:
+  ./gradlew test                 # Unit tests
+  ./gradlew assembleRelease      # Release APK
+  ./gradlew jacocoTestReport     # Coverage report
+  ./gradlew lint                 # Lint check
+
+AUTOMATION:
+  bash pipeline-utils/scripts/orchestrate-release.sh
+  bash pipeline-utils/scripts/auto-cleanup.sh --dry-run
+  bash pipeline-utils/scripts/auto-triage-issues.sh
+
+MONITORING:
+  docker ps | grep jenkins       # Check Jenkins status
+  docker ps | grep prometheus    # Check monitoring stack
+  tailscale status               # Check Tailscale
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ QUALITY GATES                                                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+✓ Unit tests MUST pass
+✓ Code coverage ≥ 95%
+✓ Lint errors block builds
+✓ Secret scanning blocks on findings
+✓ All stages run in parallel where possible
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ TROUBLESHOOTING                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+BUILD STUCK IN QUEUE:
+  → Check agents: docker ps | grep jenkins-agent
+  → Restart: cd C:\Users\plner\jenkins && docker-compose restart
+
+AGENT NOT CONNECTING:
+  → Verify secret: echo $JENKINS_AGENT_SECRET
+  → Check logs: docker logs jenkins-agent-build
+
+COVERAGE BELOW 95%:
+  → View report: app/build/reports/jacoco/test/html/index.html
+  → Find untested code and add tests
+
+REMOTE ACCESS NOT WORKING:
+  → Check Tailscale: tailscale status
+  → Restart Tailscale: net stop tailscale && net start tailscale
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ DOCUMENTATION                                                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Location: C:\Users\plner\jenkins\
+
+  PROJECT_AGENT_DESCRIPTION.md    # This document (detailed)
+  AUTOMATION_GUIDE.md              # Complete automation reference
+  REMOTE_ACCESS_GUIDE.md           # Tailscale remote access
+  TAILSCALE_CONFIG.md              # Tailscale configuration
+  FULLY_DEPLOYED.md                # Implementation summary
+  TAILSCALE_SETUP_COMPLETE.md      # Final status
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ QUICK REFERENCE                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Jenkins Multi-Agent:  3 agents, 6 executors, 8 stages
+Coverage Target:      95% (enforced)
+Automation Scripts:   67 scripts
+Monitoring:           6 Grafana dashboards, 6 Prometheus alerts
+GitHub Actions:       3 workflows active
+Remote Access:        Tailscale (pepe-pc.tail5e0de4.ts.net)
+
+Architecture:         Clean Architecture (MVVM), Jetpack Compose
+Language:             Kotlin
+Min SDK:              API 24
+Target SDK:           API 34
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           END OF CONTEXT                                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+For detailed information, see: C:\Users\plner\jenkins\PROJECT_AGENT_DESCRIPTION.md
