@@ -23,7 +23,7 @@ pipeline {
         // Stage 1: Pre-Flight Checks
         // ============================================
         stage('Pre-Flight Checks') {
-            agent { label 'agent-util' }
+            agent { label 'android util' }
             steps {
                 script {
                     echo '🔍 Running pre-flight checks...'
@@ -47,7 +47,7 @@ pipeline {
         // Stage 2: Checkout
         // ============================================
         stage('Checkout') {
-            agent { label 'agent-util' }
+            agent { label 'android util' }
             steps {
                 script {
                     echo '📥 Checkout source code...'
@@ -61,7 +61,7 @@ pipeline {
         // Stage 3: Security Scan
         // ============================================
         stage('Security Scan') {
-            agent { label 'agent-util' }
+            agent { label 'android util' }
             steps {
                 script {
                     echo '🔒 Running security scan...'
@@ -98,7 +98,7 @@ pipeline {
         // Stage 4: Build APK
         // ============================================
         stage('Build APK') {
-            agent { label 'agent-build' }
+            agent { label 'android build' }
             steps {
                 script {
                     echo '🔨 Building APK...'
@@ -121,7 +121,7 @@ pipeline {
         stage('Test Execution') {
             parallel {
                 stage('Unit Tests') {
-                    agent { label 'agent-test' }
+                    agent { label 'android test' }
                     steps {
                         script {
                             echo '🧪 Running unit tests...'
@@ -146,7 +146,7 @@ pipeline {
                 }
 
                 stage('Instrumented Tests') {
-                    agent { label 'agent-test' }
+                    agent { label 'android test' }
                     when {
                         not {
                             branch 'main'
@@ -166,7 +166,7 @@ pipeline {
         // Stage 6: Android Lint
         // ============================================
         stage('Android Lint') {
-            agent { label 'agent-util' }
+            agent { label 'android util' }
             steps {
                 script {
                     echo '🔍 Running Android Lint...'
@@ -189,7 +189,7 @@ pipeline {
         // Stage 7: Quality Gates
         // ============================================
         stage('Quality Gates') {
-            agent { label 'agent-util' }
+            agent { label 'android util' }
             steps {
                 script {
                     echo '✅ Enforcing quality gates...'
@@ -226,7 +226,7 @@ pipeline {
         // Stage 8: Self-Healing
         // ============================================
         stage('Self-Healing') {
-            agent { label 'agent-util' }
+            agent { label 'android util' }
             steps {
                 script {
                     echo '🔧 Running self-healing checks...'
