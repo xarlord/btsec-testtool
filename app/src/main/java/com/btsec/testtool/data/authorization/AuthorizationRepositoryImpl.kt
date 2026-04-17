@@ -9,6 +9,7 @@
 package com.btsec.testtool.data.authorization
 
 import android.content.Context
+import com.btsec.testtool.BuildConfig
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.AuthorizationRepository
 import com.btsec.testtool.domain.repository.AuthorizationStatus
@@ -42,6 +43,16 @@ class AuthorizationRepositoryImpl @Inject constructor(
         // For now, simulate verification
 
         if (!isValidAuthIdFormat(authId)) {
+            return null
+        }
+
+        // Prevent bypassing real verification in production.
+        // Even though this is currently a stubbed project without a real backend,
+        // from a security perspective we must not use mock hardcoded authorization
+        // outside of debug or local dev environments.
+        if (!BuildConfig.DEBUG && BuildConfig.ENVIRONMENT != "dev") {
+            // In a real production app, make network request to verification API here.
+            // For now, fail closed in production since there is no backend.
             return null
         }
 

@@ -9,6 +9,7 @@
 package com.btsec.testtool.data.authorization
 
 import android.content.Context
+import com.btsec.testtool.BuildConfig
 import com.btsec.testtool.domain.model.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -51,13 +52,18 @@ class AuthorizationRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("verifyAuthorization should return authorization for valid format")
+    @DisplayName("verifyAuthorization should return authorization for valid format in dev")
     fun testVerifyAuthorizationValidFormat() = runTest {
         val result = repository.verifyAuthorization("BTSEC-20260207-A1B2C3D4")
 
-        assertNotNull(result)
-        assertEquals("BTSEC-20260207-A1B2C3D4", result?.authId)
-        assertEquals("Security Tester", result?.issuedTo)
+        // By default gradle environment makes this true, but if not we shouldn't fail.
+        if (BuildConfig.DEBUG || BuildConfig.ENVIRONMENT == "dev") {
+            assertNotNull(result)
+            assertEquals("BTSEC-20260207-A1B2C3D4", result?.authId)
+            assertEquals("Security Tester", result?.issuedTo)
+        } else {
+            assertNull(result)
+        }
     }
 
     @Test
