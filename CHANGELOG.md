@@ -1,3 +1,29 @@
+# [1.2.0](https://github.com/xarlord/btsec-testtool/compare/v1.1.4...v1.2.0) (2026-04-17)
+
+
+### Bug Fixes
+
+* Correct AndroidX Hilt compiler version ([99d0ae0](https://github.com/xarlord/btsec-testtool/commit/99d0ae0665ee28d26d4c9dc7df69179804c0af8c))
+* correct Jenkinsfile comment syntax (# to //) ([3d1c16e](https://github.com/xarlord/btsec-testtool/commit/3d1c16ebc6feef280ec98c87cfff36a5a49891ab))
+* improve ktlint download for Git Bash on Windows ([92a0a69](https://github.com/xarlord/btsec-testtool/commit/92a0a69e4978eeaea8bfe3b9a77e6fceee740629))
+* improve pipeline completion detection ([2b15fa5](https://github.com/xarlord/btsec-testtool/commit/2b15fa57e4d9b97bc74a10ca36f8c895b158a135))
+* resolve all Kotlin compilation errors and build issues ([47a699c](https://github.com/xarlord/btsec-testtool/commit/47a699ce791a4e98784b19b8dbccfc93a97361eb))
+* resolve Android resource and manifest merger issues ([85ae0d8](https://github.com/xarlord/btsec-testtool/commit/85ae0d878c736928d1a3c598ace4283d8a8ff538))
+* resolve DI configuration issues and Compose compiler compatibility ([ea8fd53](https://github.com/xarlord/btsec-testtool/commit/ea8fd5358fb009248d2e040c88159d78980711ca))
+* resolve project build and compilation issues ([7fe243e](https://github.com/xarlord/btsec-testtool/commit/7fe243ec80a9fb533218852dd11dfa9b9be36e96))
+* restore working .woodpecker.yml configuration ([76a45b2](https://github.com/xarlord/btsec-testtool/commit/76a45b2296c1704746816568c880c2e4f06aa480))
+* update Jenkinsfile agent labels to match actual agent labels ([55cc1ae](https://github.com/xarlord/btsec-testtool/commit/55cc1aed0c8ad48aee15b9229db3190aef8a04ad))
+
+
+### Features
+
+* add autonomous CI/CD monitoring and auto-fix system ([eddb7ff](https://github.com/xarlord/btsec-testtool/commit/eddb7fffb193979a4a89cf875a68917c4fe39924)), closes [#17](https://github.com/xarlord/btsec-testtool/issues/17)
+* add comprehensive UI testing suite and fix authorization window validation ([1de765c](https://github.com/xarlord/btsec-testtool/commit/1de765c6ce5b2230fa34d4fd3f719c4ce127c68b))
+* add local CI/CD scripts ([c533aa5](https://github.com/xarlord/btsec-testtool/commit/c533aa5145d3c59573a47b8b9f122d22fce57072))
+* add local CI/CD scripts and fix Kotlin JVM target ([c383be4](https://github.com/xarlord/btsec-testtool/commit/c383be4a2f74e6cd584849b58857b139dcaf30ec))
+* add Woodpecker CI pipeline and fix dashboard UI ([6fda07d](https://github.com/xarlord/btsec-testtool/commit/6fda07d1841cf2f9c3b363c1f38f76440b400e02))
+* migrate from Woodpecker CI to Jenkins multi-agent pipeline ([01c624f](https://github.com/xarlord/btsec-testtool/commit/01c624fcf9c2c4d57321f377ea26e9dc0f079aa6))
+
 ## [1.1.4](https://github.com/xarlord/btsec-testtool/compare/v1.1.3...v1.1.4) (2026-02-07)
 
 
