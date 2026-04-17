@@ -105,19 +105,7 @@ class AuthorizationRepositoryImpl @Inject constructor(
         // In production, verify digital signature
         // For now, simulate signature verification
 
-        try {
-            // Would verify signature against stored public key
-            // val signatureBytes = Base64.getDecoder().decode(authorization.signature)
-            // val publicKey = loadPublicKey()
-            // val sig = Signature.getInstance("SHA256withRSA")
-            // sig.initVerify(publicKey)
-            // Update with authorization data
-            // return sig.verify(signatureBytes)
-
-            return true  // Mock verification
-        } catch (e: Exception) {
-            return false
-        }
+        return true // Mock verification
     }
 
     override suspend fun getAuthorizationById(authId: String): Authorization? {
