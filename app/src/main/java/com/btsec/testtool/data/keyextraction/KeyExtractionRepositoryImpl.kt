@@ -10,6 +10,7 @@ package com.btsec.testtool.data.keyextraction
 
 import android.content.Context
 import com.btsec.testtool.domain.model.*
+import java.security.SecureRandom
 import com.btsec.testtool.domain.repository.KeyExtractionRepository
 import com.btsec.testtool.domain.repository.ExtractionProgress
 import com.btsec.testtool.domain.repository.ExtractionStatus
@@ -316,7 +317,11 @@ class KeyExtractionRepositoryImpl @Inject constructor(
         return Result.success(Unit)
     }
 
+    private val secureRandom = SecureRandom()
+
     private fun generateId(): String {
-        return java.util.UUID.randomUUID().toString()
+        val bytes = ByteArray(16)
+        secureRandom.nextBytes(bytes)
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 }

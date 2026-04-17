@@ -11,6 +11,7 @@ package com.btsec.testtool.data.report
 import android.content.Context
 import android.net.Uri
 import com.btsec.testtool.domain.model.*
+import java.security.SecureRandom
 import com.btsec.testtool.domain.repository.ReportRepository
 import com.btsec.testtool.domain.repository.ReportTemplate
 import com.btsec.testtool.domain.repository.ReportOperation
@@ -423,7 +424,11 @@ class ReportRepositoryImpl @Inject constructor(
         return logs
     }
 
+    private val secureRandom = SecureRandom()
+
     private fun generateId(): String {
-        return java.util.UUID.randomUUID().toString()
+        val bytes = ByteArray(16)
+        secureRandom.nextBytes(bytes)
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 }

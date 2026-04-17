@@ -10,6 +10,7 @@ package com.btsec.testtool.data.consent
 
 import android.content.Context
 import com.btsec.testtool.domain.model.*
+import java.security.SecureRandom
 import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.*
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -306,7 +307,11 @@ class ConsentRepositoryImpl @Inject constructor(
         return Result.success(File(outputPath))
     }
 
+    private val secureRandom = SecureRandom()
+
     private fun generateId(): String {
-        return java.util.UUID.randomUUID().toString()
+        val bytes = ByteArray(16)
+        secureRandom.nextBytes(bytes)
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 }
