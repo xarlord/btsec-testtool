@@ -239,24 +239,48 @@ class FuzzingRepositoryImpl @Inject constructor(
     override fun getFuzzingStatistics(): Flow<FuzzingStatistics> {
         return flow {
             val results = fuzzingResults.value
+            var totalPacketsSent = 0L
+            var totalPacketsReceived = 0L
+            var totalErrors = 0L
+            var totalFindings = 0L
+            var sumSuccessRate = 0.0
+            var minStartTime: Instant? = null
+            var maxEndTime: Instant? = null
+
+            results.forEach { result ->
+                totalPacketsSent += result.packetsSent
+                totalPacketsReceived += result.packetsReceived
+                totalErrors += result.errors.size
+                totalFindings += result.findings.size
+                sumSuccessRate += result.getSuccessRate()
+
+                val startTime = result.startTime
+                if (minStartTime == null || startTime.isBefore(minStartTime)) {
+                    minStartTime = startTime
+                }
+
+                val endTime = result.endTime ?: result.startTime
+                if (maxEndTime == null || endTime.isAfter(maxEndTime)) {
+                    maxEndTime = endTime
+                }
+            }
+
             emit(FuzzingStatistics(
                 totalTests = results.size,
-                totalPacketsSent = results.sumOf { it.packetsSent }.toLong(),
-                totalPacketsReceived = results.sumOf { it.packetsReceived }.toLong(),
-                totalErrors = results.sumOf { it.errors.size }.toLong(),
-                totalFindings = results.sumOf { it.findings.size }.toLong(),
+                totalPacketsSent = totalPacketsSent,
+                totalPacketsReceived = totalPacketsReceived,
+                totalErrors = totalErrors,
+                totalFindings = totalFindings,
                 criticalFindings = 0,
                 highFindings = 0,
                 mediumFindings = 0,
                 lowFindings = 0,
-                averageSuccessRate = if (results.isNotEmpty()) {
-                    results.map { it.getSuccessRate() }.average()
-                } else 0.0,
+                averageSuccessRate = if (results.isNotEmpty()) sumSuccessRate / results.size else 0.0,
                 mostTestedDevice = null,
                 mostVulnerableDevice = null,
                 dateRange = DateRange(
-                    start = results.minByOrNull { it.startTime }?.startTime ?: Instant.now(),
-                    end = results.maxByOrNull { it.endTime ?: it.startTime }?.endTime ?: Instant.now()
+                    start = minStartTime ?: Instant.now(),
+                    end = maxEndTime ?: Instant.now()
                 )
             ))
         }
@@ -264,14 +288,30 @@ class FuzzingRepositoryImpl @Inject constructor(
 
     override suspend fun getStatisticsForDevice(deviceAddress: String): DeviceFuzzingStatistics {
         val deviceResults = fuzzingResults.value.filter { it.config.targetDevice.address == deviceAddress }
+        var packetsSent = 0L
+        var packetsReceived = 0L
+        var findings = 0
+        var maxStartTime: Instant? = null
+
+        deviceResults.forEach { result ->
+            packetsSent += result.packetsSent
+            packetsReceived += result.packetsReceived
+            findings += result.findings.size
+
+            val startTime = result.startTime
+            if (maxStartTime == null || startTime.isAfter(maxStartTime)) {
+                maxStartTime = startTime
+            }
+        }
+
         return DeviceFuzzingStatistics(
             deviceAddress = deviceAddress,
             deviceName = deviceResults.firstOrNull()?.config?.targetDevice?.name,
             testsPerformed = deviceResults.size,
-            packetsSent = deviceResults.sumOf { it.packetsSent }.toLong(),
-            packetsReceived = deviceResults.sumOf { it.packetsReceived }.toLong(),
-            findings = deviceResults.sumOf { it.findings.size },
-            lastTestDate = deviceResults.maxByOrNull { it.startTime }?.startTime ?: Instant.now(),
+            packetsSent = packetsSent,
+            packetsReceived = packetsReceived,
+            findings = findings,
+            lastTestDate = maxStartTime ?: Instant.now(),
             vulnerabilitiesDiscovered = emptyList()
         )
     }
