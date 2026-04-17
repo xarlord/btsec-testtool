@@ -363,6 +363,33 @@ class ReportRepositoryImplTest {
         assertTrue(logs.any { it.id == "op-1" })
     }
 
+
+    @Test
+    @DisplayName("exportToPdf should reject path traversal")
+    fun testExportToPdfPathTraversal() = runTest {
+        val report = createTestReport("traversal-export")
+        repository.saveReport(report)
+
+        val outputPath = "/tmp/../../../etc/passwd"
+        val result = repository.exportToPdf("traversal-export", outputPath)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is SecurityException)
+    }
+
+    @Test
+    @DisplayName("exportToHtml should reject path traversal")
+    fun testExportToHtmlPathTraversal() = runTest {
+        val report = createTestReport("traversal-export")
+        repository.saveReport(report)
+
+        val outputPath = "/tmp/../../../etc/passwd"
+        val result = repository.exportToHtml("traversal-export", outputPath)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is SecurityException)
+    }
+
     // Helper functions
 
     private fun createTestReport(

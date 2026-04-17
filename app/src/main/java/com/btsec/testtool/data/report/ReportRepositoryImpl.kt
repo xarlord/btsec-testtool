@@ -278,27 +278,27 @@ class ReportRepositoryImpl @Inject constructor(
 
     override suspend fun exportToPdf(reportId: String, outputPath: String): Result<File> {
         // In production, would generate actual PDF
-        val file = File(outputPath)
-        file.writeText("Mock PDF report: $reportId")
-        return Result.success(file)
+        return getSafeFile(outputPath).onSuccess { file ->
+            file.writeText("Mock PDF report: $reportId")
+        }
     }
 
     override suspend fun exportToHtml(reportId: String, outputPath: String): Result<File> {
-        val file = File(outputPath)
-        file.writeText("<html><body>Mock HTML report: $reportId</body></html>")
-        return Result.success(file)
+        return getSafeFile(outputPath).onSuccess { file ->
+            file.writeText("<html><body>Mock HTML report: $reportId</body></html>")
+        }
     }
 
     override suspend fun exportToJson(reportId: String, outputPath: String): Result<File> {
-        val file = File(outputPath)
-        file.writeText("{\"reportId\": \"$reportId\"}")
-        return Result.success(file)
+        return getSafeFile(outputPath).onSuccess { file ->
+            file.writeText("{\"reportId\": \"$reportId\"}")
+        }
     }
 
     override suspend fun exportToCsv(reportId: String, outputPath: String): Result<File> {
-        val file = File(outputPath)
-        file.writeText("report_id\n$reportId")
-        return Result.success(file)
+        return getSafeFile(outputPath).onSuccess { file ->
+            file.writeText("report_id\n$reportId")
+        }
     }
 
     override fun getAvailableExportFormats(): List<ExportFormat> {
@@ -421,6 +421,33 @@ class ReportRepositoryImpl @Inject constructor(
 
     override fun getReportLogs(): Flow<List<ReportOperation>> {
         return logs
+    }
+
+
+    private fun getSafeFile(outputPath: String): Result<File> {
+        val file = File(outputPath)
+        return try {
+            val canonicalPath = file.canonicalPath
+            val allowedDirs = listOfNotNull(
+                context.filesDir,
+                context.cacheDir,
+
+                File(System.getProperty("java.io.tmpdir")),
+                File("/tmp")
+            ).map { it.canonicalPath }
+
+            val isSafe = allowedDirs.any { base ->
+                canonicalPath.startsWith(base + File.separator) || canonicalPath == base
+            }
+
+            if (isSafe) {
+                Result.success(file)
+            } else {
+                Result.failure(SecurityException("Invalid output path: Path traversal detected or path outside allowed directories"))
+            }
+        } catch (e: Exception) {
+            Result.failure(SecurityException("Invalid output path", e))
+        }
     }
 
     private fun generateId(): String {
