@@ -1,0 +1,3 @@
+## 2024-05-18 - Jetpack Compose Accessibility Content Descriptions
+**Learning:** In Jetpack Compose, setting `contentDescription = null` is often an intentional and best practice for purely decorative icons or icons directly accompanied by descriptive text, to avoid screen reader clutter. However, isolated interactive elements without text (like an `ArrowBack` button) *must* have an accurate description (ideally extracted to strings).
+**Action:** Always evaluate whether an icon adds new context before forcing a `contentDescription`. Extract hardcoded string values for essential descriptions to string resources to properly support internationalization and accessibility.
