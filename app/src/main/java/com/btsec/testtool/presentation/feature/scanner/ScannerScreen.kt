@@ -51,7 +51,7 @@ fun ScannerScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = stringResource(R.string.cd_navigate_up)
                         )
                     }
                 }
@@ -79,12 +79,15 @@ private fun ScanControls(
     onStopScan: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = if (deviceCount > 0) {
                 stringResource(R.string.scanner_devices_found, deviceCount)
+            } else if (isScanning) {
+                stringResource(R.string.scanner_scanning)
             } else {
                 stringResource(R.string.scanner_no_devices)
             },
@@ -104,12 +107,22 @@ private fun ScanControls(
 
 @Composable
 private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean) {
-    if (devices.isEmpty() && !isScanning) {
+    if (devices.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(R.string.scanner_no_devices))
+            if (isScanning) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator()
+                    Text(stringResource(R.string.scanner_scanning))
+                }
+            } else {
+                Text(stringResource(R.string.scanner_no_devices))
+            }
         }
     } else {
         LazyColumn(
