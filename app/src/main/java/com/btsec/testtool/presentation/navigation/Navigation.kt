@@ -102,31 +102,23 @@ fun BTSecNavGraph(
         }
 
         // Fuzzer screen
-        composable(route = "${Routes.FUZZER}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
-            TODO("Implement FuzzerScreen")
+        composable(route = "${Routes.FUZZER}/{authId}") {
+            // TODO: Implement FuzzerScreen
         }
 
         // Key Extraction screen
-        composable(route = "${Routes.KEYS}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
-            TODO("Implement KeyExtractionScreen")
+        composable(route = "${Routes.KEYS}/{authId}") {
+            // TODO: Implement KeyExtractionScreen
         }
 
         // Vulnerability Scanner screen
-        composable(route = "${Routes.VULNS}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
-            TODO("Implement VulnScannerScreen")
+        composable(route = "${Routes.VULNS}/{authId}") {
+            // TODO: Implement VulnScannerScreen
         }
 
         // Reports screen
-        composable(route = "${Routes.REPORTS}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
-            TODO("Implement ReportsScreen")
+        composable(route = "${Routes.REPORTS}/{authId}") {
+            // TODO: Implement ReportsScreen
         }
     }
 }
