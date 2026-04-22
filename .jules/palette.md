@@ -1,0 +1,3 @@
+## 2026-02-07 - Accessibility of Back Buttons
+**Learning:** Isolated interactive elements like back buttons need localized string resources for their contentDescription, not hardcoded strings. Re-running linting without care can format the entire file leading to an overly large PR which violates the < 50 lines change rule. Ensure you check for unresolved compilation errors on unrelated test files because existing broken tests are fine if they are not introduced by the PR.
+**Action:** Always limit the scope of ktlint to only the changed files or only change specific lines manually, and verify if existing tests are failing before trying to fix everything, keeping the scope limited.
