@@ -352,6 +352,23 @@ class ReportRepositoryImpl @Inject constructor(
     override fun getReportStatistics(): Flow<ReportStatistics> {
         return flow {
             val allReports = reports.value
+
+            var totalVulnerabilities = 0
+            var minGeneratedAt: Instant? = null
+            var maxGeneratedAt: Instant? = null
+
+            allReports.forEach { report ->
+                totalVulnerabilities += report.vulnerabilities.size
+
+                if (minGeneratedAt == null || report.generatedAt.isBefore(minGeneratedAt)) {
+                    minGeneratedAt = report.generatedAt
+                }
+
+                if (maxGeneratedAt == null || report.generatedAt.isAfter(maxGeneratedAt)) {
+                    maxGeneratedAt = report.generatedAt
+                }
+            }
+
             emit(ReportStatistics(
                 totalReports = allReports.size,
                 reportsByStatus = allReports.groupBy { it.status }.mapValues { it.value.size },
@@ -359,11 +376,11 @@ class ReportRepositoryImpl @Inject constructor(
                     val instant = it.generatedAt
                     "${instant.toString().substring(0, 7)}" // YYYY-MM format
                 }.mapValues { it.value.size },
-                averageVulnerabilitiesPerReport = allReports.map { it.vulnerabilities.size }.average(),
+                averageVulnerabilitiesPerReport = if (allReports.isNotEmpty()) totalVulnerabilities.toDouble() / allReports.size else 0.0,
                 mostCommonSeverity = VulnerabilitySeverity.MEDIUM,
                 dateRange = DateRange(
-                    start = allReports.minByOrNull { it.generatedAt }?.generatedAt ?: Instant.now(),
-                    end = allReports.maxByOrNull { it.generatedAt }?.generatedAt ?: Instant.now()
+                    start = minGeneratedAt ?: Instant.now(),
+                    end = maxGeneratedAt ?: Instant.now()
                 )
             ))
         }
@@ -372,13 +389,29 @@ class ReportRepositoryImpl @Inject constructor(
     override fun getReportsSummary(): Flow<ReportsSummary> {
         return flow {
             val allReports = reports.value
+
+            var draftCount = 0
+            var finalCount = 0
+            var criticalVulns = 0
+            var highVulns = 0
+
+            allReports.forEach { report ->
+                if (report.status == ReportStatus.DRAFT) draftCount++
+                if (report.status == ReportStatus.FINAL) finalCount++
+
+                report.vulnerabilities.forEach { vuln ->
+                    if (vuln.severity == VulnerabilitySeverity.CRITICAL) criticalVulns++
+                    if (vuln.severity == VulnerabilitySeverity.HIGH) highVulns++
+                }
+            }
+
             emit(ReportsSummary(
                 totalReports = allReports.size,
-                draftReports = allReports.count { it.status == ReportStatus.DRAFT },
-                finalReports = allReports.count { it.status == ReportStatus.FINAL },
+                draftReports = draftCount,
+                finalReports = finalCount,
                 recentReports = allReports.take(5),
-                criticalVulnerabilitiesTotal = allReports.sumOf { it.vulnerabilities.count { it.severity == VulnerabilitySeverity.CRITICAL } },
-                highVulnerabilitiesTotal = allReports.sumOf { it.vulnerabilities.count { it.severity == VulnerabilitySeverity.HIGH } },
+                criticalVulnerabilitiesTotal = criticalVulns,
+                highVulnerabilitiesTotal = highVulns,
                 pendingActions = 0
             ))
         }
