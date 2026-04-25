@@ -1,0 +1,3 @@
+## 2024-06-03 - Localized Content Descriptions and Keyboard Input Optimization
+**Learning:** Hardcoding `contentDescription` strings in Jetpack Compose bypasses Android's localization system, which makes screen readers inaccessible for non-English speakers. Also, appropriately configuring `keyboardOptions` and `keyboardActions` for `OutlinedTextField` forms enhances UX, allowing users to submit forms directly without tapping the physical screen button.
+**Action:** Use `stringResource()` for all `contentDescription`s in UI components, avoiding hardcoded strings. Configure `KeyboardOptions` and `KeyboardActions` appropriately based on the expected form input logic.
