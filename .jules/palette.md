@@ -1,0 +1,3 @@
+## 2024-03-24 - Improve Keyboard Usability in Jetpack Compose Forms
+**Learning:** Text inputs in Jetpack Compose (`OutlinedTextField`, `TextField`) do not automatically infer or support "Submit/Done" actions from the virtual keyboard unless explicitly configured. Without this, users must manually tap away or dismiss the keyboard to find the submit button, which adds friction, especially on smaller screens or accessibility flows.
+**Action:** Always configure `keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)` and provide a corresponding `keyboardActions = KeyboardActions(onDone = { /* execute action */ })` when dealing with single-field forms or the last field in a multi-input form.
