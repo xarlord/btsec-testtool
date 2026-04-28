@@ -303,10 +303,35 @@ class ConsentRepositoryImpl @Inject constructor(
         format: AuditExportFormat
     ): Result<File> {
         // In production, would write to file
-        return Result.success(File(outputPath))
+        return getSafeFile(outputPath)
     }
 
     private fun generateId(): String {
         return java.util.UUID.randomUUID().toString()
+    }
+
+    private fun getSafeFile(outputPath: String): Result<File> {
+        val file = File(outputPath)
+        return try {
+            val canonicalPath = file.canonicalPath
+            val allowedDirs = listOfNotNull(
+                context.filesDir,
+                context.cacheDir,
+                File(System.getProperty("java.io.tmpdir")),
+                File("/tmp")
+            ).map { it.canonicalPath }
+
+            val isSafe = allowedDirs.any { base ->
+                canonicalPath.startsWith(base + File.separator) || canonicalPath == base
+            }
+
+            if (isSafe) {
+                Result.success(file)
+            } else {
+                Result.failure(SecurityException("Invalid output path: Path traversal detected or path outside allowed directories"))
+            }
+        } catch (e: Exception) {
+            Result.failure(SecurityException("Invalid output path", e))
+        }
     }
 }
