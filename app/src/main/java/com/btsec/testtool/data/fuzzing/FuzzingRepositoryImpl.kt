@@ -239,24 +239,52 @@ class FuzzingRepositoryImpl @Inject constructor(
     override fun getFuzzingStatistics(): Flow<FuzzingStatistics> {
         return flow {
             val results = fuzzingResults.value
+
+            // Performance optimization:
+            // Using a single iteration instead of multiple terminal operations
+            // (e.g., sumOf, average, maxByOrNull) to prevent O(k*n) complexity
+            // and reduce intermediate object allocations on large datasets.
+            var totalPacketsSent = 0L
+            var totalPacketsReceived = 0L
+            var totalErrors = 0L
+            var totalFindings = 0L
+            var totalSuccessRate = 0.0
+            var minStartTime: Instant? = null
+            var maxEndTime: Instant? = null
+
+            results.forEach { result ->
+                totalPacketsSent += result.packetsSent
+                totalPacketsReceived += result.packetsReceived
+                totalErrors += result.errors.size
+                totalFindings += result.findings.size
+                totalSuccessRate += result.getSuccessRate()
+
+                if (minStartTime == null || result.startTime.isBefore(minStartTime)) {
+                    minStartTime = result.startTime
+                }
+
+                val resultEndTime = result.endTime ?: result.startTime
+                if (maxEndTime == null || resultEndTime.isAfter(maxEndTime)) {
+                    maxEndTime = resultEndTime
+                }
+            }
+
             emit(FuzzingStatistics(
                 totalTests = results.size,
-                totalPacketsSent = results.sumOf { it.packetsSent }.toLong(),
-                totalPacketsReceived = results.sumOf { it.packetsReceived }.toLong(),
-                totalErrors = results.sumOf { it.errors.size }.toLong(),
-                totalFindings = results.sumOf { it.findings.size }.toLong(),
+                totalPacketsSent = totalPacketsSent,
+                totalPacketsReceived = totalPacketsReceived,
+                totalErrors = totalErrors,
+                totalFindings = totalFindings,
                 criticalFindings = 0,
                 highFindings = 0,
                 mediumFindings = 0,
                 lowFindings = 0,
-                averageSuccessRate = if (results.isNotEmpty()) {
-                    results.map { it.getSuccessRate() }.average()
-                } else 0.0,
+                averageSuccessRate = if (results.isNotEmpty()) totalSuccessRate / results.size else 0.0,
                 mostTestedDevice = null,
                 mostVulnerableDevice = null,
                 dateRange = DateRange(
-                    start = results.minByOrNull { it.startTime }?.startTime ?: Instant.now(),
-                    end = results.maxByOrNull { it.endTime ?: it.startTime }?.endTime ?: Instant.now()
+                    start = minStartTime ?: Instant.now(),
+                    end = maxEndTime ?: Instant.now()
                 )
             ))
         }
@@ -264,14 +292,32 @@ class FuzzingRepositoryImpl @Inject constructor(
 
     override suspend fun getStatisticsForDevice(deviceAddress: String): DeviceFuzzingStatistics {
         val deviceResults = fuzzingResults.value.filter { it.config.targetDevice.address == deviceAddress }
+
+        // Performance optimization:
+        // Iterate once to aggregate stats and find the maximum start time,
+        // avoiding multiple sumOf and maxByOrNull passes.
+        var packetsSent = 0L
+        var packetsReceived = 0L
+        var findings = 0
+        var maxStartTime: Instant? = null
+
+        deviceResults.forEach { result ->
+            packetsSent += result.packetsSent
+            packetsReceived += result.packetsReceived
+            findings += result.findings.size
+            if (maxStartTime == null || result.startTime.isAfter(maxStartTime)) {
+                maxStartTime = result.startTime
+            }
+        }
+
         return DeviceFuzzingStatistics(
             deviceAddress = deviceAddress,
             deviceName = deviceResults.firstOrNull()?.config?.targetDevice?.name,
             testsPerformed = deviceResults.size,
-            packetsSent = deviceResults.sumOf { it.packetsSent }.toLong(),
-            packetsReceived = deviceResults.sumOf { it.packetsReceived }.toLong(),
-            findings = deviceResults.sumOf { it.findings.size },
-            lastTestDate = deviceResults.maxByOrNull { it.startTime }?.startTime ?: Instant.now(),
+            packetsSent = packetsSent,
+            packetsReceived = packetsReceived,
+            findings = findings,
+            lastTestDate = maxStartTime ?: Instant.now(),
             vulnerabilitiesDiscovered = emptyList()
         )
     }

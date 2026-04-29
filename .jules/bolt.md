@@ -1,0 +1,3 @@
+## 2024-03-24 - Single-pass Collection Iteration Over Multiple Terminal Operations
+**Learning:** Performing multiple terminal operations (e.g., `sumOf`, `maxByOrNull`, `average`) on the same collection iterates over the collection multiple times, leading to O(k*n) complexity where k is the number of operations. This is a noticeable bottleneck for large collections (like logs or results in memory).
+**Action:** Prioritize single-pass iteration using `fold`, `forEach`, or explicit loops to compute all required aggregations simultaneously, reducing complexity to O(n) and preventing redundant iterations and intermediate object allocations.
