@@ -1,0 +1,3 @@
+## 2024-06-25 - Single-Pass Aggregation over Collections
+**Learning:** Found an anti-pattern in Flow/StateFlow state observations where multiple aggregations like `sumOf`, `maxByOrNull`, `minByOrNull`, and `map{}.average()` are chained consecutively over the same collection `fuzzingResults.value`. This triggers multiple O(n) passes and creates intermediate list allocations, which degrades performance especially as data sizes grow.
+**Action:** Always prioritize single-pass iterations using `forEach` (or `fold`) to accumulate metrics in a single traversal over the collection. This avoids redundant passes and intermediate list creation.
