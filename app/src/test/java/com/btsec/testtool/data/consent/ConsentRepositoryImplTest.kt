@@ -440,8 +440,8 @@ class ConsentRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("exportAuditLog should create export file")
-    fun testExportAuditLog() = runTest {
+    @DisplayName("exportAuditLog should create export file with valid path")
+    fun testExportAuditLogValidPath() = runTest {
         val result = repository.exportAuditLog(
             outputPath = "/tmp/audit_log.json",
             format = AuditExportFormat.JSON
@@ -450,5 +450,19 @@ class ConsentRepositoryImplTest {
         assertTrue(result.isSuccess)
         val path = result.getOrNull()
         assertNotNull(path)
+    }
+
+    @Test
+    @DisplayName("exportAuditLog should reject path traversal attempts")
+    fun testExportAuditLogPathTraversal() = runTest {
+        val result = repository.exportAuditLog(
+            outputPath = "/tmp/../../../etc/passwd",
+            format = AuditExportFormat.JSON
+        )
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertTrue(exception is SecurityException)
+        assertTrue(exception?.message?.contains("Path traversal detected") == true)
     }
 }
