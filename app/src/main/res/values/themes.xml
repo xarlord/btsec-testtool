@@ -17,6 +17,5 @@
         <item name="android:textColorSecondary">@color/btsec_on_surface</item>
 
         <!-- Error color -->
-        <item name="android:textColorPrimary">@color/btsec_critical</item>
     </style>
 </resources>

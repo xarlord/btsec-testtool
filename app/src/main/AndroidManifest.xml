@@ -107,17 +107,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Foreground service for background Bluetooth operations -->
-        <service
-            android:name=".service.BluetoothScanService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="connectedDevice">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </service>
-
         <!-- WorkManager worker for background tasks -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
