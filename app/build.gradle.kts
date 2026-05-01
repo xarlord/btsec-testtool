@@ -191,7 +191,7 @@ android {
 
 // Jacoco Test Coverage Configuration
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
+    dependsOn("testDevDebugUnitTest", "testProdDebugUnitTest")
 
     reports {
         xml.required.set(true)
@@ -217,7 +217,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/di/**"
     )
 
-    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/devDebug") {
         exclude(fileFilter)
     }
 
@@ -229,6 +229,49 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     executionData.setFrom(fileTree(buildDir) {
         include(listOf("**/*.exec", "**/*.ec"))
     })
+}
+
+tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+    dependsOn("jacocoTestReport")
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/databinding/**",
+        "**/android/databinding/**",
+        "**/androidx/databinding/**",
+        "**/*_Factory.class",
+        "**/*_MembersInjector.class",
+        "**/Dagger*Component*.*",
+        "**/*Hilt*.*",
+        "**/*DI*.*",
+        "**/di/**"
+    )
+
+    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/devDebug") {
+        exclude(fileFilter)
+    }
+
+    val mainSrc = "${project.projectDir}/src/main/java"
+    val mainKotlinSrc = "${project.projectDir}/src/main/kotlin"
+
+    sourceDirectories.setFrom(files(listOf(mainSrc, mainKotlinSrc)))
+    classDirectories.setFrom(files(listOf(debugTree)))
+    executionData.setFrom(fileTree(buildDir) {
+        include(listOf("**/*.exec", "**/*.ec"))
+    })
+
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
 }
 
 dependencies {
