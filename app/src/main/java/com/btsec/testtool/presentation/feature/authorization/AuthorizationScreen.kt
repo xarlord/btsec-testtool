@@ -9,8 +9,6 @@
 package com.btsec.testtool.presentation.feature.authorization
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
@@ -18,20 +16,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.R
-import com.btsec.testtool.domain.usecase.AuthorizationResult
 import com.btsec.testtool.domain.usecase.AuthorizationUseCase
+import com.btsec.testtool.domain.usecase.AuthorizationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Authorization Screen - Entry point for the application.
@@ -47,7 +48,7 @@ import javax.inject.Inject
 @Composable
 fun AuthorizationScreen(
     viewModel: AuthorizationViewModel = hiltViewModel(),
-    onAuthorized: (String) -> Unit,
+    onAuthorized: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -57,7 +58,7 @@ fun AuthorizationScreen(
         isLoading = uiState.isLoading,
         error = uiState.error,
         onAuthIdChanged = viewModel::onAuthIdChanged,
-        onVerifyAuthorization = { viewModel.verifyAuthorization(onAuthorized) },
+        onVerifyAuthorization = { viewModel.verifyAuthorization(onAuthorized) }
     )
 }
 
@@ -68,40 +69,39 @@ private fun AuthorizationContent(
     isLoading: Boolean,
     error: String?,
     onAuthIdChanged: (String) -> Unit,
-    onVerifyAuthorization: () -> Unit,
+    onVerifyAuthorization: () -> Unit
 ) {
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                title = { Text(stringResource(R.string.authorization_title)) },
+                title = { Text(stringResource(R.string.authorization_title)) }
             )
-        },
+        }
     ) { padding ->
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Security,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.error,
+                tint = MaterialTheme.colorScheme.error
             )
 
             Text(
                 text = stringResource(R.string.authorization_title),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineMedium
             )
 
             Text(
                 text = stringResource(R.string.authorization_description),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -115,14 +115,13 @@ private fun AuthorizationContent(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions =
-                    KeyboardActions(
-                        onDone = {
-                            if (authId.isNotBlank() && !isLoading) {
-                                onVerifyAuthorization()
-                            }
-                        },
-                    ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (authId.isNotBlank() && !isLoading) {
+                            onVerifyAuthorization()
+                        }
+                    }
+                )
             )
 
             if (authIdError != null) {
@@ -130,7 +129,7 @@ private fun AuthorizationContent(
                     text = authIdError,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
@@ -138,22 +137,21 @@ private fun AuthorizationContent(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                    ),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = stringResource(R.string.legal_warning_title),
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        color = MaterialTheme.colorScheme.onErrorContainer
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.legal_warning_text),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        color = MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
             }
@@ -163,12 +161,12 @@ private fun AuthorizationContent(
             Button(
                 onClick = onVerifyAuthorization,
                 enabled = authId.isNotBlank() && !isLoading,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
                     Text(stringResource(R.string.authorization_verify))
@@ -180,7 +178,7 @@ private fun AuthorizationContent(
                     text = error,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier.padding(top = 16.dp)
                 )
             }
         }
@@ -191,51 +189,47 @@ private fun AuthorizationContent(
  * ViewModel for the Authorization screen.
  */
 @HiltViewModel
-class AuthorizationViewModel
-    @Inject
-    constructor(
-        private val authorizationUseCase: AuthorizationUseCase,
-    ) : ViewModel() {
-        private val _uiState = MutableStateFlow(AuthorizationUiState())
-        val uiState: StateFlow<AuthorizationUiState> = _uiState.asStateFlow()
+class AuthorizationViewModel @Inject constructor(
+    private val authorizationUseCase: AuthorizationUseCase
+) : ViewModel() {
 
-        fun onAuthIdChanged(authId: String) {
-            _uiState.value =
-                _uiState.value.copy(
-                    authId = authId.uppercase(),
-                    authIdError = null,
-                    error = null,
-                )
-        }
+    private val _uiState = MutableStateFlow(AuthorizationUiState())
+    val uiState: StateFlow<AuthorizationUiState> = _uiState.asStateFlow()
 
-        fun verifyAuthorization(onAuthorized: (String) -> Unit) {
-            val authId = _uiState.value.authId
+    fun onAuthIdChanged(authId: String) {
+        _uiState.value = _uiState.value.copy(
+            authId = authId.uppercase(),
+            authIdError = null,
+            error = null
+        )
+    }
 
-            _uiState.value = _uiState.value.copy(isLoading = true)
+    fun verifyAuthorization(onAuthorized: (String) -> Unit) {
+        val authId = _uiState.value.authId
 
-            viewModelScope.launch {
-                when (val result = authorizationUseCase.verifyAuthorization(authId)) {
-                    is AuthorizationResult.Success -> {
-                        _uiState.value =
-                            _uiState.value.copy(
-                                isLoading = false,
-                                authId = authId,
-                                authIdError = null,
-                                error = null,
-                            )
-                        onAuthorized(authId)
-                    }
-                    is AuthorizationResult.Error -> {
-                        _uiState.value =
-                            _uiState.value.copy(
-                                isLoading = false,
-                                error = result.message,
-                            )
-                    }
+        _uiState.value = _uiState.value.copy(isLoading = true)
+
+        viewModelScope.launch {
+            when (val result = authorizationUseCase.verifyAuthorization(authId)) {
+                is AuthorizationResult.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        authId = authId,
+                        authIdError = null,
+                        error = null
+                    )
+                    onAuthorized(authId)
+                }
+                is AuthorizationResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = result.message
+                    )
                 }
             }
         }
     }
+}
 
 /**
  * UI state for the Authorization screen.
@@ -244,5 +238,5 @@ data class AuthorizationUiState(
     val authId: String = "",
     val authIdError: String? = null,
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: String? = null
 )
