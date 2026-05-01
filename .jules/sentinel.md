@@ -1,0 +1,4 @@
+## 2024-05-28 - Unsanitized Export File Path Vulnerability
+**Vulnerability:** Found Path Traversal vulnerability in ConsentRepositoryImpl's `exportAuditLog` where `File(outputPath)` directly instantiated files based on raw string input, potentially writing outside application's authorized sandbox.
+**Learning:** `File(outputPath)` alone does not check if an input string is within a safe directory even if intended to be locally restricted. This vulnerability existed due to incomplete input validation when adopting export functionality.
+**Prevention:** To prevent path traversal vulnerabilities during file generation (like exports), always resolve the `canonicalPath` of user-provided paths and verify they strictly begin with permitted application directories (e.g., `context.filesDir`, `context.cacheDir`, or `/tmp`) before writing, instead of directly passing unsanitized paths to `File()`.
