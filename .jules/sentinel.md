@@ -1,0 +1,4 @@
+## 2026-02-08 - Path Traversal in File Generation
+**Vulnerability:** Found a Path Traversal vulnerability in `ConsentRepositoryImpl.kt` where `exportAuditLog` directly instantiated a `File` object using unsanitized user-provided input (`outputPath`).
+**Learning:** This vulnerability existed because the system implicitly trusted the provided path string during the file export process, allowing potential partial-directory bypasses or traversing outside allowed directories using `../` components.
+**Prevention:** Always resolve the `canonicalPath` of user-provided paths and verify they match an allowed base directory exactly (`canonicalPath == base`) or strictly begin with the directory plus a separator (`canonicalPath.startsWith(base + File.separator)`). Do not pass unsanitized paths directly to `File()`.
