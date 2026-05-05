@@ -1,0 +1,3 @@
+## 2024-05-05 - Avoid Redundant Iteration Operations on Collections
+**Learning:** In Kotlin, using multiple terminal operations like `sumOf`, `average`, `maxByOrNull`, `minByOrNull`, and `filter` consecutively on the same collection results in O(N*k) passes and potential intermediate object allocations, which creates a noticeable performance bottleneck for large datasets (e.g., fuzzing results).
+**Action:** Prioritize a single-pass iteration using `forEach` or `fold` to manually aggregate multiple statistics simultaneously, reducing time complexity to O(N) and eliminating intermediate collection allocations.
