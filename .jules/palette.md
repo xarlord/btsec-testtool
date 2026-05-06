@@ -1,0 +1,3 @@
+## 2025-02-07 - Enhance Text Input UX with Keyboard Actions
+**Learning:** In Jetpack Compose, forms with a single input or a final input in a series often require users to manually tap the submit button after typing, which breaks flow. Configuring `keyboardOptions` (e.g., `imeAction = ImeAction.Done`) and `keyboardActions` (e.g., `onDone`) allows users to submit the form directly from the software keyboard, providing a smoother, more intuitive experience.
+**Action:** Always check `OutlinedTextField` and `TextField` components in forms. Add appropriate `imeAction` and `keyboardActions` configurations to enable keyboard-driven submissions where logical.
