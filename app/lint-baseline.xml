@@ -1,0 +1,4826 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.2.1" type="baseline" client="gradle" dependencies="false" name="AGP (8.2.1)" variant="all" version="8.2.1">
+
+    <issue
+        id="StopShip"
+        message="`TODO` call found; points to code which must be fixed prior to release"
+        errorLine1="            TODO(&quot;Implement FuzzerScreen&quot;)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/presentation/navigation/Navigation.kt"
+            line="108"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StopShip"
+        message="`TODO` call found; points to code which must be fixed prior to release"
+        errorLine1="            TODO(&quot;Implement KeyExtractionScreen&quot;)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/presentation/navigation/Navigation.kt"
+            line="115"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StopShip"
+        message="`TODO` call found; points to code which must be fixed prior to release"
+        errorLine1="            TODO(&quot;Implement VulnScannerScreen&quot;)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/presentation/navigation/Navigation.kt"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StopShip"
+        message="`TODO` call found; points to code which must be fixed prior to release"
+        errorLine1="            TODO(&quot;Implement ReportsScreen&quot;)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/presentation/navigation/Navigation.kt"
+            line="129"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="        bluetoothAdapter?.bluetoothLeScanner?.stopScan(object : ScanCallback() {})"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="160"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="        currentGatt?.disconnect()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="210"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="        currentGatt?.close()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="211"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                    gatt.discoverServices()"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="233"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="        return if (gatt.requestMtu(mtu)) {"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="341"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="            val state = when (device?.bondState) {"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="390"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="MissingClass"
+        message="Class referenced in the manifest, `com.btsec.testtool.service.BluetoothScanService`, was not found in the project or the libraries"
+        errorLine1="            android:name=&quot;.service.BluetoothScanService&quot;"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="112"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="DuplicateDefinition"
+        message="`android:textColorPrimary` has already been defined in this `&lt;style>`"
+        errorLine1="        &lt;item name=&quot;android:textColorPrimary&quot;>@color/btsec_critical&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="20"
+            column="15"/>
+        <location
+            file="src/main/res/values/themes.xml"
+            line="16"
+            column="9"
+            message="Previously defined here"/>
+    </issue>
+
+    <issue
+        id="InvalidPackage"
+        message="Invalid package reference in org.bouncycastle:bcpkix-jdk15on; not included in Android: `javax.naming.directory`. Referenced from `org.bouncycastle.cert.dane.fetcher.JndiDANEFetcherFactory`.">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.bouncycastle/bcpkix-jdk15on/1.70/f81e5af49571a9d5a109a88f239a73ce87055417/bcpkix-jdk15on-1.70.jar"/>
+    </issue>
+
+    <issue
+        id="InvalidPackage"
+        message="Invalid package reference in org.bouncycastle:bcpkix-jdk15on; not included in Android: `javax.naming`. Referenced from `org.bouncycastle.cert.dane.fetcher.JndiDANEFetcherFactory.1`.">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.bouncycastle/bcpkix-jdk15on/1.70/f81e5af49571a9d5a109a88f239a73ce87055417/bcpkix-jdk15on-1.70.jar"/>
+    </issue>
+
+    <issue
+        id="InvalidPackage"
+        message="Invalid package reference in com.itextpdf:kernel; not included in Android: `java.awt.image`. Referenced from `com.itextpdf.kernel.pdf.xobject.PdfImageXObject`.">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/com.itextpdf/kernel/7.2.5/379e375318afd5c979f9636e37b0da4b0a5cabac/kernel-7.2.5.jar"/>
+    </issue>
+
+    <issue
+        id="InvalidPackage"
+        message="Invalid package reference in com.itextpdf:kernel; not included in Android: `java.awt`. Referenced from `com.itextpdf.kernel.colors.DeviceRgb`.">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/com.itextpdf/kernel/7.2.5/379e375318afd5c979f9636e37b0da4b0a5cabac/kernel-7.2.5.jar"/>
+    </issue>
+
+    <issue
+        id="InvalidPackage"
+        message="Invalid package reference in com.itextpdf:kernel; not included in Android: `javax.imageio`. Referenced from `com.itextpdf.kernel.pdf.xobject.PdfImageXObject`.">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/com.itextpdf/kernel/7.2.5/379e375318afd5c979f9636e37b0da4b0a5cabac/kernel-7.2.5.jar"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        val now = Instant.now()"
+        errorLine2="                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/model/AuthorizationModels.kt"
+            line="93"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return now in validFrom..validUntil"
+        errorLine2="               ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/model/AuthorizationModels.kt"
+            line="94"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return now in validFrom..validUntil"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/model/AuthorizationModels.kt"
+            line="94"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return now in validFrom..validUntil"
+        errorLine2="                                 ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/model/AuthorizationModels.kt"
+            line="94"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        val now = Instant.now()"
+        errorLine2="                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/authorization/AuthorizationRepositoryImpl.kt"
+            line="155"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="            validUntil = now.plusSeconds(86400 * 30),  // 30 days"
+        errorLine2="                             ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/authorization/AuthorizationRepositoryImpl.kt"
+            line="168"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="            disclosureDeadline = now.plusSeconds(86400 * 90),  // 90 days"
+        errorLine2="                                     ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/authorization/AuthorizationRepositoryImpl.kt"
+            line="171"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="            expiresAt = now.plusSeconds(86400 * 365),  // 1 year"
+        errorLine2="                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/authorization/AuthorizationRepositoryImpl.kt"
+            line="182"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="        if (authorization.expiresAt.isBefore(Instant.now())) {"
+        errorLine2="                                    ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="51"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        if (authorization.expiresAt.isBefore(Instant.now())) {"
+        errorLine2="                                                     ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="51"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        val now = Instant.now()"
+        errorLine2="                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="216"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="        return now in validFrom..validUntil &amp;&amp; now.isBefore(expiresAt)"
+        errorLine2="                                                   ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="217"
+            column="52"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return now in validFrom..validUntil &amp;&amp; now.isBefore(expiresAt)"
+        errorLine2="               ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="217"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return now in validFrom..validUntil &amp;&amp; now.isBefore(expiresAt)"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="217"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return now in validFrom..validUntil &amp;&amp; now.isBefore(expiresAt)"
+        errorLine2="                                 ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="217"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#between`"
+        errorLine1="        return java.time.Duration.between(Instant.now(), validUntil)"
+        errorLine2="                                  ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="224"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        return java.time.Duration.between(Instant.now(), validUntil)"
+        errorLine2="                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="224"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="        return java.time.Duration.between(Instant.now(), validUntil)"
+        errorLine2="                                          ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="224"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="        return java.time.Duration.between(Instant.now(), validUntil)"
+        errorLine2="                                                         ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/AuthorizationUseCase.kt"
+            line="224"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#between`"
+        errorLine1="            java.time.Duration.between(startTime, endTime)"
+        errorLine2="                               ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/model/BluetoothModels.kt"
+            line="318"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="            java.time.Duration.between(startTime, endTime)"
+        errorLine2="                                       ~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/model/BluetoothModels.kt"
+            line="318"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="            java.time.Duration.between(startTime, endTime)"
+        errorLine2="                                                  ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/model/BluetoothModels.kt"
+            line="318"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `android.bluetooth.le.ScanResult#getTxPower`"
+        errorLine1="            txPower = result.txPower,"
+        errorLine2="                             ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="481"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            firstSeen = Instant.now(),"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="482"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            lastSeen = Instant.now(),"
+        errorLine2="                               ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="483"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            firstSeen = Instant.now(),"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="504"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            lastSeen = Instant.now(),"
+        errorLine2="                               ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="505"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isAfter`"
+        errorLine1="            .map { devices -> devices.filter { it.lastSeen.isAfter(java.time.Instant.now().minusSeconds(300)) } }"
+        errorLine2="                                                           ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/BluetoothScanningUseCase.kt"
+            line="82"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="            .map { devices -> devices.filter { it.lastSeen.isAfter(java.time.Instant.now().minusSeconds(300)) } }"
+        errorLine2="                                                                                           ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/BluetoothScanningUseCase.kt"
+            line="82"
+            column="92"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            .map { devices -> devices.filter { it.lastSeen.isAfter(java.time.Instant.now().minusSeconds(300)) } }"
+        errorLine2="                                                                                     ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/BluetoothScanningUseCase.kt"
+            line="82"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now(),"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="50"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return consentRecords.map { it.filter { it.timestamp in start..end } }"
+        errorLine2="                                                ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="100"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return consentRecords.map { it.filter { it.timestamp in start..end } }"
+        errorLine2="                                                                ~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="100"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return consentRecords.map { it.filter { it.timestamp in start..end } }"
+        errorLine2="                                                                       ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="100"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="        val filtered = consentRecords.value.filter { it.timestamp.isBefore(beforeDate) }"
+        errorLine2="                                                                  ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="147"
+            column="67"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="        val remaining = consentRecords.value.filter { !it.timestamp.isBefore(beforeDate) }"
+        errorLine2="                                                                    ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="148"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now(),"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="163"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return auditLogs.map { it.filter { it.timestamp in start..end } }"
+        errorLine2="                                           ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="182"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return auditLogs.map { it.filter { it.timestamp in start..end } }"
+        errorLine2="                                                           ~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="182"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return auditLogs.map { it.filter { it.timestamp in start..end } }"
+        errorLine2="                                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="182"
+            column="67"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    start = logs.minByOrNull { it.timestamp }?.timestamp ?: Instant.now(),"
+        errorLine2="                                                                                    ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="206"
+            column="85"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    end = logs.maxByOrNull { it.timestamp }?.timestamp ?: Instant.now()"
+        errorLine2="                                                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="207"
+            column="83"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            firstOperation = logs.minByOrNull { it.timestamp }?.timestamp ?: Instant.now(),"
+        errorLine2="                                                                                     ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="226"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            lastOperation = logs.maxByOrNull { it.timestamp }?.timestamp ?: Instant.now(),"
+        errorLine2="                                                                                    ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="227"
+            column="85"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="        val sevenYearsAgo = Instant.now().minusSeconds(86400 * 365 * 7)"
+        errorLine2="                                          ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="252"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        val sevenYearsAgo = Instant.now().minusSeconds(86400 * 365 * 7)"
+        errorLine2="                                    ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="252"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="        return consentRecords.value.count { it.timestamp.isBefore(sevenYearsAgo) }"
+        errorLine2="                                                         ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="253"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            val now = Instant.now()"
+        errorLine2="                              ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="258"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="            val oneYear = now.minusSeconds(86400 * 365)"
+        errorLine2="                              ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="259"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="            val threeYears = now.minusSeconds(86400 * 365 * 3)"
+        errorLine2="                                 ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="260"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="            val sevenYears = now.minusSeconds(86400 * 365 * 7)"
+        errorLine2="                                 ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="261"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isAfter`"
+        errorLine1="                recordsUnderOneYear = records.count { it.timestamp.isAfter(oneYear) }.toLong(),"
+        errorLine2="                                                                   ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="266"
+            column="68"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isAfter`"
+        errorLine1="                    it.timestamp.isAfter(threeYears) &amp;&amp; it.timestamp.isBefore(oneYear)"
+        errorLine2="                                 ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="268"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="                    it.timestamp.isAfter(threeYears) &amp;&amp; it.timestamp.isBefore(oneYear)"
+        errorLine2="                                                                     ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="268"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isAfter`"
+        errorLine1="                    it.timestamp.isAfter(sevenYears) &amp;&amp; it.timestamp.isBefore(threeYears)"
+        errorLine2="                                 ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="271"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="                    it.timestamp.isAfter(sevenYears) &amp;&amp; it.timestamp.isBefore(threeYears)"
+        errorLine2="                                                                     ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="271"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#isBefore`"
+        errorLine1="                recordsOverSevenYears = records.count { it.timestamp.isBefore(sevenYears) }.toLong(),"
+        errorLine2="                                                                     ~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="273"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        val logs = auditLogs.value.filter { it.timestamp in startDate..endDate }"
+        errorLine2="                                            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="284"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        val logs = auditLogs.value.filter { it.timestamp in startDate..endDate }"
+        errorLine2="                                                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="284"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        val logs = auditLogs.value.filter { it.timestamp in startDate..endDate }"
+        errorLine2="                                                                       ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="284"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            generatedAt = Instant.now(),"
+        errorLine2="                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="288"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="            consentRecords = consentRecords.value.count { it.timestamp in startDate..endDate },"
+        errorLine2="                                                          ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="290"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="            consentRecords = consentRecords.value.count { it.timestamp in startDate..endDate },"
+        errorLine2="                                                                          ~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="290"
+            column="75"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="            consentRecords = consentRecords.value.count { it.timestamp in startDate..endDate },"
+        errorLine2="                                                                                     ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/consent/ConsentRepositoryImpl.kt"
+            line="290"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#between`"
+        errorLine1="        return java.time.Duration.between(startTime, java.time.Instant.now())"
+        errorLine2="                                  ~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/repository/FuzzingRepository.kt"
+            line="230"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        return java.time.Duration.between(startTime, java.time.Instant.now())"
+        errorLine2="                                                                       ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/repository/FuzzingRepository.kt"
+            line="230"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="        return java.time.Duration.between(startTime, java.time.Instant.now())"
+        errorLine2="                                          ~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/repository/FuzzingRepository.kt"
+            line="230"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="        return java.time.Duration.between(startTime, java.time.Instant.now())"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/repository/FuzzingRepository.kt"
+            line="230"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                startTime = Instant.now(),"
+        errorLine2="                                    ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="62"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                estimatedCompletionTime = Instant.now().plusSeconds(config.durationSeconds?.toLong() ?: 300),"
+        errorLine2="                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="63"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                estimatedCompletionTime = Instant.now().plusSeconds(config.durationSeconds?.toLong() ?: 300),"
+        errorLine2="                                                        ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="63"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    startTime = Instant.now(),"
+        errorLine2="                                        ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="81"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    estimatedCompletionTime = Instant.now().plusSeconds(300),"
+        errorLine2="                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="82"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                    estimatedCompletionTime = Instant.now().plusSeconds(300),"
+        errorLine2="                                                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="82"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                startTime = Instant.now(),"
+        errorLine2="                                    ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="94"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                endTime = Instant.now(),"
+        errorLine2="                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="95"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return fuzzingResults.map { results -> results.filter { result -> result.startTime in start..end } }"
+        errorLine2="                                                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="153"
+            column="75"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return fuzzingResults.map { results -> results.filter { result -> result.startTime in start..end } }"
+        errorLine2="                                                                                              ~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="153"
+            column="95"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return fuzzingResults.map { results -> results.filter { result -> result.startTime in start..end } }"
+        errorLine2="                                                                                                     ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="153"
+            column="102"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    start = results.minByOrNull { it.startTime }?.startTime ?: Instant.now(),"
+        errorLine2="                                                                                       ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="258"
+            column="88"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    end = results.maxByOrNull { it.endTime ?: it.startTime }?.endTime ?: Instant.now()"
+        errorLine2="                                                                                                 ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="259"
+            column="98"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            lastTestDate = deviceResults.maxByOrNull { it.startTime }?.startTime ?: Instant.now(),"
+        errorLine2="                                                                                            ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/fuzzing/FuzzingRepositoryImpl.kt"
+            line="274"
+            column="93"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                estimatedCompletionTime = Instant.now().plusSeconds(60),"
+        errorLine2="                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="73"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                estimatedCompletionTime = Instant.now().plusSeconds(60),"
+        errorLine2="                                                        ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="73"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    estimatedCompletionTime = Instant.now().plusSeconds(30),"
+        errorLine2="                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="88"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                    estimatedCompletionTime = Instant.now().plusSeconds(30),"
+        errorLine2="                                                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="88"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                timestamp = Instant.now(),"
+        errorLine2="                                    ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="102"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                estimatedCompletionTime = Instant.now(),"
+        errorLine2="                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="115"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            analysisDate = Instant.now(),"
+        errorLine2="                                   ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="176"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    start = results.minByOrNull { it.timestamp }?.timestamp ?: Instant.now(),"
+        errorLine2="                                                                                       ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="283"
+            column="88"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    end = results.maxByOrNull { it.timestamp }?.timestamp ?: Instant.now()"
+        errorLine2="                                                                                     ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="284"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            lastExtractionDate = deviceResults.maxByOrNull { it.timestamp }?.timestamp ?: Instant.now()"
+        errorLine2="                                                                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/keyextraction/KeyExtractionRepositoryImpl.kt"
+            line="298"
+            column="99"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            analysisDate = java.time.Instant.now(),"
+        errorLine2="                                             ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/KeyExtractionUseCase.kt"
+            line="327"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                        estimatedCompletionTime = Instant.now().plusSeconds(30),"
+        errorLine2="                                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="70"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                        estimatedCompletionTime = Instant.now().plusSeconds(30),"
+        errorLine2="                                                                ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="70"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                            estimatedCompletionTime = Instant.now().plusSeconds(15),"
+        errorLine2="                                                              ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="84"
+            column="63"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                            estimatedCompletionTime = Instant.now().plusSeconds(15),"
+        errorLine2="                                                                    ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="84"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                        generatedAt = Instant.now(),"
+        errorLine2="                                              ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="96"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="                        testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                                ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="97"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                        testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="97"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                        testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                                                             ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="97"
+            column="94"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                        estimatedCompletionTime = Instant.now(),"
+        errorLine2="                                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="124"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    generatedAt = Instant.now(),"
+        errorLine2="                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="140"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="141"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="141"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                                                         ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="141"
+            column="90"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    generatedAt = Instant.now(),"
+        errorLine2="                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="171"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="172"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="172"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                                                         ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="172"
+            column="90"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    generatedAt = Instant.now(),"
+        errorLine2="                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="202"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="203"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="203"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                                                         ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="203"
+            column="90"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    generatedAt = Instant.now(),"
+        errorLine2="                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="233"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minusSeconds`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="234"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="234"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),"
+        errorLine2="                                                                                         ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="234"
+            column="90"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="            return reports.map { it.filter { it.generatedAt in start..end } }"
+        errorLine2="                                             ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="284"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="            return reports.map { it.filter { it.generatedAt in start..end } }"
+        errorLine2="                                                               ~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="284"
+            column="64"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="            return reports.map { it.filter { it.generatedAt in start..end } }"
+        errorLine2="                                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="284"
+            column="71"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                                start = allReports.minByOrNull { it.generatedAt }?.generatedAt ?: Instant.now(),"
+        errorLine2="                                                                                                          ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="410"
+            column="107"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                                end = allReports.maxByOrNull { it.generatedAt }?.generatedAt ?: Instant.now(),"
+        errorLine2="                                                                                                        ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/report/ReportRepositoryImpl.kt"
+            line="411"
+            column="105"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                startTime = Instant.now(),"
+        errorLine2="                                    ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="71"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                estimatedCompletionTime = Instant.now().plusSeconds(60)"
+        errorLine2="                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="72"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                estimatedCompletionTime = Instant.now().plusSeconds(60)"
+        errorLine2="                                                        ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="72"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    startTime = Instant.now(),"
+        errorLine2="                                        ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="86"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    estimatedCompletionTime = Instant.now().plusSeconds(60)"
+        errorLine2="                                                      ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="87"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#plusSeconds`"
+        errorLine1="                    estimatedCompletionTime = Instant.now().plusSeconds(60)"
+        errorLine2="                                                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="87"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return vulnerabilities.map { it.filter { it.discoveredAt in start..end } }"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="156"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return vulnerabilities.map { it.filter { it.discoveredAt in start..end } }"
+        errorLine2="                                                                    ~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="156"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `Comparable` requires API level 26 (current min is 24)"
+        errorLine1="        return vulnerabilities.map { it.filter { it.discoveredAt in start..end } }"
+        errorLine2="                                                                           ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="156"
+            column="76"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="        return flow { emit(Instant.now()) }"
+        errorLine2="                                   ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="205"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    start = vulns.minByOrNull { it.discoveredAt }?.discoveredAt ?: Instant.now(),"
+        errorLine2="                                                                                           ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="235"
+            column="92"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    end = vulns.maxByOrNull { it.discoveredAt }?.discoveredAt ?: Instant.now()"
+        errorLine2="                                                                                         ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="236"
+            column="90"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            lastScanDate = deviceVulns.maxByOrNull { it.discoveredAt }?.discoveredAt ?: Instant.now()"
+        errorLine2="                                                                                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="253"
+            column="97"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="277"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="289"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="301"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="313"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="324"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="335"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="346"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="            timestamp = Instant.now()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/vulnerability/VulnerabilityRepositoryImpl.kt"
+            line="357"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    timestamp = java.time.Instant.now()"
+        errorLine2="                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/VulnerabilityScanningUseCase.kt"
+            line="214"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                    timestamp = java.time.Instant.now()"
+        errorLine2="                                                  ~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/domain/usecase/VulnerabilityScanningUseCase.kt"
+            line="240"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="ForegroundServicePermission"
+        message="foregroundServiceType:dataSync requires permission:[android.permission.FOREGROUND_SERVICE_DATA_SYNC]"
+        errorLine1="        &lt;service"
+        errorLine2="        ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="122"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.accompanist:accompanist-permissions than 0.32.0 is available: 0.37.3"
+        errorLine1="    implementation(&quot;com.google.accompanist:accompanist-permissions:${Versions.accompanist}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="264"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.accompanist:accompanist-systemuicontroller than 0.32.0 is available: 0.36.0"
+        errorLine1="    implementation(&quot;com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="265"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.accompanist:accompanist-swiperefresh than 0.32.0 is available: 0.36.0"
+        errorLine1="    implementation(&quot;com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="266"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.accompanist:accompanist-flowlayout than 0.32.0 is available: 0.36.0"
+        errorLine1="    implementation(&quot;com.google.accompanist:accompanist-flowlayout:${Versions.accompanist}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="267"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.dagger:hilt-android than 2.48.1 is available: 2.56.2"
+        errorLine1="    implementation(&quot;com.google.dagger:hilt-android:${Versions.hilt}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="270"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-android than 1.7.3 is available: 1.10.2"
+        errorLine1="    implementation(&quot;org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="275"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-jdk8 than 1.7.3 is available: 1.10.2"
+        errorLine1="    implementation(&quot;org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.kotlinCoroutines}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="277"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.squareup.retrofit2:retrofit than 2.9.0 is available: 3.0.0"
+        errorLine1="    implementation(&quot;com.squareup.retrofit2:retrofit:${Versions.retrofit}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="308"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.protobuf:protobuf-kotlin-lite than 3.25.1 is available: 4.31.1"
+        errorLine1="    implementation(&quot;com.google.protobuf:protobuf-kotlin-lite:${Versions.protobufKotlinLite}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="312"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.itextpdf:kernel than 7.2.5 is available: 9.2.0"
+        errorLine1="    implementation(&quot;com.itextpdf:kernel:${Versions.iText7}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="315"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.itextpdf:io than 7.2.5 is available: 9.2.0"
+        errorLine1="    implementation(&quot;com.itextpdf:io:${Versions.iText7}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="316"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.itextpdf:layout than 7.2.5 is available: 9.2.0"
+        errorLine1="    implementation(&quot;com.itextpdf:layout:${Versions.iText7}&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="317"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.squareup.leakcanary:leakcanary-android than 2.12 is available: 2.14"
+        errorLine1="    debugImplementation(&quot;com.squareup.leakcanary:leakcanary-android:${Versions.leakCanary}&quot;)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="323"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.junit.jupiter:junit-jupiter than 5.10.1 is available: 5.12.2"
+        errorLine1="    testImplementation(&quot;org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="326"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.truth:truth than 1.1.5 is available: 1.4.4"
+        errorLine1="    testImplementation(&quot;com.google.truth:truth:${Versions.truth}&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="330"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.robolectric:robolectric than 4.11.1 is available: 4.15.1"
+        errorLine1="    testImplementation(&quot;org.robolectric:robolectric:${Versions.robolectric}&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="331"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.dagger:hilt-android-testing than 2.48.1 is available: 2.56.2"
+        errorLine1="    androidTestImplementation(&quot;com.google.dagger:hilt-android-testing:${Versions.hilt}&quot;)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="337"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of io.mockk:mockk-android than 1.13.8 is available: 1.14.3"
+        errorLine1="    androidTestImplementation(&quot;io.mockk:mockk-android:${Versions.mockk}&quot;)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="339"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;devices&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;dashboard_scope&quot;>Scope: %1$d devices&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="30"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;devices&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;scanner_devices_found&quot;>%1$d devices found&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="45"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;vulnerabilities&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;vuln_found&quot;>%1$d vulnerabilities found&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="67"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="TrustAllX509TrustManager"
+        message="`checkClientTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.bouncycastle/bcpkix-jdk15on/1.70/f81e5af49571a9d5a109a88f239a73ce87055417/bcpkix-jdk15on-1.70.jar"/>
+    </issue>
+
+    <issue
+        id="TrustAllX509TrustManager"
+        message="`checkClientTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.bouncycastle/bcpkix-jdk15on/1.70/f81e5af49571a9d5a109a88f239a73ce87055417/bcpkix-jdk15on-1.70.jar"/>
+    </issue>
+
+    <issue
+        id="TrustAllX509TrustManager"
+        message="`checkServerTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="$GRADLE_USER_HOME/caches/modules-2/files-2.1/org.bouncycastle/bcpkix-jdk15on/1.70/f81e5af49571a9d5a109a88f239a73ce87055417/bcpkix-jdk15on-1.70.jar"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 24"
+        errorLine1="            currentGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="190"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_primary_light` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_primary_light&quot;>#4C8C52&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="6"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_secondary_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_secondary_dark&quot;>#015F8F&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="10"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_secondary_light` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_secondary_light&quot;>#4FC3F7&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="11"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_accent` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_accent&quot;>#FF6D00&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="14"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_accent_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_accent_dark&quot;>#E65100&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="15"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_accent_light` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_accent_light&quot;>#FF9E40&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="16"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_high` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_high&quot;>#F57C00&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="20"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_medium` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_medium&quot;>#FBC02D&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="21"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_low` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_low&quot;>#388E3C&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="22"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_info` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_info&quot;>#1976D2&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="23"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.status_success` appears to be unused"
+        errorLine1="    &lt;color name=&quot;status_success&quot;>#4CAF50&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="26"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.status_warning` appears to be unused"
+        errorLine1="    &lt;color name=&quot;status_warning&quot;>#FF9800&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="27"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.status_error` appears to be unused"
+        errorLine1="    &lt;color name=&quot;status_error&quot;>#F44336&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="28"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.status_info` appears to be unused"
+        errorLine1="    &lt;color name=&quot;status_info&quot;>#2196F3&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="29"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_background_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_background_dark&quot;>#121212&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="33"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_surface` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_surface&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="34"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_surface_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_surface_dark&quot;>#1E1E1E&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="35"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_surface_variant` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_surface_variant&quot;>#E0E0E0&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="36"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_surface_variant_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_surface_variant_dark&quot;>#2D2D2D&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="37"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_on_primary` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_on_primary&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="40"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_on_secondary` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_on_secondary&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="41"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_on_background_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_on_background_dark&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="43"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_on_surface_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_on_surface_dark&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="45"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_on_surface_variant` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_on_surface_variant&quot;>#000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="46"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_on_surface_variant_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_on_surface_variant_dark&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="47"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_outline` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_outline&quot;>#B0B0B0&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="50"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_outline_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_outline_dark&quot;>#404040&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="51"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_scrim` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_scrim&quot;>#80000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="54"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.btsec_scrim_background` appears to be unused"
+        errorLine1="    &lt;color name=&quot;btsec_scrim_background&quot;>#60000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="55"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.rssi_excellent` appears to be unused"
+        errorLine1="    &lt;color name=&quot;rssi_excellent&quot;>#4CAF50&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="58"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.rssi_good` appears to be unused"
+        errorLine1="    &lt;color name=&quot;rssi_good&quot;>#8BC34A&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="59"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.rssi_fair` appears to be unused"
+        errorLine1="    &lt;color name=&quot;rssi_fair&quot;>#FFC107&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="60"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.rssi_weak` appears to be unused"
+        errorLine1="    &lt;color name=&quot;rssi_weak&quot;>#FF5722&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="61"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.transparent` appears to be unused"
+        errorLine1="    &lt;color name=&quot;transparent&quot;>#00000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="64"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.white` appears to be unused"
+        errorLine1="    &lt;color name=&quot;white&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="65"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.black` appears to be unused"
+        errorLine1="    &lt;color name=&quot;black&quot;>#000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="66"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_50` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_50&quot;>#FAFAFA&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="67"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_100` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_100&quot;>#F5F5F5&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="68"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_200` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_200&quot;>#EEEEEE&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="69"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_300` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_300&quot;>#E0E0E0&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="70"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_400` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_400&quot;>#BDBDBD&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="71"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_500` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_500&quot;>#9E9E9E&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="72"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_600` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_600&quot;>#757575&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="73"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_700` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_700&quot;>#616161&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="74"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_800` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_800&quot;>#424242&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="75"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.gray_900` appears to be unused"
+        errorLine1="    &lt;color name=&quot;gray_900&quot;>#212121&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="76"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.authorization_subtitle` appears to be unused"
+        errorLine1="    &lt;string name=&quot;authorization_subtitle&quot;>Bluetooth Security Testing Tool&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.authorization_verifying` appears to be unused"
+        errorLine1="    &lt;string name=&quot;authorization_verifying&quot;>Verifying…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.authorization_success` appears to be unused"
+        errorLine1="    &lt;string name=&quot;authorization_success&quot;>Authorization verified&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.authorization_failed` appears to be unused"
+        errorLine1="    &lt;string name=&quot;authorization_failed&quot;>Authorization failed&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.authorization_invalid_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;authorization_invalid_format&quot;>Invalid format. Expected: BTSEC-YYYYMMDD-XXXXXXXX&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.authorization_expired` appears to be unused"
+        errorLine1="    &lt;string name=&quot;authorization_expired&quot;>Authorization has expired&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.authorization_not_found` appears to be unused"
+        errorLine1="    &lt;string name=&quot;authorization_not_found&quot;>Authorization not found&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.legal_unauthorized_warning` appears to be unused"
+        errorLine1="    &lt;string name=&quot;legal_unauthorized_warning&quot;>Unauthorized testing is illegal and can result in:\n• Criminal prosecution\n• Civil liability\n• Professional sanctions&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.legal_understand` appears to be unused"
+        errorLine1="    &lt;string name=&quot;legal_understand&quot;>I Understand - Continue&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.dashboard_welcome` appears to be unused"
+        errorLine1="    &lt;string name=&quot;dashboard_welcome&quot;>Welcome, %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.dashboard_auth_id` appears to be unused"
+        errorLine1="    &lt;string name=&quot;dashboard_auth_id&quot;>Authorization: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="28"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.dashboard_expires` appears to be unused"
+        errorLine1="    &lt;string name=&quot;dashboard_expires&quot;>Expires: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.dashboard_scope` appears to be unused"
+        errorLine1="    &lt;string name=&quot;dashboard_scope&quot;>Scope: %1$d devices&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.nav_settings` appears to be unused"
+        errorLine1="    &lt;string name=&quot;nav_settings&quot;>Settings&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.scanner_scanning` appears to be unused"
+        errorLine1="    &lt;string name=&quot;scanner_scanning&quot;>Scanning…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.scanner_permission_required` appears to be unused"
+        errorLine1="    &lt;string name=&quot;scanner_permission_required&quot;>Location permission required for scanning&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.scanner_bluetooth_disabled` appears to be unused"
+        errorLine1="    &lt;string name=&quot;scanner_bluetooth_disabled&quot;>Bluetooth is disabled&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="48"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.scanner_bluetooth_unavailable` appears to be unused"
+        errorLine1="    &lt;string name=&quot;scanner_bluetooth_unavailable&quot;>Bluetooth not available on this device&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_name&quot;>Name: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_address` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_address&quot;>Address: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_type` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_type&quot;>Type: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="54"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_rssi` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_rssi&quot;>Signal: %1$d dBm&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="55"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_paired` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_paired&quot;>Paired&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="56"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_not_paired` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_not_paired&quot;>Not paired&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="57"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_connect` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_connect&quot;>Connect&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="58"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_disconnect` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_disconnect&quot;>Disconnect&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_test` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_test&quot;>Test Device&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="60"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_title&quot;>Vulnerability Scanner&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="63"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_scan_device` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_scan_device&quot;>Scan Device&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="64"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_scanning` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_scanning&quot;>Scanning for vulnerabilities…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="65"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_complete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_complete&quot;>Scan complete&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="66"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_found` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_found&quot;>%1$d vulnerabilities found&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="67"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_none` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_none&quot;>No vulnerabilities found&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="68"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_critical` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_critical&quot;>Critical&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="69"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_high` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_high&quot;>High&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="70"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_medium` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_medium&quot;>Medium&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="71"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_low` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_low&quot;>Low&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="72"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_info` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_info&quot;>Info&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="73"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_cvss` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_cvss&quot;>CVSS: %1$.1f&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="74"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_exploitable` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_exploitable&quot;>Exploitable&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="75"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_not_exploitable` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_not_exploitable&quot;>Not exploitable&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="76"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.vuln_remediation` appears to be unused"
+        errorLine1="    &lt;string name=&quot;vuln_remediation&quot;>Remediation: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="77"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_title&quot;>Fuzzing Engine&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="80"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_configure` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_configure&quot;>Configure Fuzzing&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="81"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_start` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_start&quot;>Start Fuzzing&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="82"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_stop` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_stop&quot;>Stop Fuzzing&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="83"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_pause` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_pause&quot;>Pause&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="84"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_resume` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_resume&quot;>Resume&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="85"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_running` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_running&quot;>Fuzzing…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="86"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_complete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_complete&quot;>Fuzzing complete&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="87"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_packets_sent` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_packets_sent&quot;>Packets sent: %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="88"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_crashes` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_crashes&quot;>Crashes: %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="89"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_anomalies` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_anomalies&quot;>Anomalies: %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="90"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_rate` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_rate&quot;>Rate: %1$d pps&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="91"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_protocol` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_protocol&quot;>Protocol&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="92"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_mutation` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_mutation&quot;>Mutation&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="93"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_duration` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_duration&quot;>Duration&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="94"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_max_packets` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_max_packets&quot;>Max packets&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="95"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.fuzzer_stop_on_crash` appears to be unused"
+        errorLine1="    &lt;string name=&quot;fuzzer_stop_on_crash&quot;>Stop on crash&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="96"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_title&quot;>Key Extraction&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="99"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_analyze` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_analyze&quot;>Analyze Keys&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="100"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_analyzing` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_analyzing&quot;>Analyzing key material…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="101"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_complete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_complete&quot;>Analysis complete&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="102"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_found` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_found&quot;>Keys found: %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="103"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_none` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_none&quot;>No keys extracted&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="104"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_irk` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_irk&quot;>IRK&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="105"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_ltk` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_ltk&quot;>LTK&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="106"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_csrk` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_csrk&quot;>CSRK&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="107"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_link` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_link&quot;>Link Key&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="108"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_entropy` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_entropy&quot;>Entropy: %1$.2f bits&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="109"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_strength` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_strength&quot;>Strength: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="110"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_strong` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_strong&quot;>Strong&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="111"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_weak` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_weak&quot;>Weak&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="112"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.keys_unknown` appears to be unused"
+        errorLine1="    &lt;string name=&quot;keys_unknown&quot;>Unknown&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="113"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_title&quot;>Reports&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="116"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_generate` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_generate&quot;>Generate Report&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_view` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_view&quot;>View Report&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="118"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_delete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_delete&quot;>Delete&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="119"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_export` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_export&quot;>Export&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="120"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_share` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_share&quot;>Share&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="121"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_no_reports` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_no_reports&quot;>No reports yet&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_date` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_date&quot;>%1$s at %2$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="123"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_device` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_device&quot;>Device: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="124"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reports_type` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reports_type&quot;>Type: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="125"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.report_executive` appears to be unused"
+        errorLine1="    &lt;string name=&quot;report_executive&quot;>Executive Summary&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="128"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.report_technical` appears to be unused"
+        errorLine1="    &lt;string name=&quot;report_technical&quot;>Technical Report&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="129"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.report_vulnerabilities` appears to be unused"
+        errorLine1="    &lt;string name=&quot;report_vulnerabilities&quot;>Vulnerability Report&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="130"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.report_keys` appears to be unused"
+        errorLine1="    &lt;string name=&quot;report_keys&quot;>Key Analysis Report&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="131"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.report_fuzzing` appears to be unused"
+        errorLine1="    &lt;string name=&quot;report_fuzzing&quot;>Fuzzing Report&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="132"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_title&quot;>Settings&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="135"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_general` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_general&quot;>General&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="136"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_scanner` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_scanner&quot;>Scanner Settings&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="137"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_fuzzer` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_fuzzer&quot;>Fuzzer Settings&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="138"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_reports` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_reports&quot;>Report Settings&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="139"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_about` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_about&quot;>About&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="140"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_version` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_version&quot;>Version %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="141"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_license` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_license&quot;>License&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="142"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_privacy` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_privacy&quot;>Privacy Policy&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="143"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings_terms` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings_terms&quot;>Terms of Service&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="144"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_generic` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_generic&quot;>An error occurred&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="147"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_network` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_network&quot;>Network error&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="148"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_bluetooth` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_bluetooth&quot;>Bluetooth error&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="149"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_permission` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_permission&quot;>Permission denied&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="150"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_scope` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_scope&quot;>Scope violation&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="151"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_unauthorized` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_unauthorized&quot;>Unauthorized action&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="152"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_timeout` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_timeout&quot;>Operation timed out&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="153"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_connection_failed` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_connection_failed&quot;>Connection failed&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="154"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.success_scan_complete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;success_scan_complete&quot;>Scan complete&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="157"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.success_report_generated` appears to be unused"
+        errorLine1="    &lt;string name=&quot;success_report_generated&quot;>Report generated&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="158"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.success_exported` appears to be unused"
+        errorLine1="    &lt;string name=&quot;success_exported&quot;>Exported successfully&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="159"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.warning_scope_violation` appears to be unused"
+        errorLine1="    &lt;string name=&quot;warning_scope_violation&quot;>This action is outside your authorized scope&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="162"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.warning_rate_limit` appears to be unused"
+        errorLine1="    &lt;string name=&quot;warning_rate_limit&quot;>Rate limit exceeded&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="163"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.warning_time_constraint` appears to be unused"
+        errorLine1="    &lt;string name=&quot;warning_time_constraint&quot;>Outside authorized time window&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="164"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cancel` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cancel&quot;>Cancel&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="167"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.save` appears to be unused"
+        errorLine1="    &lt;string name=&quot;save&quot;>Save&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="168"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.delete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;delete&quot;>Delete&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="169"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.share` appears to be unused"
+        errorLine1="    &lt;string name=&quot;share&quot;>Share&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="170"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.export` appears to be unused"
+        errorLine1="    &lt;string name=&quot;export&quot;>Export&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="171"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.import_action` appears to be unused"
+        errorLine1="    &lt;string name=&quot;import_action&quot;>Import&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="172"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.confirm` appears to be unused"
+        errorLine1="    &lt;string name=&quot;confirm&quot;>Confirm&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="173"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.close` appears to be unused"
+        errorLine1="    &lt;string name=&quot;close&quot;>Close&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="174"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.done` appears to be unused"
+        errorLine1="    &lt;string name=&quot;done&quot;>Done&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="175"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.retry` appears to be unused"
+        errorLine1="    &lt;string name=&quot;retry&quot;>Retry&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="176"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.loading` appears to be unused"
+        errorLine1="    &lt;string name=&quot;loading&quot;>Loading…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="177"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.search` appears to be unused"
+        errorLine1="    &lt;string name=&quot;search&quot;>Search&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="178"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.filter` appears to be unused"
+        errorLine1="    &lt;string name=&quot;filter&quot;>Filter&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="179"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.sort` appears to be unused"
+        errorLine1="    &lt;string name=&quot;sort&quot;>Sort&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="180"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.refresh` appears to be unused"
+        errorLine1="    &lt;string name=&quot;refresh&quot;>Refresh&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="181"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.more` appears to be unused"
+        errorLine1="    &lt;string name=&quot;more&quot;>More&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="182"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.less` appears to be unused"
+        errorLine1="    &lt;string name=&quot;less&quot;>Less&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="183"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.expand` appears to be unused"
+        errorLine1="    &lt;string name=&quot;expand&quot;>Expand&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="184"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.collapse` appears to be unused"
+        errorLine1="    &lt;string name=&quot;collapse&quot;>Collapse&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="185"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.select_all` appears to be unused"
+        errorLine1="    &lt;string name=&quot;select_all&quot;>Select All&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="186"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.clear_all` appears to be unused"
+        errorLine1="    &lt;string name=&quot;clear_all&quot;>Clear All&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="187"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.apply` appears to be unused"
+        errorLine1="    &lt;string name=&quot;apply&quot;>Apply&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="188"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reset` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reset&quot;>Reset&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="189"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.continue_action` appears to be unused"
+        errorLine1="    &lt;string name=&quot;continue_action&quot;>Continue&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="190"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.back` appears to be unused"
+        errorLine1="    &lt;string name=&quot;back&quot;>Back&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="191"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.next` appears to be unused"
+        errorLine1="    &lt;string name=&quot;next&quot;>Next&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="192"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.previous` appears to be unused"
+        errorLine1="    &lt;string name=&quot;previous&quot;>Previous&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="193"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.finish` appears to be unused"
+        errorLine1="    &lt;string name=&quot;finish&quot;>Finish&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="194"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.yes` appears to be unused"
+        errorLine1="    &lt;string name=&quot;yes&quot;>Yes&lt;/string>"
+        errorLine2="            ~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="195"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.no` appears to be unused"
+        errorLine1="    &lt;string name=&quot;no&quot;>No&lt;/string>"
+        errorLine2="            ~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="196"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.ok` appears to be unused"
+        errorLine1="    &lt;string name=&quot;ok&quot;>OK&lt;/string>"
+        errorLine2="            ~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="197"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_type_ble` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_type_ble&quot;>BLE&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="200"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_type_classic` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_type_classic&quot;>Classic&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="201"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_type_dual` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_type_dual&quot;>Dual Mode&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="202"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_type_unknown` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_type_unknown&quot;>Unknown&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="203"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_class_phone` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_class_phone&quot;>Phone&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="206"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_class_computer` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_class_computer&quot;>Computer&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="207"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_class_audio` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_class_audio&quot;>Audio&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="208"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_class_peripheral` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_class_peripheral&quot;>Peripheral&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="209"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_class_wearable` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_class_wearable&quot;>Wearable&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="210"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_class_vehicle` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_class_vehicle&quot;>Vehicle&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="211"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.device_class_iot` appears to be unused"
+        errorLine1="    &lt;string name=&quot;device_class_iot&quot;>IoT Device&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="212"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.protocol_gatt` appears to be unused"
+        errorLine1="    &lt;string name=&quot;protocol_gatt&quot;>GATT&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="215"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.protocol_smp` appears to be unused"
+        errorLine1="    &lt;string name=&quot;protocol_smp&quot;>SMP&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="216"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.protocol_l2cap` appears to be unused"
+        errorLine1="    &lt;string name=&quot;protocol_l2cap&quot;>L2CAP&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="217"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.protocol_sdp` appears to be unused"
+        errorLine1="    &lt;string name=&quot;protocol_sdp&quot;>SDP&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="218"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.protocol_rfcomm` appears to be unused"
+        errorLine1="    &lt;string name=&quot;protocol_rfcomm&quot;>RFCOMM&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="219"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.action_scan` appears to be unused"
+        errorLine1="    &lt;string name=&quot;action_scan&quot;>Scan Devices&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="222"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.action_connect` appears to be unused"
+        errorLine1="    &lt;string name=&quot;action_connect&quot;>Connect Device&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="223"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.action_fuzz` appears to be unused"
+        errorLine1="    &lt;string name=&quot;action_fuzz&quot;>Start Fuzzing&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="224"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.action_extract_keys` appears to be unused"
+        errorLine1="    &lt;string name=&quot;action_extract_keys&quot;>Extract Keys&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="225"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.action_scan_vulns` appears to be unused"
+        errorLine1="    &lt;string name=&quot;action_scan_vulns&quot;>Scan Vulnerabilities&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="226"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.action_generate_report` appears to be unused"
+        errorLine1="    &lt;string name=&quot;action_generate_report&quot;>Generate Report&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="227"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_bluetooth` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_bluetooth&quot;>Bluetooth&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="230"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_security` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_security&quot;>Security&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="231"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_warning` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_warning&quot;>Warning&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="232"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_error` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_error&quot;>Error&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="233"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_success` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_success&quot;>Success&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="234"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_info` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_info&quot;>Information&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="235"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_more_options` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_more_options&quot;>More options&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="236"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_menu` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_menu&quot;>Menu&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="237"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_navigate_up` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_navigate_up&quot;>Navigate up&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="238"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_refresh` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_refresh&quot;>Refresh&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="239"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_delete` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_delete&quot;>Delete&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="240"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_share` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_share&quot;>Share&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="241"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_export` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_export&quot;>Export&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="242"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `mapScanResult` of class `BluetoothRepositoryImpl` requires synthetic accessor"
+        errorLine1="                        val btDevice = mapScanResult(device, result)"
+        errorLine2="                                       ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="119"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `updateScanResults` of class `BluetoothRepositoryImpl` requires synthetic accessor"
+        errorLine1="                            updateScanResults(btDevice)"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="122"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `mapScanResult` of class `BluetoothRepositoryImpl` requires synthetic accessor"
+        errorLine1="                            val btDevice = mapScanResult(device, result)"
+        errorLine2="                                           ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="130"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `updateScanResults` of class `BluetoothRepositoryImpl` requires synthetic accessor"
+        errorLine1="                                updateScanResults(btDevice)"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="133"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `mapBluetoothDevice` of class `BluetoothRepositoryImpl` requires synthetic accessor"
+        errorLine1="                    connectedDevice.value = mapBluetoothDevice(gatt.device)"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="232"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `mapGattService` of class `BluetoothRepositoryImpl` requires synthetic accessor"
+        errorLine1="                val services = gatt.services?.map { mapGattService(it) } ?: emptyList()"
+        errorLine2="                                                    ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/btsec/testtool/data/bluetooth/BluetoothRepositoryImpl.kt"
+            line="244"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Key Extraction`, used in `keys_title` and `nav_keys`"
+        errorLine1="    &lt;string name=&quot;nav_keys&quot;>Key Extraction&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="35"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="99"
+            column="5"
+            message="Duplicates value in `nav_keys`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Reports`, used in `nav_reports` and `reports_title`"
+        errorLine1="    &lt;string name=&quot;nav_reports&quot;>Reports&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="37"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="116"
+            column="5"
+            message="Duplicates value in `nav_reports`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Settings`, used in `nav_settings` and `settings_title`"
+        errorLine1="    &lt;string name=&quot;nav_settings&quot;>Settings&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="38"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="135"
+            column="5"
+            message="Duplicates value in `nav_settings`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Type: %1$s`, used in `device_type` and `reports_type`"
+        errorLine1="    &lt;string name=&quot;device_type&quot;>Type: %1$s&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="54"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="125"
+            column="5"
+            message="Duplicates value in `device_type`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Scan complete`, used in `success_scan_complete` and `vuln_complete`"
+        errorLine1="    &lt;string name=&quot;vuln_complete&quot;>Scan complete&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="66"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="157"
+            column="5"
+            message="Duplicates value in `vuln_complete`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Start Fuzzing`, used in `action_fuzz` and `fuzzer_start`"
+        errorLine1="    &lt;string name=&quot;fuzzer_start&quot;>Start Fuzzing&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="82"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="224"
+            column="5"
+            message="Duplicates value in `fuzzer_start`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Unknown`, used in `device_type_unknown` and `keys_unknown`"
+        errorLine1="    &lt;string name=&quot;keys_unknown&quot;>Unknown&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="113"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="203"
+            column="5"
+            message="Duplicates value in `keys_unknown`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Generate Report`, used in `action_generate_report` and `reports_generate`"
+        errorLine1="    &lt;string name=&quot;reports_generate&quot;>Generate Report&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="117"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="227"
+            column="5"
+            message="Duplicates value in `reports_generate`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Delete`, used in `cd_delete`, `delete` and `reports_delete`"
+        errorLine1="    &lt;string name=&quot;reports_delete&quot;>Delete&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="119"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="169"
+            column="5"
+            message="Duplicates value in `reports_delete`"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="240"
+            column="5"
+            message="Duplicates value in `reports_delete`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Export`, used in `cd_export`, `export` and `reports_export`"
+        errorLine1="    &lt;string name=&quot;reports_export&quot;>Export&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="120"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="171"
+            column="5"
+            message="Duplicates value in `reports_export`"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="242"
+            column="5"
+            message="Duplicates value in `reports_export`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Share`, used in `cd_share`, `reports_share` and `share`"
+        errorLine1="    &lt;string name=&quot;reports_share&quot;>Share&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="121"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="170"
+            column="5"
+            message="Duplicates value in `reports_share`"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="241"
+            column="5"
+            message="Duplicates value in `reports_share`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Refresh`, used in `cd_refresh` and `refresh`"
+        errorLine1="    &lt;string name=&quot;refresh&quot;>Refresh&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="181"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="239"
+            column="5"
+            message="Duplicates value in `refresh`"/>
+    </issue>
+
+    <issue
+        id="MissingApplicationIcon"
+        message="Should explicitly set `android:icon`, there is no default"
+        errorLine1="    &lt;application"
+        errorLine2="     ~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="68"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="AppLinkUrlError"
+        message="Missing URL"
+        errorLine1="            &lt;intent-filter>"
+        errorLine2="            ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="103"
+            column="13"/>
+    </issue>
+
+</issues>
