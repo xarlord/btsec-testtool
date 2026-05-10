@@ -451,4 +451,16 @@ class ConsentRepositoryImplTest {
         val path = result.getOrNull()
         assertNotNull(path)
     }
+
+    @Test
+    @DisplayName("exportAuditLog should reject path traversal")
+    fun testExportAuditLogPathTraversal() = runTest {
+        val result = repository.exportAuditLog(
+            outputPath = "/tmp/../../../etc/passwd",
+            format = AuditExportFormat.JSON
+        )
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is SecurityException)
+    }
 }

@@ -1,0 +1,4 @@
+## 2025-02-12 - Path Traversal in Export Operations
+**Vulnerability:** Found a path traversal vulnerability in `ConsentRepositoryImpl.exportAuditLog` where unsanitized user input (`outputPath`) was passed directly to the `File` constructor, allowing potential arbitrary file writes outside the intended export directories.
+**Learning:** This vulnerability existed because the `outputPath` was implicitly trusted. This same pattern previously existed in `ReportRepositoryImpl.kt`. Unsanitized paths in file operations are a recurrent pattern.
+**Prevention:** To avoid this next time, always resolve the `canonicalPath` of user-provided paths and strictly verify they start with the `canonicalPath` of an allowed base directory plus a `File.separator`, or match the base directory exactly, before performing file I/O.
