@@ -1,0 +1,3 @@
+## 2024-05-18 - Keyboard Submit Action in Compose
+**Learning:** Text inputs in Jetpack Compose should provide keyboard options and actions (like `ImeAction.Done`) allowing users to easily dismiss the keyboard and submit directly without having to reach for a button. This is especially helpful in single-field forms like the Authorization Screen.
+**Action:** When adding an `OutlinedTextField` that acts as the primary input for a form, configure `keyboardOptions` with the appropriate `imeAction` and `keyboardActions` to trigger the submit action and clear focus via `LocalFocusManager.current.clearFocus()`.
