@@ -1,0 +1,4 @@
+## 2026-05-15 - Path Traversal Vulnerability in ConsentRepositoryImpl
+**Vulnerability:** Found a path traversal vulnerability in `ConsentRepositoryImpl.kt` where unsanitized user input (`outputPath`) was passed directly to `File()` during audit log export operations (`exportAuditLog`).
+**Learning:** Returning unsanitized file paths directly from a repository function can lead to path traversal if the system isn't strictly verifying that the resulting canonical paths reside within authorized directories (like `filesDir` or `cacheDir`).
+**Prevention:** To prevent partial-directory bypasses (e.g., `/files-spoofed`), always resolve the `canonicalPath` of user-provided paths and verify they match an allowed base directory exactly (`canonicalPath == base`) or strictly begin with the directory plus a separator (`canonicalPath.startsWith(base + File.separator)`). Do not pass unsanitized paths directly to `File()`.
