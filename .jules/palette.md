@@ -1,0 +1,3 @@
+## 2026-05-12 - Missing software keyboard submission support in forms
+**Learning:** Users often expect to be able to submit a form directly from their software keyboard after entering their details (like an Authorization ID), instead of manually dismissing the keyboard to find the submit button.
+**Action:** Always configure `keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)` and `keyboardActions = KeyboardActions(onDone = { ... })` for critical text inputs, and use `LocalFocusManager.current.clearFocus()` to properly dismiss the keyboard upon submission to reduce friction and improve UX.
