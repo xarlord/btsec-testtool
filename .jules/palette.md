@@ -1,0 +1,3 @@
+## 2026-05-13 - Keyboard Submission Support for Jetpack Compose Forms
+**Learning:** In Jetpack Compose, text inputs (like `OutlinedTextField`) do not automatically submit forms or dismiss the software keyboard when the user presses the "Done" or "Enter" key on the keyboard. This forces users to tap outside the input or find the specific submit button, degrading the UX.
+**Action:** Always configure `keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)` and `keyboardActions = KeyboardActions(onDone = { ... })` for terminal text inputs in a form. Within the `onDone` action, ensure `LocalFocusManager.current.clearFocus()` is called to explicitly dismiss the keyboard, and trigger the form submission logic if valid.
