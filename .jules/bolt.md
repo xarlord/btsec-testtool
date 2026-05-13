@@ -1,0 +1,3 @@
+## 2024-06-25 - Avoid Chained Collection Operations for Statistical Aggregation
+**Learning:** Chaining standard Kotlin collection operations like `filter`, `count`, and `map` for generating statistics causes redundant traversals over the same list and potentially creates intermediate objects. For instance, calculating counts for multiple severity levels using consecutive `count` operations scales linearly with the number of groups rather than processing everything in O(n) time.
+**Action:** Always prefer single-pass iterative approaches (using `forEach` or `fold`) when calculating multiple aggregated statistics over a single collection to optimize execution time and reduce memory allocation overhead.
