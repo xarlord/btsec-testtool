@@ -347,3 +347,14 @@ dependencies {
 tasks.named("dependencyCheckAnalyze") {
     dependsOn("assembleDebug")
 }
+
+tasks.register("jacocoTestCoverageVerification", JacocoCoverageVerification::class) {
+    dependsOn("testDevDebugUnitTest")
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.0".toBigDecimal()
+            }
+        }
+    }
+}
