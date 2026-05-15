@@ -16,6 +16,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.Instant
@@ -450,5 +454,17 @@ class ConsentRepositoryImplTest {
         assertTrue(result.isSuccess)
         val path = result.getOrNull()
         assertNotNull(path)
+    }
+
+    @Test
+    @DisplayName("exportAuditLog should reject path traversal")
+    fun testExportAuditLogPathTraversal() = runTest {
+        val result = repository.exportAuditLog(
+            outputPath = "/tmp/../../../etc/passwd",
+            format = AuditExportFormat.JSON
+        )
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is SecurityException)
     }
 }
