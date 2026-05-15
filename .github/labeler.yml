@@ -3,66 +3,66 @@
 
 documentation:
   - "*.md"
-  - docs/**
+  - "docs/**"
 
 security:
   - SECURITY.md
   - "**/security/**"
 
 tests:
-  - "**/*/test/**
-  - "**/*/*Test.kt
-  - "**/*/*Test.java
-  - "**/*/androidTest/**
+  - "**/test/**"
+  - "**/*Test.kt"
+  - "**/*Test.java"
+  - "**/androidTest/**"
 
 ci-cd:
-  - .github/workflows/**
-  - .github/actions/**
+  - ".github/workflows/**"
+  - ".github/actions/**"
   - Dockerfile
   - docker-compose.yml
 
 dependencies:
   - build.gradle.kts
   - app/build.gradle.kts
-  - buildSrc/**/*.kt
+  - "buildSrc/**/*.kt"
   - gradle/libs.versions.toml
 
 domain:
-  - domain/model/**
-  - domain/repository/**
-  - domain/usecase/**
+  - "domain/model/**"
+  - "domain/repository/**"
+  - "domain/usecase/**"
 
 data:
-  - data/**
+  - "data/**"
 
 presentation:
-  - presentation/**
-  - ui/**
+  - "presentation/**"
+  - "ui/**"
 
 android:
-  - app/src/main/**
+  - "app/src/main/**"
   - AndroidManifest.xml
 
 vulnerability:
-  - "**/*/vulnerability/**
-  - "**/*/vuln/**
+  - "**/vulnerability/**"
+  - "**/vuln/**"
 
 fuzzing:
-  - "**/*/fuzzing/**
-  - "**/*/fuzz/**
+  - "**/fuzzing/**"
+  - "**/fuzz/**"
 
 key-extraction:
-  - "**/*/keyextraction/**
-  - "**/*/keys/**
+  - "**/keyextraction/**"
+  - "**/keys/**"
 
 reporting:
-  - "**/*/report/**
-  - "**/*/reports/**
+  - "**/report/**"
+  - "**/reports/**"
 
 authorization:
-  - "**/*/authorization/**
-  - "**/*/auth/**
+  - "**/authorization/**"
+  - "**/auth/**"
 
 bluetooth:
-  - "**/*/bluetooth/**
-  - "**/*/ble/**
+  - "**/bluetooth/**"
+  - "**/ble/**"
