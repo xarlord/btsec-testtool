@@ -2,7 +2,7 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - *.md
+  - '*.md'
   - docs/**
 
 security:
