@@ -2,22 +2,22 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - *.md
+  - "*.md"
   - docs/**
 
 security:
   - SECURITY.md
-  - **/security/**
+  - "**/security/**"
 
 tests:
-  - **/test/**
-  - **/*Test.kt
-  - **/*Test.java
-  - **/androidTest/**
+  - "**/test/**"
+  - "**/*Test.kt"
+  - "**/*Test.java"
+  - "**/androidTest/**"
 
 ci-cd:
-  - .github/workflows/**
-  - .github/actions/**
+  - ".github/workflows/**"
+  - ".github/actions/**"
   - Dockerfile
   - docker-compose.yml
 
@@ -44,25 +44,25 @@ android:
   - AndroidManifest.xml
 
 vulnerability:
-  - **/vulnerability/**
-  - **/vuln/**
+  - "**/vulnerability/**"
+  - "**/vuln/**"
 
 fuzzing:
-  - **/fuzzing/**
-  - **/fuzz/**
+  - "**/fuzzing/**"
+  - "**/fuzz/**"
 
 key-extraction:
-  - **/keyextraction/**
-  - **/keys/**
+  - "**/keyextraction/**"
+  - "**/keys/**"
 
 reporting:
-  - **/report/**
-  - **/reports/**
+  - "**/report/**"
+  - "**/reports/**"
 
 authorization:
-  - **/authorization/**
-  - **/auth/**
+  - "**/authorization/**"
+  - "**/auth/**"
 
 bluetooth:
-  - **/bluetooth/**
-  - **/ble/**
+  - "**/bluetooth/**"
+  - "**/ble/**"
