@@ -1,0 +1,3 @@
+## 2024-06-25 - Prevent Intermediate Object Allocations in List Computations
+**Learning:** Performing multiple chained operations like `sumOf`, `average`, `filter`, or `maxByOrNull` repeatedly over collections causes hidden N+1 iteration overhead and intermediate List object allocations, leading to unnecessary GC pressure on Android, especially for repositories mapping `StateFlow` streams on every update.
+**Action:** Always prioritize single-pass iterations (e.g., using `forEach` or `fold`) over multiple functional terminal operations when aggregating statistical data from collections, significantly reducing time complexity from O(M*N) to O(N).
