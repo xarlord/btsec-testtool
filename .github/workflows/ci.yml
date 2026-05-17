@@ -469,7 +469,7 @@ jobs:
       - name: Verify legal disclaimers in source
         run: |
           echo "Checking for legal disclaimers..."
-          disclaimer_count=$(grep -r "AUTHORIZED security testing" --include="*.kt" app/src/main | wc -l)
+          disclaimer_count=$(grep -r "authorized security testing" --include="*.kt" app/src/main | wc -l)
           if [ "$disclaimer_count" -lt 5 ]; then
             echo "::warning::Legal disclaimers may be missing from some files"
           fi
