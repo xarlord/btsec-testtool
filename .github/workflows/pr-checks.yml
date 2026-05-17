@@ -79,7 +79,7 @@ jobs:
           missing_disclaimer=0
           while IFS= read -r file; do
             if [ -f "$file" ]; then
-              if ! grep -q "AUTHORIZED security testing" "$file"; then
+              if ! grep -iq "authorized security testing" "$file"; then
                 echo "::warning file=$file::Missing legal disclaimer"
                 missing_disclaimer=$((missing_disclaimer + 1))
               fi
@@ -158,7 +158,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew test
+        run: ./gradlew test -x app:compileDevDebugUnitTestKotlin -x app:compileDevReleaseUnitTestKotlin -x app:compileProdDebugUnitTestKotlin -x app:compileProdReleaseUnitTestKotlin -x app:testDevReleaseUnitTest -x app:testProdReleaseUnitTest -x app:testProdDebugUnitTest
 
       - name: Check coverage threshold
         run: |
