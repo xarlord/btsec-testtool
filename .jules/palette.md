@@ -1,0 +1,3 @@
+## 2024-05-24 - Improve Form Submission Flow via Keyboard Actions
+**Learning:** In Jetpack Compose, single-field forms without properly configured `keyboardOptions` (like `imeAction = ImeAction.Done`) and `keyboardActions` force the user to dismiss the software keyboard manually and tap a separate button to submit. This breaks the native, expected interaction flow on Android.
+**Action:** Always configure `KeyboardOptions` and `KeyboardActions` for text inputs. When triggering actions (like `onDone`), ensure `LocalFocusManager.current.clearFocus()` is called to explicitly dismiss the keyboard, completing the smooth UX interaction.
