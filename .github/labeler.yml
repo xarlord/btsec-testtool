@@ -2,18 +2,18 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - *.md
-  - docs/**
+  - "*.md"
+  - "docs/**"
 
 security:
   - SECURITY.md
-  - **/security/**
+  - "**/security/**"
 
 tests:
-  - **/test/**
-  - **/*Test.kt
-  - **/*Test.java
-  - **/androidTest/**
+  - "**/test/**"
+  - "**/*Test.kt"
+  - "**/*Test.java"
+  - "**/androidTest/**"
 
 ci-cd:
   - .github/workflows/**
