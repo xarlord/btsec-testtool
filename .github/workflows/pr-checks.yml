@@ -11,10 +11,6 @@ permissions:
   pull-requests: read
   contents: read
 
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   # ============================================
   # PR Description Validation
@@ -69,8 +65,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Check for legal disclaimers in new files
         run: |
@@ -148,8 +142,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -164,12 +156,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin
+        run: ./gradlew test jacocoTestCoverageVerification
 
       - name: Check coverage threshold
         run: |
           # Verify minimum coverage (80%)
-          coverage=80
+          coverage=$(./gradlew jacocoTestReport | grep -oP 'Total.*?\K\d+(?=%)' || echo "0")
           if [ "$coverage" -lt 80 ]; then
             echo "::error::Test coverage below 80% (current: $coverage%)"
             exit 1
@@ -249,8 +241,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Check for README updates
         run: |
@@ -284,8 +274,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Label based on files changed
         uses: actions/labeler@v5

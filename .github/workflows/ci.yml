@@ -12,7 +12,6 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   JAVA_VERSION: '17'
   JAVA_DISTRIBUTION: 'temurin'
 
@@ -32,8 +31,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -42,9 +39,7 @@ jobs:
           queries: security-extended,security-and-quality
 
       - name: Autobuild
-        run: |
-          chmod +x gradlew
-          ./gradlew compileDevDebugKotlin
+        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -62,8 +57,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Kotlin
         uses: actions/setup-java@v4
@@ -96,8 +89,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -114,7 +105,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin --stacktrace
+        run: ./gradlew test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
@@ -167,8 +158,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -183,7 +172,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDevDebug -Dlint.baselines.continue=true || true
+        run: ./gradlew lintDebug
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
@@ -215,8 +204,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -261,8 +248,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -328,8 +313,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Check for hardcoded secrets
         run: |
@@ -389,14 +372,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency check
-        run: ./gradlew app:dependencyCheckAnalyze
+        run: ./gradlew dependencyCheckAnalyze
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
@@ -432,8 +413,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Check for README
         run: |
