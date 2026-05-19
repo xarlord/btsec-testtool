@@ -1,3 +1,0 @@
-## 2026-02-07 - Add Keyboard Done Action to Authorization ID Input
-**Learning:** For forms or single inputs like an Authorization ID, failing to configure `KeyboardOptions` and `KeyboardActions` creates friction as users must dismiss the software keyboard to see the submit button, or are unable to use the native keyboard "Done" action to proceed.
-**Action:** Always configure `KeyboardOptions(imeAction = ImeAction.Done)` and bind `onDone` in `KeyboardActions` for single-input forms. Ensure to explicitly clear focus using `LocalFocusManager.current.clearFocus()` within the action block to smoothly dismiss the keyboard while executing the submission logic.
