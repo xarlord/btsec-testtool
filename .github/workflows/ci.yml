@@ -377,7 +377,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency check
-        run: ./gradlew app:dependencyCheckAnalyze --no-configuration-cache
+        run: ./gradlew app:dependencyCheckAnalyze --no-configuration-cache -Dorg.gradle.unsafe.configuration-cache=false
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4

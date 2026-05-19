@@ -158,3 +158,10 @@
 # Obfuscate
 -repackageclasses ''
 -allowaccessmodification
+
+# Guava / ErrorProne
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn javax.annotation.**
+-dontwarn org.slf4j.**
+-dontwarn java.lang.ClassValue
+-dontwarn org.bouncycastle.**
