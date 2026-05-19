@@ -327,6 +327,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.kotlinCoroutines}")
     testImplementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("app.cash.turbine:turbine:${Versions.turbine}")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("com.google.truth:truth:${Versions.truth}")
     testImplementation("org.robolectric:robolectric:${Versions.robolectric}")
 

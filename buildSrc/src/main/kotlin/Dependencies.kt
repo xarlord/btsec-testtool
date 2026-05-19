@@ -115,6 +115,7 @@ object Dependencies {
 
     // Testing
     val junit = "org.junit.jupiter:junit-jupiter:${Versions.junit}"
+    val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:5.2.1"
     val mockk = "io.mockk:mockk:${Versions.mockk}"
     val turbine = "app.cash.turbine:turbine:${Versions.turbine}"
 }
