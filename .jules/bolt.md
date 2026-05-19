@@ -1,0 +1,3 @@
+## 2024-06-25 - Prevent Multiple Iteration Anti-Pattern in Kotlin Collections
+**Learning:** Multiple consecutive terminal operations on Kotlin collections (e.g., chained `sumOf`, `map`, `average`, `minByOrNull`) cause the program to traverse the entire list repeatedly and potentially create unnecessary intermediate allocations (like `.map` creating a whole new List just to calculate an average). This is an anti-pattern that heavily degrades performance on large datasets.
+**Action:** Consolidate multiple aggregate calculations into a single-pass iteration using `.forEach { }` or `.fold { }` to compute all required values simultaneously.

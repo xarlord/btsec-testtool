@@ -239,24 +239,49 @@ class FuzzingRepositoryImpl @Inject constructor(
     override fun getFuzzingStatistics(): Flow<FuzzingStatistics> {
         return flow {
             val results = fuzzingResults.value
+            var totalPacketsSent = 0L
+            var totalPacketsReceived = 0L
+            var totalErrors = 0L
+            var totalFindings = 0L
+            var totalSuccessRate = 0.0
+            var minStart: Instant? = null
+            var maxEnd: Instant? = null
+
+            results.forEach { result ->
+                totalPacketsSent += result.packetsSent
+                totalPacketsReceived += result.packetsReceived
+                totalErrors += result.errors.size
+                totalFindings += result.findings.size
+                totalSuccessRate += result.getSuccessRate()
+
+                if (minStart == null || result.startTime.isBefore(minStart)) {
+                    minStart = result.startTime
+                }
+
+                val currentEnd = result.endTime ?: result.startTime
+                if (maxEnd == null || currentEnd.isAfter(maxEnd)) {
+                    maxEnd = currentEnd
+                }
+            }
+
             emit(FuzzingStatistics(
                 totalTests = results.size,
-                totalPacketsSent = results.sumOf { it.packetsSent }.toLong(),
-                totalPacketsReceived = results.sumOf { it.packetsReceived }.toLong(),
-                totalErrors = results.sumOf { it.errors.size }.toLong(),
-                totalFindings = results.sumOf { it.findings.size }.toLong(),
+                totalPacketsSent = totalPacketsSent,
+                totalPacketsReceived = totalPacketsReceived,
+                totalErrors = totalErrors,
+                totalFindings = totalFindings,
                 criticalFindings = 0,
                 highFindings = 0,
                 mediumFindings = 0,
                 lowFindings = 0,
                 averageSuccessRate = if (results.isNotEmpty()) {
-                    results.map { it.getSuccessRate() }.average()
+                    totalSuccessRate / results.size
                 } else 0.0,
                 mostTestedDevice = null,
                 mostVulnerableDevice = null,
                 dateRange = DateRange(
-                    start = results.minByOrNull { it.startTime }?.startTime ?: Instant.now(),
-                    end = results.maxByOrNull { it.endTime ?: it.startTime }?.endTime ?: Instant.now()
+                    start = minStart ?: Instant.now(),
+                    end = maxEnd ?: Instant.now()
                 )
             ))
         }
