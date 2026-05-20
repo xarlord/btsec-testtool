@@ -71,7 +71,7 @@ jobs:
           echo "Checking legal disclaimers in modified files..."
 
           # Get list of changed Kotlin files
-          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
+          git diff --name-only HEAD~1...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
 
           # Check each file for disclaimer
           missing_disclaimer=0
@@ -95,7 +95,7 @@ jobs:
         run: |
           echo "Checking for authorization enforcement in new code..."
 
-          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
+          git diff --name-only HEAD~1...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
 
           # Check use case files for authorization
           usecase_files=$(grep -l "UseCase" /tmp/changed_files.txt 2>/dev/null || echo "")
@@ -116,7 +116,7 @@ jobs:
         run: |
           echo "Checking for potential security issues..."
 
-          git diff origin/${{ github.base_ref }}...HEAD > /tmp/pr.diff
+          git diff HEAD~1...HEAD > /tmp/pr.diff
 
           # Check for suspicious patterns
           if grep -iE "TODO.*auth|FIXME.*security|hack|workaround.*security" /tmp/pr.diff; then
@@ -187,7 +187,7 @@ jobs:
           echo "Checking for breaking API changes..."
 
           # Get changed files
-          git diff --name-only origin/${{ github.base_ref }}...HEAD > /tmp/changed_files.txt
+          git diff --name-only HEAD~1...HEAD > /tmp/changed_files.txt
 
           # Check for changes in public API
           api_changed=0
@@ -217,14 +217,14 @@ jobs:
           echo "Checking for removed or disabled tests..."
 
           # Count deleted test files
-          deleted_tests=$(git diff origin/${{ github.base_ref }}...HEAD --diff-filter=D --name-only | grep 'Test.kt' | wc -l)
+          deleted_tests=$(git diff HEAD~1...HEAD --diff-filter=D --name-only | grep 'Test.kt' | wc -l)
 
           if [ $deleted_tests -gt 0 ]; then
             echo "::warning::$deleted_tests test file(s) deleted"
           fi
 
           # Check for disabled/skipped tests
-          git diff origin/${{ github.base_ref }}...HEAD | grep -E "@Disabled|@Ignore" > /tmp/disabled_tests.txt || true
+          git diff HEAD~1...HEAD | grep -E "@Disabled|@Ignore" > /tmp/disabled_tests.txt || true
 
           if [ -s /tmp/disabled_tests.txt ]; then
             echo "::warning::Tests have been disabled/skipped in this PR"
@@ -244,7 +244,7 @@ jobs:
 
       - name: Check for README updates
         run: |
-          if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q 'README.md'; then
+          if git diff HEAD~1...HEAD --name-only | grep -q 'README.md'; then
             echo "README.md updated"
           else
             echo "::notice::Consider updating README.md if this PR changes user-facing functionality"
@@ -252,10 +252,10 @@ jobs:
 
       - name: Check for test coverage report updates
         run: |
-          if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q 'TEST_COVERAGE_REPORT.md'; then
+          if git diff HEAD~1...HEAD --name-only | grep -q 'TEST_COVERAGE_REPORT.md'; then
             echo "TEST_COVERAGE_REPORT.md updated"
           else
-            if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q '\.kt$'; then
+            if git diff HEAD~1...HEAD --name-only | grep -q '\.kt$'; then
               echo "::warning::Kotlin files changed but TEST_COVERAGE_REPORT.md not updated"
             fi
           fi
