@@ -2,67 +2,67 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - "*.md"
-  - "docs/**"
+  - any: ['*.md']
+  - any: ['docs/**']
 
 security:
-  - "SECURITY.md"
-  - "**/security/**"
+  - any: ['SECURITY.md']
+  - any: ['**/security/**']
 
 tests:
-  - "**/test/**"
-  - "**/*Test.kt"
-  - "**/*Test.java"
-  - "**/androidTest/**"
+  - any: ['**/test/**']
+  - any: ['**/*Test.kt']
+  - any: ['**/*Test.java']
+  - any: ['**/androidTest/**']
 
 ci-cd:
-  - ".github/workflows/**"
-  - ".github/actions/**"
-  - "Dockerfile"
-  - "docker-compose.yml"
+  - any: ['.github/workflows/**']
+  - any: ['.github/actions/**']
+  - any: ['Dockerfile']
+  - any: ['docker-compose.yml']
 
 dependencies:
-  - "build.gradle.kts"
-  - "app/build.gradle.kts"
-  - "buildSrc/**/*.kt"
-  - "gradle/libs.versions.toml"
+  - any: ['build.gradle.kts']
+  - any: ['app/build.gradle.kts']
+  - any: ['buildSrc/**/*.kt']
+  - any: ['gradle/libs.versions.toml']
 
 domain:
-  - "domain/model/**"
-  - "domain/repository/**"
-  - "domain/usecase/**"
+  - any: ['domain/model/**']
+  - any: ['domain/repository/**']
+  - any: ['domain/usecase/**']
 
 data:
-  - "data/**"
+  - any: ['data/**']
 
 presentation:
-  - "presentation/**"
-  - "ui/**"
+  - any: ['presentation/**']
+  - any: ['ui/**']
 
 android:
-  - "app/src/main/**"
-  - "AndroidManifest.xml"
+  - any: ['app/src/main/**']
+  - any: ['AndroidManifest.xml']
 
 vulnerability:
-  - "**/vulnerability/**"
-  - "**/vuln/**"
+  - any: ['**/vulnerability/**']
+  - any: ['**/vuln/**']
 
 fuzzing:
-  - "**/fuzzing/**"
-  - "**/fuzz/**"
+  - any: ['**/fuzzing/**']
+  - any: ['**/fuzz/**']
 
 key-extraction:
-  - "**/keyextraction/**"
-  - "**/keys/**"
+  - any: ['**/keyextraction/**']
+  - any: ['**/keys/**']
 
 reporting:
-  - "**/report/**"
-  - "**/reports/**"
+  - any: ['**/report/**']
+  - any: ['**/reports/**']
 
 authorization:
-  - "**/authorization/**"
-  - "**/auth/**"
+  - any: ['**/authorization/**']
+  - any: ['**/auth/**']
 
 bluetooth:
-  - "**/bluetooth/**"
-  - "**/ble/**"
+  - any: ['**/bluetooth/**']
+  - any: ['**/ble/**']

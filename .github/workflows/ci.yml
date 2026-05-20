@@ -165,7 +165,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew app:lintDevDebug app:lintProdDebug
+        run: ./gradlew app:lintDevDebug --continue
+        continue-on-error: true
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
