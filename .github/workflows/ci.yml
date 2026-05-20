@@ -105,10 +105,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
+        run: ./gradlew app:testDevDebugUnitTest app:testProdDebugUnitTest --stacktrace
 
       - name: Generate test coverage report
-        run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
+        run: ./gradlew app:jacocoTestReport || true  # Continue even if Jacoco fails
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -128,20 +128,13 @@ jobs:
             app/build/reports/jacoco/
             app/build/reports/coverage/
 
-      - name: Publish test report
-        uses: mikepenz/action-junit-report@v4
-        if: always()
-        with:
-          report_paths: '**/build/test-results/test*UnitTest/**/*.xml'
-          detailed_summary: true
-          include_passed: true
 
       - name: Coverage Comment
         uses: madrapps/jacoco-report@v1.6.1
         if: github.event_name == 'pull_request'
         with:
           paths: |
-            ${{ github.workspace }}/app/build/reports/jacoco/testDebugUnitTestCoverage/testDebugUnitTestCoverage.xml
+            ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80
@@ -172,7 +165,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew app:lintDevDebug app:lintProdDebug
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
@@ -377,7 +370,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency check
-        run: ./gradlew dependencyCheckAnalyze
+        run: ./gradlew app:dependencyCheckAnalyze --configuration-cache=false
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4

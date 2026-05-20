@@ -6,7 +6,7 @@ documentation:
   - "docs/**"
 
 security:
-  - SECURITY.md
+  - "SECURITY.md"
   - "**/security/**"
 
 tests:
@@ -18,14 +18,14 @@ tests:
 ci-cd:
   - ".github/workflows/**"
   - ".github/actions/**"
-  - Dockerfile
-  - docker-compose.yml
+  - "Dockerfile"
+  - "docker-compose.yml"
 
 dependencies:
-  - build.gradle.kts
-  - app/build.gradle.kts
+  - "build.gradle.kts"
+  - "app/build.gradle.kts"
   - "buildSrc/**/*.kt"
-  - gradle/libs.versions.toml
+  - "gradle/libs.versions.toml"
 
 domain:
   - "domain/model/**"
@@ -41,7 +41,7 @@ presentation:
 
 android:
   - "app/src/main/**"
-  - AndroidManifest.xml
+  - "AndroidManifest.xml"
 
 vulnerability:
   - "**/vulnerability/**"
