@@ -1,0 +1,3 @@
+## 2024-05-21 - Keyboard Action Enhancements in Compose
+**Learning:** Users heavily rely on software keyboard action keys (like 'Done' or 'Go') to submit forms, especially single-field inputs like authorization codes. Missing `keyboardActions` forces them to dismiss the keyboard manually and find the submit button, degrading the UX significantly.
+**Action:** Always configure `KeyboardOptions(imeAction = ImeAction.Done)` and `KeyboardActions(onDone = { ... })` on primary text fields, and ensure `LocalFocusManager.current.clearFocus()` is called to seamlessly dismiss the keyboard upon submission.
