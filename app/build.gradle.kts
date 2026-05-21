@@ -191,7 +191,7 @@ android {
 
 // Jacoco Test Coverage Configuration
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
+    dependsOn("testDevDebugUnitTest")
 
     reports {
         xml.required.set(true)
