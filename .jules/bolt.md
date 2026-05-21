@@ -1,0 +1,3 @@
+## 2024-03-02 - Compose LazyColumn Performance Optimization
+**Learning:** By default, LazyColumn in Jetpack Compose uses item position as the identity key. When a dynamic list (like Bluetooth scan results that frequently update, reorder, or have elements inserted/removed) changes, Compose cannot track items across recompositions efficiently, leading to full recompositions of all visible items.
+**Action:** Always provide a stable, unique `key` parameter to `items()` inside `LazyColumn`/`LazyRow` for dynamic lists. This allows Compose to structurally track items and skip unnecessary recompositions, significantly improving scrolling performance and rendering efficiency during updates.
