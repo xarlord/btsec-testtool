@@ -94,6 +94,10 @@ jobs:
     name: Unit Tests
     runs-on: macos-latest
     timeout-minutes: 30
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -164,6 +168,10 @@ jobs:
     name: Android Lint
     runs-on: macos-latest
     timeout-minutes: 30
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout repository
