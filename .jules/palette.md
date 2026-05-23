@@ -1,0 +1,3 @@
+## 2024-05-24 - Keyboard Actions in Jetpack Compose
+**Learning:** Providing `KeyboardOptions(imeAction = ImeAction.Done)` and `KeyboardActions(onDone = { ... })` for form inputs in Jetpack Compose allows users to intuitively submit forms directly from the software keyboard without requiring an extra tap on a separate "Submit" button, leading to a much smoother UX.
+**Action:** When creating text inputs that act as a primary submission point for a form (especially single inputs like the auth screen), always configure the appropriate IME action and ensure `LocalFocusManager.current.clearFocus()` is called within the action to explicitly dismiss the keyboard.
