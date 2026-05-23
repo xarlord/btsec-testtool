@@ -117,7 +117,8 @@ private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(devices) { device ->
+            // Optimize: Provide a stable key to prevent unnecessary recompositions
+            items(devices, key = { it.address }) { device ->
                 DeviceCard(device = device)
             }
         }
