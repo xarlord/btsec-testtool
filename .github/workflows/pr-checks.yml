@@ -65,6 +65,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check for legal disclaimers in new files
         run: |
@@ -156,12 +158,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew test jacocoTestCoverageVerification
+        run: ./gradlew app:testDevDebugUnitTest app:jacocoTestReport
 
       - name: Check coverage threshold
         run: |
           # Verify minimum coverage (80%)
-          coverage=$(./gradlew jacocoTestReport | grep -oP 'Total.*?\K\d+(?=%)' || echo "0")
+          coverage=$(./gradlew app:jacocoTestReport | grep -oP 'Total.*?\K\d+(?=%)' || echo "0")
           if [ "$coverage" -lt 80 ]; then
             echo "::error::Test coverage below 80% (current: $coverage%)"
             exit 1
@@ -241,6 +243,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check for README updates
         run: |
