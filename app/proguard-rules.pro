@@ -158,3 +158,9 @@
 # Obfuscate
 -repackageclasses ''
 -allowaccessmodification
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn org.slf4j.**
+-keep class com.google.errorprone.annotations.** { *; }
+-keep class org.slf4j.** { *; }
+-keepattributes *Annotation*
+-ignorewarnings
