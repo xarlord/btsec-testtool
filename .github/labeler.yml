@@ -2,67 +2,103 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - *.md
-  - docs/**
+  - changed-files:
+    - any-glob-to-any-file: ['*.md']
+  - changed-files:
+    - any-glob-to-any-file: ['docs/**']
 
 security:
-  - SECURITY.md
-  - **/security/**
+  - changed-files:
+    - any-glob-to-any-file: ['SECURITY.md']
+  - changed-files:
+    - any-glob-to-any-file: ['**/security/**']
 
 tests:
-  - **/test/**
-  - **/*Test.kt
-  - **/*Test.java
-  - **/androidTest/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/test/**']
+  - changed-files:
+    - any-glob-to-any-file: ['**/*Test.kt']
+  - changed-files:
+    - any-glob-to-any-file: ['**/*Test.java']
+  - changed-files:
+    - any-glob-to-any-file: ['**/androidTest/**']
 
 ci-cd:
-  - .github/workflows/**
-  - .github/actions/**
-  - Dockerfile
-  - docker-compose.yml
+  - changed-files:
+    - any-glob-to-any-file: ['.github/workflows/**']
+  - changed-files:
+    - any-glob-to-any-file: ['.github/actions/**']
+  - changed-files:
+    - any-glob-to-any-file: ['Dockerfile']
+  - changed-files:
+    - any-glob-to-any-file: ['docker-compose.yml']
 
 dependencies:
-  - build.gradle.kts
-  - app/build.gradle.kts
-  - buildSrc/**/*.kt
-  - gradle/libs.versions.toml
+  - changed-files:
+    - any-glob-to-any-file: ['build.gradle.kts']
+  - changed-files:
+    - any-glob-to-any-file: ['app/build.gradle.kts']
+  - changed-files:
+    - any-glob-to-any-file: ['buildSrc/**/*.kt']
+  - changed-files:
+    - any-glob-to-any-file: ['gradle/libs.versions.toml']
 
 domain:
-  - domain/model/**
-  - domain/repository/**
-  - domain/usecase/**
+  - changed-files:
+    - any-glob-to-any-file: ['domain/model/**']
+  - changed-files:
+    - any-glob-to-any-file: ['domain/repository/**']
+  - changed-files:
+    - any-glob-to-any-file: ['domain/usecase/**']
 
 data:
-  - data/**
+  - changed-files:
+    - any-glob-to-any-file: ['data/**']
 
 presentation:
-  - presentation/**
-  - ui/**
+  - changed-files:
+    - any-glob-to-any-file: ['presentation/**']
+  - changed-files:
+    - any-glob-to-any-file: ['ui/**']
 
 android:
-  - app/src/main/**
-  - AndroidManifest.xml
+  - changed-files:
+    - any-glob-to-any-file: ['app/src/main/**']
+  - changed-files:
+    - any-glob-to-any-file: ['AndroidManifest.xml']
 
 vulnerability:
-  - **/vulnerability/**
-  - **/vuln/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/vulnerability/**']
+  - changed-files:
+    - any-glob-to-any-file: ['**/vuln/**']
 
 fuzzing:
-  - **/fuzzing/**
-  - **/fuzz/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/fuzzing/**']
+  - changed-files:
+    - any-glob-to-any-file: ['**/fuzz/**']
 
 key-extraction:
-  - **/keyextraction/**
-  - **/keys/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/keyextraction/**']
+  - changed-files:
+    - any-glob-to-any-file: ['**/keys/**']
 
 reporting:
-  - **/report/**
-  - **/reports/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/report/**']
+  - changed-files:
+    - any-glob-to-any-file: ['**/reports/**']
 
 authorization:
-  - **/authorization/**
-  - **/auth/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/authorization/**']
+  - changed-files:
+    - any-glob-to-any-file: ['**/auth/**']
 
 bluetooth:
-  - **/bluetooth/**
-  - **/ble/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/bluetooth/**']
+  - changed-files:
+    - any-glob-to-any-file: ['**/ble/**']
