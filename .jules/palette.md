@@ -1,0 +1,3 @@
+## 2026-05-24 - Add keyboard actions to Authorization text field
+**Learning:** In Jetpack Compose, configuring `keyboardOptions` (e.g., `imeAction = ImeAction.Done`) and `keyboardActions` (e.g., `onDone`) for text inputs enhances UX by allowing users to submit forms directly from the software keyboard.
+**Action:** Always include keyboard options and actions for single-line text inputs, especially for primary forms, and ensure `LocalFocusManager.current.clearFocus()` is called within the action to dismiss the keyboard. Include the same validation logic (e.g., `if (authId.isNotBlank() && !isLoading)`) used by the primary submit button.
