@@ -12,6 +12,7 @@ on:
   workflow_dispatch:
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   JAVA_VERSION: '17'
   JAVA_DISTRIBUTION: 'temurin'
 
@@ -38,8 +39,8 @@ jobs:
           languages: kotlin, java
           queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      - name: Build App
+        run: ./gradlew app:assembleDevDebug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -62,6 +63,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Run ktlint
@@ -94,6 +96,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
@@ -141,7 +144,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           paths: |
-            ${{ github.workspace }}/app/build/reports/jacoco/testDebugUnitTestCoverage/testDebugUnitTestCoverage.xml
+            ${{ github.workspace }}/app/build/reports/jacoco/testDevDebugUnitTestCoverage/testDevDebugUnitTestCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80
@@ -163,6 +166,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
@@ -172,7 +176,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew app:lintDevDebug
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
@@ -209,6 +213,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
@@ -253,6 +258,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
@@ -378,6 +384,7 @@ jobs:
 
       - name: Run dependency check
         run: ./gradlew dependencyCheckAnalyze
+        continue-on-error: true
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4

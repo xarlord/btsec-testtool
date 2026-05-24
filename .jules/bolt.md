@@ -1,3 +1,0 @@
-## 2026-05-24 - Missing unique key parameter in LazyColumn items
-**Learning:** Found that LazyColumn in `ScannerScreen.kt` doesn't provide a unique key for list items, which can cause unnecessary and expensive recompositions when the dynamic list changes (Bluetooth devices scanning dynamically changes the list). Memory explicitly states: "When optimizing Jetpack Compose lists, always provide a stable, unique `key` parameter (e.g., `key = { it.address }`) to `items()` inside `LazyColumn` or `LazyRow` to prevent unnecessary and expensive recompositions when dynamic lists change."
-**Action:** Add `key = { it.address }` to `items()` in Compose lists.
