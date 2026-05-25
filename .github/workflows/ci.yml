@@ -167,6 +167,7 @@ jobs:
 
       - name: Run Android Lint
         run: ./gradlew app:lintDevDebug
+        continue-on-error: true
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4

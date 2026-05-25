@@ -8,6 +8,8 @@
  */
 package com.btsec.testtool.presentation.navigation
 
+import androidx.compose.material3.Text
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -105,28 +107,28 @@ fun BTSecNavGraph(
         composable(route = "${Routes.FUZZER}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement FuzzerScreen")
+            Text("FuzzerScreen placeholder")
         }
 
         // Key Extraction screen
         composable(route = "${Routes.KEYS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement KeyExtractionScreen")
+            Text("KeyExtractionScreen placeholder")
         }
 
         // Vulnerability Scanner screen
         composable(route = "${Routes.VULNS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement VulnScannerScreen")
+            Text("VulnScannerScreen placeholder")
         }
 
         // Reports screen
         composable(route = "${Routes.REPORTS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement ReportsScreen")
+            Text("ReportsScreen placeholder")
         }
     }
 }
