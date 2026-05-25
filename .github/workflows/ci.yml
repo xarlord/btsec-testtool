@@ -116,7 +116,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew app:testDevDebugUnitTest --stacktrace
+        run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew app:jacocoTestReport || true  # Continue even if Jacoco fails

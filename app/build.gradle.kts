@@ -326,6 +326,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.kotlinCoroutines}")
     testImplementation("io.mockk:mockk:${Versions.mockk}")
+    testImplementation("org.mockito:mockito-core:5.10.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
+
     testImplementation("app.cash.turbine:turbine:${Versions.turbine}")
     testImplementation("com.google.truth:truth:${Versions.truth}")
     testImplementation("org.robolectric:robolectric:${Versions.robolectric}")
