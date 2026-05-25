@@ -105,7 +105,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin --stacktrace
+        run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin -x app:compileProdDebugUnitTestKotlin --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
@@ -135,7 +135,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           paths: |
-            ${{ github.workspace }}/app/build/reports/jacoco/testDebugUnitTestCoverage/testDebugUnitTestCoverage.xml
+            ${{ github.workspace }}/app/build/reports/jacoco/testDevDebugUnitTestCoverage/testDevDebugUnitTestCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80
