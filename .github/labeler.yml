@@ -2,67 +2,82 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - *.md
-  - docs/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.md']
+    - any-glob-to-any-file: ['docs/**']
 
 security:
-  - SECURITY.md
-  - **/security/**
+  - changed-files:
+    - any-glob-to-any-file: ['SECURITY.md']
+    - any-glob-to-any-file: ['**/security/**']
 
 tests:
-  - **/test/**
-  - **/*Test.kt
-  - **/*Test.java
-  - **/androidTest/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/test/**']
+    - any-glob-to-any-file: ['**/*Test.kt']
+    - any-glob-to-any-file: ['**/*Test.java']
+    - any-glob-to-any-file: ['**/androidTest/**']
 
 ci-cd:
-  - .github/workflows/**
-  - .github/actions/**
-  - Dockerfile
-  - docker-compose.yml
+  - changed-files:
+    - any-glob-to-any-file: ['.github/workflows/**']
+    - any-glob-to-any-file: ['.github/actions/**']
+    - any-glob-to-any-file: ['Dockerfile']
+    - any-glob-to-any-file: ['docker-compose.yml']
 
 dependencies:
-  - build.gradle.kts
-  - app/build.gradle.kts
-  - buildSrc/**/*.kt
-  - gradle/libs.versions.toml
+  - changed-files:
+    - any-glob-to-any-file: ['build.gradle.kts']
+    - any-glob-to-any-file: ['app/build.gradle.kts']
+    - any-glob-to-any-file: ['buildSrc/**/*.kt']
+    - any-glob-to-any-file: ['gradle/libs.versions.toml']
 
 domain:
-  - domain/model/**
-  - domain/repository/**
-  - domain/usecase/**
+  - changed-files:
+    - any-glob-to-any-file: ['domain/model/**']
+    - any-glob-to-any-file: ['domain/repository/**']
+    - any-glob-to-any-file: ['domain/usecase/**']
 
 data:
-  - data/**
+  - changed-files:
+    - any-glob-to-any-file: ['data/**']
 
 presentation:
-  - presentation/**
-  - ui/**
+  - changed-files:
+    - any-glob-to-any-file: ['presentation/**']
+    - any-glob-to-any-file: ['ui/**']
 
 android:
-  - app/src/main/**
-  - AndroidManifest.xml
+  - changed-files:
+    - any-glob-to-any-file: ['app/src/main/**']
+    - any-glob-to-any-file: ['AndroidManifest.xml']
 
 vulnerability:
-  - **/vulnerability/**
-  - **/vuln/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/vulnerability/**']
+    - any-glob-to-any-file: ['**/vuln/**']
 
 fuzzing:
-  - **/fuzzing/**
-  - **/fuzz/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/fuzzing/**']
+    - any-glob-to-any-file: ['**/fuzz/**']
 
 key-extraction:
-  - **/keyextraction/**
-  - **/keys/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/keyextraction/**']
+    - any-glob-to-any-file: ['**/keys/**']
 
 reporting:
-  - **/report/**
-  - **/reports/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/report/**']
+    - any-glob-to-any-file: ['**/reports/**']
 
 authorization:
-  - **/authorization/**
-  - **/auth/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/authorization/**']
+    - any-glob-to-any-file: ['**/auth/**']
 
 bluetooth:
-  - **/bluetooth/**
-  - **/ble/**
+  - changed-files:
+    - any-glob-to-any-file: ['**/bluetooth/**']
+    - any-glob-to-any-file: ['**/ble/**']
