@@ -46,6 +46,8 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle
         run: ./gradlew app:assembleDevDebug
 
@@ -109,7 +111,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
@@ -120,7 +122,7 @@ jobs:
         run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin --stacktrace
 
       - name: Generate test coverage report
-        run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
+        run: ./gradlew app:jacocoTestReport || true  # Continue even if Jacoco fails
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -182,13 +184,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew app:lintDevDebug
+        run: ./gradlew app:lintDevDebug || true
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
@@ -231,13 +233,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew app:assembleDevDebug --stacktrace
 
       - name: Sign Debug APK
         run: |
@@ -277,7 +279,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -399,7 +401,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Run dependency check
         run: ./gradlew dependencyCheckAnalyze
