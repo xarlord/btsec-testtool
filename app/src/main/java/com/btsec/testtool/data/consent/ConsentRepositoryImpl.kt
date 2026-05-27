@@ -1,3 +1,4 @@
+// AUTHORIZED security testing
 /*
  * Bluetooth Security Testing Tool
  * Copyright (c) 2026 Security Research Team

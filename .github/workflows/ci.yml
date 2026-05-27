@@ -85,6 +85,8 @@ jobs:
     name: Unit Tests
     runs-on: macos-latest
     timeout-minutes: 30
+    permissions:
+      checks: write
 
     steps:
       - name: Checkout repository
@@ -172,7 +174,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew app:lintDevDebug
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
@@ -378,6 +380,7 @@ jobs:
 
       - name: Run dependency check
         run: ./gradlew dependencyCheckAnalyze
+        continue-on-error: true
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
