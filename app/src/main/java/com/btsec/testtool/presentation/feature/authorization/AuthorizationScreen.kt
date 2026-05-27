@@ -3,9 +3,10 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
+
 package com.btsec.testtool.presentation.feature.authorization
 
 import androidx.compose.foundation.layout.*
