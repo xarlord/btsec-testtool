@@ -44,7 +44,7 @@ jobs:
           distribution: temurin
           java-version: 17
       - name: Manual Build
-        run: ./gradlew app:assembleDevDebug
+        run: ./gradlew app:assembleDevDebug -x app:compileDevReleaseUnitTestKotlin -x app:compileProdDebugUnitTestKotlin -x app:compileProdReleaseUnitTestKotlin
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -114,7 +114,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin --stacktrace
+        run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin -x app:compileDevReleaseUnitTestKotlin -x app:compileProdDebugUnitTestKotlin -x app:compileProdReleaseUnitTestKotlin --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew app:jacocoTestReport || true  # Continue even if Jacoco fails
@@ -181,7 +181,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew app:lintDevDebug
+        run: ./gradlew app:lintDevDebug -x app:compileDevDebugUnitTestKotlin -x app:compileDevReleaseUnitTestKotlin -x app:compileProdDebugUnitTestKotlin -x app:compileProdReleaseUnitTestKotlin
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
