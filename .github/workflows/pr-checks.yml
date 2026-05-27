@@ -156,7 +156,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew test jacocoTestCoverageVerification
+        run: ./gradlew app:testDevDebugUnitTest app:jacocoTestReport
 
       - name: Check coverage threshold
         run: |
