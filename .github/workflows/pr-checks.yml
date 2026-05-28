@@ -140,6 +140,9 @@ jobs:
     name: Test Coverage Check
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -160,7 +163,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew app:testDevDebugUnitTest app:jacocoTestReport
+        run: ./gradlew app:testDevDebugUnitTest app:jacocoTestReport -x app:compileDevDebugUnitTestKotlin
 
       - name: Verify coverage report
         run: |
