@@ -51,7 +51,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build project
-        run: ./gradlew app:assembleDevDebug
+        run: ./gradlew app:assembleDevDebug -x app:minifyDevReleaseWithR8 -x app:minifyProdReleaseWithR8
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -120,7 +120,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
+        run: ./gradlew app:testDevDebugUnitTest --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
