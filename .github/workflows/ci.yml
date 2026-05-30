@@ -24,9 +24,6 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 30
     permissions:
-      checks: write
-      pull-requests: write
-    permissions:
       actions: read
       contents: read
       security-events: write
@@ -169,9 +166,6 @@ jobs:
     name: Android Lint
     runs-on: macos-latest
     timeout-minutes: 30
-    permissions:
-      checks: write
-      pull-requests: write
 
     steps:
       - name: Checkout repository
