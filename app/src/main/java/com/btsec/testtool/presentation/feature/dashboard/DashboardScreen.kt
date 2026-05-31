@@ -8,17 +8,33 @@
  */
 package com.btsec.testtool.presentation.feature.dashboard
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Scanner
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Scanner
+import androidx.compose.material.icons.filled.Science
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -50,7 +66,7 @@ fun DashboardScreen(
     onNavigateToKeys: () -> Unit,
     onNavigateToVulns: () -> Unit,
     onNavigateToReports: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -60,19 +76,20 @@ fun DashboardScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = "Navigate back",
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AuthorizationInfoCard(authId = authId)
             FeatureGrid(
@@ -80,7 +97,7 @@ fun DashboardScreen(
                 onNavigateToFuzzer = onNavigateToFuzzer,
                 onNavigateToKeys = onNavigateToKeys,
                 onNavigateToVulns = onNavigateToVulns,
-                onNavigateToReports = onNavigateToReports
+                onNavigateToReports = onNavigateToReports,
             )
         }
     }
@@ -90,30 +107,31 @@ fun DashboardScreen(
 private fun AuthorizationInfoCard(authId: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.Security,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                contentDescription = "Authorization Status Icon",
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
                     text = "Authorized",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
                 Text(
                     text = "Authorization ID: $authId",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
             }
         }
@@ -126,54 +144,54 @@ private fun FeatureGrid(
     onNavigateToFuzzer: () -> Unit,
     onNavigateToKeys: () -> Unit,
     onNavigateToVulns: () -> Unit,
-    onNavigateToReports: () -> Unit
+    onNavigateToReports: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
             text = "Features",
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             FeatureCard(
                 icon = Icons.Filled.Scanner,
                 title = stringResource(R.string.nav_scanner),
                 description = "Scan for Bluetooth devices",
                 onClick = onNavigateToScanner,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             FeatureCard(
                 icon = Icons.Filled.BugReport,
                 title = stringResource(R.string.nav_vulns),
                 description = "Scan for vulnerabilities",
                 onClick = onNavigateToVulns,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
         }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             FeatureCard(
                 icon = Icons.Filled.Science,
                 title = stringResource(R.string.nav_fuzzer),
                 description = "Fuzz Bluetooth protocols",
                 onClick = onNavigateToFuzzer,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             FeatureCard(
                 icon = Icons.Filled.Key,
                 title = stringResource(R.string.nav_keys),
                 description = "Extract Bluetooth keys",
                 onClick = onNavigateToKeys,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
         }
 
@@ -182,7 +200,7 @@ private fun FeatureGrid(
             title = stringResource(R.string.nav_reports),
             description = "View and generate reports",
             onClick = onNavigateToReports,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -193,29 +211,30 @@ private fun FeatureCard(
     title: String,
     description: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier.height(120.dp)
+        modifier = modifier.height(120.dp),
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = title,
                 modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
             Text(text = title, style = MaterialTheme.typography.titleMedium)
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -225,41 +244,44 @@ private fun FeatureCard(
  * ViewModel for the Dashboard screen.
  */
 @HiltViewModel
-class DashboardViewModel @Inject constructor(
-    private val authorizationUseCase: AuthorizationUseCase
-) : ViewModel() {
+class DashboardViewModel
+    @Inject
+    constructor(
+        private val authorizationUseCase: AuthorizationUseCase,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(DashboardUiState())
+        val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(DashboardUiState())
-    val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+        init {
+            loadAuthorizationDetails()
+        }
 
-    init {
-        loadAuthorizationDetails()
-    }
-
-    private fun loadAuthorizationDetails() {
-        viewModelScope.launch {
-            authorizationUseCase.getCurrentAuthorization().collect { auth ->
-                auth?.let {
-                    _uiState.value = _uiState.value.copy(
-                        authId = it.authId,
-                        isValid = true,
-                        details = authorizationUseCase.getAuthorizationDetails()
-                    )
-                } ?: run {
-                    _uiState.value = _uiState.value.copy(
-                        authId = null,
-                        isValid = false,
-                        details = null
-                    )
+        private fun loadAuthorizationDetails() {
+            viewModelScope.launch {
+                authorizationUseCase.getCurrentAuthorization().collect { auth ->
+                    auth?.let {
+                        _uiState.value =
+                            _uiState.value.copy(
+                                authId = it.authId,
+                                isValid = true,
+                                details = authorizationUseCase.getAuthorizationDetails(),
+                            )
+                    } ?: run {
+                        _uiState.value =
+                            _uiState.value.copy(
+                                authId = null,
+                                isValid = false,
+                                details = null,
+                            )
+                    }
                 }
             }
         }
-    }
 
-    fun refreshAuthorization() {
-        loadAuthorizationDetails()
+        fun refreshAuthorization() {
+            loadAuthorizationDetails()
+        }
     }
-}
 
 /**
  * UI state for the Dashboard screen.
@@ -267,5 +289,5 @@ class DashboardViewModel @Inject constructor(
 data class DashboardUiState(
     val authId: String? = null,
     val isValid: Boolean = false,
-    val details: com.btsec.testtool.domain.usecase.AuthorizationDetails? = null
+    val details: com.btsec.testtool.domain.usecase.AuthorizationDetails? = null,
 )
