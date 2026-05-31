@@ -8,10 +8,13 @@ on:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
@@ -53,7 +56,7 @@ jobs:
   # Build and attach APKs to release
   release-apks:
     name: Build Release APKs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: release
     if: needs.release.result == 'success'
 
