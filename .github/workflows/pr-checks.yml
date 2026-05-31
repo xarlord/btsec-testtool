@@ -65,10 +65,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Check for legal disclaimers in new files
         run: |
           echo "Checking legal disclaimers in modified files..."
+
+          # Fetch the base branch to avoid 'fatal: ambiguous argument' errors
+          git fetch origin ${{ github.base_ref }}:${{ github.base_ref }} --depth=1 || true
 
           # Get list of changed Kotlin files
           git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
@@ -95,6 +102,9 @@ jobs:
         run: |
           echo "Checking for authorization enforcement in new code..."
 
+          # Fetch the base branch to avoid 'fatal: ambiguous argument' errors
+          git fetch origin ${{ github.base_ref }}:${{ github.base_ref }} --depth=1 || true
+
           git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
 
           # Check use case files for authorization
@@ -115,6 +125,9 @@ jobs:
       - name: Check for security concerns
         run: |
           echo "Checking for potential security issues..."
+
+          # Fetch the base branch to avoid 'fatal: ambiguous argument' errors
+          git fetch origin ${{ github.base_ref }}:${{ github.base_ref }} --depth=1 || true
 
           git diff origin/${{ github.base_ref }}...HEAD > /tmp/pr.diff
 
@@ -142,6 +155,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -179,6 +196,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         with:
           fetch-depth: 0
 
@@ -241,6 +260,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Check for README updates
         run: |
@@ -274,6 +297,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Label based on files changed
         uses: actions/labeler@v5
