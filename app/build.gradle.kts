@@ -323,6 +323,10 @@ dependencies {
     debugImplementation("com.squareup.leakcanary:leakcanary-android:${Versions.leakCanary}")
 
     // Testing
+    testImplementation("org.mockito:mockito-core:5.7.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("app.cash.turbine:turbine:1.0.0")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.kotlinCoroutines}")
     testImplementation("io.mockk:mockk:${Versions.mockk}")
