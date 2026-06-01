@@ -1,0 +1,11 @@
+💡 What:
+Added a unique `key = { it.address }` parameter to the `items()` block within the `LazyColumn` inside `ScannerScreen.kt`. Also added an inline comment explaining the optimization.
+
+🎯 Why:
+In Jetpack Compose, dynamic lists in `LazyColumn` can cause severe performance issues (unnecessary recompositions of all items) when the list changes (e.g. new discovered devices are added) if a stable, unique `key` parameter is not provided. Without a key, Compose uses the item's position, leading to expensive UI updates as items shift.
+
+📊 Impact:
+Significantly reduces unnecessary recompositions of unchanged items when the device list updates during active Bluetooth scanning, saving CPU cycles and battery.
+
+🔬 Measurement:
+Run the application, open the Scanner screen, start scanning for devices, and use the Compose Layout Inspector or Android Studio Profiler. Observe the recomposition count for `DeviceCard` composables; they should no longer recompose unnecessarily when new items are added to the list.
