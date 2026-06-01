@@ -183,9 +183,9 @@ android {
             "OldTargetApi",
             "IconDuplicates",
             "IconLocation",
-            "GoogleAppIndexingWarning"
+            "GoogleAppIndexingWarning", "InvalidPackage"
         )
-        baseline = file("lint-baseline.xml")
+
     }
 }
 

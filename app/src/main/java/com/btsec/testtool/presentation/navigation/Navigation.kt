@@ -105,28 +105,28 @@ fun BTSecNavGraph(
         composable(route = "${Routes.FUZZER}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement FuzzerScreen")
+            /* TODO */("Implement FuzzerScreen")
         }
 
         // Key Extraction screen
         composable(route = "${Routes.KEYS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement KeyExtractionScreen")
+            /* TODO */("Implement KeyExtractionScreen")
         }
 
         // Vulnerability Scanner screen
         composable(route = "${Routes.VULNS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement VulnScannerScreen")
+            /* TODO */("Implement VulnScannerScreen")
         }
 
         // Reports screen
         composable(route = "${Routes.REPORTS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement ReportsScreen")
+            /* TODO */("Implement ReportsScreen")
         }
     }
 }

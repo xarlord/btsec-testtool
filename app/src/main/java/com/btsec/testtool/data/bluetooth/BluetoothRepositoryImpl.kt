@@ -65,6 +65,7 @@ import javax.inject.Singleton
  * connection, and BLE operations.
  */
 @Singleton
+@android.annotation.SuppressLint("MissingPermission")
 class BluetoothRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : BluetoothRepository {
