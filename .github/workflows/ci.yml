@@ -1,3 +1,6 @@
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # Bluetooth Security Testing Tool - CI/CD Pipeline
 # Copyright (c) 2026 Security Research Team
 # Licensed under MIT with additional restrictions

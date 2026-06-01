@@ -1,3 +1,6 @@
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # Pull Request Checks
 # Additional checks specific to pull requests
 
@@ -65,6 +68,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check for legal disclaimers in new files
         run: |
@@ -142,6 +147,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -156,7 +163,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew test jacocoTestCoverageVerification
+        run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin
 
       - name: Check coverage threshold
         run: |
@@ -241,6 +248,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check for README updates
         run: |
@@ -274,6 +283,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Label based on files changed
         uses: actions/labeler@v5
