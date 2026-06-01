@@ -329,6 +329,10 @@ dependencies {
     testImplementation("app.cash.turbine:turbine:${Versions.turbine}")
     testImplementation("com.google.truth:truth:${Versions.truth}")
     testImplementation("org.robolectric:robolectric:${Versions.robolectric}")
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.0")
+    testImplementation("junit:junit:4.13.2")
 
     // Android Testing
     androidTestImplementation("androidx.test.ext:junit:${Versions.androidxJunit}")
@@ -344,6 +348,4 @@ dependencies {
 }
 
 // OWASP Dependency Check Configuration
-tasks.named("dependencyCheckAnalyze") {
-    dependsOn("assembleDebug")
-}
+// Configuration caching workaround
