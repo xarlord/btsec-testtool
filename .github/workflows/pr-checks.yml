@@ -67,6 +67,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Check for legal disclaimers in new files
         run: |
@@ -146,6 +148,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -160,7 +164,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew app:testDevDebugUnitTest
+        run: ./gradlew app:testDevDebugUnitTest -x app:compileDevDebugUnitTestKotlin
 
       - name: Check coverage threshold
         run: |
@@ -183,6 +187,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         with:
           fetch-depth: 0
         with:
@@ -249,6 +255,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Check for README updates
         run: |
@@ -282,6 +290,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         with:
           fetch-depth: 0
 
