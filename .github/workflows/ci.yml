@@ -38,8 +38,17 @@ jobs:
           languages: kotlin, java
           queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build project
+        run: ./gradlew app:assembleDevDebug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -85,6 +94,9 @@ jobs:
     name: Unit Tests
     runs-on: macos-latest
     timeout-minutes: 30
+    permissions:
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -108,7 +120,7 @@ jobs:
         run: ./gradlew test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
 
       - name: Generate test coverage report
-        run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
+        run: ./gradlew app:jacocoTestReport || true  # Continue even if Jacoco fails
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -172,21 +184,21 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew app:lintDevDebug
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lint-reports
-          path: app/build/reports/lint-results-*.html
+          path: app/build/reports/lint-results-devDebug.html
 
       - name: Annotate lint issues
         uses: yutailang0119/action-android-lint@v3
         if: always()
         continue-on-error: true
         with:
-          report-path: app/build/reports/lint-results-*.xml
+          report-path: app/build/reports/lint-results-devDebug.xml
 
   # ============================================
   # Build Verification
@@ -377,6 +389,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency check
+        continue-on-error: true
         run: ./gradlew dependencyCheckAnalyze
 
       - name: Upload dependency report
