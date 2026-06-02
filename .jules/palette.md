@@ -1,0 +1,3 @@
+## 2024-06-02 - Form Submission via Keyboard Action in Jetpack Compose
+**Learning:** For `OutlinedTextField` and other text inputs in Jetpack Compose, explicitly adding `KeyboardOptions` (`imeAction = ImeAction.Done`) and `KeyboardActions` (`onDone = { focusManager.clearFocus() }`) allows the user to submit forms or clear focus directly from the software keyboard, creating a much smoother mobile UX compared to forcing them to manually dismiss the keyboard and find the UI submit button.
+**Action:** When implementing new forms or reviewing existing text inputs, explicitly include keyboard options/actions, ensuring that any submission logic triggered by `onDone` strictly mirrors the constraints applied to the primary visual submit button (e.g., verifying `!isLoading`).
