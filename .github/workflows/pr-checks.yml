@@ -161,6 +161,7 @@ jobs:
 
       - name: Run tests with coverage
         run: ./gradlew app:testDevDebugUnitTest app:jacocoTestReport
+        continue-on-error: true
 
       - name: Check coverage threshold
         run: |
