@@ -1,7 +1,0 @@
-💡 What: Added `keyboardOptions` (`imeAction = ImeAction.Done`) and `keyboardActions` (`onDone`) to the OutlinedTextField in `AuthorizationScreen.kt`. It also uses `LocalFocusManager` to clear focus upon submission.
-
-🎯 Why: The text input for the authorization ID did not support submitting the form directly from the software keyboard, requiring users to manually dismiss the keyboard and click the Verify button. This improves the intuitiveness and keyboard accessibility of the authorization flow.
-
-📸 Before/After: Before, the user had to tap outside the text field and then tap the "Verify" button. Now, the user can directly tap the "Done" button on the software keyboard to submit the form.
-
-♿ Accessibility: Improves keyboard navigation and efficiency for users relying on software keyboards or alternative input methods that map to the "Done" action, reducing the number of required interactions.
