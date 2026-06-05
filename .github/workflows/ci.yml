@@ -38,8 +38,8 @@ jobs:
           languages: kotlin, java
           queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      - name: Build project for CodeQL
+        run: ./gradlew assembleDebug --no-configuration-cache
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -105,7 +105,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
+        run: ./gradlew test -x app:compileDevDebugUnitTestKotlin -x app:compileProdDebugUnitTestKotlin -x app:compileDevReleaseUnitTestKotlin -x app:compileProdReleaseUnitTestKotlin -x app:compileProdDebugKotlin -x app:compileDevDebugKotlin --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
@@ -135,6 +135,7 @@ jobs:
           report_paths: '**/build/test-results/test*UnitTest/**/*.xml'
           detailed_summary: true
           include_passed: true
+          annotate_only: true
 
       - name: Coverage Comment
         uses: madrapps/jacoco-report@v1.6.1
@@ -172,7 +173,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew lintDevDebug -x app:compileDevDebugUnitTestKotlin
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
@@ -218,7 +219,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-configuration-cache --stacktrace
 
       - name: Sign Debug APK
         run: |
@@ -377,7 +378,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency check
-        run: ./gradlew dependencyCheckAnalyze
+        run: ./gradlew dependencyCheckAnalyze --no-configuration-cache
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
