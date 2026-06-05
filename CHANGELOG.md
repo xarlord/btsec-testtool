@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/xarlord/btsec-testtool/compare/v1.2.1...v1.3.0) (2026-06-05)
+
+
+### Features
+
+* implement real application infrastructure ([c5fe984](https://github.com/xarlord/btsec-testtool/commit/c5fe984a7a530ee8216730c812772fc8a87f68ac))
+
 ## [1.2.1](https://github.com/xarlord/btsec-testtool/compare/v1.2.0...v1.2.1) (2026-06-05)
 
 
