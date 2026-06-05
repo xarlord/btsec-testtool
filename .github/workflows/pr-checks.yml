@@ -65,7 +65,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Check for legal disclaimers in new files
         run: |
           echo "Checking legal disclaimers in modified files..."
@@ -142,7 +143,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -241,7 +243,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Check for README updates
         run: |
           if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q 'README.md'; then
@@ -274,7 +277,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Label based on files changed
         uses: actions/labeler@v5
         with:

@@ -1,0 +1,3 @@
+## 2025-02-07 - Enhance keyboard UX for Authorization Screen
+**Learning:** The text input for the authorization ID did not support submitting the form directly from the software keyboard (`imeAction = ImeAction.Done`), requiring users to manually dismiss the keyboard and click the Verify button.
+**Action:** When adding text inputs in Jetpack Compose, consistently configure `keyboardOptions` (e.g., `imeAction = ImeAction.Done`) and `keyboardActions` (e.g., `onDone`) to allow users to submit forms directly. Ensure `LocalFocusManager.current.clearFocus()` is called within the action to dismiss the keyboard, and explicitly include the same validation logic (e.g., `if (isValid && !isLoading)`) used by the primary submit button to avoid bypassing constraints.
