@@ -259,7 +259,7 @@ enum class FuzzMethod {
     RANDOM,                // Random bytes
     SEQUENTIAL,            // Sequential patterns
     LENGTH_FUZZING,        // Vary length (buffer overflow)
-   边界_CASE,              // Boundary values
+    BOUNDARY_CASE,         // Boundary values
     FORMAT_STRING,         // Format string patterns
     INJECTION,             // Injection patterns
     MUTATION,              // Mutate valid packets
