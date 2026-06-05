@@ -16,6 +16,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import com.btsec.testtool.domain.model.*
+import com.btsec.testtool.domain.repository.FuzzProgress
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -237,7 +238,15 @@ class BleFuzzEngine @Inject constructor(
             } catch (_: SecurityException) { null }
         }
 
-        override fun disconnect() { try { gatt?.disconnect(); gatt?.close() } catch (_: Exception) {} gatt = null }
+        override fun disconnect() {
+            try {
+                gatt?.disconnect()
+                gatt?.close()
+            } catch (_: Exception) {
+                // ignore
+            }
+            gatt = null
+        }
     }
 
     /** Simulated GATT for testing without real hardware. */

@@ -306,6 +306,7 @@ class ConsentRepositoryImpl @Inject constructor(
             when (format) {
                 AuditExportFormat.JSON -> file.writeText("[]")
                 AuditExportFormat.CSV -> file.writeText("timestamp,action,target\n")
+                AuditExportFormat.XML -> file.writeText("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<audit></audit>")
             }
         }
     }

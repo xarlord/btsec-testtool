@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ExportFormat
+import com.btsec.testtool.domain.repository.ReportConfig
 import com.btsec.testtool.domain.repository.ReportGenerationStatus
 import com.btsec.testtool.domain.repository.ReportsSummary
 import com.btsec.testtool.domain.usecase.ReportGenerationUseCase

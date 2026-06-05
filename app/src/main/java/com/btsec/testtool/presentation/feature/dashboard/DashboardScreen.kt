@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment

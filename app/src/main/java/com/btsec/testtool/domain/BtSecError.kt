@@ -22,115 +22,115 @@ sealed class BtSecError(
 
     // ── Bluetooth Errors ──
 
-    data class BluetoothUnavailable(override val message: String = "Bluetooth is not available on this device") :
-        BtSecError("BT_001", message)
+    data class BluetoothUnavailable(val msg: String = "Bluetooth is not available on this device") :
+        BtSecError("BT_001", msg)
 
-    data class BluetoothDisabled(override val message: String = "Please enable Bluetooth to continue") :
-        BtSecError("BT_002", message)
+    data class BluetoothDisabled(val msg: String = "Please enable Bluetooth to continue") :
+        BtSecError("BT_002", msg)
 
-    data class BluetoothPermissionDenied(override val message: String = "Bluetooth permission is required for scanning") :
-        BtSecError("BT_003", message)
+    data class BluetoothPermissionDenied(val msg: String = "Bluetooth permission is required for scanning") :
+        BtSecError("BT_003", msg)
 
-    data class LocationPermissionDenied(override val message: String = "Location permission is required for BLE scanning") :
-        BtSecError("BT_004", message)
+    data class LocationPermissionDenied(val msg: String = "Location permission is required for BLE scanning") :
+        BtSecError("BT_004", msg)
 
     // ── Connection Errors ──
 
-    data class ConnectionFailed(val address: String, override val message: String = "Failed to connect to device") :
-        BtSecError("CONN_001", "$message ($address)")
+    data class ConnectionFailed(val address: String, val msg: String = "Failed to connect to device") :
+        BtSecError("CONN_001", "$msg ($address)")
 
-    data class ConnectionTimeout(val address: String, override val message: String = "Connection timed out") :
-        BtSecError("CONN_002", "$message ($address)")
+    data class ConnectionTimeout(val address: String, val msg: String = "Connection timed out") :
+        BtSecError("CONN_002", "$msg ($address)")
 
-    data class ConnectionLost(val address: String, override val message: String = "Connection lost") :
-        BtSecError("CONN_003", "$message ($address)")
+    data class ConnectionLost(val address: String, val msg: String = "Connection lost") :
+        BtSecError("CONN_003", "$msg ($address)")
 
-    data class ServiceDiscoveryFailed(val address: String, override val message: String = "Service discovery failed") :
-        BtSecError("CONN_004", "$message ($address)")
+    data class ServiceDiscoveryFailed(val address: String, val msg: String = "Service discovery failed") :
+        BtSecError("CONN_004", "$msg ($address)")
 
     // ── GATT Errors ──
 
-    data class GattOperationFailed(val operation: String, val status: Int, override val message: String = "GATT operation failed") :
-        BtSecError("GATT_001", "$message: $operation (status=$status)")
+    data class GattOperationFailed(val operation: String, val status: Int, val msg: String = "GATT operation failed") :
+        BtSecError("GATT_001", "$msg: $operation (status=$status)")
 
-    data class GattWriteFailed(val charUuid: String, override val message: String = "Failed to write to characteristic") :
-        BtSecError("GATT_002", "$message: $charUuid")
+    data class GattWriteFailed(val charUuid: String, val msg: String = "Failed to write to characteristic") :
+        BtSecError("GATT_002", "$msg: $charUuid")
 
-    data class GattReadFailed(val charUuid: String, override val message: String = "Failed to read characteristic") :
-        BtSecError("GATT_003", "$message: $charUuid")
+    data class GattReadFailed(val charUuid: String, val msg: String = "Failed to read characteristic") :
+        BtSecError("GATT_003", "$msg: $charUuid")
 
-    data class GattNotificationFailed(val charUuid: String, override val message: String = "Failed to subscribe to notifications") :
-        BtSecError("GATT_004", "$message: $charUuid")
+    data class GattNotificationFailed(val charUuid: String, val msg: String = "Failed to subscribe to notifications") :
+        BtSecError("GATT_004", "$msg: $charUuid")
 
     // ── Authorization Errors ──
 
-    data class NotAuthorized(override val message: String = "Authorization required") :
-        BtSecError("AUTH_001", message)
+    data class NotAuthorized(val msg: String = "Authorization required") :
+        BtSecError("AUTH_001", msg)
 
-    data class AuthorizationExpired(override val message: String = "Authorization has expired") :
-        BtSecError("AUTH_002", message)
+    data class AuthorizationExpired(val msg: String = "Authorization has expired") :
+        BtSecError("AUTH_002", msg)
 
-    data class AuthorizationRevoked(override val message: String = "Authorization has been revoked") :
-        BtSecError("AUTH_003", message)
+    data class AuthorizationRevoked(val msg: String = "Authorization has been revoked") :
+        BtSecError("AUTH_003", msg)
 
-    data class ActionNotInScope(val action: String, override val message: String = "Action not authorized") :
-        BtSecError("AUTH_004", "$message: $action")
+    data class ActionNotInScope(val action: String, val msg: String = "Action not authorized") :
+        BtSecError("AUTH_004", "$msg: $action")
 
-    data class TargetNotInScope(val address: String, override val message: String = "Target device not in scope") :
-        BtSecError("AUTH_005", "$message: $address")
+    data class TargetNotInScope(val address: String, val msg: String = "Target device not in scope") :
+        BtSecError("AUTH_005", "$msg: $address")
 
-    data class InvalidAuthFormat(override val message: String = "Invalid authorization ID format") :
-        BtSecError("AUTH_006", message)
+    data class InvalidAuthFormat(val msg: String = "Invalid authorization ID format") :
+        BtSecError("AUTH_006", msg)
 
-    data class ServerVerificationFailed(override val message: String = "Server verification failed") :
-        BtSecError("AUTH_007", message)
+    data class ServerVerificationFailed(val msg: String = "Server verification failed") :
+        BtSecError("AUTH_007", msg)
 
     // ── Fuzzing Errors ──
 
-    data class FuzzingAlreadyRunning(override val message: String = "Fuzzing session already in progress") :
-        BtSecError("FUZZ_001", message)
+    data class FuzzingAlreadyRunning(val msg: String = "Fuzzing session already in progress") :
+        BtSecError("FUZZ_001", msg)
 
-    data class FuzzingNotRunning(override val message: String = "No active fuzzing session") :
-        BtSecError("FUZZ_002", message)
+    data class FuzzingNotRunning(val msg: String = "No active fuzzing session") :
+        BtSecError("FUZZ_002", msg)
 
-    data class FuzzingConfigError(override val message: String = "Invalid fuzzing configuration") :
-        BtSecError("FUZZ_003", message)
+    data class FuzzingConfigError(val msg: String = "Invalid fuzzing configuration") :
+        BtSecError("FUZZ_003", msg)
 
-    data class RateLimitExceeded(val rate: Int, override val message: String = "Rate limit exceeded") :
-        BtSecError("FUZZ_004", "$message: $rate pkt/s exceeds authorized limit")
+    data class RateLimitExceeded(val rate: Int, val msg: String = "Rate limit exceeded") :
+        BtSecError("FUZZ_004", "$msg: $rate pkt/s exceeds authorized limit")
 
     // ── Vulnerability Scan Errors ──
 
-    data class ScanAlreadyRunning(override val message: String = "Vulnerability scan already in progress") :
-        BtSecError("SCAN_001", message)
+    data class ScanAlreadyRunning(val msg: String = "Vulnerability scan already in progress") :
+        BtSecError("SCAN_001", msg)
 
-    data class ScanNotRunning(override val message: String = "No active scan") :
-        BtSecError("SCAN_002", message)
+    data class ScanNotRunning(val msg: String = "No active scan") :
+        BtSecError("SCAN_002", msg)
 
     // ── Report Errors ──
 
-    data class ReportGenerationFailed(override val message: String = "Failed to generate report") :
-        BtSecError("RPT_001", message)
+    data class ReportGenerationFailed(val msg: String = "Failed to generate report") :
+        BtSecError("RPT_001", msg)
 
-    data class ExportFailed(val format: String, override val message: String = "Export failed") :
-        BtSecError("RPT_002", "$message: $format")
+    data class ExportFailed(val format: String, val msg: String = "Export failed") :
+        BtSecError("RPT_002", "$msg: $format")
 
-    data class FileWriteError(val path: String, override val message: String = "Failed to write file") :
-        BtSecError("RPT_003", "$message: $path")
+    data class FileWriteError(val path: String, val msg: String = "Failed to write file") :
+        BtSecError("RPT_003", "$msg: $path")
 
-    data class PathTraversal(val path: String, override val message: String = "Invalid file path") :
-        BtSecError("SEC_001", "$message: path traversal detected")
+    data class PathTraversal(val path: String, val msg: String = "Invalid file path") :
+        BtSecError("SEC_001", "$msg: path traversal detected")
 
     // ── General Errors ──
 
-    data class NetworkError(override val message: String = "Network error") :
-        BtSecError("NET_001", message)
+    data class NetworkError(val msg: String = "Network error") :
+        BtSecError("NET_001", msg)
 
-    data class StorageError(override val message: String = "Storage error") :
-        BtSecError("STORE_001", message)
+    data class StorageError(val msg: String = "Storage error") :
+        BtSecError("STORE_001", msg)
 
-    data class UnknownError(override val message: String = "An unexpected error occurred", val exception: Throwable? = null) :
-        BtSecError("UNKNOWN", message, exception)
+    data class UnknownError(val msg: String = "An unexpected error occurred", val exception: Throwable? = null) :
+        BtSecError("UNKNOWN", msg, exception)
 
     /**
      * Whether this error is recoverable (user can retry).

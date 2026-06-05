@@ -74,7 +74,7 @@ class FuzzPayloadGenerator @Inject constructor() {
         FuzzDataPattern("BleedingTooth BadChoice",
             "Malformed A2MP packet causing type confusion (CVE-2020-12351)",
             PatternType.KNOWN_EXPLOIT,
-            byteArrayOf(0x08, 0x20, 0x08, 0x00, 0x03, 0x00, 0x01, 0x00, 0x04, 0x00, 0xFF, 0xFF)),
+            byteArrayOf(0x08, 0x20, 0x08, 0x00, 0x03, 0x00, 0x01, 0x00, 0x04, 0x00, 0xFF.toByte(), 0xFF.toByte())),
         // BleedingTooth BadKarma (CVE-2020-12352)
         FuzzDataPattern("BleedingTooth BadKarma",
             "Heap buffer overflow via L2CAP config (CVE-2020-12352)",

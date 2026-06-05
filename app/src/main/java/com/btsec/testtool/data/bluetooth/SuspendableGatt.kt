@@ -78,7 +78,7 @@ class SuspendableGatt {
                         connectionState.value = ConnectionStateInternal.Disconnected
                         Timber.d("GATT disconnected from ${device.address}, status=$status")
                         if (!deferred.isCompleted) {
-                            deferred.tryCompleteExceptionally(
+                            deferred.completeExceptionally(
                                 GattException("Connection failed with status: $status")
                             )
                         }
@@ -96,7 +96,7 @@ class SuspendableGatt {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     op?.tryComplete(gatt.services ?: emptyList())
                 } else {
-                    op?.tryCompleteExceptionally(GattException("Service discovery failed: $status"))
+                    op?.completeExceptionally(GattException("Service discovery failed: $status"))
                 }
             }
 
@@ -112,7 +112,7 @@ class SuspendableGatt {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     op?.tryComplete(value)
                 } else {
-                    op?.tryCompleteExceptionally(GattException("Characteristic read failed: $status"))
+                    op?.completeExceptionally(GattException("Characteristic read failed: $status"))
                 }
             }
 

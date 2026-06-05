@@ -20,8 +20,8 @@ import java.time.Instant
  */
 
 @SuppressLint("MissingPermission")
-fun android.bluetooth.BluetoothDevice.toDomainModel(): BluetoothDevice {
-    return BluetoothDevice(
+fun android.bluetooth.BluetoothDevice.toDomainModel(): com.btsec.testtool.domain.model.BluetoothDevice {
+    return com.btsec.testtool.domain.model.BluetoothDevice(
         address = address,
         name = name,
         type = when (type) {

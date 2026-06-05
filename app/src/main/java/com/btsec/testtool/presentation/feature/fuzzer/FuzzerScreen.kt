@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.FuzzProgress
-import com.btsec.testtool.domain.repository.FuzzStatus
 import com.btsec.testtool.domain.repository.FuzzingStatistics
 import com.btsec.testtool.domain.usecase.FuzzingStartResult
 import com.btsec.testtool.domain.usecase.FuzzingUseCase
@@ -163,10 +162,7 @@ fun FuzzerScreen(
                             Spacer(Modifier.height(8.dp))
 
                             val progressPct = uiState.progress?.getProgressPercentage()?.toFloat() ?: 0f
-                            LinearProgressIndicator(
-                                progress = { progressPct / 100f },
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
 
                             Spacer(Modifier.height(8.dp))
 

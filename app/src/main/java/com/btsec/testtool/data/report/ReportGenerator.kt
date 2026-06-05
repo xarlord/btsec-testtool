@@ -9,242 +9,216 @@
 package com.btsec.testtool.data.report
 
 import com.btsec.testtool.domain.model.*
+import com.btsec.testtool.domain.repository.ExportFormat
+import com.btsec.testtool.domain.repository.ReportConfig
+import com.btsec.testtool.domain.repository.VulnerabilityTestResult
 import java.time.Instant
-import java.util.UUID
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Generates comprehensive security assessment reports from test data.
- *
- * Aggregates vulnerability scan results, fuzzing findings, and key extraction
- * results into structured SecurityReport objects with risk scoring and
- * actionable recommendations.
+ * Generates security reports from test results.
  */
 @Singleton
 class ReportGenerator @Inject constructor() {
 
     /**
-     * Generate a security report from collected test data.
+     * Generate a full security report from test results.
      */
-    suspend fun generateReport(
-        config: ReportConfig,
+    fun generateReport(
         authId: String,
-        devices: List<BluetoothDevice>,
-        vulns: List<Vulnerability>,
-        fuzzResults: List<FuzzResult>,
-        keyResults: List<KeyExtractionResult>
+        config: ReportConfig,
+        targetDevices: List<BluetoothDevice>,
+        vulnerabilityResults: List<VulnerabilityTestResult>,
+        fuzzingResults: List<FuzzResult>,
+        keyExtractionResults: List<KeyExtractionResult>
     ): SecurityReport {
-        val filteredVulns = if (config.includeVulnerabilities) {
-            vulns.filter { it.severity.ordinal <= config.minSeverity.ordinal }
-        } else emptyList()
+        val now = Instant.now()
 
-        val riskScore = calculateRiskScore(vulns)
-        val sections = buildSections(config, filteredVulns, fuzzResults, keyResults, riskScore)
-        val summary = if (config.includeExecutiveSummary) buildExecutiveSummary(filteredVulns, fuzzResults, keyResults, riskScore) else null
-        val recommendations = if (config.includeRecommendations) buildRecommendations(filteredVulns) else emptyList()
+        // Build findings — group by category+severity
+        val findings = vulnerabilityResults
+            .groupBy { Pair(mapCategory(it.vulnerability.category), it.vulnerability.severity) }
+            .map { (catSev, results) ->
+                ReportFinding(
+                    category = catSev.first,
+                    severity = catSev.second,
+                    count = results.size,
+                    description = results.map { it.vulnerability.name }.distinct().joinToString(", "),
+                    affectedDevices = targetDevices.map { it.address }
+                )
+            }
+
+        // Build recommendations from detected vulnerabilities
+        val recommendations = vulnerabilityResults
+            .filter { it.detected }
+            .sortedByDescending { it.vulnerability.cvssScore }
+            .map { result ->
+                Recommendation(
+                    priority = mapPriority(result.vulnerability.severity),
+                    title = "Remediate ${result.vulnerability.name}",
+                    description = result.vulnerability.description,
+                    affectedDevices = targetDevices.map { it.address },
+                    implementation = result.vulnerability.mitigation,
+                    verification = "Re-scan after applying fix to confirm vulnerability is resolved."
+                )
+            }
+            .distinctBy { it.title }
+
+        // Build executive summary
+        val detectedCount = vulnerabilityResults.count { it.detected }
+        val totalScanned = vulnerabilityResults.size
+        val criticalCount = vulnerabilityResults.count {
+            it.detected && it.vulnerability.severity == VulnerabilitySeverity.CRITICAL
+        }
+        val highCount = vulnerabilityResults.count {
+            it.detected && it.vulnerability.severity == VulnerabilitySeverity.HIGH
+        }
+
+        val executiveSummary = buildString {
+            appendLine("Bluetooth Security Assessment Report")
+            appendLine("Generated: $now")
+            appendLine("Target devices: ${targetDevices.size}")
+            appendLine("Vulnerabilities scanned: $totalScanned")
+            appendLine("Vulnerabilities detected: $detectedCount")
+            if (criticalCount > 0) appendLine("⚠️ Critical: $criticalCount")
+            if (highCount > 0) appendLine("🔴 High: $highCount")
+            appendLine()
+            appendLine("Fuzzing sessions: ${fuzzingResults.size}")
+            appendLine("Key extraction attempts: ${keyExtractionResults.size}")
+            if (detectedCount == 0) {
+                appendLine("No critical vulnerabilities detected. Continue monitoring.")
+            } else {
+                appendLine("IMMEDIATE ACTION REQUIRED: $detectedCount vulnerabilities need remediation.")
+            }
+        }
+
+        // Build appendix
+        val appendix = ReportAppendix(
+            toolsUsed = listOf("BTSec TestTool v1.2.1", "BLE Fuzzing Engine", "Vulnerability Scanner"),
+            testMethodology = "Automated scanning using CVE-specific test vectors, BLE packet fuzzing, and key extraction analysis.",
+            limitations = listOf(
+                "Tests performed from Android device perspective only",
+                "Some vulnerabilities require specific hardware/firmware to exploit",
+                "Results represent point-in-time assessment"
+            ),
+            glossary = mapOf(
+                "CVSS" to "Common Vulnerability Scoring System",
+                "CVE" to "Common Vulnerabilities and Exposures",
+                "BLE" to "Bluetooth Low Energy",
+                "GATT" to "Generic Attribute Profile",
+                "SMP" to "Security Manager Protocol",
+                "CTKD" to "Cross-Transport Key Derivation"
+            ),
+            references = vulnerabilityResults.flatMap { it.vulnerability.references }.distinct()
+        )
+
+        // Map detected vulnerabilities to domain Vulnerability objects
+        val vulnerabilities = vulnerabilityResults.filter { it.detected }.map { result ->
+            val def = result.vulnerability
+            Vulnerability(
+                id = "vuln-${def.cveId}",
+                cveId = def.cveId,
+                name = def.name,
+                description = def.description,
+                severity = def.severity,
+                cvssScore = def.cvssScore,
+                affectedDevice = targetDevices.firstOrNull() ?: BluetoothDevice(
+                    address = "00:00:00:00:00:00",
+                    name = "Unknown",
+                    type = BluetoothType.UNKNOWN,
+                    deviceClass = null,
+                    bondState = BondState.NONE,
+                    rssi = null,
+                    txPower = null,
+                    firstSeen = now,
+                    lastSeen = now
+                ),
+                discoveredAt = now,
+                category = def.category,
+                affectedBluetoothVersions = def.affectedVersions.split(","),
+                references = def.references,
+                mitigation = def.mitigation,
+                verified = false,
+                notes = "Detected via automated scan. Confidence: ${result.confidence}"
+            )
+        }
 
         return SecurityReport(
-            id = UUID.randomUUID().toString(),
-            title = config.title,
-            generatedAt = Instant.now(),
-            generatedBy = "BTSec TestTool v1.2.1",
-            targetDevices = devices,
-            vulnerabilities = filteredVulns,
-            fuzzingResults = if (config.includeFuzzingResults) fuzzResults else emptyList(),
-            keyExtractionResults = if (config.includeKeyExtraction) keyResults else emptyList(),
-            executiveSummary = summary,
-            recommendations = recommendations,
-            status = ReportStatus.DRAFT,
+            id = "rpt-${System.currentTimeMillis()}",
             authId = authId,
-            templateId = config.templateId,
-            sections = sections,
-            totalRiskScore = riskScore
+            title = "BTSec Assessment - ${targetDevices.firstOrNull()?.name ?: "Unknown"}",
+            generatedAt = now,
+            testPeriod = ReportPeriod(
+                start = now.minus(1, ChronoUnit.HOURS),
+                end = now
+            ),
+            targetDevices = targetDevices,
+            vulnerabilities = vulnerabilities,
+            fuzzingResults = fuzzingResults,
+            keyExtractionResults = keyExtractionResults,
+            executiveSummary = executiveSummary.trim(),
+            findings = findings,
+            recommendations = recommendations,
+            appendix = appendix,
+            status = ReportStatus.FINAL
         )
     }
 
     /**
-     * Calculate risk score (0-10) based on discovered vulnerabilities.
+     * Calculate overall risk score from vulnerability results.
      */
-    fun calculateRiskScore(vulns: List<Vulnerability>): Double {
-        if (vulns.isEmpty()) return 0.0
+    fun calculateRiskScore(vulnerabilityResults: List<VulnerabilityTestResult>): Double {
+        if (vulnerabilityResults.isEmpty()) return 0.0
+        val detected = vulnerabilityResults.filter { it.detected }
+        if (detected.isEmpty()) return 0.0
 
-        val weights = mapOf(
-            VulnerabilitySeverity.CRITICAL to 3.0,
-            VulnerabilitySeverity.HIGH to 2.0,
-            VulnerabilitySeverity.MEDIUM to 1.0,
-            VulnerabilitySeverity.LOW to 0.5,
-            VulnerabilitySeverity.INFORMATIONAL to 0.1,
-            VulnerabilitySeverity.NONE to 0.0
-        )
-
-        val rawScore = vulns.sumOf { vuln ->
-            val baseWeight = weights[vuln.severity] ?: 0.0
-            val verifiedMultiplier = if (vuln.verified) 1.0 else 0.7
-            val cvssContribution = vuln.cvssScore?.div(10.0) ?: 0.5
-            baseWeight * verifiedMultiplier * cvssContribution
+        val weightedScore = detected.sumOf { result ->
+            when (result.vulnerability.severity) {
+                VulnerabilitySeverity.CRITICAL -> result.vulnerability.cvssScore * 1.5
+                VulnerabilitySeverity.HIGH -> result.vulnerability.cvssScore * 1.2
+                VulnerabilitySeverity.MEDIUM -> result.vulnerability.cvssScore * 1.0
+                VulnerabilitySeverity.LOW -> result.vulnerability.cvssScore * 0.5
+                VulnerabilitySeverity.NONE -> 0.0
+                VulnerabilitySeverity.INFORMATIONAL -> result.vulnerability.cvssScore * 0.2
+            }
         }
-
-        // Normalize to 0-10 scale with diminishing returns for many vulns
-        val normalized = rawScore * 10.0 / (rawScore + vulns.size * 0.5)
-        return (normalized * 10.0).toInt() / 10.0  // Round to 1 decimal
+        return (weightedScore / vulnerabilityResults.size).coerceIn(0.0, 10.0)
     }
 
-    private fun buildSections(
-        config: ReportConfig,
-        vulns: List<Vulnerability>,
-        fuzzResults: List<FuzzResult>,
-        keyResults: List<KeyExtractionResult>,
-        riskScore: Double
-    ): List<ReportSection> {
-        val sections = mutableListOf<ReportSection>()
-        var order = 0
-
-        // Risk Assessment section
-        sections.add(ReportSection(
-            title = "Risk Assessment",
-            content = "Overall risk score: $riskScore/10.0\n" +
-                    when {
-                        riskScore >= 8.0 -> "CRITICAL: Immediate remediation required."
-                        riskScore >= 5.0 -> "HIGH: Remediation should be prioritized."
-                        riskScore >= 2.5 -> "MODERATE: Address findings within standard timeline."
-                        else -> "LOW: Findings are informational, routine review recommended."
-                    },
-            severity = when {
-                riskScore >= 8.0 -> VulnerabilitySeverity.CRITICAL
-                riskScore >= 5.0 -> VulnerabilitySeverity.HIGH
-                riskScore >= 2.5 -> VulnerabilitySeverity.MEDIUM
-                else -> VulnerabilitySeverity.LOW
-            },
-            order = order++
-        ))
-
-        if (config.includeVulnerabilities && vulns.isNotEmpty()) {
-            val bySeverity = vulns.groupBy { it.severity }
-            sections.add(ReportSection(
-                title = "Vulnerability Findings",
-                content = buildString {
-                    appendLine("Total vulnerabilities discovered: ${vulns.size}")
-                    VulnerabilitySeverity.entries.reversed().forEach { sev ->
-                        val count = bySeverity[sev]?.size ?: 0
-                        if (count > 0) appendLine("  ${sev.name}: $count")
-                    }
-                    appendLine()
-                    vulns.forEach { v ->
-                        appendLine("• ${v.cveId ?: v.name} [${v.severity}]")
-                        appendLine("  ${v.description}")
-                        if (v.remediation != null) appendLine("  Fix: ${v.remediation}")
-                        appendLine()
-                    }
-                },
-                severity = vulns.maxByOrNull { it.severity.ordinal }?.severity,
-                order = order++
-            ))
-        }
-
-        if (config.includeFuzzingResults && fuzzResults.isNotEmpty()) {
-            val totalFindings = fuzzResults.sumOf { it.findings.size }
-            sections.add(ReportSection(
-                title = "Fuzzing Results",
-                content = buildString {
-                    appendLine("Fuzzing sessions: ${fuzzResults.size}")
-                    appendLine("Total packets sent: ${fuzzResults.sumOf { it.packetsSent }}")
-                    appendLine("Total findings: $totalFindings")
-                    fuzzResults.forEach { r ->
-                        appendLine("\nSession ${r.id.take(8)}: ${r.status.name}")
-                        appendLine("  Method: ${r.config.fuzzMethod.name}")
-                        appendLine("  Packets: ${r.packetsSent} sent, ${r.packetsReceived} received")
-                        r.findings.forEach { f ->
-                            appendLine("  Finding: ${f.description} [${f.severity}]")
-                        }
-                    }
-                },
-                severity = fuzzResults.flatMap { it.findings }.maxByOrNull { it.severity.ordinal }?.severity,
-                order = order++
-            ))
-        }
-
-        if (config.includeKeyExtraction && keyResults.isNotEmpty()) {
-            sections.add(ReportSection(
-                title = "Key Extraction Analysis",
-                content = buildString {
-                    appendLine("Key extraction attempts: ${keyResults.size}")
-                    keyResults.forEach { r ->
-                        appendLine("  ${r.keyType.name} via ${r.method.name}: " +
-                                if (r.extracted) "EXTRACTED (${r.confidence.name} confidence)" else "Not extracted")
-                    }
-                },
-                severity = if (keyResults.any { it.extracted }) VulnerabilitySeverity.CRITICAL else null,
-                order = order++
-            ))
-        }
-
-        return sections
+    /**
+     * Get risk level label from score.
+     */
+    fun getRiskLabel(score: Double): String = when {
+        score >= 9.0 -> "CRITICAL"
+        score >= 7.0 -> "HIGH"
+        score >= 4.0 -> "MEDIUM"
+        score >= 1.0 -> "LOW"
+        else -> "NONE"
     }
 
-    private fun buildExecutiveSummary(
-        vulns: List<Vulnerability>,
-        fuzzResults: List<FuzzResult>,
-        keyResults: List<KeyExtractionResult>,
-        riskScore: Double
-    ): String {
-        val criticalVulns = vulns.count { it.severity == VulnerabilitySeverity.CRITICAL }
-        val highVulns = vulns.count { it.severity == VulnerabilitySeverity.HIGH }
-        val fuzzFindings = fuzzResults.sumOf { it.findings.size }
-        val keysExtracted = keyResults.count { it.extracted }
+    // ── Mapping helpers ──
 
-        return buildString {
-            appendLine("Bluetooth Security Assessment — Executive Summary")
-            appendLine()
-            appendLine("This report presents the findings of an authorized Bluetooth security assessment.")
-            appendLine()
-            append("Risk Score: $riskScore/10.0 — ")
-            appendLine(when {
-                riskScore >= 8.0 -> "CRITICAL risk level. Multiple serious vulnerabilities require immediate attention."
-                riskScore >= 5.0 -> "HIGH risk level. Significant security issues identified."
-                riskScore >= 2.5 -> "MODERATE risk level. Some concerns identified, standard remediation recommended."
-                else -> "LOW risk level. No significant security issues detected."
-            })
-            appendLine()
-            appendLine("Key Findings:")
-            if (criticalVulns > 0) appendLine("  ⚠ $criticalVulns CRITICAL vulnerabilities detected")
-            if (highVulns > 0) appendLine("  ⚠ $highVulns HIGH severity vulnerabilities detected")
-            appendLine("  • ${vulns.size} total vulnerabilities identified")
-            appendLine("  • $fuzzFindings fuzzing anomalies detected")
-            if (keysExtracted > 0) appendLine("  ⚠ $keysExtracted encryption keys extracted — CRITICAL")
-            appendLine("  • ${fuzzResults.size} fuzzing sessions completed")
-            appendLine("  • ${keyResults.size} key extraction tests performed")
-        }
+    private fun mapCategory(category: VulnerabilityCategory): FindingCategory = when (category) {
+        VulnerabilityCategory.PAIRING -> FindingCategory.STATE_ERROR
+        VulnerabilityCategory.ENCRYPTION -> FindingCategory.INFORMATION_LEAK
+        VulnerabilityCategory.AUTHENTICATION -> FindingCategory.BYPASS
+        VulnerabilityCategory.IMPLEMENTATION -> FindingCategory.CRASH
+        VulnerabilityCategory.CONFIGURATION -> FindingCategory.UNEXPECTED_RESPONSE
+        VulnerabilityCategory.DENIAL_OF_SERVICE -> FindingCategory.HANG
+        VulnerabilityCategory.INFORMATION_DISCLOSURE -> FindingCategory.INFORMATION_LEAK
+        VulnerabilityCategory.PROTOCOL -> FindingCategory.UNEXPECTED_RESPONSE
+        VulnerabilityCategory.PRIVILEGE_ESCALATION -> FindingCategory.BYPASS
+        VulnerabilityCategory.AUTHORIZATION -> FindingCategory.BYPASS
+        VulnerabilityCategory.OTHER -> FindingCategory.UNEXPECTED_RESPONSE
     }
 
-    private fun buildRecommendations(vulns: List<Vulnerability>): List<String> {
-        val recs = mutableListOf<String>()
-
-        val categories = vulns.groupBy { it.category }
-        if (categories.containsKey(VulnerabilityCategory.ENCRYPTION)) {
-            recs.add("Upgrade to Bluetooth 5.2+ with LE Secure Connections. Enforce minimum 128-bit encryption keys.")
-        }
-        if (categories.containsKey(VulnerabilityCategory.AUTHENTICATION)) {
-            recs.add("Implement mutual authentication on every connection. Disable legacy pairing where possible.")
-        }
-        if (categories.containsKey(VulnerabilityCategory.IMPLEMENTATION)) {
-            recs.add("Apply latest firmware patches. Test with fuzzing tools regularly. Enable stack canaries and ASLR.")
-        }
-        if (categories.containsKey(VulnerabilityCategory.DENIAL_OF_SERVICE)) {
-            recs.add("Implement rate limiting and connection throttling. Monitor for abnormal disconnection patterns.")
-        }
-        if (categories.containsKey(VulnerabilityCategory.PAIRING)) {
-            recs.add("Use Numeric Comparison or Passkey Entry pairing. Disable Just Works for sensitive devices.")
-        }
-        if (categories.containsKey(VulnerabilityCategory.PRIVACY)) {
-            recs.add("Enable LE Privacy 1.2 with resolving list. Use random resolvable addresses.")
-        }
-
-        // General recommendations
-        recs.add("Disable Bluetooth when not actively in use.")
-        recs.add("Regularly update device firmware to patch known vulnerabilities.")
-        recs.add("Maintain an inventory of all Bluetooth-capable devices and their firmware versions.")
-
-        return recs.distinct()
+    private fun mapPriority(severity: VulnerabilitySeverity): RecommendationPriority = when (severity) {
+        VulnerabilitySeverity.CRITICAL -> RecommendationPriority.CRITICAL
+        VulnerabilitySeverity.HIGH -> RecommendationPriority.HIGH
+        VulnerabilitySeverity.MEDIUM -> RecommendationPriority.MEDIUM
+        VulnerabilitySeverity.LOW -> RecommendationPriority.LOW
+        VulnerabilitySeverity.NONE -> RecommendationPriority.LOW
+        VulnerabilitySeverity.INFORMATIONAL -> RecommendationPriority.LOW
     }
 }

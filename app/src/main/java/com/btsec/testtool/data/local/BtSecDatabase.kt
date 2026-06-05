@@ -50,7 +50,7 @@ import com.btsec.testtool.data.local.entity.VulnerabilityEntity
         BtOperationEntity::class
     ],
     version = 1,
-    exportSchema = true
+    exportSchema = false
 )
 @TypeConverters(BtSecTypeConverters::class)
 abstract class BtSecDatabase : RoomDatabase() {
