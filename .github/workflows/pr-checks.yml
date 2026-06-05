@@ -79,7 +79,7 @@ jobs:
           missing_disclaimer=0
           while IFS= read -r file; do
             if [ -f "$file" ]; then
-              if ! grep -q "AUTHORIZED security testing" "$file"; then
+              if ! grep -qi "AUTHORIZED security testing" "$file"; then
                 echo "::warning file=$file::Missing legal disclaimer"
                 missing_disclaimer=$((missing_disclaimer + 1))
               fi
