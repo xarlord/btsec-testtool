@@ -1,0 +1,3 @@
+## 2024-05-14 - Improve Keyboard Accessibility in Authorization Form
+**Learning:** In Jetpack Compose text inputs, users expect to be able to submit the form directly using the software keyboard's action button (e.g., "Done"). Without `keyboardOptions` and `keyboardActions`, they must dismiss the keyboard manually and click the submit button. Adding these properties and managing focus dismissal improves form accessibility and UX.
+**Action:** When adding text inputs in Compose, explicitly configure `keyboardOptions` (like `imeAction = ImeAction.Done`) and `keyboardActions` (like `onDone = { focusManager.clearFocus(); ... }`) to map the keyboard's primary action to the form's submit logic, ensuring the same validation checks are applied.
