@@ -16,7 +16,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.btsec.testtool.presentation.feature.authorization.AuthorizationScreen
 import com.btsec.testtool.presentation.feature.dashboard.DashboardScreen
+import com.btsec.testtool.presentation.feature.fuzzer.FuzzerScreen
+import com.btsec.testtool.presentation.feature.keys.KeyExtractionScreen
+import com.btsec.testtool.presentation.feature.reports.ReportsScreen
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
+import com.btsec.testtool.presentation.feature.vulns.VulnScannerScreen
 
 /**
  * Navigation routes for the application.
@@ -105,28 +109,40 @@ fun BTSecNavGraph(
         composable(route = "${Routes.FUZZER}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement FuzzerScreen")
+            FuzzerScreen(
+                authId = authId,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         // Key Extraction screen
         composable(route = "${Routes.KEYS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement KeyExtractionScreen")
+            KeyExtractionScreen(
+                authId = authId,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         // Vulnerability Scanner screen
         composable(route = "${Routes.VULNS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement VulnScannerScreen")
+            VulnScannerScreen(
+                authId = authId,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         // Reports screen
         composable(route = "${Routes.REPORTS}/{authId}") { backStackEntry ->
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
-            TODO("Implement ReportsScreen")
+            ReportsScreen(
+                authId = authId,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
