@@ -232,6 +232,10 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 }
 
 dependencies {
+    testImplementation("org.mockito:mockito-core:4.8.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation("app.cash.turbine:turbine:0.12.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     // Core Android
     implementation("androidx.core:core-ktx:${Versions.coreKtx}")
     implementation("androidx.appcompat:appcompat:${Versions.appcompat}")
