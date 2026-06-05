@@ -1,0 +1,3 @@
+## 2024-05-24 - Improve Keyboard Accessibility on Authorization Input
+**Learning:** The text input for the authorization ID lacks standard keyboard actions (`imeAction = ImeAction.Done` and `keyboardActions` for submission), meaning users cannot easily submit the form directly from their software keyboard, which degrades the UX on Android.
+**Action:** Always verify that main forms and text inputs have appropriate `keyboardOptions` and `keyboardActions` configured to allow seamless submission, and use `LocalFocusManager.current.clearFocus()` to properly dismiss the keyboard when an action is triggered.
