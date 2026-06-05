@@ -303,10 +303,30 @@ class ConsentRepositoryImpl @Inject constructor(
         format: AuditExportFormat
     ): Result<File> {
         // In production, would write to file
-        return Result.success(File(outputPath))
+        return getSafeExportFile(outputPath)
     }
 
     private fun generateId(): String {
         return java.util.UUID.randomUUID().toString()
+    }
+
+    private fun getSafeExportFile(outputPath: String): Result<File> {
+        val file = File(outputPath)
+        return try {
+            // Reject paths containing '..' sequence which indicates path traversal attempt
+            if (outputPath.contains("..")) {
+                return Result.failure(SecurityException("Invalid output path: Path traversal detected"))
+            }
+
+            // Further ensure the canonical path doesn't result in traversal
+            val canonicalPath = file.canonicalPath
+            if (canonicalPath.contains("..")) {
+                return Result.failure(SecurityException("Invalid output path: Path traversal detected in canonical path"))
+            }
+
+            Result.success(file)
+        } catch (e: Exception) {
+            Result.failure(SecurityException("Invalid output path", e))
+        }
     }
 }

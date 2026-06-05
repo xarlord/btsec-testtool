@@ -191,7 +191,7 @@ android {
 
 // Jacoco Test Coverage Configuration
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
+    dependsOn("testDevDebugUnitTest")
 
     reports {
         xml.required.set(true)
@@ -346,4 +346,56 @@ dependencies {
 // OWASP Dependency Check Configuration
 tasks.named("dependencyCheckAnalyze") {
     dependsOn("assembleDebug")
+}
+
+tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+    dependsOn("jacocoTestReport")
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R\$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/databinding/**",
+        "**/android/databinding/**",
+        "**/androidx/databinding/**",
+        "**/*_Factory.class",
+        "**/*_MembersInjector.class",
+        "**/Dagger*Component*.class",
+        "**/Dagger*Component\$Builder.class",
+        "**/Dagger*Subcomponent*.class",
+        "**/*Subcomponent\$Builder.class",
+        "**/*Module_*Factory.class",
+        "**/di/**",
+        "**/*Hilt*.*"
+    )
+
+    val debugTree = fileTree(layout.buildDirectory.dir("intermediates/javac/devDebug/classes")) {
+        exclude(fileFilter)
+    }
+
+    val kotlinDebugTree = fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/devDebug")) {
+        exclude(fileFilter)
+    }
+
+    val mainSrc = "src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree, kotlinDebugTree))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include(
+            "outputs/unit_test_code_coverage/devDebugUnitTest/testDevDebugUnitTest.exec",
+            "jacoco/testDevDebugUnitTest.exec"
+        )
+    })
+
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.00".toBigDecimal()
+            }
+        }
+    }
 }

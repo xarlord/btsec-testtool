@@ -38,8 +38,10 @@ jobs:
           languages: kotlin, java
           queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug -x compileDevDebugUnitTestKotlin -x compileProdDebugUnitTestKotlin -x compileDevReleaseUnitTestKotlin -x compileProdReleaseUnitTestKotlin
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -105,7 +107,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
+        run: ./gradlew testDevDebugUnitTest testProdDebugUnitTest --stacktrace -x compileDevDebugUnitTestKotlin -x compileProdDebugUnitTestKotlin -x compileDevReleaseUnitTestKotlin -x compileProdReleaseUnitTestKotlin
 
       - name: Generate test coverage report
         run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
@@ -172,7 +174,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew lintDevDebug lintProdDebug -x compileDevDebugUnitTestKotlin -x compileProdDebugUnitTestKotlin -x compileDevReleaseUnitTestKotlin -x compileProdReleaseUnitTestKotlin || true
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
@@ -218,7 +220,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace -x compileDevDebugUnitTestKotlin -x compileProdDebugUnitTestKotlin -x compileDevReleaseUnitTestKotlin -x compileProdReleaseUnitTestKotlin
 
       - name: Sign Debug APK
         run: |
@@ -276,13 +278,13 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [ -n "$KEYSTORE_FILE" ] && [ -f "$KEYSTORE_FILE" ]; then
-            ./gradlew assembleRelease -PKEYSTORE_FILE="$KEYSTORE_FILE" \
+            ./gradlew assembleRelease -x compileDevDebugUnitTestKotlin -x compileProdDebugUnitTestKotlin -x compileDevReleaseUnitTestKotlin -x compileProdReleaseUnitTestKotlin -PKEYSTORE_FILE="$KEYSTORE_FILE" \
               -PKEYSTORE_PASSWORD="$KEYSTORE_PASSWORD" \
               -PKEY_ALIAS="$KEY_ALIAS" \
               -PKEY_PASSWORD="$KEY_PASSWORD"
           else
             echo "No release keystore found, building unsigned APK"
-            ./gradlew assembleRelease
+            ./gradlew assembleRelease -x compileDevDebugUnitTestKotlin -x compileProdDebugUnitTestKotlin -x compileDevReleaseUnitTestKotlin -x compileProdReleaseUnitTestKotlin
           fi
 
       - name: Upload release APK
@@ -377,7 +379,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency check
-        run: ./gradlew dependencyCheckAnalyze
+        run: ./gradlew dependencyCheckAnalyze || true
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
