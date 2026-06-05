@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Shield shape background -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,20 L80,35 L80,60 Q80,80 54,90 Q28,80 28,60 L28,35 Z"/>
+    <!-- Bluetooth symbol -->
+    <path
+        android:fillColor="#1B5E20"
+        android:pathData="M54,30 L54,78 M54,30 L68,44 L44,60 M54,78 L68,64 L44,48"
+        android:strokeColor="#1B5E20"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+</vector>
