@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/xarlord/btsec-testtool/compare/v1.2.0...v1.2.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* resolve compilation blockers and security issues ([0fee715](https://github.com/xarlord/btsec-testtool/commit/0fee71566cb6c46e9ab6eb44eba5ea8b60c655b3))
+
 # [1.2.0](https://github.com/xarlord/btsec-testtool/compare/v1.1.4...v1.2.0) (2026-04-17)
 
 
