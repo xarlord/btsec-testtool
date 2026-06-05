@@ -50,6 +50,7 @@ fun DashboardScreen(
     onNavigateToKeys: () -> Unit,
     onNavigateToVulns: () -> Unit,
     onNavigateToReports: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -61,6 +62,14 @@ fun DashboardScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Navigate back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
                         )
                     }
                 }

@@ -20,6 +20,7 @@ import com.btsec.testtool.presentation.feature.fuzzer.FuzzerScreen
 import com.btsec.testtool.presentation.feature.keys.KeyExtractionScreen
 import com.btsec.testtool.presentation.feature.reports.ReportsScreen
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
+import com.btsec.testtool.presentation.feature.settings.SettingsScreen
 import com.btsec.testtool.presentation.feature.vulns.VulnScannerScreen
 
 /**
@@ -33,6 +34,7 @@ object Routes {
     const val KEYS = "keys"
     const val VULNS = "vulns"
     const val REPORTS = "reports"
+    const val SETTINGS = "settings"
 }
 
 /**
@@ -85,6 +87,9 @@ fun BTSecNavGraph(
                 },
                 onNavigateToReports = {
                     navController.navigate("${Routes.REPORTS}/$authId")
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Routes.SETTINGS)
                 },
                 onBack = {
                     // Navigate back to authorization
@@ -141,6 +146,13 @@ fun BTSecNavGraph(
 
             ReportsScreen(
                 authId = authId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // Settings screen
+        composable(route = Routes.SETTINGS) {
+            SettingsScreen(
                 onBack = { navController.popBackStack() }
             )
         }
