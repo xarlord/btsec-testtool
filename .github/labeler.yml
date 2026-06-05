@@ -2,67 +2,82 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - *.md
-  - docs/**
+  - any:
+      - '*.md'
+      - 'docs/**'
 
 security:
-  - SECURITY.md
-  - **/security/**
+  - any:
+      - 'SECURITY.md'
+      - '**/security/**'
 
 tests:
-  - **/test/**
-  - **/*Test.kt
-  - **/*Test.java
-  - **/androidTest/**
+  - any:
+      - '**/test/**'
+      - '**/*Test.kt'
+      - '**/*Test.java'
+      - '**/androidTest/**'
 
 ci-cd:
-  - .github/workflows/**
-  - .github/actions/**
-  - Dockerfile
-  - docker-compose.yml
+  - any:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
 
 dependencies:
-  - build.gradle.kts
-  - app/build.gradle.kts
-  - buildSrc/**/*.kt
-  - gradle/libs.versions.toml
+  - any:
+      - 'build.gradle.kts'
+      - 'app/build.gradle.kts'
+      - 'buildSrc/**/*.kt'
+      - 'gradle/libs.versions.toml'
 
 domain:
-  - domain/model/**
-  - domain/repository/**
-  - domain/usecase/**
+  - any:
+      - 'domain/model/**'
+      - 'domain/repository/**'
+      - 'domain/usecase/**'
 
 data:
-  - data/**
+  - any:
+      - 'data/**'
 
 presentation:
-  - presentation/**
-  - ui/**
+  - any:
+      - 'presentation/**'
+      - 'ui/**'
 
 android:
-  - app/src/main/**
-  - AndroidManifest.xml
+  - any:
+      - 'app/src/main/**'
+      - 'AndroidManifest.xml'
 
 vulnerability:
-  - **/vulnerability/**
-  - **/vuln/**
+  - any:
+      - '**/vulnerability/**'
+      - '**/vuln/**'
 
 fuzzing:
-  - **/fuzzing/**
-  - **/fuzz/**
+  - any:
+      - '**/fuzzing/**'
+      - '**/fuzz/**'
 
 key-extraction:
-  - **/keyextraction/**
-  - **/keys/**
+  - any:
+      - '**/keyextraction/**'
+      - '**/keys/**'
 
 reporting:
-  - **/report/**
-  - **/reports/**
+  - any:
+      - '**/report/**'
+      - '**/reports/**'
 
 authorization:
-  - **/authorization/**
-  - **/auth/**
+  - any:
+      - '**/authorization/**'
+      - '**/auth/**'
 
 bluetooth:
-  - **/bluetooth/**
-  - **/ble/**
+  - any:
+      - '**/bluetooth/**'
+      - '**/ble/**'
