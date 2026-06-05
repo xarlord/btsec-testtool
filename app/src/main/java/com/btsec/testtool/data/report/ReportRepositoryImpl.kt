@@ -432,8 +432,7 @@ class ReportRepositoryImpl @Inject constructor(
                 context.filesDir,
                 context.cacheDir,
 
-                File(System.getProperty("java.io.tmpdir")),
-                File("/tmp")
+                File(System.getProperty("java.io.tmpdir") ?: "/tmp")
             ).map { it.canonicalPath }
 
             val isSafe = allowedDirs.any { base ->
