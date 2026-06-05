@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/xarlord/btsec-testtool/compare/v1.5.0...v1.5.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* resolve all compilation errors across 8 implementation phases ([e5910cb](https://github.com/xarlord/btsec-testtool/commit/e5910cbbc5e7e89329f7bc35d8dfd36f4c4aeb7f))
+
 # [1.5.0](https://github.com/xarlord/btsec-testtool/compare/v1.4.0...v1.5.0) (2026-06-05)
 
 
