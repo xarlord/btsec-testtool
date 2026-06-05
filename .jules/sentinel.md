@@ -1,0 +1,4 @@
+## 2026-02-07 - Path Traversal Vulnerability in Export Audit Log
+**Vulnerability:** The `exportAuditLog` function in `ConsentRepositoryImpl` naively accepted a user-provided path and created a `File` object using it without validation, creating a severe Path Traversal vulnerability that allowed writing logs to arbitrary locations.
+**Learning:** Common utility functions like exports are frequent sources of path traversal when dealing with user-supplied paths, especially if developers overlook validating `canonicalPath` against permitted base directories.
+**Prevention:** Always validate that `file.canonicalPath` strictly matches an allowed base directory (`canonicalPath == base`) or resides safely within it (`canonicalPath.startsWith(base + File.separator)`). Never instantiate file objects directly from unverified inputs.

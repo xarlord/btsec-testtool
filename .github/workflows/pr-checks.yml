@@ -4,12 +4,18 @@
 name: PR Checks
 
 on:
+  push:
+    branches:
+      - main
+      - "releases/**"
   pull_request:
     types: [opened, synchronize, reopened]
 
 permissions:
   pull-requests: read
   contents: read
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ============================================
@@ -156,12 +162,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew test jacocoTestCoverageVerification
+        run: ./gradlew test app:jacocoTestCoverageVerification
 
       - name: Check coverage threshold
         run: |
           # Verify minimum coverage (80%)
-          coverage=$(./gradlew jacocoTestReport | grep -oP 'Total.*?\K\d+(?=%)' || echo "0")
+          coverage=$(./gradlew jacocoTestReport | grep -oP 'Total.*?\\K\d+(?=%)' || echo "0")
           if [ "$coverage" -lt 80 ]; then
             echo "::error::Test coverage below 80% (current: $coverage%)"
             exit 1
