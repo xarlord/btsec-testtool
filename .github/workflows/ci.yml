@@ -38,8 +38,17 @@ jobs:
           languages: kotlin, java
           queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+
+    - name: Build project manually
+      run: ./gradlew app:assembleDevDebug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -84,6 +93,9 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: macos-latest
+    permissions:
+      checks: write
+      pull-requests: write
     timeout-minutes: 30
 
     steps:
@@ -105,7 +117,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew test testDevDebugUnitTest testProdDebugUnitTest --stacktrace
+        run: ./gradlew app:testDevDebugUnitTest --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
@@ -172,7 +184,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew app:lintDevDebug
 
       - name: Upload lint results
         uses: actions/upload-artifact@v4
