@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/xarlord/btsec-testtool/compare/v1.3.0...v1.4.0) (2026-06-05)
+
+
+### Features
+
+* implement fuzzing engine, vulnerability tests, and report generation ([476e026](https://github.com/xarlord/btsec-testtool/commit/476e026eed0184a8b83da39b21ed2092df75e5aa))
+
 # [1.3.0](https://github.com/xarlord/btsec-testtool/compare/v1.2.1...v1.3.0) (2026-06-05)
 
 
