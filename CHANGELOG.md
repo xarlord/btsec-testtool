@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/xarlord/btsec-testtool/compare/v1.4.0...v1.5.0) (2026-06-05)
+
+
+### Features
+
+* authorization backend, settings screen, error handling, BT state monitor ([98da201](https://github.com/xarlord/btsec-testtool/commit/98da20105464fbfd4a584cb7ff91ed11bcd5b488))
+
 # [1.4.0](https://github.com/xarlord/btsec-testtool/compare/v1.3.0...v1.4.0) (2026-06-05)
 
 
