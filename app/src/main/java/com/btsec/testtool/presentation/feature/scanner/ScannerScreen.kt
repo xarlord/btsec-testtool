@@ -37,7 +37,7 @@ import javax.inject.Inject
  */
 @Composable
 fun ScannerScreen(
-
+    authId: String,
     onBack: () -> Unit
 ) {
     val isScanning = remember { mutableStateOf(false) }

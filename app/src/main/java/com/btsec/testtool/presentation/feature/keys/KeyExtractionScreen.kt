@@ -34,7 +34,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KeyExtractionScreen(
-
+    authId: String,
     onBack: () -> Unit
 ) {
     val viewModel: KeyExtractionViewModel = androidx.hilt.navigation.compose.hiltViewModel()

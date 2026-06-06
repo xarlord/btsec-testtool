@@ -105,7 +105,7 @@ fun BTSecNavGraph(
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             ScannerScreen(
-
+                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -115,7 +115,7 @@ fun BTSecNavGraph(
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             FuzzerScreen(
-
+                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -125,7 +125,7 @@ fun BTSecNavGraph(
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             KeyExtractionScreen(
-
+                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -135,7 +135,7 @@ fun BTSecNavGraph(
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             VulnScannerScreen(
-
+                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -145,7 +145,7 @@ fun BTSecNavGraph(
             val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
 
             ReportsScreen(
-
+                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }

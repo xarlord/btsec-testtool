@@ -37,7 +37,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VulnScannerScreen(
-
+    authId: String,
     onBack: () -> Unit
 ) {
     val viewModel: VulnScannerViewModel = androidx.hilt.navigation.compose.hiltViewModel()

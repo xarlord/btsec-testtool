@@ -3,6 +3,14 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
+ * - This application may ONLY be used for AUTHORIZED security testing
+ * - See LICENSE for full terms
+ */
+/*
+ * Bluetooth Security Testing Tool
+ * Copyright (c) 2026 Security Research Team
+ *
+ * Licensed under MIT with additional restrictions:
  * - This application may ONLY be used for authorized security testing
  * - See LICENSE for full terms
  */
@@ -36,7 +44,8 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(
-        onBack: () -> Unit
+    authId: String,
+    onBack: () -> Unit
 ) {
     val viewModel: ReportsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()

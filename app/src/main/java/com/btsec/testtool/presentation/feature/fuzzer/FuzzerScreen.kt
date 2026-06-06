@@ -34,7 +34,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FuzzerScreen(
-
+    authId: String,
     onBack: () -> Unit
 ) {
     val viewModel: FuzzerViewModel = androidx.hilt.navigation.compose.hiltViewModel()
