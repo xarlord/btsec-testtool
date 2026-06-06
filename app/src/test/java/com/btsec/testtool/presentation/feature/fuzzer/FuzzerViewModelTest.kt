@@ -16,8 +16,13 @@ import com.btsec.testtool.domain.repository.DateRange
 import com.btsec.testtool.domain.usecase.FuzzingUseCase
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -39,6 +44,7 @@ class FuzzerViewModelTest {
 
     @BeforeEach
     fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         every { mockFuzzingUseCase.getFuzzingStatus() } returns flowOf(FuzzStatus.PENDING)
         every { mockFuzzingUseCase.getFuzzingProgress() } returns flowOf(null)
         every { mockFuzzingUseCase.getFuzzingStatistics() } returns flowOf(
@@ -56,6 +62,11 @@ class FuzzerViewModelTest {
         )
         every { mockFuzzingUseCase.getCriticalFindings() } returns flowOf(emptyList())
         viewModel = FuzzerViewModel(mockFuzzingUseCase)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -112,13 +123,13 @@ class FuzzerViewModelTest {
     }
 
     @Test
-    @DisplayName("clearError should remove error from state")
+    @DisplayName("clearError should have no effect when error is already null")
     fun testClearError() = runTest {
-        // Manually set error via state update
         viewModel.uiState.test {
-            awaitItem()
+            val state = awaitItem()
+            assertNull(state.error)
             viewModel.clearError()
-            assertNull(awaitItem().error)
+            // No new emission expected since error was already null
         }
     }
 

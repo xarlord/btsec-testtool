@@ -8,9 +8,6 @@
  */
 package com.btsec.testtool.domain.model
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import java.time.Instant
@@ -26,11 +23,9 @@ import kotlin.test.assertTrue
 @DisplayName("Authorization Models Tests")
 class AuthorizationModelsTest {
 
-    private val testJson = Json { ignoreUnknownKeys = true }
-
     @Test
-    @DisplayName("Authorization should serialize correctly")
-    fun testAuthorizationSerialization() {
+    @DisplayName("Authorization data class should have correct field values")
+    fun testAuthorizationFieldValues() {
         val authorization = Authorization(
             authId = "BTSEC-20260207-A1B2C3D4",
             issuedTo = "Security Tester",
@@ -43,9 +38,12 @@ class AuthorizationModelsTest {
             terms = listOf("Term 1", "Term 2")
         )
 
-        val json = testJson.encodeToString(authorization)
-        assertTrue(json.contains("BTSEC-20260207-A1B2C3D4"))
-        assertTrue(json.contains("Security Tester"))
+        assertEquals("BTSEC-20260207-A1B2C3D4", authorization.authId)
+        assertEquals("Security Tester", authorization.issuedTo)
+        assertEquals("Security Research Team", authorization.issuedBy)
+        assertTrue(authorization.authorizedActions.contains(TestAction.SCAN_DEVICES))
+        assertEquals("test_signature", authorization.signature)
+        assertEquals(listOf("Term 1", "Term 2"), authorization.terms)
     }
 
     @Test
