@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/xarlord/btsec-testtool/compare/v1.5.3...v1.5.4) (2026-06-06)
+
+
+### Bug Fixes
+
+* **security:** validate BT service intents, require explicit consent, add server verification ([#179](https://github.com/xarlord/btsec-testtool/issues/179)) ([1e655cb](https://github.com/xarlord/btsec-testtool/commit/1e655cb3a55a2fbb49130075b542849770652973)), closes [#153](https://github.com/xarlord/btsec-testtool/issues/153) [#152](https://github.com/xarlord/btsec-testtool/issues/152) [#126](https://github.com/xarlord/btsec-testtool/issues/126)
+
 ## [1.5.3](https://github.com/xarlord/btsec-testtool/compare/v1.5.2...v1.5.3) (2026-06-06)
 
 
