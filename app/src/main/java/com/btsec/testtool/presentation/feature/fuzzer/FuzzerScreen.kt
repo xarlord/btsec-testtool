@@ -123,7 +123,7 @@ fun FuzzerScreen(
                                         onClick = { viewModel.startFuzzing() },
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                        Icon(Icons.Default.PlayArrow, contentDescription = "Start fuzzing")
                                         Spacer(Modifier.width(4.dp))
                                         Text("Start")
                                     }
@@ -133,7 +133,7 @@ fun FuzzerScreen(
                                         onClick = { viewModel.pauseFuzzing() },
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        Icon(Icons.Default.Pause, contentDescription = null)
+                                        Icon(Icons.Default.Pause, contentDescription = "Pause fuzzing")
                                         Spacer(Modifier.width(4.dp))
                                         Text("Pause")
                                     }
@@ -142,7 +142,7 @@ fun FuzzerScreen(
                                         modifier = Modifier.weight(1f),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                     ) {
-                                        Icon(Icons.Default.Stop, contentDescription = null)
+                                        Icon(Icons.Default.Stop, contentDescription = "Stop fuzzing")
                                         Spacer(Modifier.width(4.dp))
                                         Text("Stop")
                                     }
@@ -207,7 +207,7 @@ fun FuzzerScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     Icons.Default.Warning,
-                                    contentDescription = null,
+                                    contentDescription = "Finding severity",
                                     tint = when (finding.severity) {
                                         VulnerabilitySeverity.CRITICAL -> Color.Red
                                         VulnerabilitySeverity.HIGH -> Color(0xFFFF6D00)

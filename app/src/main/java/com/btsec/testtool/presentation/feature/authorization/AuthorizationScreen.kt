@@ -85,7 +85,7 @@ private fun AuthorizationContent(
         ) {
             Icon(
                 imageVector = Icons.Default.Security,
-                contentDescription = null,
+                contentDescription = "Security",
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.error
             )

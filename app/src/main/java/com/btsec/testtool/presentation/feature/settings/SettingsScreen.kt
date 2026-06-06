@@ -69,7 +69,7 @@ fun SettingsScreen(
                                     BluetoothState.OFF -> Icons.Default.BluetoothDisabled
                                     else -> Icons.Default.BluetoothSearching
                                 },
-                                contentDescription = null,
+                                contentDescription = "Bluetooth status",
                                 tint = when (uiState.btState) {
                                     BluetoothState.ON -> MaterialTheme.colorScheme.primary
                                     BluetoothState.OFF -> MaterialTheme.colorScheme.error
@@ -120,7 +120,7 @@ fun SettingsScreen(
                             ) {
                                 Icon(
                                     if (granted) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                                    contentDescription = null,
+                                    contentDescription = if (granted) "Permission granted" else "Permission denied",
                                     tint = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -165,7 +165,7 @@ fun SettingsScreen(
                             onClick = { viewModel.updateServerUrl(serverUrl) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Save, contentDescription = null)
+                            Icon(Icons.Default.Save, contentDescription = "Save settings")
                             Spacer(Modifier.width(4.dp))
                             Text("Save Server URL")
                         }
@@ -184,7 +184,7 @@ fun SettingsScreen(
                             onClick = { viewModel.generateDemoAuth() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.VpnKey, contentDescription = null)
+                            Icon(Icons.Default.VpnKey, contentDescription = "Demo authorization")
                             Spacer(Modifier.width(4.dp))
                             Text("Generate Demo Authorization ID")
                         }
@@ -214,7 +214,7 @@ fun SettingsScreen(
                             onClick = { viewModel.clearAuthorization() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Logout, contentDescription = null)
+                            Icon(Icons.Default.Logout, contentDescription = "Sign out")
                             Spacer(Modifier.width(4.dp))
                             Text("Clear Authorization")
                         }
@@ -224,7 +224,7 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                         ) {
-                            Icon(Icons.Default.DeleteForever, contentDescription = null)
+                            Icon(Icons.Default.DeleteForever, contentDescription = "Clear data")
                             Spacer(Modifier.width(4.dp))
                             Text("Clear All Data")
                         }

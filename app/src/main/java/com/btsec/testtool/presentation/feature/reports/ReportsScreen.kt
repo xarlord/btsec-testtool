@@ -122,7 +122,7 @@ fun ReportsScreen(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 Icons.Default.Assessment,
-                                contentDescription = null,
+                                contentDescription = "Reports",
                                 modifier = Modifier.size(64.dp),
                                 tint = MaterialTheme.colorScheme.outline
                             )
@@ -134,7 +134,7 @@ fun ReportsScreen(
                             )
                             Spacer(Modifier.height(16.dp))
                             FilledTonalButton(onClick = { showGenerateDialog = true }) {
-                                Icon(Icons.Default.Add, contentDescription = null)
+                                Icon(Icons.Default.Add, contentDescription = "Generate report")
                                 Spacer(Modifier.width(4.dp))
                                 Text("Generate Report")
                             }
@@ -169,7 +169,7 @@ fun ReportsScreen(
 @Composable
 private fun StatChip(label: String, count: Int, icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
+        Icon(icon, contentDescription = "Report statistic", modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
         Text("$count", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Text(label, style = MaterialTheme.typography.labelSmall)
     }

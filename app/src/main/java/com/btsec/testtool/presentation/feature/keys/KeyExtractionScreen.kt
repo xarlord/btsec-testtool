@@ -122,7 +122,7 @@ fun KeyExtractionScreen(
                                     onClick = { viewModel.startExtraction() },
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Icon(Icons.Default.VpnKey, contentDescription = null)
+                                    Icon(Icons.Default.VpnKey, contentDescription = "Encryption key")
                                     Spacer(Modifier.width(4.dp))
                                     Text("Extract Key")
                                 }
@@ -132,7 +132,7 @@ fun KeyExtractionScreen(
                                     modifier = Modifier.weight(1f),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                 ) {
-                                    Icon(Icons.Default.Cancel, contentDescription = null)
+                                    Icon(Icons.Default.Cancel, contentDescription = "Cancel extraction")
                                     Spacer(Modifier.width(4.dp))
                                     Text("Cancel")
                                 }
@@ -164,7 +164,7 @@ fun KeyExtractionScreen(
                                             isActive -> Icons.Default.Sync
                                             else -> Icons.Default.RadioButtonUnchecked
                                         },
-                                        contentDescription = null,
+                                        contentDescription = "Step status",
                                         tint = when {
                                             isDone -> Color(0xFF4CAF50)
                                             isActive -> MaterialTheme.colorScheme.primary
@@ -225,7 +225,7 @@ fun KeyExtractionScreen(
                         ) {
                             Icon(
                                 if (result.extracted) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                                contentDescription = null,
+                                contentDescription = if (result.extracted) "Key extracted" else "Extraction failed",
                                 tint = if (result.extracted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline
                             )
                             Spacer(Modifier.width(12.dp))

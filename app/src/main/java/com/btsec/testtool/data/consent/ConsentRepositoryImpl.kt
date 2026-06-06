@@ -9,6 +9,7 @@
 package com.btsec.testtool.data.consent
 
 import android.content.Context
+import com.btsec.testtool.data.common.PathValidator
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.*
@@ -312,28 +313,7 @@ class ConsentRepositoryImpl @Inject constructor(
     }
 
     private fun getSafeFile(outputPath: String): Result<File> {
-        val file = File(outputPath)
-        return try {
-            val canonicalPath = file.canonicalPath
-            val allowedDirs = listOfNotNull(
-                context.filesDir,
-                context.cacheDir,
-                File(System.getProperty("java.io.tmpdir")),
-                File("/tmp")
-            ).map { it.canonicalPath }
-
-            val isSafe = allowedDirs.any { base ->
-                canonicalPath.startsWith(base + File.separator) || canonicalPath == base
-            }
-
-            if (isSafe) {
-                Result.success(file)
-            } else {
-                Result.failure(SecurityException("Invalid output path: Path traversal detected or path outside allowed directories"))
-            }
-        } catch (e: Exception) {
-            Result.failure(SecurityException("Invalid output path", e))
-        }
+        return PathValidator.getSafeFile(context, outputPath)
     }
 
     private fun generateId(): String {

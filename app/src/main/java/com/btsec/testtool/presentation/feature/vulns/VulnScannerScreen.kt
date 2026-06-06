@@ -84,7 +84,7 @@ fun VulnScannerScreen(
                                     onClick = { viewModel.startScan() },
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                    Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
                                     Spacer(Modifier.width(4.dp))
                                     Text("Scan All")
                                 }
@@ -94,7 +94,7 @@ fun VulnScannerScreen(
                                     modifier = Modifier.weight(1f),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                 ) {
-                                    Icon(Icons.Default.Stop, contentDescription = null)
+                                    Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
                                     Spacer(Modifier.width(4.dp))
                                     Text("Stop Scan")
                                 }
