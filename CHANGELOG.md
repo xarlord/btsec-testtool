@@ -1,3 +1,10 @@
+## [1.5.15](https://github.com/xarlord/btsec-testtool/compare/v1.5.14...v1.5.15) (2026-06-06)
+
+
+### Bug Fixes
+
+* **#221,#229,#230:** verifySignature bypass, empty reports, Timber migration ([#233](https://github.com/xarlord/btsec-testtool/issues/233)) ([2e11efa](https://github.com/xarlord/btsec-testtool/commit/2e11efab6e457a6d46cc8e66d221089d31b284aa)), closes [#221](https://github.com/xarlord/btsec-testtool/issues/221) [#229](https://github.com/xarlord/btsec-testtool/issues/229) [#230](https://github.com/xarlord/btsec-testtool/issues/230) [#221](https://github.com/xarlord/btsec-testtool/issues/221) [#229](https://github.com/xarlord/btsec-testtool/issues/229) [#230](https://github.com/xarlord/btsec-testtool/issues/230)
+
 ## [1.5.14](https://github.com/xarlord/btsec-testtool/compare/v1.5.13...v1.5.14) (2026-06-06)
 
 
