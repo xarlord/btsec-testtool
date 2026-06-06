@@ -1,3 +1,10 @@
+## [1.5.7](https://github.com/xarlord/btsec-testtool/compare/v1.5.6...v1.5.7) (2026-06-06)
+
+
+### Bug Fixes
+
+* **ble:** implement readCharacteristic, subscribeToCharacteristic, readDescriptor ([#181](https://github.com/xarlord/btsec-testtool/issues/181)) ([6322c22](https://github.com/xarlord/btsec-testtool/commit/6322c2296b744983a9ef281d57b9ee5f8557faf4)), closes [#131](https://github.com/xarlord/btsec-testtool/issues/131)
+
 ## [1.5.6](https://github.com/xarlord/btsec-testtool/compare/v1.5.5...v1.5.6) (2026-06-06)
 
 
