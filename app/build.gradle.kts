@@ -150,6 +150,9 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+            all {
+                it.useJUnitPlatform()
+            }
         }
         animationsDisabled = true
     }
@@ -324,6 +327,7 @@ dependencies {
 
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.kotlinCoroutines}")
     testImplementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("app.cash.turbine:turbine:${Versions.turbine}")
