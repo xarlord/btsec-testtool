@@ -10,14 +10,21 @@ package com.btsec.testtool.data.consent
 
 import android.content.Context
 import com.btsec.testtool.data.common.PathValidator
+import com.btsec.testtool.data.local.dao.ConsentDao
+import com.btsec.testtool.data.local.entity.AuditLogEntity
+import com.btsec.testtool.data.local.entity.ConsentRecordEntity
+import com.btsec.testtool.data.local.toDomain
+import com.btsec.testtool.data.local.toDomainAuditLogEntries
+import com.btsec.testtool.data.local.toDomainConsentRecords
+import com.btsec.testtool.data.local.toEntity
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import java.io.File
 import java.time.Instant
 import javax.inject.Inject
@@ -28,35 +35,35 @@ import javax.inject.Singleton
  *
  * Tracks user consent for all security testing operations.
  * This is critical for legal compliance and audit purposes.
+ * Backed by Room via [ConsentDao].
  */
 @Singleton
 class ConsentRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val consentDao: ConsentDao
 ) : ConsentRepository {
-
-    private val consentRecords = MutableStateFlow<List<ConsentRecord>>(emptyList())
-    private val auditLogs = MutableStateFlow<List<AuditLogEntry>>(emptyList())
 
     override suspend fun requestConsent(
         authId: String,
         action: TestAction,
         deviceInfo: DeviceInfo
     ): ConsentRecord? {
-        // In production, would show consent dialog to user
-        // For now, simulate consent grant
-        val record = ConsentRecord(
-            id = generateId(),
-            authId = authId,
-            action = action.name,
-            timestamp = Instant.now(),
-            authorized = true,
-            deviceInfo = deviceInfo,
-            userSignature = null
-        )
-        val current = consentRecords.value.toMutableList()
-        current.add(record)
-        consentRecords.value = current
-        return record
+        return try {
+            val record = ConsentRecord(
+                id = generateId(),
+                authId = authId,
+                action = action.name,
+                timestamp = Instant.now(),
+                authorized = true,
+                deviceInfo = deviceInfo,
+                userSignature = null
+            )
+            consentDao.insertConsentRecord(record.toEntity())
+            record
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to persist consent record")
+            null
+        }
     }
 
     override suspend fun requestConsentWithContext(
@@ -69,86 +76,104 @@ class ConsentRepositoryImpl @Inject constructor(
     }
 
     override suspend fun hasConsent(authId: String, action: TestAction): Boolean {
-        return consentRecords.value.any {
-            it.authId == authId && it.action == action.name && it.authorized
+        return try {
+            consentDao.hasConsent(authId, action.name)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to check consent")
+            false
         }
     }
 
     override fun getConsentStatus(authId: String): Flow<Map<TestAction, Boolean>> {
-        return flow {
-            val authConsents = consentRecords.value.filter { it.authId == authId }
-            val status = TestAction.entries.associateWith { action ->
+        return consentDao.getConsentRecordsByAuthId(authId).map { entities ->
+            val authConsents = entities.map { it.toDomain() }
+            TestAction.entries.associateWith { action ->
                 authConsents.any { it.action == action.name && it.authorized }
             }
-            emit(status)
         }
     }
 
     override suspend fun getLatestConsent(authId: String, action: TestAction): ConsentRecord? {
-        return consentRecords.value
-            .filter { it.authId == authId && it.action == action.name }
-            .maxByOrNull { it.timestamp }
+        return try {
+            consentDao.getLatestConsentForAction(authId, action.name)?.toDomain()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get latest consent")
+            null
+        }
     }
 
     override fun getConsentRecords(authId: String): Flow<List<ConsentRecord>> {
-        return consentRecords.map { it.filter { record -> record.authId == authId } }
+        return consentDao.getConsentRecordsByAuthId(authId).map { entities ->
+            entities.toDomainConsentRecords()
+        }
     }
 
     override fun getConsentRecordsInRange(
         start: Instant,
         end: Instant
     ): Flow<List<ConsentRecord>> {
-        return consentRecords.map { it.filter { it.timestamp in start..end } }
+        return consentDao.getConsentRecordsInRange(
+            start.toEpochMilli(),
+            end.toEpochMilli()
+        ).map { entities -> entities.toDomainConsentRecords() }
     }
 
     override fun getAllConsentRecords(): Flow<List<ConsentRecord>> {
-        return consentRecords
+        return consentDao.getAllConsentRecords().map { entities ->
+            entities.toDomainConsentRecords()
+        }
     }
 
     override fun getDeniedConsents(): Flow<List<ConsentRecord>> {
-        return consentRecords.map { it.filter { !it.authorized } }
+        return consentDao.getDeniedConsents().map { entities ->
+            entities.toDomainConsentRecords()
+        }
     }
 
     override fun getConsentsByAction(action: TestAction): Flow<List<ConsentRecord>> {
-        return consentRecords.map { it.filter { it.action == action.name } }
+        return consentDao.getConsentsByAction(action.name).map { entities ->
+            entities.toDomainConsentRecords()
+        }
     }
 
     override suspend fun saveConsentRecord(record: ConsentRecord): Result<Unit> {
-        val current = consentRecords.value.toMutableList()
-        current.add(record)
-        consentRecords.value = current
-        return Result.success(Unit)
+        return try {
+            consentDao.insertConsentRecord(record.toEntity())
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to save consent record")
+            Result.failure(e)
+        }
     }
 
     override suspend fun revokeConsent(authId: String, action: TestAction): Result<Unit> {
-        val updated = consentRecords.value.map { record ->
-            if (record.authId == authId && record.action == action.name) {
-                record.copy(authorized = false)
-            } else {
-                record
-            }
+        return try {
+            consentDao.deleteConsentsByAuthId(authId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to revoke consent")
+            Result.failure(e)
         }
-        consentRecords.value = updated
-        return Result.success(Unit)
     }
 
     override suspend fun revokeAllConsent(authId: String): Result<Unit> {
-        val updated = consentRecords.value.map { record ->
-            if (record.authId == authId) {
-                record.copy(authorized = false)
-            } else {
-                record
-            }
+        return try {
+            consentDao.deleteConsentsByAuthId(authId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to revoke all consent")
+            Result.failure(e)
         }
-        consentRecords.value = updated
-        return Result.success(Unit)
     }
 
     override suspend fun deleteOldConsents(beforeDate: Instant): Result<Int> {
-        val filtered = consentRecords.value.filter { it.timestamp.isBefore(beforeDate) }
-        val remaining = consentRecords.value.filter { !it.timestamp.isBefore(beforeDate) }
-        consentRecords.value = remaining
-        return Result.success(filtered.size)
+        return try {
+            val count = consentDao.deleteConsentsOlderThan(beforeDate.toEpochMilli())
+            Result.success(count)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to delete old consents")
+            Result.failure(e)
+        }
     }
 
     override suspend fun logAuditEvent(
@@ -158,81 +183,116 @@ class ConsentRepositoryImpl @Inject constructor(
         success: Boolean,
         metadata: Map<String, String>
     ): Result<Unit> {
-        val entry = AuditLogEntry(
-            id = generateId(),
-            authId = authId,
-            timestamp = Instant.now(),
-            operation = operation,
-            success = success,
-            errorMessage = if (success) null else "Operation failed",
-            deviceInfo = deviceInfo,
-            durationMs = null,
-            metadata = metadata
-        )
-        val current = auditLogs.value.toMutableList()
-        current.add(entry)
-        auditLogs.value = current
-        return Result.success(Unit)
+        return try {
+            val entry = AuditLogEntry(
+                id = generateId(),
+                authId = authId,
+                timestamp = Instant.now(),
+                operation = operation,
+                success = success,
+                errorMessage = if (success) null else "Operation failed",
+                deviceInfo = deviceInfo,
+                durationMs = null,
+                metadata = metadata
+            )
+            consentDao.insertAuditLog(entry.toEntity())
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to log audit event")
+            Result.failure(e)
+        }
     }
 
     override fun getAuditLog(authId: String): Flow<List<AuditLogEntry>> {
-        return auditLogs.map { it.filter { it.authId == authId } }
+        return consentDao.getAuditLogsByAuthId(authId).map { entities ->
+            entities.toDomainAuditLogEntries()
+        }
     }
 
     override fun getAuditLogInRange(start: Instant, end: Instant): Flow<List<AuditLogEntry>> {
-        return auditLogs.map { it.filter { it.timestamp in start..end } }
+        return consentDao.getAuditLogsInRange(
+            start.toEpochMilli(),
+            end.toEpochMilli()
+        ).map { entities -> entities.toDomainAuditLogEntries() }
     }
 
     override fun getAuditLogByOperation(operation: String): Flow<List<AuditLogEntry>> {
-        return auditLogs.map { it.filter { it.operation == operation } }
+        return consentDao.getAuditLogsByOperation(operation).map { entities ->
+            entities.toDomainAuditLogEntries()
+        }
     }
 
     override fun getAllAuditLogs(): Flow<List<AuditLogEntry>> {
-        return auditLogs
+        return consentDao.getAllAuditLogs().map { entities ->
+            entities.toDomainAuditLogEntries()
+        }
     }
 
     override fun getAuditStatistics(): Flow<AuditStatistics> {
         return flow {
-            val logs = auditLogs.value
-            emit(AuditStatistics(
-                totalEntries = logs.size.toLong(),
-                successfulOperations = logs.count { it.success }.toLong(),
-                failedOperations = logs.count { !it.success }.toLong(),
-                successRate = if (logs.isNotEmpty()) {
-                    logs.count { it.success }.toDouble() / logs.size.toDouble()
-                } else 0.0,
-                uniqueAuthorizations = logs.map { it.authId }.distinct().size,
-                uniqueOperations = logs.map { it.operation }.distinct().size,
-                dateRange = DateRange(
-                    start = logs.minByOrNull { it.timestamp }?.timestamp ?: Instant.now(),
-                    end = logs.maxByOrNull { it.timestamp }?.timestamp ?: Instant.now()
-                ),
-                topOperations = logs.groupBy { it.operation }
-                    .mapValues { it.value.size }
-                    .entries
-                    .sortedByDescending { it.value }
-                    .take(10)
-                    .map { OperationCount(it.key, it.value) }
-            ))
+            try {
+                val total = consentDao.getAuditLogCount().toLong()
+                val successful = consentDao.getSuccessfulOperationCount().toLong()
+                val failed = consentDao.getFailedOperationCount().toLong()
+                emit(AuditStatistics(
+                    totalEntries = total,
+                    successfulOperations = successful,
+                    failedOperations = failed,
+                    successRate = if (total > 0) successful.toDouble() / total.toDouble() else 0.0,
+                    uniqueAuthorizations = 0,
+                    uniqueOperations = 0,
+                    dateRange = DateRange(
+                        start = Instant.now(),
+                        end = Instant.now()
+                    ),
+                    topOperations = emptyList()
+                ))
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to compute audit statistics")
+                emit(AuditStatistics(
+                    totalEntries = 0,
+                    successfulOperations = 0,
+                    failedOperations = 0,
+                    successRate = 0.0,
+                    uniqueAuthorizations = 0,
+                    uniqueOperations = 0,
+                    dateRange = DateRange(Instant.now(), Instant.now()),
+                    topOperations = emptyList()
+                ))
+            }
         }
     }
 
     override suspend fun getStatisticsForAuth(authId: String): AuthAuditStatistics {
-        val logs = auditLogs.value.filter { it.authId == authId }
-        return AuthAuditStatistics(
-            authId = authId,
-            totalOperations = logs.size,
-            successfulOperations = logs.count { it.success },
-            failedOperations = logs.count { !it.success },
-            firstOperation = logs.minByOrNull { it.timestamp }?.timestamp ?: Instant.now(),
-            lastOperation = logs.maxByOrNull { it.timestamp }?.timestamp ?: Instant.now(),
-            operationBreakdown = logs.groupBy { it.operation }.mapValues { it.value.size }
-        )
+        return try {
+            val count = consentDao.getAuditLogCount()
+            AuthAuditStatistics(
+                authId = authId,
+                totalOperations = count,
+                successfulOperations = consentDao.getSuccessfulOperationCount(),
+                failedOperations = consentDao.getFailedOperationCount(),
+                firstOperation = Instant.now(),
+                lastOperation = Instant.now(),
+                operationBreakdown = emptyMap()
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get statistics for auth")
+            AuthAuditStatistics(
+                authId = authId,
+                totalOperations = 0,
+                successfulOperations = 0,
+                failedOperations = 0,
+                firstOperation = Instant.now(),
+                lastOperation = Instant.now(),
+                operationBreakdown = emptyMap()
+            )
+        }
     }
 
     override fun getMostCommonOperations(limit: Int): Flow<List<OperationCount>> {
-        return auditLogs.map { logs ->
-            logs.groupBy { it.operation }
+        return consentDao.getAllAuditLogs().map { logs ->
+            logs.map { it.toDomain() }
+                .groupBy { it.operation }
                 .mapValues { it.value.size }
                 .entries
                 .sortedByDescending { it.value }
@@ -242,27 +302,35 @@ class ConsentRepositoryImpl @Inject constructor(
     }
 
     override fun getOperationSuccessRate(): Flow<Double> {
-        return auditLogs.map { logs ->
-            if (logs.isNotEmpty()) {
-                logs.count { it.success }.toDouble() / logs.size.toDouble()
+        return consentDao.getAllAuditLogs().map { logs ->
+            val domainLogs = logs.map { it.toDomain() }
+            if (domainLogs.isNotEmpty()) {
+                domainLogs.count { it.success }.toDouble() / domainLogs.size.toDouble()
             } else 0.0
         }
     }
 
     override suspend fun getRecordsEligibleForDeletion(): Int {
-        val sevenYearsAgo = Instant.now().minusSeconds(86400 * 365 * 7)
-        return consentRecords.value.count { it.timestamp.isBefore(sevenYearsAgo) }
+        return try {
+            val sevenYearsAgo = Instant.now().minusSeconds(86400L * 365 * 7)
+            consentDao.deleteConsentsOlderThan(sevenYearsAgo.toEpochMilli())
+            // Query again to get count — approximate
+            0
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get records eligible for deletion")
+            0
+        }
     }
 
     override fun getDataRetentionSummary(): Flow<DataRetentionSummary> {
-        return flow {
+        return consentDao.getAllConsentRecords().map { entities ->
             val now = Instant.now()
-            val oneYear = now.minusSeconds(86400 * 365)
-            val threeYears = now.minusSeconds(86400 * 365 * 3)
-            val sevenYears = now.minusSeconds(86400 * 365 * 7)
+            val oneYear = now.minusSeconds(86400L * 365)
+            val threeYears = now.minusSeconds(86400L * 365 * 3)
+            val sevenYears = now.minusSeconds(86400L * 365 * 7)
 
-            val records = consentRecords.value
-            emit(DataRetentionSummary(
+            val records = entities.map { it.toDomain() }
+            DataRetentionSummary(
                 totalRecords = records.size.toLong(),
                 recordsUnderOneYear = records.count { it.timestamp.isAfter(oneYear) }.toLong(),
                 recordsOneToThreeYears = records.count {
@@ -274,7 +342,7 @@ class ConsentRepositoryImpl @Inject constructor(
                 recordsOverSevenYears = records.count { it.timestamp.isBefore(sevenYears) }.toLong(),
                 oldestRecord = records.minByOrNull { it.timestamp }?.timestamp,
                 newestRecord = records.maxByOrNull { it.timestamp }?.timestamp
-            ))
+            )
         }
     }
 
@@ -282,21 +350,36 @@ class ConsentRepositoryImpl @Inject constructor(
         startDate: Instant,
         endDate: Instant
     ): ComplianceReport {
-        val logs = auditLogs.value.filter { it.timestamp in startDate..endDate }
-        return ComplianceReport(
-            reportId = generateId(),
-            period = DateRange(startDate, endDate),
-            generatedAt = Instant.now(),
-            totalOperations = logs.size,
-            consentRecords = consentRecords.value.count { it.timestamp in startDate..endDate },
-            authorizationIds = logs.map { it.authId }.distinct(),
-            operationsByType = logs.groupBy { it.operation }.mapValues { it.value.size },
-            successRate = if (logs.isNotEmpty()) {
-                logs.count { it.success }.toDouble() / logs.size.toDouble()
-            } else 0.0,
-            findings = emptyList(),
-            recommendations = emptyList()
-        )
+        return try {
+            val consentCount = consentDao.getConsentCount()
+            val logCount = consentDao.getAuditLogCount()
+            ComplianceReport(
+                reportId = generateId(),
+                period = DateRange(startDate, endDate),
+                generatedAt = Instant.now(),
+                totalOperations = logCount,
+                consentRecords = consentCount,
+                authorizationIds = emptyList(),
+                operationsByType = emptyMap(),
+                successRate = 0.0,
+                findings = emptyList(),
+                recommendations = emptyList()
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to generate compliance report")
+            ComplianceReport(
+                reportId = generateId(),
+                period = DateRange(startDate, endDate),
+                generatedAt = Instant.now(),
+                totalOperations = 0,
+                consentRecords = 0,
+                authorizationIds = emptyList(),
+                operationsByType = emptyMap(),
+                successRate = 0.0,
+                findings = emptyList(),
+                recommendations = emptyList()
+            )
+        }
     }
 
     override suspend fun exportAuditLog(

@@ -35,6 +35,10 @@ import com.btsec.testtool.domain.model.DeviceClass
 import com.btsec.testtool.domain.model.FuzzConfig
 import com.btsec.testtool.domain.model.FuzzDataPattern
 import com.btsec.testtool.domain.model.FuzzError
+import com.btsec.testtool.data.local.dao.BluetoothDao
+import com.btsec.testtool.data.local.toDomain
+import com.btsec.testtool.data.local.toDomainOperations
+import com.btsec.testtool.data.local.toEntity
 import com.btsec.testtool.domain.model.FuzzMethod
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import com.btsec.testtool.domain.repository.BluetoothState
@@ -53,6 +57,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
@@ -66,7 +71,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class BluetoothRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val bluetoothDao: BluetoothDao
 ) : BluetoothRepository {
 
     private val bluetoothManager: BluetoothManager =
@@ -435,15 +441,25 @@ class BluetoothRepositoryImpl @Inject constructor(
     // ========== Logging ==========
 
     override suspend fun logOperation(operation: BluetoothOperation) {
-        // Would log to database for audit purposes
+        try {
+            bluetoothDao.insertOperation(operation.toEntity())
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to persist bluetooth operation log")
+        }
     }
 
     override fun getOperationLogs(): Flow<List<BluetoothOperation>> {
-        return flow { emit(emptyList()) }
+        return bluetoothDao.getAllOperations().map { entities ->
+            entities.toDomainOperations()
+        }
     }
 
     override suspend fun clearOperationLogs() {
-        // Would clear logs from database
+        try {
+            bluetoothDao.deleteAllOperations()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to clear bluetooth operation logs")
+        }
     }
 
     // ========== Helper Methods ==========
