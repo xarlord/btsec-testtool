@@ -1,3 +1,10 @@
+## [1.5.8](https://github.com/xarlord/btsec-testtool/compare/v1.5.7...v1.5.8) (2026-06-06)
+
+
+### Bug Fixes
+
+* **ui:** add loading/empty/error states and accessibility content descriptions ([#182](https://github.com/xarlord/btsec-testtool/issues/182)) ([9ff3428](https://github.com/xarlord/btsec-testtool/commit/9ff3428b113f41c9144d9ae224c47ca46f4c0d90)), closes [#135](https://github.com/xarlord/btsec-testtool/issues/135) [#134](https://github.com/xarlord/btsec-testtool/issues/134)
+
 ## [1.5.7](https://github.com/xarlord/btsec-testtool/compare/v1.5.6...v1.5.7) (2026-06-06)
 
 
