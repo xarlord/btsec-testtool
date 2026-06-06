@@ -22,6 +22,7 @@ import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -386,12 +387,49 @@ class ConsentRepositoryImpl @Inject constructor(
         outputPath: String,
         format: AuditExportFormat
     ): Result<File> {
-        return getSafeFile(outputPath).onSuccess { file ->
-            when (format) {
-                AuditExportFormat.JSON -> file.writeText("[]")
-                AuditExportFormat.CSV -> file.writeText("timestamp,action,target\n")
-                AuditExportFormat.XML -> file.writeText("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<audit></audit>")
+        return try {
+            // Query actual audit logs from Room
+            val auditLogs = try {
+                consentDao.getAllAuditLogs().first()
+            } catch (_: Exception) {
+                emptyList()
             }
+
+            getSafeFile(outputPath).onSuccess { file ->
+                when (format) {
+                    AuditExportFormat.JSON -> {
+                        val jsonArr = auditLogs.joinToString(",\n") { entry ->
+                            """{"id":"${entry.id}","authId":"${entry.authId}","operation":"${entry.operation}","timestamp":${entry.timestamp},"success":${entry.success},"errorMessage":"${entry.errorMessage ?: ""}","deviceInfo":"${entry.deviceInfo}","durationMs":${entry.durationMs ?: 0},"metadata":"${entry.metadata}"}"""
+                        }
+                        file.writeText("[\n$jsonArr\n]")
+                    }
+                    AuditExportFormat.CSV -> {
+                        val header = "id,authId,operation,timestamp,success,errorMessage,deviceInfo,durationMs,metadata"
+                        val rows = auditLogs.map { e ->
+                            "${e.id},${e.authId},${e.operation},${e.timestamp},${e.success},${e.errorMessage ?: ""},${e.deviceInfo},${e.durationMs ?: 0},${e.metadata}"
+                        }
+                        file.writeText(header + "\n" + rows.joinToString("\n"))
+                    }
+                    AuditExportFormat.XML -> {
+                        val entries = auditLogs.joinToString("\n") { e ->
+                            """  <entry id="${e.id}">
+    <authId>${e.authId}</authId>
+    <operation>${e.operation}</operation>
+    <timestamp>${e.timestamp}</timestamp>
+    <success>${e.success}</success>
+    <errorMessage>${e.errorMessage ?: ""}</errorMessage>
+    <deviceInfo>${e.deviceInfo}</deviceInfo>
+    <durationMs>${e.durationMs ?: 0}</durationMs>
+    <metadata>${e.metadata}</metadata>
+  </entry>"""
+                        }
+                        file.writeText("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<audit>\n$entries\n</audit>")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "exportAuditLog failed")
+            Result.failure(e)
         }
     }
 
