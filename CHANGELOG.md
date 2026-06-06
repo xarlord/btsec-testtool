@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/xarlord/btsec-testtool/compare/v1.5.2...v1.5.3) (2026-06-06)
+
+
+### Bug Fixes
+
+* security, code quality, and accessibility improvements ([31d80b3](https://github.com/xarlord/btsec-testtool/commit/31d80b329d16b51b8c554c12e72b672ae0de83a6))
+
 ## [1.5.2](https://github.com/xarlord/btsec-testtool/compare/v1.5.1...v1.5.2) (2026-06-06)
 
 
