@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/xarlord/btsec-testtool/compare/v1.5.1...v1.5.2) (2026-06-06)
+
+
+### Bug Fixes
+
+* resolve review findings - manifest, mapper logging, fuzz tests ([#141](https://github.com/xarlord/btsec-testtool/issues/141)) ([96c593a](https://github.com/xarlord/btsec-testtool/commit/96c593a372f390a4f99a524408b93e99629ae8f9)), closes [#128](https://github.com/xarlord/btsec-testtool/issues/128) [#130](https://github.com/xarlord/btsec-testtool/issues/130) [#139](https://github.com/xarlord/btsec-testtool/issues/139)
+
 ## [1.5.1](https://github.com/xarlord/btsec-testtool/compare/v1.5.0...v1.5.1) (2026-06-05)
 
 
