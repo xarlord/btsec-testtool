@@ -14,7 +14,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.content.pm.ServiceInfo
 import android.os.Build
-import android.util.Log
+import timber.log.Timber
 import com.btsec.testtool.BtSecTestToolApplication.Companion.CHANNEL_ID_SERVICE
 import com.btsec.testtool.BtSecTestToolApplication.Companion.NOTIFICATION_ID_SCAN
 
@@ -30,7 +30,6 @@ import com.btsec.testtool.BtSecTestToolApplication.Companion.NOTIFICATION_ID_SCA
 class BluetoothScanService : Service() {
 
     companion object {
-        private const val TAG = "BluetoothScanService"
         const val EXTRA_AUTH_ID = "extra_auth_id"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
         const val ACTION_START_SCAN = "com.btsec.testtool.action.START_SCAN"
@@ -45,7 +44,7 @@ class BluetoothScanService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!validateAuthorization(intent)) {
-            Log.w(TAG, "Unauthorized intent received — stopping service. " +
+            Timber.w( "Unauthorized intent received — stopping service. " +
                 "Intent action: ${intent?.action}, extras: ${intent?.extras?.keySet()}")
             stopSelf()
             return START_NOT_STICKY
@@ -54,11 +53,11 @@ class BluetoothScanService : Service() {
         when (intent?.action) {
             ACTION_START_SCAN -> {
                 val authId = intent.getStringExtra(EXTRA_AUTH_ID) ?: ""
-                Log.i(TAG, "Starting authorized BLE scan with auth: ${authId.take(10)}***")
+                Timber.i( "Starting authorized BLE scan with auth: ${authId.take(10)}***")
                 // Scan logic handled by BluetoothRepository via ViewModel
             }
             ACTION_STOP_SCAN -> {
-                Log.i(TAG, "Stopping BLE scan")
+                Timber.i( "Stopping BLE scan")
                 stopSelf()
             }
         }
@@ -81,17 +80,17 @@ class BluetoothScanService : Service() {
         val authToken = intent.getStringExtra(EXTRA_AUTH_TOKEN)
 
         if (authId.isNullOrBlank()) {
-            Log.w(TAG, "Missing auth ID in scan intent")
+            Timber.w( "Missing auth ID in scan intent")
             return false
         }
 
         if (!AUTH_ID_PATTERN.matches(authId)) {
-            Log.w(TAG, "Invalid auth ID format in scan intent: ${authId.take(10)}***")
+            Timber.w( "Invalid auth ID format in scan intent: ${authId.take(10)}***")
             return false
         }
 
         if (authToken.isNullOrBlank()) {
-            Log.w(TAG, "Missing auth token in scan intent")
+            Timber.w( "Missing auth token in scan intent")
             return false
         }
 
@@ -101,7 +100,7 @@ class BluetoothScanService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        Log.d(TAG, "BluetoothScanService destroyed")
+        Timber.d( "BluetoothScanService destroyed")
         super.onDestroy()
     }
 

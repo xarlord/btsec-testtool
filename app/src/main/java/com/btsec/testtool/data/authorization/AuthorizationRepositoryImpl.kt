@@ -9,8 +9,8 @@
 package com.btsec.testtool.data.authorization
 
 import android.content.Context
-import android.util.Log
 import com.btsec.testtool.domain.model.*
+import timber.log.Timber
 import com.btsec.testtool.domain.repository.AuthorizationRepository
 import com.btsec.testtool.domain.repository.AuthorizationStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,9 +18,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
-import java.util.Base64
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,9 +32,6 @@ class AuthorizationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : AuthorizationRepository {
 
-    companion object {
-        private const val TAG = "AuthRepoImpl"
-    }
 
     private val currentAuthorization = MutableStateFlow<Authorization?>(null)
     private val authorizations = mutableMapOf<String, Authorization>()
@@ -58,12 +52,12 @@ class AuthorizationRepositoryImpl @Inject constructor(
                 }
             } catch (e: Exception) {
                 // Server unreachable — fall through to mock if demo format
-                Log.w(TAG, "Server verification failed, falling back: ${e.message}")
+                Timber.w( "Server verification failed, falling back: ${e.message}")
             }
         }
 
         // Mock/demo fallback — ONLY when no server URL configured
-        Log.i(TAG, "No server URL configured — falling back to mock verification (demo mode)")
+        Timber.i( "No server URL configured — falling back to mock verification (demo mode)")
         return createMockAuthorization(authId)
     }
 
@@ -87,7 +81,7 @@ class AuthorizationRepositoryImpl @Inject constructor(
 
             val responseCode = connection.responseCode
             if (responseCode != 200) {
-                Log.w(TAG, "Server returned HTTP $responseCode for auth verification")
+                Timber.w( "Server returned HTTP $responseCode for auth verification")
                 return null
             }
 
@@ -142,7 +136,7 @@ class AuthorizationRepositoryImpl @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse server response: ${e.message}")
+            Timber.e( "Failed to parse server response: ${e.message}")
             return null
         }
     }
@@ -200,22 +194,20 @@ class AuthorizationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun verifySignature(authorization: Authorization): Boolean {
-        // In production, verify digital signature
-        // For now, simulate signature verification
-
-        try {
-            // Would verify signature against stored public key
-            // val signatureBytes = Base64.getDecoder().decode(authorization.signature)
-            // val publicKey = loadPublicKey()
-            // val sig = Signature.getInstance("SHA256withRSA")
-            // sig.initVerify(publicKey)
-            // Update with authorization data
-            // return sig.verify(signatureBytes)
-
-            return true  // Mock verification
-        } catch (e: Exception) {
+        // Basic format validation — real crypto verification requires stored public key
+        // TODO: Implement full RSA/ECDSA verification using KEY_PUBLIC_KEY from AuthorizationBackend
+        if (authorization.signature.isBlank()) {
+            Timber.w("Signature verification failed: empty signature for auth ${authorization.authId.takeLast(4)}")
             return false
         }
+        if (authorization.signature == "mock_signature") {
+            Timber.w("Signature verification failed: mock signature detected for auth ${authorization.authId.takeLast(4)}")
+            return false
+        }
+        // Accept demo_signature_* and server_verified_* formats until real crypto is implemented
+        // This is a transitional measure — see GitHub issue #221
+        return authorization.signature.startsWith("demo_signature_") ||
+               authorization.signature.startsWith("server_verified_")
     }
 
     override suspend fun getAuthorizationById(authId: String): Authorization? {

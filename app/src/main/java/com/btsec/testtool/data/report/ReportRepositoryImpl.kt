@@ -11,13 +11,23 @@ package com.btsec.testtool.data.report
 import android.content.Context
 import android.net.Uri
 import com.btsec.testtool.data.common.PathValidator
+import com.btsec.testtool.data.local.dao.BluetoothDao
+import com.btsec.testtool.data.local.dao.FuzzingDao
+import com.btsec.testtool.data.local.dao.KeyExtractionDao
 import com.btsec.testtool.data.local.dao.ReportDao
+import com.btsec.testtool.data.local.dao.VulnerabilityDao
 import com.btsec.testtool.data.local.toDomain
+import com.btsec.testtool.data.local.toDomainDevices
+import com.btsec.testtool.data.local.toDomainFuzzResults
+import com.btsec.testtool.data.local.toDomainKeyResults
 import com.btsec.testtool.data.local.toDomainReports
+import com.btsec.testtool.data.local.toDomainDefinitions
 import com.btsec.testtool.data.local.toEntity
+import kotlinx.coroutines.flow.first
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ReportRepository
 import com.btsec.testtool.domain.repository.VulnerabilityTestResult
+import com.btsec.testtool.domain.repository.DetectionConfidence
 import com.btsec.testtool.domain.repository.ReportTemplate
 import com.btsec.testtool.domain.repository.ReportOperation
 import com.btsec.testtool.domain.repository.ReportConfig
@@ -49,6 +59,10 @@ import javax.inject.Singleton
 class ReportRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val reportDao: ReportDao,
+    private val bluetoothDao: BluetoothDao,
+    private val vulnerabilityDao: VulnerabilityDao,
+    private val fuzzingDao: FuzzingDao,
+    private val keyExtractionDao: KeyExtractionDao,
     private val reportGenerator: com.btsec.testtool.data.report.ReportGenerator,
     private val exportFormatters: com.btsec.testtool.data.report.ExportFormatters
 ) : ReportRepository {
@@ -86,11 +100,40 @@ class ReportRepositoryImpl @Inject constructor(
             }
 
             val report = try {
-                // Collect data from Room DAOs — fall back to empty if queries unavailable
-                val targetDevices = emptyList<BluetoothDevice>()
-                val vulnResults = emptyList<VulnerabilityTestResult>()
-                val fuzzResults = emptyList<FuzzResult>()
-                val keyResults = emptyList<KeyExtractionResult>()
+                // Collect data from Room DAOs
+                val targetDevices = try {
+                    bluetoothDao.getAllDevices().first().toDomainDevices()
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to load devices for report")
+                    emptyList<BluetoothDevice>()
+                }
+                val vulnResults = try {
+                    vulnerabilityDao.getAllDefinitions().first().toDomainDefinitions().map { def ->
+                        VulnerabilityTestResult(
+                            vulnerability = def,
+                            detected = false,
+                            confidence = DetectionConfidence.LOW,
+                            details = "Included from vulnerability definitions database",
+                            evidence = emptyList(),
+                            timestamp = Instant.now()
+                        )
+                    }
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to load vulnerabilities for report")
+                    emptyList<VulnerabilityTestResult>()
+                }
+                val fuzzResults = try {
+                    fuzzingDao.getAllFuzzResults().first().toDomainFuzzResults()
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to load fuzz results for report")
+                    emptyList<FuzzResult>()
+                }
+                val keyResults = try {
+                    keyExtractionDao.getAllKeyExtractionResults().first().toDomainKeyResults()
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to load key extraction results for report")
+                    emptyList<KeyExtractionResult>()
+                }
 
                 reportGenerator.generateReport(
                     authId = authId,
