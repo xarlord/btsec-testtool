@@ -22,11 +22,14 @@ import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import java.io.File
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -386,14 +389,106 @@ class ConsentRepositoryImpl @Inject constructor(
         outputPath: String,
         format: AuditExportFormat
     ): Result<File> {
-        return getSafeFile(outputPath).onSuccess { file ->
-            when (format) {
-                AuditExportFormat.JSON -> file.writeText("[]")
-                AuditExportFormat.CSV -> file.writeText("timestamp,action,target\n")
-                AuditExportFormat.XML -> file.writeText("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<audit></audit>")
+        return try {
+            val entities = consentDao.getAllAuditLogs().first()
+            val entries = entities.toDomainAuditLogEntries()
+            getSafeFile(outputPath).onSuccess { file ->
+                val content = when (format) {
+                    AuditExportFormat.JSON -> serializeToJson(entries)
+                    AuditExportFormat.CSV -> serializeToCsv(entries)
+                    AuditExportFormat.XML -> serializeToXml(entries)
+                }
+                file.writeText(content)
             }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to export audit log")
+            Result.failure(e)
         }
     }
+
+    private fun serializeToJson(entries: List<AuditLogEntry>): String {
+        val isoFormatter = DateTimeFormatter.ISO_INSTANT
+        val sb = StringBuilder("[\n")
+        entries.forEachIndexed { index, entry ->
+            sb.append("  {\n")
+            sb.append("    \"id\": \"${escapeJson(entry.id)}\",\n")
+            sb.append("    \"authId\": \"${escapeJson(entry.authId)}\",\n")
+            sb.append("    \"timestamp\": \"${isoFormatter.format(entry.timestamp)}\",\n")
+            sb.append("    \"operation\": \"${escapeJson(entry.operation)}\",\n")
+            sb.append("    \"success\": ${entry.success},\n")
+            sb.append("    \"errorMessage\": ${entry.errorMessage?.let { "\"${escapeJson(it)}\"" } ?: "null"},\n")
+            sb.append("    \"durationMs\": ${entry.durationMs ?: "null"},\n")
+            sb.append("    \"deviceInfo\": \"${escapeJson(entry.deviceInfo.toString())}\",\n")
+            sb.append("    \"metadata\": {\n")
+            entry.metadata.entries.forEachIndexed { mi, mapEntry ->
+                sb.append("      \"${escapeJson(mapEntry.key)}\": \"${escapeJson(mapEntry.value)}\"")
+                if (mi < entry.metadata.size - 1) sb.append(",")
+                sb.append("\n")
+            }
+            sb.append("    }\n")
+            sb.append("  }")
+            if (index < entries.size - 1) sb.append(",")
+            sb.append("\n")
+        }
+        sb.append("]")
+        return sb.toString()
+    }
+
+    private fun serializeToCsv(entries: List<AuditLogEntry>): String {
+        val sb = StringBuilder()
+        sb.appendLine("id,auth_id,timestamp,operation,success,error_message,duration_ms,device_info,metadata")
+        for (entry in entries) {
+            sb.appendLine(
+                "\"${escapeCsv(entry.id)}\"," +
+                "\"${escapeCsv(entry.authId)}\"," +
+                "\"${entry.timestamp}\"," +
+                "\"${escapeCsv(entry.operation)}\"," +
+                "${entry.success}," +
+                "\"${escapeCsv(entry.errorMessage ?: "")}\"," +
+                "${entry.durationMs ?: ""}," +
+                "\"${escapeCsv(entry.deviceInfo.toString())}\"," +
+                "\"${escapeCsv(entry.metadata.toString())}\""
+            )
+        }
+        return sb.toString()
+    }
+
+    private fun serializeToXml(entries: List<AuditLogEntry>): String {
+        val sb = StringBuilder()
+        sb.appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+        sb.appendLine("<audit>")
+        for (entry in entries) {
+            sb.appendLine("  <entry>")
+            sb.appendLine("    <id>${escapeXml(entry.id)}</id>")
+            sb.appendLine("    <authId>${escapeXml(entry.authId)}</authId>")
+            sb.appendLine("    <timestamp>${entry.timestamp}</timestamp>")
+            sb.appendLine("    <operation>${escapeXml(entry.operation)}</operation>")
+            sb.appendLine("    <success>${entry.success}</success>")
+            entry.errorMessage?.let {
+                sb.appendLine("    <errorMessage>${escapeXml(it)}</errorMessage>")
+            }
+            entry.durationMs?.let {
+                sb.appendLine("    <durationMs>$it</durationMs>")
+            }
+            sb.appendLine("    <metadata>")
+            for ((key, value) in entry.metadata) {
+                sb.appendLine("      <entry key=\"${escapeXml(key)}\">${escapeXml(value)}</entry>")
+            }
+            sb.appendLine("    </metadata>")
+            sb.appendLine("  </entry>")
+        }
+        sb.appendLine("</audit>")
+        return sb.toString()
+    }
+
+    private fun escapeJson(s: String): String =
+        s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+    private fun escapeCsv(s: String): String =
+        s.replace("\"", "\"\"")
+
+    private fun escapeXml(s: String): String =
+        s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;")
 
     private fun getSafeFile(outputPath: String): Result<File> {
         return PathValidator.getSafeFile(context, outputPath)
