@@ -1,0 +1,41 @@
+/*
+ * Bluetooth Security Testing Tool
+ * Copyright (c) 2026 Security Research Team
+ */
+package com.btsec.testtool.domain.usecase
+
+import com.btsec.testtool.domain.repository.BluetoothRepository
+import com.btsec.testtool.domain.repository.ConsentRepository
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Test
+
+class BluetoothScanningUseCaseTest {
+
+    private lateinit var useCase: BluetoothScanningUseCase
+    private val btRepo: BluetoothRepository = mockk(relaxed = true)
+    private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
+    private val consentRepo: ConsentRepository = mockk(relaxed = true)
+
+    @Before
+    fun setup() {
+        useCase = BluetoothScanningUseCase(btRepo, authUseCase, consentRepo)
+    }
+
+    @Test
+    fun `getSelectedDeviceAddress returns flow`() = runTest {
+        every { btRepo.getSelectedDeviceAddress() } returns flowOf("AA:BB:CC:DD:EE:FF")
+        val result = useCase.getSelectedDeviceAddress().first()
+        assertEquals("AA:BB:CC:DD:EE:FF", result)
+    }
+
+    @Test
+    fun `selectDevice does not throw`() {
+        useCase.selectDevice("AA:BB:CC:DD:EE:FF")
+    }
+}
