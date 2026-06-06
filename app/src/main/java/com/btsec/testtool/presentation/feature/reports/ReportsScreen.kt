@@ -28,6 +28,7 @@ import com.btsec.testtool.domain.repository.ReportConfig
 import com.btsec.testtool.domain.repository.ReportGenerationStatus
 import com.btsec.testtool.domain.repository.ReportsSummary
 import com.btsec.testtool.domain.usecase.ReportGenerationUseCase
+import com.btsec.testtool.presentation.feature.scanner.ErrorView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -50,106 +51,152 @@ fun ReportsScreen(
                 title = { Text("Reports") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showGenerateDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Generate Report")
+                Icon(Icons.Default.Add, contentDescription = "Generate new report")
             }
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Summary Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Report Summary", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            uiState.error != null -> {
+                Column(modifier = Modifier.padding(padding)) {
+                    ErrorView(
+                        error = uiState.error!!,
+                        onRetry = { viewModel.retry() }
+                    )
+                }
+            }
+            else -> {
+                ReportsContent(
+                    padding = padding,
+                    uiState = uiState,
+                    onExport = { reportId, format -> viewModel.exportReport(reportId, format) },
+                    onDelete = { viewModel.deleteReport(it) },
+                    onArchive = { viewModel.archiveReport(it) },
+                    showGenerateDialog = showGenerateDialog,
+                    onDismissDialog = { showGenerateDialog = false },
+                    onGenerate = { title, includeVulns, includeFuzzing, includeKeys ->
+                        viewModel.generateReport(title, includeVulns, includeFuzzing, includeKeys)
+                        showGenerateDialog = false
+                    }
+                )
+            }
+        }
+    }
+}
 
-                        val summary = uiState.summary
-                        if (summary != null) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                StatChip("Total", summary.totalReports, Icons.Default.Description)
-                                StatChip("Draft", summary.draftReports, Icons.Default.Edit)
-                                StatChip("Final", summary.finalReports, Icons.Default.CheckCircle)
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Text(
-                                    "Critical Vulns: ${summary.criticalVulnerabilitiesTotal}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.Red
-                                )
-                                Text(
-                                    "High Vulns: ${summary.highVulnerabilitiesTotal}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFFFF6D00)
-                                )
-                                Text(
-                                    "Pending: ${summary.pendingActions}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        } else {
-                            Text("No report data available", style = MaterialTheme.typography.bodySmall)
+@Composable
+private fun ReportsContent(
+    padding: PaddingValues,
+    uiState: ReportsUiState,
+    onExport: (String, ExportFormat) -> Unit,
+    onDelete: (String) -> Unit,
+    onArchive: (String) -> Unit,
+    showGenerateDialog: Boolean,
+    onDismissDialog: () -> Unit,
+    onGenerate: (String, Boolean, Boolean, Boolean) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Summary Card
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Report Summary", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(8.dp))
+
+                    val summary = uiState.summary
+                    if (summary != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            StatChip("Total", summary.totalReports, Icons.Default.Description, "Total reports")
+                            StatChip("Draft", summary.draftReports, Icons.Default.Edit, "Draft reports")
+                            StatChip("Final", summary.finalReports, Icons.Default.CheckCircle, "Final reports")
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(
+                                "Critical Vulns: ${summary.criticalVulnerabilitiesTotal}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Red
+                            )
+                            Text(
+                                "High Vulns: ${summary.highVulnerabilitiesTotal}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFFFF6D00)
+                            )
+                            Text(
+                                "Pending: ${summary.pendingActions}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    } else {
+                        Text("No report data available", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+
+        // Report List
+        if (uiState.reports.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Assessment,
+                            contentDescription = "No reports available",
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.outline
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text("No reports yet", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Generate your first security assessment report",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        FilledTonalButton(onClick = { onGenerate("Bluetooth Security Assessment", true, true, true) }) {
+                            Icon(Icons.Default.Add, contentDescription = "Generate first report")
+                            Spacer(Modifier.width(4.dp))
+                            Text("Generate Report")
                         }
                     }
                 }
             }
-
-            // Report List
-            if (uiState.reports.isEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.Assessment,
-                                contentDescription = "Reports",
-                                modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.outline
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            Text("No reports yet", style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                "Generate your first security assessment report",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            FilledTonalButton(onClick = { showGenerateDialog = true }) {
-                                Icon(Icons.Default.Add, contentDescription = "Generate report")
-                                Spacer(Modifier.width(4.dp))
-                                Text("Generate Report")
-                            }
-                        }
-                    }
-                }
-            } else {
-                items(uiState.reports, key = { it.id }) { report ->
-                    ReportCard(
-                        report = report,
-                        onExport = { format -> viewModel.exportReport(report.id, format) },
-                        onDelete = { viewModel.deleteReport(report.id) },
-                        onArchive = { viewModel.archiveReport(report.id) }
-                    )
-                }
+        } else {
+            items(uiState.reports, key = { it.id }) { report ->
+                ReportCard(
+                    report = report,
+                    onExport = { format -> onExport(report.id, format) },
+                    onDelete = { onDelete(report.id) },
+                    onArchive = { onArchive(report.id) }
+                )
             }
         }
     }
@@ -157,19 +204,16 @@ fun ReportsScreen(
     // Generate Report Dialog
     if (showGenerateDialog) {
         GenerateReportDialog(
-            onDismiss = { showGenerateDialog = false },
-            onGenerate = { title, includeVulns, includeFuzzing, includeKeys ->
-                viewModel.generateReport(title, includeVulns, includeFuzzing, includeKeys)
-                showGenerateDialog = false
-            }
+            onDismiss = onDismissDialog,
+            onGenerate = onGenerate
         )
     }
 }
 
 @Composable
-private fun StatChip(label: String, count: Int, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+private fun StatChip(label: String, count: Int, icon: androidx.compose.ui.graphics.vector.ImageVector, description: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(icon, contentDescription = "Report statistic", modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
+        Icon(icon, contentDescription = description, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
         Text("$count", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Text(label, style = MaterialTheme.typography.labelSmall)
     }
@@ -212,10 +256,10 @@ private fun ReportCard(
                     Text("PDF", style = MaterialTheme.typography.labelSmall)
                 }
                 IconButton(onClick = onArchive) {
-                    Icon(Icons.Default.Archive, contentDescription = "Archive", modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Archive, contentDescription = "Archive report", modifier = Modifier.size(18.dp))
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Default.Delete, contentDescription = "Delete report", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -300,14 +344,15 @@ class ReportsViewModel @Inject constructor(
     val uiState: StateFlow<ReportsUiState> = _uiState.asStateFlow()
 
     init {
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             reportGenerationUseCase.getAllReports().collect { reports ->
-                _uiState.update { it.copy(reports = reports) }
+                _uiState.update { it.copy(reports = reports, isLoading = false) }
             }
         }
         viewModelScope.launch {
             reportGenerationUseCase.getReportsSummary().collect { summary ->
-                _uiState.update { it.copy(summary = summary) }
+                _uiState.update { it.copy(summary = summary, isLoading = false) }
             }
         }
     }
@@ -344,9 +389,15 @@ class ReportsViewModel @Inject constructor(
     fun archiveReport(reportId: String) {
         viewModelScope.launch { reportGenerationUseCase.archiveReport(reportId) }
     }
+
+    fun retry() {
+        _uiState.update { it.copy(error = null, isLoading = true) }
+    }
 }
 
 data class ReportsUiState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
     val reports: List<SecurityReport> = emptyList(),
     val summary: ReportsSummary? = null
 )

@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,6 +30,8 @@ import com.btsec.testtool.domain.repository.VulnerabilityStatistics
 import com.btsec.testtool.domain.repository.VulnerabilityTestResult
 import com.btsec.testtool.domain.usecase.ScanStartResult
 import com.btsec.testtool.domain.usecase.VulnerabilityScanningUseCase
+import com.btsec.testtool.presentation.feature.scanner.EmptyView
+import com.btsec.testtool.presentation.feature.scanner.ErrorView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -49,92 +52,145 @@ fun VulnScannerScreen(
                 title = { Text("Vulnerability Scanner") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
                     }
                 }
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Scan Controls
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Loading vulnerability data…",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+            uiState.error != null -> {
+                Column(modifier = Modifier.padding(padding)) {
+                    ErrorView(
+                        error = uiState.error!!,
+                        onRetry = { viewModel.retry() }
+                    )
+                }
+            }
+            else -> {
+                VulnScannerContent(
+                    padding = padding,
+                    uiState = uiState,
+                    onStartScan = { viewModel.startScan() },
+                    onStopScan = { viewModel.stopScan() },
+                    onVerify = { viewModel.verifyVulnerability(it) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VulnScannerContent(
+    padding: PaddingValues,
+    uiState: VulnScannerUiState,
+    onStartScan: () -> Unit,
+    onStopScan: () -> Unit,
+    onVerify: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Scan Controls
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Vulnerability Scan", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(
+                        "Scan the connected device for known Bluetooth vulnerabilities including KNOB, BIAS, BLESA, BlueBorne, and more.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (uiState.scanStatus != ScanStatus.RUNNING) {
+                            FilledTonalButton(
+                                onClick = onStartScan,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
+                                Spacer(Modifier.width(4.dp))
+                                Text("Scan All")
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = onStopScan,
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
+                                Spacer(Modifier.width(4.dp))
+                                Text("Stop Scan")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Scan Progress
+        if (uiState.scanStatus == ScanStatus.RUNNING) {
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Vulnerability Scan", style = MaterialTheme.typography.titleMedium)
+                        Text("Scanning Progress", style = MaterialTheme.typography.titleSmall)
                         Spacer(Modifier.height(8.dp))
 
-                        Text(
-                            "Scan the connected device for known Bluetooth vulnerabilities including KNOB, BIAS, BLESA, BlueBorne, and more.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(Modifier.height(12.dp))
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            if (uiState.scanStatus != ScanStatus.RUNNING) {
-                                FilledTonalButton(
-                                    onClick = { viewModel.startScan() },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Scan All")
-                                }
-                            } else {
-                                OutlinedButton(
-                                    onClick = { viewModel.stopScan() },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                                ) {
-                                    Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Stop Scan")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                        Spacer(Modifier.height(4.dp))
 
-            // Scan Progress
-            if (uiState.scanStatus == ScanStatus.RUNNING) {
-                item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Scanning Progress", style = MaterialTheme.typography.titleSmall)
-                            Spacer(Modifier.height(8.dp))
-
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-
-                            Spacer(Modifier.height(4.dp))
-
-                            uiState.scanProgress?.let { progress ->
+                        uiState.scanProgress?.let { progress ->
+                            Text(
+                                "Checking: ${progress.vulnerabilitiesChecked}/${progress.totalVulnerabilities} • Found: ${progress.vulnerabilitiesFound}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            progress.currentVulnerability?.let { vuln ->
                                 Text(
-                                    "Checking: ${progress.vulnerabilitiesChecked}/${progress.totalVulnerabilities} • Found: ${progress.vulnerabilitiesFound}",
-                                    style = MaterialTheme.typography.bodySmall
+                                    "Current: ${vuln.name}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
-                                progress.currentVulnerability?.let { vuln ->
-                                    Text(
-                                        "Current: ${vuln.name}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
                             }
                         }
                     }
                 }
             }
+        }
 
-            // Known Vulnerability Definitions
+        // Known Vulnerability Definitions
+        if (uiState.definitions.isEmpty()) {
+            item {
+                EmptyView(
+                    message = "No vulnerability definitions loaded. Pull to refresh or check your connection.",
+                    icon = Icons.Default.BugReport
+                )
+            }
+        } else {
             item {
                 Text("Known Vulnerability Database", style = MaterialTheme.typography.titleMedium)
             }
@@ -169,74 +225,81 @@ fun VulnScannerScreen(
                     }
                 }
             }
+        }
 
-            // Discovered Vulnerabilities
-            if (uiState.discoveredVulns.isNotEmpty()) {
-                item {
-                    Text(
-                        "Discovered Vulnerabilities (${uiState.discoveredVulns.size})",
-                        style = MaterialTheme.typography.titleMedium
+        // Discovered Vulnerabilities
+        if (uiState.discoveredVulns.isNotEmpty()) {
+            item {
+                Text(
+                    "Discovered Vulnerabilities (${uiState.discoveredVulns.size})",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            items(uiState.discoveredVulns) { vuln ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = when (vuln.severity) {
+                            VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
+                            VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
+                            VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
+                            else -> MaterialTheme.colorScheme.surfaceVariant
+                        }
                     )
-                }
-                items(uiState.discoveredVulns) { vuln ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = when (vuln.severity) {
-                                VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
-                                VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
-                                VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
-                                else -> MaterialTheme.colorScheme.surfaceVariant
-                            }
-                        )
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                SeverityBadge(vuln.severity)
-                                Spacer(Modifier.width(8.dp))
-                                Text(vuln.name, style = MaterialTheme.typography.titleSmall)
-                            }
-                            vuln.cveId?.let {
-                                Text(it, style = MaterialTheme.typography.labelMedium)
-                            }
-                            Text(vuln.description, style = MaterialTheme.typography.bodySmall, maxLines = 2)
-                            Spacer(Modifier.height(4.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                if (vuln.verified) {
-                                    AssistChip(
-                                        onClick = {},
-                                        label = { Text("Verified") },
-                                        leadingIcon = { Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(16.dp)) }
-                                    )
-                                }
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            SeverityBadge(vuln.severity)
+                            Spacer(Modifier.width(8.dp))
+                            Text(vuln.name, style = MaterialTheme.typography.titleSmall)
+                        }
+                        vuln.cveId?.let {
+                            Text(it, style = MaterialTheme.typography.labelMedium)
+                        }
+                        Text(vuln.description, style = MaterialTheme.typography.bodySmall, maxLines = 2)
+                        Spacer(Modifier.height(4.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (vuln.verified) {
                                 AssistChip(
-                                    onClick = { viewModel.verifyVulnerability(vuln.id) },
-                                    label = { Text("Verify") },
-                                    leadingIcon = { Icon(Icons.Default.FactCheck, null, modifier = Modifier.size(16.dp)) }
+                                    onClick = {},
+                                    label = { Text("Verified") },
+                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = "Verified vulnerability", modifier = Modifier.size(16.dp)) }
                                 )
                             }
+                            AssistChip(
+                                onClick = { onVerify(vuln.id) },
+                                label = { Text("Verify") },
+                                leadingIcon = { Icon(Icons.Default.FactCheck, contentDescription = "Verify vulnerability", modifier = Modifier.size(16.dp)) }
+                            )
                         }
                     }
                 }
             }
-
-            // Statistics
+        } else if (uiState.scanStatus == ScanStatus.COMPLETED) {
             item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Statistics", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
-                        val stats = uiState.statistics
-                        if (stats != null) {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                                StatItem("Critical", stats.criticalCount, Color.Red)
-                                StatItem("High", stats.highCount, Color(0xFFFF6D00))
-                                StatItem("Medium", stats.mediumCount, Color(0xFFFFAB00))
-                                StatItem("Low", stats.lowCount, Color(0xFF4CAF50))
-                            }
-                        } else {
-                            Text("No scan data yet", style = MaterialTheme.typography.bodySmall)
+                EmptyView(
+                    message = "No vulnerabilities discovered. The target device appears secure.",
+                    icon = Icons.Default.CheckCircle
+                )
+            }
+        }
+
+        // Statistics
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Statistics", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(8.dp))
+                    val stats = uiState.statistics
+                    if (stats != null) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                            StatItem("Critical", stats.criticalCount, Color.Red)
+                            StatItem("High", stats.highCount, Color(0xFFFF6D00))
+                            StatItem("Medium", stats.mediumCount, Color(0xFFFFAB00))
+                            StatItem("Low", stats.lowCount, Color(0xFF4CAF50))
                         }
+                    } else {
+                        Text("No scan data yet", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -285,9 +348,10 @@ class VulnScannerViewModel @Inject constructor(
     val uiState: StateFlow<VulnScannerUiState> = _uiState.asStateFlow()
 
     init {
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             vulnScanningUseCase.getScanStatus().collect { status ->
-                _uiState.update { it.copy(scanStatus = status) }
+                _uiState.update { it.copy(scanStatus = status, isLoading = false) }
             }
         }
         viewModelScope.launch {
@@ -296,8 +360,12 @@ class VulnScannerViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            vulnScanningUseCase.getAllVulnerabilityDefinitions().collect { defs ->
-                _uiState.update { it.copy(definitions = defs) }
+            try {
+                vulnScanningUseCase.getAllVulnerabilityDefinitions().collect { defs ->
+                    _uiState.update { it.copy(definitions = defs, isLoading = false) }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message ?: "Failed to load definitions", isLoading = false) }
             }
         }
         viewModelScope.launch {
@@ -338,9 +406,17 @@ class VulnScannerViewModel @Inject constructor(
             vulnScanningUseCase.updateVulnerabilityVerification(vulnId, true, "Manually verified")
         }
     }
+
+    fun retry() {
+        _uiState.update { it.copy(error = null, isLoading = true) }
+        // Re-trigger loading by re-collecting flows (they're already active via init)
+        _uiState.update { it.copy(isLoading = false) }
+    }
 }
 
 data class VulnScannerUiState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
     val scanStatus: ScanStatus = ScanStatus.PENDING,
     val scanProgress: ScanProgress? = null,
     val definitions: List<VulnerabilityDefinition> = emptyList(),
