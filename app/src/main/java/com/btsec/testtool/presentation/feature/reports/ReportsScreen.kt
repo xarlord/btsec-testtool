@@ -36,8 +36,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(
-    authId: String,
-    onBack: () -> Unit
+        onBack: () -> Unit
 ) {
     val viewModel: ReportsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()

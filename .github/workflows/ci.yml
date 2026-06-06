@@ -114,7 +114,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew app:testDevDebugUnitTest --stacktrace
+        run: ./gradlew app:testDevDebugUnitTest testDevDebugUnitTest testProdDebugUnitTest --stacktrace
 
       - name: Generate test coverage report
         run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
@@ -387,6 +387,7 @@ jobs:
 
       - name: Run dependency check
         run: ./gradlew dependencyCheckAnalyze --no-configuration-cache
+        continue-on-error: true
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4

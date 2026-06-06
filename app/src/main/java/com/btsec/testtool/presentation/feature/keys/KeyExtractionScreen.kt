@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.keys
@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.*
+import com.btsec.testtool.domain.usecase.KeyExtractionStartResult
 import com.btsec.testtool.domain.usecase.KeyExtractionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -33,8 +34,8 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KeyExtractionScreen(
-    authId: String,
-    onBack: () -> Unit,
+
+    onBack: () -> Unit
 ) {
     val viewModel: KeyExtractionViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -47,17 +48,16 @@ fun KeyExtractionScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                },
+                }
             )
-        },
+        }
     ) { padding ->
         LazyColumn(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Extraction Configuration
             item {
@@ -75,16 +75,13 @@ fun KeyExtractionScreen(
                                 readOnly = true,
                                 label = { Text("Key Type") },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = keyTypeExpanded) },
-                                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                                modifier = Modifier.fillMaxWidth().menuAnchor()
                             )
                             ExposedDropdownMenu(expanded = keyTypeExpanded, onDismissRequest = { keyTypeExpanded = false }) {
                                 KeyType.entries.forEach { kt ->
                                     DropdownMenuItem(
                                         text = { Text(kt.name) },
-                                        onClick = {
-                                            viewModel.updateKeyType(kt)
-                                            keyTypeExpanded = false
-                                        },
+                                        onClick = { viewModel.updateKeyType(kt); keyTypeExpanded = false }
                                     )
                                 }
                             }
@@ -101,16 +98,13 @@ fun KeyExtractionScreen(
                                 readOnly = true,
                                 label = { Text("Extraction Method") },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
-                                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                                modifier = Modifier.fillMaxWidth().menuAnchor()
                             )
                             ExposedDropdownMenu(expanded = methodExpanded, onDismissRequest = { methodExpanded = false }) {
                                 ExtractionMethod.entries.forEach { m ->
                                     DropdownMenuItem(
                                         text = { Text(m.name.replace("_", " ")) },
-                                        onClick = {
-                                            viewModel.updateMethod(m)
-                                            methodExpanded = false
-                                        },
+                                        onClick = { viewModel.updateMethod(m); methodExpanded = false }
                                     )
                                 }
                             }
@@ -121,12 +115,12 @@ fun KeyExtractionScreen(
                         // Start/Cancel Buttons
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             if (uiState.extractionStatus != ExtractionStatus.RUNNING) {
                                 FilledTonalButton(
                                     onClick = { viewModel.startExtraction() },
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Icon(Icons.Default.VpnKey, contentDescription = null)
                                     Spacer(Modifier.width(4.dp))
@@ -136,7 +130,7 @@ fun KeyExtractionScreen(
                                 OutlinedButton(
                                     onClick = { viewModel.cancelExtraction() },
                                     modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                 ) {
                                     Icon(Icons.Default.Cancel, contentDescription = null)
                                     Spacer(Modifier.width(4.dp))
@@ -171,18 +165,17 @@ fun KeyExtractionScreen(
                                             else -> Icons.Default.RadioButtonUnchecked
                                         },
                                         contentDescription = null,
-                                        tint =
-                                            when {
-                                                isDone -> Color(0xFF4CAF50)
-                                                isActive -> MaterialTheme.colorScheme.primary
-                                                else -> MaterialTheme.colorScheme.outline
-                                            },
-                                        modifier = Modifier.size(20.dp),
+                                        tint = when {
+                                            isDone -> Color(0xFF4CAF50)
+                                            isActive -> MaterialTheme.colorScheme.primary
+                                            else -> MaterialTheme.colorScheme.outline
+                                        },
+                                        modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(Modifier.width(8.dp))
                                     Text(
                                         step.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
-                                        color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                        color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                             }
@@ -228,29 +221,29 @@ fun KeyExtractionScreen(
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 if (result.extracted) Icons.Default.CheckCircle else Icons.Default.Cancel,
                                 contentDescription = null,
-                                tint = if (result.extracted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline,
+                                tint = if (result.extracted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline
                             )
                             Spacer(Modifier.width(12.dp))
                             Column {
                                 Text(result.keyType.name, style = MaterialTheme.typography.titleSmall)
                                 Text(
                                     "Method: ${result.method.name.replace("_", " ")}",
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodySmall
                                 )
                                 Text(
                                     "Confidence: ${result.confidence.name}",
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodySmall
                                 )
                                 if (result.notes != null) {
                                     Text(
                                         result.notes!!,
                                         style = MaterialTheme.typography.bodySmall,
-                                        fontFamily = FontFamily.Monospace,
+                                        fontFamily = FontFamily.Monospace
                                     )
                                 }
                             }
@@ -263,65 +256,63 @@ fun KeyExtractionScreen(
 }
 
 @HiltViewModel
-class KeyExtractionViewModel
-    @Inject
-    constructor(
-        private val keyExtractionUseCase: KeyExtractionUseCase,
-    ) : ViewModel() {
-        private val _uiState = MutableStateFlow(KeyExtractionUiState())
-        val uiState: StateFlow<KeyExtractionUiState> = _uiState.asStateFlow()
+class KeyExtractionViewModel @Inject constructor(
+    private val keyExtractionUseCase: KeyExtractionUseCase
+) : ViewModel() {
 
-        init {
-            viewModelScope.launch {
-                keyExtractionUseCase.getExtractionStatus().collect { status ->
-                    _uiState.update { it.copy(extractionStatus = status) }
-                }
-            }
-            viewModelScope.launch {
-                keyExtractionUseCase.getAllExtractionResults().collect { results ->
-                    _uiState.update { it.copy(results = results) }
-                }
+    private val _uiState = MutableStateFlow(KeyExtractionUiState())
+    val uiState: StateFlow<KeyExtractionUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            keyExtractionUseCase.getExtractionStatus().collect { status ->
+                _uiState.update { it.copy(extractionStatus = status) }
             }
         }
-
-        fun updateKeyType(keyType: KeyType) {
-            _uiState.update { it.copy(selectedKeyType = keyType) }
-        }
-
-        fun updateMethod(method: ExtractionMethod) {
-            _uiState.update { it.copy(selectedMethod = method) }
-        }
-
-        fun startExtraction() {
-            viewModelScope.launch {
-                val placeholderDevice =
-                    BluetoothDevice(
-                        address = "00:00:00:00:00:00",
-                        name = "Target Device",
-                        type = BluetoothType.BLE,
-                        deviceClass = null,
-                        bondState = BondState.NONE,
-                        rssi = null,
-                        txPower = null,
-                        firstSeen = java.time.Instant.now(),
-                        lastSeen = java.time.Instant.now(),
-                    )
-                keyExtractionUseCase.extractKey(
-                    device = placeholderDevice,
-                    keyType = _uiState.value.selectedKeyType,
-                    method = _uiState.value.selectedMethod,
-                )
-
-                // Load encryption analysis
-                val analysis = keyExtractionUseCase.analyzeEncryptionStrength(placeholderDevice)
-                _uiState.update { it.copy(encryptionAnalysis = analysis) }
+        viewModelScope.launch {
+            keyExtractionUseCase.getAllExtractionResults().collect { results ->
+                _uiState.update { it.copy(results = results) }
             }
-        }
-
-        fun cancelExtraction() {
-            viewModelScope.launch { keyExtractionUseCase.cancelExtraction() }
         }
     }
+
+    fun updateKeyType(keyType: KeyType) {
+        _uiState.update { it.copy(selectedKeyType = keyType) }
+    }
+
+    fun updateMethod(method: ExtractionMethod) {
+        _uiState.update { it.copy(selectedMethod = method) }
+    }
+
+    fun startExtraction() {
+        viewModelScope.launch {
+            val placeholderDevice = BluetoothDevice(
+                address = "00:00:00:00:00:00",
+                name = "Target Device",
+                type = BluetoothType.BLE,
+                deviceClass = null,
+                bondState = BondState.NONE,
+                rssi = null,
+                txPower = null,
+                firstSeen = java.time.Instant.now(),
+                lastSeen = java.time.Instant.now()
+            )
+            keyExtractionUseCase.extractKey(
+                device = placeholderDevice,
+                keyType = _uiState.value.selectedKeyType,
+                method = _uiState.value.selectedMethod
+            )
+
+            // Load encryption analysis
+            val analysis = keyExtractionUseCase.analyzeEncryptionStrength(placeholderDevice)
+            _uiState.update { it.copy(encryptionAnalysis = analysis) }
+        }
+    }
+
+    fun cancelExtraction() {
+        viewModelScope.launch { keyExtractionUseCase.cancelExtraction() }
+    }
+}
 
 data class KeyExtractionUiState(
     val selectedKeyType: KeyType = KeyType.LTK,
@@ -329,5 +320,5 @@ data class KeyExtractionUiState(
     val extractionStatus: ExtractionStatus = ExtractionStatus.PENDING,
     val currentStep: ExtractionStep = ExtractionStep.INITIALIZING,
     val results: List<KeyExtractionResult> = emptyList(),
-    val encryptionAnalysis: EncryptionAnalysis? = null,
+    val encryptionAnalysis: EncryptionAnalysis? = null
 )
