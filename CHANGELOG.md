@@ -1,3 +1,10 @@
+## [1.5.6](https://github.com/xarlord/btsec-testtool/compare/v1.5.5...v1.5.6) (2026-06-06)
+
+
+### Bug Fixes
+
+* **persistence:** wire Room DAOs into consent, report, and bluetooth repositories ([#180](https://github.com/xarlord/btsec-testtool/issues/180)) ([89af74c](https://github.com/xarlord/btsec-testtool/commit/89af74c4bf87efa3d3a90c24ec1c9efe1a56d0b8))
+
 ## [1.5.5](https://github.com/xarlord/btsec-testtool/compare/v1.5.4...v1.5.5) (2026-06-06)
 
 
