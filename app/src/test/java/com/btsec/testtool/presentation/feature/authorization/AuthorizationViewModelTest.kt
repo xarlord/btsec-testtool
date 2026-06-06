@@ -8,22 +8,17 @@
  */
 package com.btsec.testtool.presentation.feature.authorization
 
+import app.cash.turbine.test
 import com.btsec.testtool.TestHelpers
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.usecase.AuthorizationResult
 import com.btsec.testtool.domain.usecase.AuthorizationUseCase
-import kotlinx.coroutines.flow.MutableStateFlow
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -35,9 +30,7 @@ import kotlin.test.assertTrue
 @DisplayName("AuthorizationViewModel Tests")
 class AuthorizationViewModelTest {
 
-    @Mock
-    private lateinit var mockAuthorizationUseCase: AuthorizationUseCase
-
+    private val mockAuthorizationUseCase: AuthorizationUseCase = mockk(relaxed = true)
     private lateinit var viewModel: AuthorizationViewModel
 
     private val testDeviceInfo = DeviceInfo(
@@ -50,44 +43,78 @@ class AuthorizationViewModelTest {
 
     @BeforeEach
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-
-        // Create a real ViewModel instance for testing
-        viewModel = AuthorizationViewModel()
+        viewModel = AuthorizationViewModel(mockAuthorizationUseCase)
     }
 
     @Test
     @DisplayName("onAuthIdChanged should update auth ID and clear errors")
-    fun testOnAuthIdChanged() {
-        // Note: This tests the real ViewModel behavior
-        // In the actual implementation with DI, the ViewModel would use the mock
-
-        viewModel.onAuthIdChanged("BTSEC-20260207-A1B2C3D4")
-
-        // In real test with Hilt, would verify UI state update
-        assertTrue(true) // Placeholder - actual test would verify state
+    fun testOnAuthIdChanged() = runTest {
+        viewModel.uiState.test {
+            assertEquals("", awaitItem().authId)
+            viewModel.onAuthIdChanged("BTSEC-20260207-A1B2C3D4")
+            val state = awaitItem()
+            assertEquals("BTSEC-20260207-A1B2C3D4", state.authId)
+            assertNull(state.authIdError)
+            assertNull(state.error)
+        }
     }
 
     @Test
     @DisplayName("onAuthIdChanged should uppercase the input")
-    fun testAuthIdChangedUppercase() {
-        viewModel.onAuthIdChanged("btsec-20260207-a1b2c3d4")
+    fun testAuthIdChangedUppercase() = runTest {
+        viewModel.uiState.test {
+            assertEquals("", awaitItem().authId)
+            viewModel.onAuthIdChanged("btsec-20260207-a1b2c3d4")
+            assertEquals("BTSEC-20260207-A1B2C3D4", awaitItem().authId)
+        }
+    }
 
-        // Should be converted to uppercase
-        assertTrue(true) // Placeholder
+    @Test
+    @DisplayName("verifyAuthorization with success should call onAuthorized")
+    fun testVerifyAuthorizationSuccess() = runTest {
+        val testAuthId = "BTSEC-20260207-A1B2C3D4"
+        coEvery { mockAuthorizationUseCase.verifyAuthorization(testAuthId) } returns
+            AuthorizationResult.Success(TestHelpers.createTestAuthorization(authId = testAuthId))
+
+        viewModel.onAuthIdChanged(testAuthId)
+
+        var authorizedAuthId: String? = null
+        viewModel.verifyAuthorization { authId ->
+            authorizedAuthId = authId
+        }
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertFalse(state.isLoading)
+            assertNull(state.error)
+        }
+        assertEquals(testAuthId, authorizedAuthId)
+    }
+
+    @Test
+    @DisplayName("verifyAuthorization with error should update error state")
+    fun testVerifyAuthorizationError() = runTest {
+        val testAuthId = "BTSEC-INVALID"
+        coEvery { mockAuthorizationUseCase.verifyAuthorization(testAuthId) } returns
+            AuthorizationResult.Error("Invalid format")
+
+        viewModel.onAuthIdChanged(testAuthId)
+        viewModel.verifyAuthorization { }
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertFalse(state.isLoading)
+            assertEquals("Invalid format", state.error)
+        }
     }
 
     @Test
     @DisplayName("Authorization ID format regex should work correctly")
     fun testAuthIdFormatValidation() {
         val validFormat = Regex("^BTSEC-\\d{8}-[A-Z0-9]{8}$")
-
-        // Valid formats
         assertTrue("BTSEC-20260207-A1B2C3D4".matches(validFormat))
         assertTrue("BTSEC-19991231-ZZ999999".matches(validFormat))
         assertTrue("BTSEC-20200101-00000000".matches(validFormat))
-
-        // Invalid formats
         assertFalse("BTSEC-16-ABCD".matches(validFormat))
         assertFalse("btsec-20260207-A1B2C3D4".matches(validFormat))
         assertFalse("BTSEC-20260207-A1B2C3".matches(validFormat))
@@ -98,7 +125,7 @@ class AuthorizationViewModelTest {
     @Test
     @DisplayName("Authorization should have required scope fields")
     fun testAuthorizationScopeFields() {
-        val now = Instant.now()
+        val now = java.time.Instant.now()
         val scope = TestScope(
             authId = "BTSEC-TEST",
             authorizedTargets = listOf(
@@ -118,7 +145,6 @@ class AuthorizationViewModelTest {
             locationConstraints = "US",
             requiresSupervision = false
         )
-
         assertEquals("BTSEC-TEST", scope.authId)
         assertEquals(1, scope.authorizedTargets.size)
         assertEquals(2, scope.allowedActions.size)
@@ -134,13 +160,12 @@ class AuthorizationViewModelTest {
             authId = "BTSEC-TEST",
             issuedTo = "Tester",
             issuedBy = "Issuer",
-            issuedAt = Instant.now(),
-            expiresAt = Instant.now(),
+            issuedAt = java.time.Instant.now(),
+            expiresAt = java.time.Instant.now(),
             authorizedActions = emptySet(),
             scope = TestHelpers.createTestScope(),
             signature = "sig"
         )
-
         assertTrue(auth.terms.isEmpty())
     }
 
@@ -151,12 +176,11 @@ class AuthorizationViewModelTest {
             id = "consent-1",
             authId = "BTSEC-TEST",
             action = "SCAN_DEVICES",
-            timestamp = Instant.now(),
+            timestamp = java.time.Instant.now(),
             authorized = true,
             deviceInfo = testDeviceInfo,
             userSignature = "signature"
         )
-
         assertEquals("consent-1", consent.id)
         assertEquals("BTSEC-TEST", consent.authId)
         assertEquals("SCAN_DEVICES", consent.action)
@@ -168,37 +192,20 @@ class AuthorizationViewModelTest {
     @Test
     @DisplayName("DeviceType enum should have all expected values")
     fun testDeviceTypeEnum() {
-        val expectedTypes = listOf(
-            DeviceType.PHONE,
-            DeviceType.TABLET,
-            DeviceType.COMPUTER,
-            DeviceType.AUDIO_DEVICE,
-            DeviceType.WEARABLE,
-            DeviceType.VEHICLE,
-            DeviceType.IOT_DEVICE,
-            DeviceType.UNKNOWN
-        )
-
         assertEquals(8, DeviceType.entries.size)
-        expectedTypes.forEach { type ->
-            assertTrue(DeviceType.entries.contains(type))
-        }
+        assertTrue(DeviceType.entries.contains(DeviceType.PHONE))
+        assertTrue(DeviceType.entries.contains(DeviceType.TABLET))
+        assertTrue(DeviceType.entries.contains(DeviceType.COMPUTER))
+        assertTrue(DeviceType.entries.contains(DeviceType.AUDIO_DEVICE))
+        assertTrue(DeviceType.entries.contains(DeviceType.WEARABLE))
+        assertTrue(DeviceType.entries.contains(DeviceType.VEHICLE))
+        assertTrue(DeviceType.entries.contains(DeviceType.IOT_DEVICE))
+        assertTrue(DeviceType.entries.contains(DeviceType.UNKNOWN))
     }
 
     @Test
     @DisplayName("TestAction enum should include all security testing actions")
     fun testTestActionEnum() {
-        val expectedActions = listOf(
-            TestAction.SCAN_DEVICES,
-            TestAction.CONNECT_DEVICE,
-            TestAction.START_FUZZING,
-            TestAction.EXTRACT_KEYS,
-            TestAction.SCAN_VULNERABILITIES,
-            TestAction.GENERATE_REPORT,
-            TestAction.EXPORT_DATA,
-            TestAction.PACKET_CAPTURE
-        )
-
         assertEquals(8, TestAction.entries.size)
     }
 }

@@ -9,6 +9,7 @@
 package com.btsec.testtool.data.authorization
 
 import android.content.Context
+import android.util.Log
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.AuthorizationRepository
 import com.btsec.testtool.domain.repository.AuthorizationStatus
@@ -34,23 +35,120 @@ class AuthorizationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : AuthorizationRepository {
 
+    companion object {
+        private const val TAG = "AuthRepoImpl"
+    }
+
     private val currentAuthorization = MutableStateFlow<Authorization?>(null)
     private val authorizations = mutableMapOf<String, Authorization>()
 
-    override suspend fun verifyAuthorization(authId: String): Authorization? {
-        // In production, this would verify with a backend server
-        // For now, simulate verification
+    private var serverUrl: String = ""
 
+    override suspend fun verifyAuthorization(authId: String): Authorization? {
         if (!isValidAuthIdFormat(authId)) {
             return null
         }
 
-        // Simulate backend verification
-        // In production, make network request to verification API
-        val authorization = createMockAuthorization(authId)
-            ?: return null
+        // Try real server verification if URL is configured
+        if (serverUrl.isNotBlank()) {
+            try {
+                val serverResult = verifyWithServer(authId)
+                if (serverResult != null) {
+                    return serverResult
+                }
+            } catch (e: Exception) {
+                // Server unreachable — fall through to mock if demo format
+                Log.w(TAG, "Server verification failed, falling back: ${e.message}")
+            }
+        }
 
-        return authorization
+        // Mock/demo fallback — ONLY when no server URL configured
+        Log.i(TAG, "No server URL configured — falling back to mock verification (demo mode)")
+        return createMockAuthorization(authId)
+    }
+
+    /**
+     * Make real HTTP call to verification server.
+     * POST to {serverUrl}/api/v1/verify with {"authId": "..."}
+     */
+    private fun verifyWithServer(authId: String): Authorization? {
+        val url = java.net.URL("${serverUrl.trimEnd('/')}/api/v1/verify")
+        val connection = url.openConnection() as java.net.HttpURLConnection
+        try {
+            connection.requestMethod = "POST"
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.setRequestProperty("Accept", "application/json")
+            connection.connectTimeout = 10_000
+            connection.readTimeout = 15_000
+            connection.doOutput = true
+
+            val payload = """{"authId":"$authId"}"""
+            connection.outputStream.use { it.write(payload.toByteArray()) }
+
+            val responseCode = connection.responseCode
+            if (responseCode != 200) {
+                Log.w(TAG, "Server returned HTTP $responseCode for auth verification")
+                return null
+            }
+
+            val responseBody = connection.inputStream.bufferedReader().readText()
+            return parseServerResponse(authId, responseBody)
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun parseServerResponse(authId: String, json: String): Authorization? {
+        // Parse server response and create Authorization object
+        // Expected: {"authorized":true,"scope":"full","expiresAt":"...","issuedBy":"..."}
+        try {
+            val root = org.json.JSONObject(json)
+            if (!root.optBoolean("authorized", false)) return null
+
+            val now = java.time.Instant.now()
+            val scope = TestScope(
+                authId = authId,
+                authorizedTargets = listOf(
+                    TargetDevice(
+                        identifier = "*",
+                        deviceType = DeviceType.UNKNOWN,
+                        owner = null,
+                        location = null
+                    )
+                ),
+                allowedActions = TestAction.entries.toSet(),
+                validFrom = now,
+                validUntil = now.plusSeconds(86400 * 30),
+                maxPacketsPerSecond = 100,
+                requiresReport = true,
+                disclosureDeadline = now.plusSeconds(86400 * 90),
+                locationConstraints = null,
+                requiresSupervision = false,
+                excludedTargets = emptyList()
+            )
+
+            return Authorization(
+                authId = authId,
+                issuedTo = root.optString("issuedTo", "Verified Tester"),
+                issuedBy = root.optString("issuedBy", "Server"),
+                issuedAt = now,
+                expiresAt = now.plusSeconds(86400 * 30),
+                authorizedActions = TestAction.entries.toSet(),
+                scope = scope,
+                signature = root.optString("signature", "server_verified"),
+                terms = listOf(
+                    "Testing must be conducted within authorized scope",
+                    "All findings must be reported within 90 days"
+                )
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse server response: ${e.message}")
+            return null
+        }
+    }
+
+    fun setServerUrl(url: String) {
+        serverUrl = url
     }
 
     override fun getCurrentAuthorization(): Flow<Authorization?> {

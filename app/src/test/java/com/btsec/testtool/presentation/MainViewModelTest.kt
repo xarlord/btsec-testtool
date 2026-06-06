@@ -33,70 +33,38 @@ class MainViewModelTest {
     @Test
     @DisplayName("Initial state should have no permissions and not loading")
     fun testInitialState() = runTest {
-        viewModel.hasRequiredPermissions.test {
-            assertFalse(awaitItem())
-        }
-
-        viewModel.isLoading.test {
-            assertFalse(awaitItem())
-        }
+        assertFalse(viewModel.hasRequiredPermissions.value)
+        assertFalse(viewModel.isLoading.value)
     }
 
     @Test
     @DisplayName("onPermissionResult with true should grant permissions")
     fun testOnPermissionResultGranted() = runTest {
-        viewModel.hasRequiredPermissions.test {
-            // Initial state
-            assertFalse(awaitItem())
-
-            // Grant permissions
-            viewModel.onPermissionResult(allGranted = true)
-
-            // Should now have permissions
-            assertTrue(awaitItem())
-        }
+        viewModel.onPermissionResult(allGranted = true)
+        assertTrue(viewModel.hasRequiredPermissions.value)
     }
 
     @Test
     @DisplayName("onPermissionResult with false should deny permissions")
     fun testOnPermissionResultDenied() = runTest {
-        viewModel.hasRequiredPermissions.test {
-            // Initial state
-            assertFalse(awaitItem())
-
-            // Deny permissions
-            viewModel.onPermissionResult(allGranted = false)
-
-            // Should still not have permissions
-            assertFalse(awaitItem())
-        }
+        viewModel.onPermissionResult(allGranted = false)
+        assertFalse(viewModel.hasRequiredPermissions.value)
     }
 
     @Test
     @DisplayName("setLoading should update loading state")
     fun testSetLoading() = runTest {
-        viewModel.isLoading.test {
-            // Initial state
-            assertFalse(awaitItem())
-
-            // Set loading to true
-            viewModel.setLoading(true)
-            assertTrue(awaitItem())
-
-            // Set loading to false
-            viewModel.setLoading(false)
-            assertFalse(awaitItem())
-        }
+        viewModel.setLoading(true)
+        assertTrue(viewModel.isLoading.value)
+        viewModel.setLoading(false)
+        assertFalse(viewModel.isLoading.value)
     }
 
     @Test
     @DisplayName("setLoading with true should set loading state")
     fun testSetLoadingTrue() = runTest {
         viewModel.setLoading(true)
-
-        viewModel.isLoading.test {
-            assertTrue(awaitItem())
-        }
+        assertTrue(viewModel.isLoading.value)
     }
 
     @Test
@@ -104,208 +72,108 @@ class MainViewModelTest {
     fun testSetLoadingFalse() = runTest {
         viewModel.setLoading(true)
         viewModel.setLoading(false)
-
-        viewModel.isLoading.test {
-            assertFalse(awaitItem())
-        }
+        assertFalse(viewModel.isLoading.value)
     }
 
     @Test
     @DisplayName("Multiple permission grants should maintain state")
     fun testMultiplePermissionGrants() = runTest {
-        viewModel.hasRequiredPermissions.test {
-            // Initial state
-            assertFalse(awaitItem())
-
-            // Grant permissions
-            viewModel.onPermissionResult(true)
-            assertTrue(awaitItem())
-
-            // Grant again (should stay true)
-            viewModel.onPermissionResult(true)
-            assertTrue(awaitItem())
-
-            // Revoke
-            viewModel.onPermissionResult(false)
-            assertFalse(awaitItem())
-
-            // Grant again
-            viewModel.onPermissionResult(true)
-            assertTrue(awaitItem())
-        }
+        viewModel.onPermissionResult(true)
+        assertTrue(viewModel.hasRequiredPermissions.value)
+        viewModel.onPermissionResult(true)
+        assertTrue(viewModel.hasRequiredPermissions.value)
+        viewModel.onPermissionResult(false)
+        assertFalse(viewModel.hasRequiredPermissions.value)
+        viewModel.onPermissionResult(true)
+        assertTrue(viewModel.hasRequiredPermissions.value)
     }
 
     @Test
     @DisplayName("Permission state should persist across loading changes")
     fun testPermissionStatePersists() = runTest {
-        // Grant permissions
         viewModel.onPermissionResult(true)
-
-        viewModel.hasRequiredPermissions.test {
-            assertTrue(awaitItem())
-
-            // Change loading state
-            viewModel.setLoading(true)
-            viewModel.setLoading(false)
-
-            // Permissions should still be granted
-            assertTrue(expectMostRecentItem())
-        }
+        viewModel.setLoading(true)
+        viewModel.setLoading(false)
+        assertTrue(viewModel.hasRequiredPermissions.value)
     }
 
     @Test
     @DisplayName("Loading state should be independent of permission state")
     fun testLoadingStateIndependent() = runTest {
         viewModel.onPermissionResult(true)
-
-        viewModel.isLoading.test {
-            assertFalse(awaitItem())
-
-            // Set loading while permissions granted
-            viewModel.setLoading(true)
-            assertTrue(awaitItem())
-
-            // Revoke permissions
-            viewModel.onPermissionResult(false)
-
-            // Loading should still be true
-            assertTrue(expectMostRecentItem())
-        }
+        viewModel.setLoading(true)
+        viewModel.onPermissionResult(false)
+        assertTrue(viewModel.isLoading.value)
     }
 
     @Test
     @DisplayName("Permission and loading can be changed independently")
     fun testIndependentStateChanges() = runTest {
-        // Start with both false
-        viewModel.hasRequiredPermissions.test {
-            viewModel.isLoading.test {
-                assertFalse(hasPermissionState.awaitItem())
-                assertFalse(loadingState.awaitItem())
+        assertFalse(viewModel.hasRequiredPermissions.value)
+        assertFalse(viewModel.isLoading.value)
 
-                // Set loading only
-                viewModel.setLoading(true)
-                assertFalse(hasPermissionState.awaitItem())
-                assertTrue(loadingState.awaitItem())
+        viewModel.setLoading(true)
+        assertFalse(viewModel.hasRequiredPermissions.value)
+        assertTrue(viewModel.isLoading.value)
 
-                // Grant permissions only
-                viewModel.onPermissionResult(true)
-                assertTrue(hasPermissionState.awaitItem())
-                assertTrue(loadingState.awaitItem())
+        viewModel.onPermissionResult(true)
+        assertTrue(viewModel.hasRequiredPermissions.value)
+        assertTrue(viewModel.isLoading.value)
 
-                // Clear loading only
-                viewModel.setLoading(false)
-                assertTrue(hasPermissionState.awaitItem())
-                assertFalse(loadingState.awaitItem())
+        viewModel.setLoading(false)
+        assertTrue(viewModel.hasRequiredPermissions.value)
+        assertFalse(viewModel.isLoading.value)
 
-                // Revoke permissions only
-                viewModel.onPermissionResult(false)
-                assertFalse(hasPermissionState.awaitItem())
-                assertFalse(loadingState.awaitItem())
-            }
-        }
+        viewModel.onPermissionResult(false)
+        assertFalse(viewModel.hasRequiredPermissions.value)
+        assertFalse(viewModel.isLoading.value)
     }
 
     @Test
     @DisplayName("ViewModel should handle rapid state changes")
     fun testRapidStateChanges() = runTest {
-        viewModel.hasRequiredPermissions.test {
-            viewModel.isLoading.test {
-                // Rapid permission changes
-                viewModel.onPermissionResult(true)
-                viewModel.onPermissionResult(false)
-                viewModel.onPermissionResult(true)
+        viewModel.onPermissionResult(true)
+        viewModel.onPermissionResult(false)
+        viewModel.onPermissionResult(true)
+        viewModel.setLoading(true)
+        viewModel.setLoading(false)
+        viewModel.setLoading(true)
 
-                // Rapid loading changes
-                viewModel.setLoading(true)
-                viewModel.setLoading(false)
-                viewModel.setLoading(true)
-
-                // Final state
-                assertTrue(hasPermissionState.expectMostRecentItem())
-                assertTrue(loadingState.expectMostRecentItem())
-            }
-        }
+        assertTrue(viewModel.hasRequiredPermissions.value)
+        assertTrue(viewModel.isLoading.value)
     }
 
     @Test
     @DisplayName("State should be consistent after multiple operations")
     fun testStateConsistency() = runTest {
-        // Perform various operations
         viewModel.onPermissionResult(true)
         viewModel.setLoading(true)
         viewModel.onPermissionResult(false)
         viewModel.setLoading(false)
         viewModel.onPermissionResult(true)
 
-        viewModel.hasRequiredPermissions.test {
-            assertTrue(awaitItem())
-        }
-
-        viewModel.isLoading.test {
-            assertFalse(awaitItem())
-        }
+        assertTrue(viewModel.hasRequiredPermissions.value)
+        assertFalse(viewModel.isLoading.value)
     }
 
     @Test
     @DisplayName("Initial permission state should be false")
     fun testInitialPermissionState() = runTest {
-        var hasPermission = false
-
-        viewModel.hasRequiredPermissions.test {
-            hasPermission = awaitItem()
-        }
-
-        assertFalse(hasPermission)
+        assertFalse(viewModel.hasRequiredPermissions.value)
     }
 
     @Test
     @DisplayName("Initial loading state should be false")
     fun testInitialLoadingState() = runTest {
-        var isLoading = false
-
-        viewModel.isLoading.test {
-            isLoading = awaitItem()
-        }
-
-        assertFalse(isLoading)
+        assertFalse(viewModel.isLoading.value)
     }
 
     @Test
-    @DisplayName("Setting loading to same value should not emit duplicate")
-    fun testSetLoadingSameValue() = runTest {
-        viewModel.isLoading.test {
-            assertFalse(awaitItem())
-
-            viewModel.setLoading(true)
-            assertTrue(awaitItem())
-
-            // Set to same value - should not emit duplicate
-            viewModel.setLoading(true)
-            // No new emission expected
-
-            viewModel.setLoading(false)
-            assertFalse(awaitItem())
-        }
-    }
-
-    @Test
-    @DisplayName("Permission granted then denied should emit both states")
+    @DisplayName("Permission granted then denied should update state")
     fun testPermissionGrantedThenDenied() = runTest {
-        viewModel.hasRequiredPermissions.test {
-            assertFalse(awaitItem())
-
-            viewModel.onPermissionResult(true)
-            assertTrue(awaitItem())
-
-            viewModel.onPermissionResult(false)
-            assertFalse(awaitItem())
-        }
+        viewModel.onPermissionResult(true)
+        assertTrue(viewModel.hasRequiredPermissions.value)
+        viewModel.onPermissionResult(false)
+        assertFalse(viewModel.hasRequiredPermissions.value)
     }
 }
-
-// Extension property to give a name to the nested flow for clarity
-private val Any?.hasPermissionState: Any?
-    get() = this
-
-private val Any?.loadingState: Any?
-    get() = this

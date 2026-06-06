@@ -248,11 +248,30 @@ class AuthorizationBackend @Inject constructor(
 
     /**
      * Save server URL configuration.
+     * Validates that the URL uses HTTPS for secure communication.
      */
-    suspend fun setServerUrl(url: String) {
-        context.authDataStore.edit { prefs ->
-            prefs[KEY_SERVER_URL] = url
+    suspend fun setServerUrl(url: String): Result<Unit> {
+        val trimmed = url.trim()
+        if (trimmed.isBlank()) {
+            context.authDataStore.edit { prefs -> prefs[KEY_SERVER_URL] = "" }
+            return Result.success(Unit)
         }
+
+        // Enforce HTTPS for security — auth tokens must not be sent in cleartext
+        val secureUrl = when {
+            trimmed.startsWith("https://") -> trimmed
+            trimmed.startsWith("http://") -> {
+                Timber.w("Insecure HTTP URL provided, upgrading to HTTPS: $trimmed")
+                trimmed.replaceFirst("http://", "https://")
+            }
+            else -> "https://$trimmed"
+        }
+
+        context.authDataStore.edit { prefs ->
+            prefs[KEY_SERVER_URL] = secureUrl
+        }
+        Timber.d("Server URL saved (HTTPS enforced): ${secureUrl.take(30)}...")
+        return Result.success(Unit)
     }
 
     /**

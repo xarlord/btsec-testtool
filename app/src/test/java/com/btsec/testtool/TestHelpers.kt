@@ -75,7 +75,7 @@ object TestHelpers {
     fun createTestBluetoothDevice(
         address: String = "AA:BB:CC:DD:EE:FF",
         name: String = "Test Device",
-        type: DeviceType = DeviceType.BLE
+        type: BluetoothType = BluetoothType.BLE
     ): BluetoothDevice {
         return BluetoothDevice(
             address = address,
