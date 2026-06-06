@@ -18,11 +18,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.btsec.testtool.R
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ScanProgress
 import com.btsec.testtool.domain.repository.ScanStatus
@@ -49,10 +51,10 @@ fun VulnScannerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Vulnerability Scanner") },
+                title = { Text(stringResource(R.string.vuln_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_navigate_up))
                     }
                 }
             )
@@ -68,7 +70,7 @@ fun VulnScannerScreen(
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Loading vulnerability data…",
+                            text = stringResource(R.string.vuln_loading),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -114,11 +116,11 @@ private fun VulnScannerContent(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Vulnerability Scan", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.vuln_scan_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
 
                     Text(
-                        "Scan the connected device for known Bluetooth vulnerabilities including KNOB, BIAS, BLESA, BlueBorne, and more.",
+                        stringResource(R.string.vuln_scan_description),
                         style = MaterialTheme.typography.bodySmall
                     )
                     Spacer(Modifier.height(12.dp))
@@ -134,7 +136,7 @@ private fun VulnScannerContent(
                             ) {
                                 Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
                                 Spacer(Modifier.width(4.dp))
-                                Text("Scan All")
+                                Text(stringResource(R.string.vuln_scan_all))
                             }
                         } else {
                             OutlinedButton(
@@ -144,7 +146,7 @@ private fun VulnScannerContent(
                             ) {
                                 Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
                                 Spacer(Modifier.width(4.dp))
-                                Text("Stop Scan")
+                                Text(stringResource(R.string.scanner_stop))
                             }
                         }
                     }
@@ -157,7 +159,7 @@ private fun VulnScannerContent(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Scanning Progress", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.vuln_scanning_progress), style = MaterialTheme.typography.titleSmall)
                         Spacer(Modifier.height(8.dp))
 
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -166,12 +168,12 @@ private fun VulnScannerContent(
 
                         uiState.scanProgress?.let { progress ->
                             Text(
-                                "Checking: ${progress.vulnerabilitiesChecked}/${progress.totalVulnerabilities} • Found: ${progress.vulnerabilitiesFound}",
+                                stringResource(R.string.vuln_checking_progress, progress.vulnerabilitiesChecked, progress.totalVulnerabilities, progress.vulnerabilitiesFound),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             progress.currentVulnerability?.let { vuln ->
                                 Text(
-                                    "Current: ${vuln.name}",
+                                    stringResource(R.string.vuln_current, vuln.name),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -186,13 +188,13 @@ private fun VulnScannerContent(
         if (uiState.definitions.isEmpty()) {
             item {
                 EmptyView(
-                    message = "No vulnerability definitions loaded. Pull to refresh or check your connection.",
+                    message = stringResource(R.string.vuln_no_definitions),
                     icon = Icons.Default.BugReport
                 )
             }
         } else {
             item {
-                Text("Known Vulnerability Database", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.vuln_known_database), style = MaterialTheme.typography.titleMedium)
             }
 
             items(uiState.definitions) { def ->
@@ -219,8 +221,8 @@ private fun VulnScannerContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("CVSS: ${def.cvssScore}", style = MaterialTheme.typography.bodySmall)
-                            Text("Year: ${def.yearDiscovered}", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.vuln_cvss_label, def.cvssScore.toString()), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.vuln_year_label, def.yearDiscovered), style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -231,7 +233,7 @@ private fun VulnScannerContent(
         if (uiState.discoveredVulns.isNotEmpty()) {
             item {
                 Text(
-                    "Discovered Vulnerabilities (${uiState.discoveredVulns.size})",
+                    stringResource(R.string.vuln_discovered_title, uiState.discoveredVulns.size),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -278,7 +280,7 @@ private fun VulnScannerContent(
         } else if (uiState.scanStatus == ScanStatus.COMPLETED) {
             item {
                 EmptyView(
-                    message = "No vulnerabilities discovered. The target device appears secure.",
+                    message = stringResource(R.string.vuln_none_discovered),
                     icon = Icons.Default.CheckCircle
                 )
             }
@@ -288,18 +290,18 @@ private fun VulnScannerContent(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Statistics", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.fuzzer_stats_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
                     val stats = uiState.statistics
                     if (stats != null) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                            StatItem("Critical", stats.criticalCount, Color.Red)
-                            StatItem("High", stats.highCount, Color(0xFFFF6D00))
-                            StatItem("Medium", stats.mediumCount, Color(0xFFFFAB00))
-                            StatItem("Low", stats.lowCount, Color(0xFF4CAF50))
+                            StatItem(stringResource(R.string.vuln_critical), stats.criticalCount, Color.Red)
+                            StatItem(stringResource(R.string.vuln_high), stats.highCount, Color(0xFFFF6D00))
+                            StatItem(stringResource(R.string.vuln_medium), stats.mediumCount, Color(0xFFFFAB00))
+                            StatItem(stringResource(R.string.vuln_low), stats.lowCount, Color(0xFF4CAF50))
                         }
                     } else {
-                        Text("No scan data yet", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.vuln_no_scan_data), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }

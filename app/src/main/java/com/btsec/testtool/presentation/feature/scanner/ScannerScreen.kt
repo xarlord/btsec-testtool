@@ -54,7 +54,7 @@ fun ScannerScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = stringResource(R.string.cd_navigate_up)
                         )
                     }
                 }
@@ -91,7 +91,7 @@ fun ScannerScreen(
                             CircularProgressIndicator()
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "Scanning for Bluetooth devices…",
+                                text = stringResource(R.string.scanner_scanning_bt),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -99,7 +99,7 @@ fun ScannerScreen(
                 }
                 devices.value.isEmpty() -> {
                     EmptyView(
-                        message = "No devices found. Start a scan to discover Bluetooth devices.",
+                        message = stringResource(R.string.scanner_no_devices_hint),
                         icon = Icons.Default.BluetoothSearching
                     )
                 }
@@ -210,7 +210,7 @@ fun ErrorView(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Error occurred",
+                contentDescription = stringResource(R.string.cd_error),
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -223,7 +223,7 @@ fun ErrorView(
             )
             Spacer(modifier = Modifier.height(16.dp))
             FilledTonalButton(onClick = onRetry) {
-                Text("Retry")
+                Text(stringResource(R.string.retry))
             }
         }
     }
@@ -268,7 +268,7 @@ class ScannerViewModel @Inject constructor(
                 }
                 is ScanResult.ConsentRequired -> {
                     _uiState.value = _uiState.value.copy(
-                        error = "Consent required for scanning"
+                    error = "Consent required for scanning"
                     )
                 }
                 is ScanResult.NotAuthorized -> {

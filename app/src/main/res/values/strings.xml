@@ -240,4 +240,139 @@
     <string name="cd_delete">Delete</string>
     <string name="cd_share">Share</string>
     <string name="cd_export">Export</string>
+
+    <!-- Scanner Screen (additional) -->
+    <string name="scanner_scanning_bt">Scanning for Bluetooth devices…</string>
+    <string name="scanner_no_devices_hint">No devices found. Start a scan to discover Bluetooth devices.</string>
+    <string name="scanner_consent_required">Consent required for scanning</string>
+    <string name="scanner_not_authorized">Not authorized for scanning</string>
+
+    <!-- Vulnerability Scanner Screen -->
+    <string name="vuln_scan_title">Vulnerability Scan</string>
+    <string name="vuln_scan_description">Scan the connected device for known Bluetooth vulnerabilities including KNOB, BIAS, BLESA, BlueBorne, and more.</string>
+    <string name="vuln_scan_all">Scan All</string>
+    <string name="vuln_scanning_progress">Scanning Progress</string>
+    <string name="vuln_checking_progress">Checking: %1$d/%2$d • Found: %3$d</string>
+    <string name="vuln_current">Current: %1$s</string>
+    <string name="vuln_loading">Loading vulnerability data…</string>
+    <string name="vuln_no_definitions">No vulnerability definitions loaded. Pull to refresh or check your connection.</string>
+    <string name="vuln_known_database">Known Vulnerability Database</string>
+    <string name="vuln_discovered_title">Discovered Vulnerabilities (%1$d)</string>
+    <string name="vuln_none_discovered">No vulnerabilities discovered. The target device appears secure.</string>
+    <string name="vuln_no_scan_data">No scan data yet</string>
+    <string name="vuln_cvss_label">CVSS: %1$s</string>
+    <string name="vuln_year_label">Year: %1$d</string>
+
+    <!-- Fuzzer Screen -->
+    <string name="fuzzer_bt_title">Bluetooth Fuzzer</string>
+    <string name="fuzzer_config_title">Fuzzing Configuration</string>
+    <string name="fuzzer_method_label">Fuzz Method</string>
+    <string name="fuzzer_packet_count_label">Packet Count: %1$d</string>
+    <string name="fuzzer_rate_label">Rate: %1$d pkt/sec</string>
+    <string name="fuzzer_starting">Starting fuzzing session…</string>
+    <string name="fuzzer_progress">Progress</string>
+    <string name="fuzzer_sent">Sent: %1$d</string>
+    <string name="fuzzer_received">Received: %1$d</string>
+    <string name="fuzzer_errors">Errors: %1$d</string>
+    <string name="fuzzer_findings_count">Findings: %1$d</string>
+    <string name="fuzzer_pct_complete">%1$d%% complete</string>
+    <string name="fuzzer_no_findings">No fuzzing findings. The target handled all packets without issues.</string>
+    <string name="fuzzer_findings_title">Findings</string>
+    <string name="fuzzer_stats_title">Statistics</string>
+    <string name="fuzzer_total_tests">Total Tests: %1$d</string>
+    <string name="fuzzer_total_packets">Total Packets Sent: %1$d</string>
+    <string name="fuzzer_avg_success">Avg Success Rate: %1$s%%</string>
+    <string name="fuzzer_category_label">Category: %1$s</string>
+
+    <!-- Key Extraction Screen -->
+    <string name="keys_config_title">Key Extraction Configuration</string>
+    <string name="keys_type_label">Key Type</string>
+    <string name="keys_method_label">Extraction Method</string>
+    <string name="keys_extract_btn">Extract Key</string>
+    <string name="keys_progress_title">Extraction Progress</string>
+    <string name="keys_encryption_title">Encryption Analysis</string>
+    <string name="keys_encryption">Encryption:</string>
+    <string name="keys_enabled">Enabled</string>
+    <string name="keys_disabled">Disabled</string>
+    <string name="keys_key_size">Key Size:</string>
+    <string name="keys_key_size_value">%1$d bits</string>
+    <string name="keys_secure_connections">Secure Connections:</string>
+    <string name="keys_yes">Yes</string>
+    <string name="keys_no_label">No</string>
+    <string name="keys_pairing_method">Pairing Method:</string>
+    <string name="keys_no_keys_found">No keys were extracted. Try a different extraction method or key type.</string>
+    <string name="keys_results_title">Extraction Results</string>
+    <string name="keys_method_label_value">Method: %1$s</string>
+    <string name="keys_confidence_label">Confidence: %1$s</string>
+
+    <!-- Reports Screen (additional) -->
+    <string name="reports_summary_title">Report Summary</string>
+    <string name="reports_total">Total</string>
+    <string name="reports_draft">Draft</string>
+    <string name="reports_final">Final</string>
+    <string name="reports_critical_vulns">Critical Vulns: %1$d</string>
+    <string name="reports_high_vulns">High Vulns: %1$d</string>
+    <string name="reports_pending">Pending: %1$d</string>
+    <string name="reports_no_data">No report data available</string>
+    <string name="reports_no_reports_hint">Generate your first security assessment report</string>
+    <string name="reports_generated">Generated: %1$s</string>
+    <string name="reports_devices_vulns">Devices: %1$d • Vulns: %2$d</string>
+    <string name="reports_generate_dialog_title">Generate Report</string>
+    <string name="reports_report_title">Report Title</string>
+    <string name="reports_include_vulns">Include Vulnerabilities</string>
+    <string name="reports_include_fuzzing">Include Fuzzing Results</string>
+    <string name="reports_include_keys">Include Key Extraction</string>
+    <string name="reports_generate_btn">Generate</string>
+    <string name="reports_status_draft">Draft</string>
+    <string name="reports_status_review">Review</string>
+    <string name="reports_status_final">Final</string>
+    <string name="reports_status_archived">Archived</string>
+
+    <!-- Settings Screen (additional) -->
+    <string name="settings_bt_status">Bluetooth Status</string>
+    <string name="settings_bt_enabled">Bluetooth Enabled</string>
+    <string name="settings_bt_disabled">Bluetooth Disabled</string>
+    <string name="settings_bt_turning_on">Turning On…</string>
+    <string name="settings_bt_turning_off">Turning Off…</string>
+    <string name="settings_bt_unavailable">Bluetooth Unavailable</string>
+    <string name="settings_bt_required">Bluetooth must be enabled for scanning and testing.</string>
+    <string name="settings_permissions">Permissions</string>
+    <string name="settings_perm_bt_scan">Bluetooth Scan</string>
+    <string name="settings_perm_bt_connect">Bluetooth Connect</string>
+    <string name="settings_perm_location">Location Access</string>
+    <string name="settings_perm_notifications">Notifications</string>
+    <string name="settings_perm_granted">Granted</string>
+    <string name="settings_perm_denied">Denied</string>
+    <string name="settings_request_perms">Request Permissions</string>
+    <string name="settings_auth_card">Authorization</string>
+    <string name="settings_server_url">Server URL</string>
+    <string name="settings_server_url_placeholder">https://auth.btsec.example.com</string>
+    <string name="settings_save_server">Save Server URL</string>
+    <string name="settings_demo_mode">Demo Mode</string>
+    <string name="settings_demo_desc">Use BTSEC-DEMO-XXXXXXXX format for offline testing without server verification.</string>
+    <string name="settings_generate_demo">Generate Demo Authorization ID</string>
+    <string name="settings_data_management">Data Management</string>
+    <string name="settings_clear_auth">Clear Authorization</string>
+    <string name="settings_clear_all">Clear All Data</string>
+    <string name="settings_about_card">About</string>
+    <string name="settings_app_version">BTSec TestTool v1.2.1</string>
+    <string name="settings_app_subtitle">Bluetooth Security Testing Tool</string>
+    <string name="settings_warning_notice">⚠️ This tool is for AUTHORIZED security testing only.\nUnauthorized use is prohibited and may be illegal.</string>
+
+    <!-- Authorization Screen (additional) -->
+    <string name="auth_placeholder">BTSEC-20260207-A1B2C3D4</string>
+    <string name="auth_security_icon">Application security icon</string>
+
+    <!-- Dashboard Screen (additional) -->
+    <string name="dashboard_authorized">Authorized</string>
+    <string name="dashboard_auth_id_label">Authorization ID: %1$s</string>
+    <string name="dashboard_features">Features</string>
+    <string name="dashboard_scan_desc">Scan for Bluetooth devices</string>
+    <string name="dashboard_vulns_desc">Scan for vulnerabilities</string>
+    <string name="dashboard_fuzz_desc">Fuzz Bluetooth protocols</string>
+    <string name="dashboard_keys_desc">Extract Bluetooth keys</string>
+    <string name="dashboard_reports_desc">View and generate reports</string>
+
+    <!-- Demo Mode Banner -->
+    <string name="demo_mode_banner">⚠️ DEMO MODE — Not for production use</string>
 </resources>
