@@ -1,3 +1,10 @@
+## [1.5.5](https://github.com/xarlord/btsec-testtool/compare/v1.5.4...v1.5.5) (2026-06-06)
+
+
+### Bug Fixes
+
+* resolve test compilation errors, add kotlin-test dependency, fix AuthorizationBackend HTTPS enforcement ([30cc487](https://github.com/xarlord/btsec-testtool/commit/30cc48786d3444a153e7dd3988dfb524fbf3b02b))
+
 ## [1.5.4](https://github.com/xarlord/btsec-testtool/compare/v1.5.3...v1.5.4) (2026-06-06)
 
 
