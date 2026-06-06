@@ -1,3 +1,10 @@
+## [1.5.11](https://github.com/xarlord/btsec-testtool/compare/v1.5.10...v1.5.11) (2026-06-06)
+
+
+### Bug Fixes
+
+* **#199,#200,#203,#213,#214:** wire real engines into repositories — replace stubs with working implementations ([#216](https://github.com/xarlord/btsec-testtool/issues/216)) ([73802da](https://github.com/xarlord/btsec-testtool/commit/73802daa9b12545993ecb71b1f4298e6ff133193)), closes [#199](https://github.com/xarlord/btsec-testtool/issues/199) [#200](https://github.com/xarlord/btsec-testtool/issues/200) [#203](https://github.com/xarlord/btsec-testtool/issues/203) [#213](https://github.com/xarlord/btsec-testtool/issues/213) [#214](https://github.com/xarlord/btsec-testtool/issues/214) [#199](https://github.com/xarlord/btsec-testtool/issues/199) [#200](https://github.com/xarlord/btsec-testtool/issues/200) [#203](https://github.com/xarlord/btsec-testtool/issues/203) [#213](https://github.com/xarlord/btsec-testtool/issues/213) [#214](https://github.com/xarlord/btsec-testtool/issues/214)
+
 ## [1.5.10](https://github.com/xarlord/btsec-testtool/compare/v1.5.9...v1.5.10) (2026-06-06)
 
 
