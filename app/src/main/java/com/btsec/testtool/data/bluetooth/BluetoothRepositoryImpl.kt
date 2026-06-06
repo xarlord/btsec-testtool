@@ -13,6 +13,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice as AndroidBluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
@@ -50,6 +51,7 @@ import com.btsec.testtool.domain.repository.PacketStatistics
 import com.btsec.testtool.domain.repository.PacketType
 import com.btsec.testtool.domain.repository.WriteType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -57,11 +59,15 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import java.time.Instant
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Implementation of Bluetooth repository.
@@ -87,6 +93,11 @@ class BluetoothRepositoryImpl @Inject constructor(
     private val discoveredServices = MutableStateFlow<List<BleService>>(emptyList())
 
     private var currentGatt: BluetoothGatt? = null
+
+    // Pending coroutine continuations for GATT callback resolution
+    private val pendingReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
+    private val pendingDescriptorReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
+    private var notificationListener: ((UUID, ByteArray) -> Unit)? = null
 
     // ========== Bluetooth State ==========
 
@@ -241,6 +252,15 @@ class BluetoothRepositoryImpl @Inject constructor(
                 BluetoothGatt.STATE_DISCONNECTED -> {
                     connectionState.value = ConnectionState.Disconnected
                     connectedDevice.value = null
+                    // Cancel any pending reads on disconnect
+                    pendingReads.values.forEach { callback ->
+                        callback(Result.failure(Exception("GATT disconnected")))
+                    }
+                    pendingReads.clear()
+                    pendingDescriptorReads.values.forEach { callback ->
+                        callback(Result.failure(Exception("GATT disconnected")))
+                    }
+                    pendingDescriptorReads.clear()
                 }
             }
         }
@@ -250,6 +270,88 @@ class BluetoothRepositoryImpl @Inject constructor(
                 val services = gatt.services?.map { mapGattService(it) } ?: emptyList()
                 discoveredServices.value = services
             }
+        }
+
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray,
+            status: Int
+        ) {
+            val key = characteristic.uuid.toString()
+            val callback = pendingReads.remove(key)
+            if (callback != null) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Timber.d("Characteristic read success: ${characteristic.uuid}, ${value.size} bytes")
+                    callback(Result.success(value))
+                } else {
+                    Timber.w("Characteristic read failed: ${characteristic.uuid}, status=$status")
+                    callback(Result.failure(Exception("Characteristic read failed with status: $status")))
+                }
+            }
+        }
+
+        // Legacy callback for API < 33
+        @Deprecated("Deprecated in API 33")
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            @Suppress("DEPRECATION")
+            val value = characteristic.value ?: byteArrayOf()
+            onCharacteristicRead(gatt, characteristic, value, status)
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray
+        ) {
+            Timber.d("Notification received: ${characteristic.uuid}, ${value.size} bytes")
+            notificationListener?.invoke(characteristic.uuid, value)
+        }
+
+        // Legacy callback for API < 33
+        @Deprecated("Deprecated in API 33")
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic
+        ) {
+            @Suppress("DEPRECATION")
+            val value = characteristic.value ?: byteArrayOf()
+            onCharacteristicChanged(gatt, characteristic, value)
+        }
+
+        override fun onDescriptorRead(
+            gatt: BluetoothGatt,
+            descriptor: BluetoothGattDescriptor,
+            status: Int,
+            value: ByteArray
+        ) {
+            val key = "${descriptor.characteristic.uuid}_${descriptor.uuid}"
+            val callback = pendingDescriptorReads.remove(key)
+            if (callback != null) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Timber.d("Descriptor read success: ${descriptor.uuid}, ${value.size} bytes")
+                    callback(Result.success(value))
+                } else {
+                    Timber.w("Descriptor read failed: ${descriptor.uuid}, status=$status")
+                    callback(Result.failure(Exception("Descriptor read failed with status: $status")))
+                }
+            }
+        }
+
+        // Legacy callback for API < 33
+        @Deprecated("Deprecated in API 33")
+        override fun onDescriptorRead(
+            gatt: BluetoothGatt,
+            descriptor: BluetoothGattDescriptor,
+            status: Int
+        ) {
+            @Suppress("DEPRECATION")
+            val value = descriptor.value ?: byteArrayOf()
+            onDescriptorRead(gatt, descriptor, status, value)
         }
     }
 
@@ -270,15 +372,36 @@ class BluetoothRepositoryImpl @Inject constructor(
     ): Result<ByteArray> {
         val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
         val service = gatt.getService(UUID.fromString(serviceUuid))
-            ?: return Result.failure(Exception("Service not found"))
+            ?: return Result.failure(Exception("Service not found: $serviceUuid"))
         val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
-            ?: return Result.failure(Exception("Characteristic not found"))
+            ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
 
-        return if (gatt.readCharacteristic(characteristic)) {
-            // Would need to wait for callback in production
-            Result.success(byteArrayOf())
-        } else {
-            Result.failure(Exception("Read failed"))
+        return try {
+            suspendCancellableCoroutine { cont ->
+                val key = characteristicUuid
+                pendingReads[key] = { result ->
+                    if (cont.isActive) {
+                        cont.resume(result)
+                    }
+                }
+                cont.invokeOnCancellation {
+                    pendingReads.remove(key)
+                }
+
+                if (!gatt.readCharacteristic(characteristic)) {
+                    pendingReads.remove(key)
+                    if (cont.isActive) {
+                        cont.resume(Result.failure(Exception("Failed to initiate characteristic read")))
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            pendingReads.remove(characteristicUuid)
+            Timber.w("readCharacteristic cancelled: $characteristicUuid")
+            Result.failure(Exception("Operation cancelled"))
+        } catch (e: Exception) {
+            Timber.e(e, "readCharacteristic error: $characteristicUuid")
+            Result.failure(e)
         }
     }
 
@@ -309,28 +432,149 @@ class BluetoothRepositoryImpl @Inject constructor(
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun subscribeToCharacteristic(
         serviceUuid: String,
         characteristicUuid: String
-    ): Flow<ByteArray> {
-        // Implementation would set up notifications and return data as Flow
-        return flow { }
+    ): Flow<ByteArray> = callbackFlow {
+        val gatt = currentGatt
+        if (gatt == null) {
+            Timber.w("subscribeToCharacteristic: not connected")
+            close()
+            return@callbackFlow
+        }
+
+        val service = gatt.getService(UUID.fromString(serviceUuid))
+        if (service == null) {
+            Timber.w("subscribeToCharacteristic: service not found: $serviceUuid")
+            close()
+            return@callbackFlow
+        }
+
+        val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
+        if (characteristic == null) {
+            Timber.w("subscribeToCharacteristic: characteristic not found: $characteristicUuid")
+            close()
+            return@callbackFlow
+        }
+
+        // Write to CCC descriptor to enable notifications
+        val cccUuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+        val cccDescriptor = characteristic.getDescriptor(cccUuid)
+
+        // Set up notification listener for this characteristic
+        val targetUuid = UUID.fromString(characteristicUuid)
+        val previousListener = notificationListener
+        notificationListener = { uuid, value ->
+            if (uuid == targetUuid) {
+                trySend(value)
+            }
+            previousListener?.invoke(uuid, value)
+        }
+
+        // Enable local notification
+        if (!gatt.setCharacteristicNotification(characteristic, true)) {
+            Timber.w("subscribeToCharacteristic: setCharacteristicNotification failed")
+            notificationListener = previousListener
+            close()
+            return@callbackFlow
+        }
+
+        // Write CCC descriptor to enable remote notifications
+        if (cccDescriptor != null) {
+            cccDescriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            gatt.writeDescriptor(cccDescriptor)
+            Timber.d("subscribeToCharacteristic: wrote CCC descriptor for $characteristicUuid")
+        } else {
+            Timber.w("subscribeToCharacteristic: no CCC descriptor found for $characteristicUuid")
+        }
+
+        awaitClose {
+            Timber.d("subscribeToCharacteristic: cleaning up $characteristicUuid")
+            notificationListener = previousListener
+            try {
+                gatt.setCharacteristicNotification(characteristic, false)
+                if (cccDescriptor != null) {
+                    cccDescriptor.value = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+                    gatt.writeDescriptor(cccDescriptor)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error cleaning up notification subscription")
+            }
+        }
     }
 
+    @SuppressLint("MissingPermission")
     override suspend fun unsubscribeFromCharacteristic(
         serviceUuid: String,
         characteristicUuid: String
     ): Result<Unit> {
-        // Implementation would disable notifications
-        return Result.success(Unit)
+        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
+        val service = gatt.getService(UUID.fromString(serviceUuid))
+            ?: return Result.failure(Exception("Service not found: $serviceUuid"))
+        val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
+            ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
+
+        return try {
+            // Disable local notification
+            if (!gatt.setCharacteristicNotification(characteristic, false)) {
+                Timber.w("unsubscribeFromCharacteristic: setCharacteristicNotification(false) failed")
+            }
+            // Write CCC descriptor to disable remote notifications
+            val cccUuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+            val cccDescriptor = characteristic.getDescriptor(cccUuid)
+            if (cccDescriptor != null) {
+                cccDescriptor.value = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+                gatt.writeDescriptor(cccDescriptor)
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "unsubscribeFromCharacteristic error")
+            Result.failure(e)
+        }
     }
 
+    @SuppressLint("MissingPermission")
     override suspend fun readDescriptor(
         serviceUuid: String,
         characteristicUuid: String,
         descriptorUuid: String
     ): Result<ByteArray> {
-        return Result.failure(Exception("Not implemented"))
+        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
+        val service = gatt.getService(UUID.fromString(serviceUuid))
+            ?: return Result.failure(Exception("Service not found: $serviceUuid"))
+        val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
+            ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
+        val descriptor = characteristic.getDescriptor(UUID.fromString(descriptorUuid))
+            ?: return Result.failure(Exception("Descriptor not found: $descriptorUuid"))
+
+        return try {
+            suspendCancellableCoroutine { cont ->
+                val key = "${characteristicUuid}_${descriptorUuid}"
+                pendingDescriptorReads[key] = { result ->
+                    if (cont.isActive) {
+                        cont.resume(result)
+                    }
+                }
+                cont.invokeOnCancellation {
+                    pendingDescriptorReads.remove(key)
+                }
+
+                if (!gatt.readDescriptor(descriptor)) {
+                    pendingDescriptorReads.remove(key)
+                    if (cont.isActive) {
+                        cont.resume(Result.failure(Exception("Failed to initiate descriptor read")))
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            pendingDescriptorReads.remove("${characteristicUuid}_${descriptorUuid}")
+            Timber.w("readDescriptor cancelled: $descriptorUuid")
+            Result.failure(Exception("Operation cancelled"))
+        } catch (e: Exception) {
+            Timber.e(e, "readDescriptor error: $descriptorUuid")
+            Result.failure(e)
+        }
     }
 
     override suspend fun writeDescriptor(
