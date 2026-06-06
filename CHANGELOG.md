@@ -1,3 +1,10 @@
+## [1.5.10](https://github.com/xarlord/btsec-testtool/compare/v1.5.9...v1.5.10) (2026-06-06)
+
+
+### Bug Fixes
+
+* **test:** add Dispatchers.Main setup to ViewModel tests - 30 to 0 failures ([#193](https://github.com/xarlord/btsec-testtool/issues/193)) ([f94fe39](https://github.com/xarlord/btsec-testtool/commit/f94fe39dd488b4a8578c83d47df99911c19d2a3c)), closes [#171](https://github.com/xarlord/btsec-testtool/issues/171) [#172](https://github.com/xarlord/btsec-testtool/issues/172)
+
 ## [1.5.9](https://github.com/xarlord/btsec-testtool/compare/v1.5.8...v1.5.9) (2026-06-06)
 
 
