@@ -27,6 +27,8 @@ import com.btsec.testtool.domain.repository.EncryptionMode
 import com.btsec.testtool.domain.repository.KeyExtractionStatistics
 import com.btsec.testtool.domain.repository.DeviceKeyStatistics
 import com.btsec.testtool.domain.repository.DateRange
+import com.btsec.testtool.domain.repository.KeySecurityFinding
+import com.btsec.testtool.domain.repository.KeyFindingCategory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +48,11 @@ import javax.inject.Singleton
 class KeyExtractionRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : KeyExtractionRepository {
+
+    private val bluetoothAdapter: android.bluetooth.BluetoothAdapter? by lazy {
+        (context.getSystemService(Context.BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager?)
+            ?.adapter
+    }
 
     private val extractionStatus = MutableStateFlow<ExtractionStatus>(ExtractionStatus.PENDING)
     private val extractionProgress = MutableStateFlow<ExtractionProgress?>(null)
@@ -170,15 +177,42 @@ class KeyExtractionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun analyzeKeySecurity(device: BluetoothDevice): KeySecurityAnalysis {
+        val encryption = analyzeEncryptionStrength(device)
+        val keySize = encryption.encryptionKeySize ?: 0
+        val score = when {
+            encryption.usingSecureConnections -> SecurityScore.GOOD
+            encryption.encryptionEnabled -> SecurityScore.FAIR
+            else -> SecurityScore.POOR
+        }
+        val strength = when {
+            keySize >= 256 -> EncryptionStrength.STRONG
+            keySize >= 128 -> EncryptionStrength.STANDARD
+            keySize > 0 -> EncryptionStrength.WEAK
+            else -> EncryptionStrength.NONE
+        }
+        val securityFindings = encryption.findings.mapIndexed { idx, desc ->
+            KeySecurityFinding(
+                severity = if (desc.startsWith("WARNING")) VulnerabilitySeverity.HIGH else VulnerabilitySeverity.INFORMATIONAL,
+                category = if (desc.contains("Legacy", ignoreCase = true)) KeyFindingCategory.WEAK_ENCRYPTION else KeyFindingCategory.REUSED_KEY,
+                description = desc,
+                affectedKey = null,
+                recommendation = if (desc.startsWith("WARNING")) "Upgrade to LE Secure Connections" else ""
+            )
+        }
         return KeySecurityAnalysis(
             deviceAddress = device.address,
             deviceName = device.name,
             analysisDate = Instant.now(),
-            overallScore = SecurityScore.GOOD,
-            findings = emptyList(),
+            overallScore = score,
+            findings = securityFindings,
             extractedKeys = emptyList(),
-            encryptionStrength = EncryptionStrength.STANDARD,
-            recommendations = listOf("Continue monitoring")
+            encryptionStrength = strength,
+            recommendations = buildList {
+                if (!encryption.encryptionEnabled) add("Enable encryption by pairing with the device")
+                if (encryption.encryptionEnabled && !encryption.usingSecureConnections)
+                    add("Upgrade to LE Secure Connections pairing")
+                if (score == SecurityScore.GOOD) add("Encryption is strong — continue monitoring")
+            }
         )
     }
 
@@ -245,24 +279,64 @@ class KeyExtractionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun analyzeEncryptionStrength(device: BluetoothDevice): EncryptionAnalysis {
-        return EncryptionAnalysis(
-            deviceAddress = device.address,
-            encryptionEnabled = true,
-            encryptionKeySize = 128,
-            supportsSecureConnections = true,
-            usingSecureConnections = true,
-            pairingMethod = PairingMethod.SECURE_CONNECTIONS,
-            encryptionMode = EncryptionMode.SECURE_CONNECTIONS,
-            findings = listOf("Device uses secure connections")
-        )
+        return try {
+            val btDevice = bluetoothAdapter?.getRemoteDevice(device.address)
+            val bondState = btDevice?.bondState ?: android.bluetooth.BluetoothDevice.BOND_NONE
+            val isBonded = bondState == android.bluetooth.BluetoothDevice.BOND_BONDED
+            val deviceType = btDevice?.type ?: android.bluetooth.BluetoothDevice.DEVICE_TYPE_UNKNOWN
+
+            // LE Secure Connections available on BLE devices with Android 6+
+            val supportsSC = deviceType != android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC
+            val usingSC = isBonded && supportsSC
+            val keySize = if (usingSC) 256 else if (isBonded) 128 else 0
+
+            EncryptionAnalysis(
+                deviceAddress = device.address,
+                encryptionEnabled = isBonded,
+                encryptionKeySize = keySize,
+                supportsSecureConnections = supportsSC,
+                usingSecureConnections = usingSC,
+                pairingMethod = if (usingSC) PairingMethod.SECURE_CONNECTIONS
+                    else if (isBonded) PairingMethod.LEGACY_PAIRING
+                    else PairingMethod.JUST_WORKS,
+                encryptionMode = if (usingSC) EncryptionMode.SECURE_CONNECTIONS
+                    else if (isBonded) EncryptionMode.LEGACY
+                    else EncryptionMode.NONE,
+                findings = buildList {
+                    if (isBonded) add("Device is bonded")
+                    else add("Device is not bonded — encryption status unknown")
+                    if (supportsSC) add("Device supports LE Secure Connections")
+                    else add("Device may not support LE Secure Connections")
+                    if (!usingSC && isBonded) add("WARNING: Legacy pairing in use — vulnerable to KNOB attack")
+                }
+            )
+        } catch (e: SecurityException) {
+            EncryptionAnalysis(
+                deviceAddress = device.address,
+                encryptionEnabled = false,
+                encryptionKeySize = 0,
+                supportsSecureConnections = false,
+                usingSecureConnections = false,
+                pairingMethod = PairingMethod.JUST_WORKS,
+                encryptionMode = EncryptionMode.NONE,
+                findings = listOf("Missing Bluetooth permissions — cannot analyze encryption")
+            )
+        }
     }
 
     override suspend fun supportsSecureConnections(device: BluetoothDevice): Boolean {
-        return true  // In production, would check device capabilities
+        return try {
+            val btDevice = bluetoothAdapter?.getRemoteDevice(device.address)
+            btDevice?.type != android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC
+        } catch (_: SecurityException) { false }
     }
 
     override suspend fun getEncryptionKeySize(device: BluetoothDevice): Int? {
-        return 128  // Standard BLE key size
+        return try {
+            val btDevice = bluetoothAdapter?.getRemoteDevice(device.address)
+            val isBonded = btDevice?.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED
+            if (isBonded) 128 else null
+        } catch (_: SecurityException) { null }
     }
 
     override fun getKeyExtractionStatistics(): Flow<KeyExtractionStatistics> {
