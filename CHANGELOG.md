@@ -1,3 +1,10 @@
+## [1.5.14](https://github.com/xarlord/btsec-testtool/compare/v1.5.13...v1.5.14) (2026-06-06)
+
+
+### Bug Fixes
+
+* **#202:** implement real key extraction analysis with BluetoothAdapter data ([#219](https://github.com/xarlord/btsec-testtool/issues/219)) ([4fcf536](https://github.com/xarlord/btsec-testtool/commit/4fcf5366d6d7e50be27754ed5c95d877ea90ba99)), closes [#202](https://github.com/xarlord/btsec-testtool/issues/202) [#202](https://github.com/xarlord/btsec-testtool/issues/202)
+
 ## [1.5.13](https://github.com/xarlord/btsec-testtool/compare/v1.5.12...v1.5.13) (2026-06-06)
 
 
