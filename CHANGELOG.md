@@ -1,3 +1,10 @@
+## [1.5.12](https://github.com/xarlord/btsec-testtool/compare/v1.5.11...v1.5.12) (2026-06-06)
+
+
+### Bug Fixes
+
+* **#205:** pass real scanned device to fuzzer/vuln/key-extraction screens ([#217](https://github.com/xarlord/btsec-testtool/issues/217)) ([426b1b9](https://github.com/xarlord/btsec-testtool/commit/426b1b9de1ca054acc599d20225b5f9cdffc209c)), closes [#205](https://github.com/xarlord/btsec-testtool/issues/205)
+
 ## [1.5.11](https://github.com/xarlord/btsec-testtool/compare/v1.5.10...v1.5.11) (2026-06-06)
 
 
