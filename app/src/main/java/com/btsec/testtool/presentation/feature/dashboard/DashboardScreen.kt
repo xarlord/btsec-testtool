@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for AUTHORIZED security testing
+ * - This application may ONLY be used for authorized security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.dashboard
@@ -110,7 +110,7 @@ private fun AuthorizationInfoCard(authId: String) {
         ) {
             Icon(
                 imageVector = Icons.Default.Security,
-                contentDescription = null,
+                contentDescription = "Authorization status",
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -217,7 +217,7 @@ private fun FeatureCard(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = title,
                 modifier = Modifier.size(32.dp),
                 tint = MaterialTheme.colorScheme.primary
             )

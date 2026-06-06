@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for AUTHORIZED security testing
+ * - This application may ONLY be used for authorized security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.vulns
@@ -84,7 +84,7 @@ fun VulnScannerScreen(
                                     onClick = { viewModel.startScan() },
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                    Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
                                     Spacer(Modifier.width(4.dp))
                                     Text("Scan All")
                                 }
@@ -94,7 +94,7 @@ fun VulnScannerScreen(
                                     modifier = Modifier.weight(1f),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                 ) {
-                                    Icon(Icons.Default.Stop, contentDescription = null)
+                                    Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
                                     Spacer(Modifier.width(4.dp))
                                     Text("Stop Scan")
                                 }
@@ -139,7 +139,7 @@ fun VulnScannerScreen(
                 Text("Known Vulnerability Database", style = MaterialTheme.typography.titleMedium)
             }
 
-            items(uiState.definitions, key = { it.cveId }) { def ->
+            items(uiState.definitions) { def ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -178,7 +178,7 @@ fun VulnScannerScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
-                items(uiState.discoveredVulns, key = { it.id }) { vuln ->
+                items(uiState.discoveredVulns) { vuln ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(

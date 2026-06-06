@@ -2,61 +2,67 @@
 # Automatically labels PRs based on changed files
 
 documentation:
-  - changed-files:
-    - any-glob-to-any-file: ['*.md', docs/**]
+  - *.md
+  - docs/**
 
 security:
-  - changed-files:
-    - any-glob-to-any-file: [SECURITY.md, '**/security/**']
+  - SECURITY.md
+  - **/security/**
 
 tests:
-  - changed-files:
-    - any-glob-to-any-file: ['**/test/**', '**/*Test.kt', '**/*Test.java', '**/androidTest/**']
+  - **/test/**
+  - **/*Test.kt
+  - **/*Test.java
+  - **/androidTest/**
 
 ci-cd:
-  - changed-files:
-    - any-glob-to-any-file: [.github/workflows/**, .github/actions/**, Dockerfile, docker-compose.yml]
+  - .github/workflows/**
+  - .github/actions/**
+  - Dockerfile
+  - docker-compose.yml
 
 dependencies:
-  - changed-files:
-    - any-glob-to-any-file: [build.gradle.kts, app/build.gradle.kts, buildSrc/**/*.kt, gradle/libs.versions.toml]
+  - build.gradle.kts
+  - app/build.gradle.kts
+  - buildSrc/**/*.kt
+  - gradle/libs.versions.toml
 
 domain:
-  - changed-files:
-    - any-glob-to-any-file: [domain/model/**, domain/repository/**, domain/usecase/**]
+  - domain/model/**
+  - domain/repository/**
+  - domain/usecase/**
 
 data:
-  - changed-files:
-    - any-glob-to-any-file: [data/**]
+  - data/**
 
 presentation:
-  - changed-files:
-    - any-glob-to-any-file: [presentation/**, ui/**]
+  - presentation/**
+  - ui/**
 
 android:
-  - changed-files:
-    - any-glob-to-any-file: [app/src/main/**, AndroidManifest.xml]
+  - app/src/main/**
+  - AndroidManifest.xml
 
 vulnerability:
-  - changed-files:
-    - any-glob-to-any-file: ['**/vulnerability/**', '**/vuln/**']
+  - **/vulnerability/**
+  - **/vuln/**
 
 fuzzing:
-  - changed-files:
-    - any-glob-to-any-file: ['**/fuzzing/**', '**/fuzz/**']
+  - **/fuzzing/**
+  - **/fuzz/**
 
 key-extraction:
-  - changed-files:
-    - any-glob-to-any-file: ['**/keyextraction/**', '**/keys/**']
+  - **/keyextraction/**
+  - **/keys/**
 
 reporting:
-  - changed-files:
-    - any-glob-to-any-file: ['**/report/**', '**/reports/**']
+  - **/report/**
+  - **/reports/**
 
 authorization:
-  - changed-files:
-    - any-glob-to-any-file: ['**/authorization/**', '**/auth/**']
+  - **/authorization/**
+  - **/auth/**
 
 bluetooth:
-  - changed-files:
-    - any-glob-to-any-file: ['**/bluetooth/**', '**/ble/**']
+  - **/bluetooth/**
+  - **/ble/**

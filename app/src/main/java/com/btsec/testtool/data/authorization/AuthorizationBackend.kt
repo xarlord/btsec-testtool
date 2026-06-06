@@ -58,7 +58,7 @@ class AuthorizationBackend @Inject constructor(
      */
     suspend fun verifyAuthorization(authId: String): Authorization? {
         if (!authId.matches(Regex(AUTH_PATTERN))) {
-            Timber.w("Invalid auth ID format: $authId")
+            Timber.w("Invalid auth ID format: ****${authId.takeLast(4)}")
             return null
         }
 
@@ -74,7 +74,7 @@ class AuthorizationBackend @Inject constructor(
      * Creates a full authorization with all permissions, 24h validity.
      */
     private fun verifyDemoAuthorization(authId: String): Authorization {
-        Timber.i("Using demo authorization: $authId")
+        Timber.i("Using demo authorization: ****${authId.takeLast(4)}")
         val now = Instant.now()
         val scope = TestScope(
             authId = authId,
@@ -178,7 +178,7 @@ class AuthorizationBackend @Inject constructor(
             prefs[KEY_AUTH_SIGNATURE] = authorization.signature
             prefs[KEY_LAST_VERIFIED] = Instant.now().toString()
         }
-        Timber.d("Cached authorization: ${authorization.authId}")
+        Timber.d("Cached authorization: ****${authorization.authId.takeLast(4)}")
     }
 
     /**

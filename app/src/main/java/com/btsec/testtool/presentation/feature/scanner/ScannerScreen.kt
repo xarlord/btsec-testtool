@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for AUTHORIZED security testing
+ * - This application may ONLY be used for authorized security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.scanner
@@ -117,7 +117,7 @@ private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(devices, key = { it.address }) { device ->
+            items(devices) { device ->
                 DeviceCard(device = device)
             }
         }
@@ -165,7 +165,7 @@ class ScannerViewModel @Inject constructor(
         }
     }
 
-    fun startScan() {
+    fun startScan(authId: String) {
         viewModelScope.launch {
             when (val result = scanningUseCase.startScan()) {
                 is ScanResult.Started -> {

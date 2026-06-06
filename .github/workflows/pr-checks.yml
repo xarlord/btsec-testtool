@@ -65,8 +65,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Check for legal disclaimers in new files
         run: |
@@ -158,8 +156,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew app:testDevDebugUnitTest
-        ./gradlew app:jacocoTestReport
+        run: ./gradlew test jacocoTestCoverageVerification
 
       - name: Check coverage threshold
         run: |
