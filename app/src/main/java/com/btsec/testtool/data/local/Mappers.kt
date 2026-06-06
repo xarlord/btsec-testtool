@@ -66,6 +66,7 @@ import com.btsec.testtool.domain.repository.AuthorizationStatus
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
+import timber.log.Timber
 import java.time.Instant
 
 /**
@@ -163,7 +164,8 @@ fun AuthorizationEntity.toDomain(): Authorization {
 
     val scope: TestScope = try {
         mapperJson.decodeFromString<TestScope>(scope)
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to parse TestScope for auth $authId, using fallback")
         // Fallback: create minimal scope
         TestScope(
             authId = authId,
@@ -320,7 +322,8 @@ fun BluetoothOperation.toEntity(): BtOperationEntity {
 fun VulnerabilityEntity.toDomain(): Vulnerability {
     val affectedDevice: BluetoothDevice = try {
         mapperJson.decodeFromString<BluetoothDevice>(affectedDevice)
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to parse affected device for vuln $cveId, using fallback")
         BluetoothDevice(
             address = affectedDeviceAddress,
             name = null,
@@ -351,7 +354,9 @@ fun VulnerabilityEntity.toDomain(): Vulnerability {
         cveId = cveId,
         name = name,
         description = description,
-        severity = try { VulnerabilitySeverity.valueOf(severity) } catch (_: Exception) { VulnerabilitySeverity.INFORMATIONAL },
+        severity = try { VulnerabilitySeverity.valueOf(severity) } catch (e: Exception) {
+            Timber.w(e, "Unknown severity '$severity' for vuln $cveId, defaulting to INFORMATIONAL")
+            VulnerabilitySeverity.INFORMATIONAL },
         cvssScore = cvssScore,
         affectedDevice = affectedDevice,
         discoveredAt = Instant.ofEpochMilli(discoveredAt),
@@ -437,9 +442,9 @@ fun VulnerabilityDefinition.toEntity(): VulnDefinitionEntity {
 fun FuzzResultEntity.toDomain(): FuzzResult {
     val config: FuzzConfig = try {
         mapperJson.decodeFromString<FuzzConfig>(config)
-    } catch (_: Exception) {
-        // Minimal fallback — should not happen in practice
-        throw IllegalStateException("Cannot deserialize FuzzConfig for result $id")
+    } catch (e: Exception) {
+        Timber.e(e, "Cannot deserialize FuzzConfig for result $id")
+        throw IllegalStateException("Cannot deserialize FuzzConfig for result $id", e)
     }
 
     val errorsList: List<FuzzError> = try {
