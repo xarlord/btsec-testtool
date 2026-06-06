@@ -17,10 +17,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.btsec.testtool.R
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.FuzzProgress
 import com.btsec.testtool.domain.repository.FuzzingStatistics
@@ -45,10 +47,10 @@ fun FuzzerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Bluetooth Fuzzer") },
+                title = { Text(stringResource(R.string.fuzzer_bt_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_navigate_up))
                     }
                 }
             )
@@ -71,7 +73,7 @@ fun FuzzerScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Starting fuzzing session…", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.fuzzer_starting), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -113,7 +115,7 @@ private fun FuzzerContent(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Fuzzing Configuration", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.fuzzer_config_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(12.dp))
 
                     // Fuzz Method Selector
@@ -123,7 +125,7 @@ private fun FuzzerContent(
                             value = uiState.selectedMethod.name,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Fuzz Method") },
+                            label = { Text(stringResource(R.string.fuzzer_method_label)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
                             modifier = Modifier.fillMaxWidth().menuAnchor()
                         )
@@ -143,7 +145,7 @@ private fun FuzzerContent(
                     Spacer(Modifier.height(8.dp))
 
                     // Packet Count
-                    Text("Packet Count: ${uiState.packetCount}")
+                    Text(stringResource(R.string.fuzzer_packet_count_label, uiState.packetCount))
                     Slider(
                         value = uiState.packetCount.toFloat(),
                         onValueChange = { onPacketCountChange(it.toInt()) },
@@ -153,7 +155,7 @@ private fun FuzzerContent(
                     Spacer(Modifier.height(8.dp))
 
                     // Rate
-                    Text("Rate: ${uiState.packetsPerSecond} pkt/sec")
+                    Text(stringResource(R.string.fuzzer_rate_label, uiState.packetsPerSecond))
                     Slider(
                         value = uiState.packetsPerSecond.toFloat(),
                         onValueChange = { onRateChange(it.toInt()) },
