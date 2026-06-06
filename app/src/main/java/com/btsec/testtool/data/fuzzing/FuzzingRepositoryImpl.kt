@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 /**
  * Implementation of fuzzing repository.
@@ -33,7 +34,9 @@ import javax.inject.Singleton
  */
 @Singleton
 class FuzzingRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val bleFuzzEngine: BleFuzzEngine,
+    private val payloadGenerator: FuzzPayloadGenerator
 ) : FuzzingRepository {
 
     private val fuzzingStatus = MutableStateFlow<FuzzStatus>(FuzzStatus.PENDING)
@@ -46,10 +49,6 @@ class FuzzingRepositoryImpl @Inject constructor(
         return flow {
             fuzzingStatus.value = FuzzStatus.RUNNING
             val resultId = generateId()
-            var packetsSent = 0
-            var packetsReceived = 0
-            var errors = 0
-            var findings = 0
 
             emit(FuzzProgress(
                 resultId = resultId,
@@ -65,43 +64,58 @@ class FuzzingRepositoryImpl @Inject constructor(
                 totalPackets = config.packetCount
             ))
 
-            // Simulate fuzzing progress
-            repeat(config.packetCount) { i ->
-                packetsSent++
-                packetsReceived++  // Assume some responses
+            // Use real BleFuzzEngine for actual BLE packet fuzzing
+            val totalPackets = config.packetCount
+            val progressState = MutableStateFlow(FuzzProgress(
+                resultId = resultId,
+                config = config,
+                status = FuzzStatus.RUNNING,
+                packetsSent = 0,
+                packetsReceived = 0,
+                errors = 0,
+                findings = 0,
+                startTime = Instant.now(),
+                estimatedCompletionTime = Instant.now().plusSeconds(config.durationSeconds?.toLong() ?: 300),
+                currentPacketNumber = 0,
+                totalPackets = totalPackets
+            ))
 
-                emit(FuzzProgress(
-                    resultId = resultId,
-                    config = config,
-                    status = FuzzStatus.RUNNING,
-                    packetsSent = packetsSent,
-                    packetsReceived = packetsReceived,
-                    errors = 0,
-                    findings = 0,
-                    startTime = Instant.now(),
-                    estimatedCompletionTime = Instant.now().plusSeconds(300),
-                    currentPacketNumber = i + 1,
-                    totalPackets = config.packetCount
-                ))
+            val result = bleFuzzEngine.executeFuzzing(
+                config = config,
+                onProgress = { progress ->
+                    progressState.value = progress
+                },
+                onFinding = { finding ->
+                    Timber.d("Fuzzing finding: ${finding.description}")
+                }
+            )
 
-                kotlinx.coroutines.delay(100)  // Simulate work
-            }
+            // Emit final progress
+            emit(progressState.value.copy(
+                status = FuzzStatus.COMPLETED,
+                packetsSent = result.packetsSent,
+                packetsReceived = result.packetsReceived,
+                findings = result.findings.size,
+                errors = result.errors.size,
+                currentPacketNumber = result.packetsSent,
+                totalPackets = result.packetsSent
+            ))
 
-            // Save result
-            val result = FuzzResult(
+            // Save the engine result as our FuzzResult
+            val fuzzResult = FuzzResult(
                 id = resultId,
                 config = config,
                 startTime = Instant.now(),
                 endTime = Instant.now(),
                 status = FuzzStatus.COMPLETED,
-                packetsSent = packetsSent,
-                packetsReceived = packetsReceived,
-                errors = emptyList(),
-                findings = emptyList(),
+                packetsSent = result.packetsSent,
+                packetsReceived = result.packetsReceived,
+                errors = result.errors,
+                findings = result.findings,
                 captureFile = null,
                 reportGenerated = false
             )
-            saveResult(result)
+            saveResult(fuzzResult)
 
             fuzzingStatus.value = FuzzStatus.COMPLETED
         }

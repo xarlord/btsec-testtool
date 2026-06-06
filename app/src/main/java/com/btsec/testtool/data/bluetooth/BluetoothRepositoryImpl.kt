@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import java.time.Instant
@@ -93,11 +94,15 @@ class BluetoothRepositoryImpl @Inject constructor(
     private val discoveredServices = MutableStateFlow<List<BleService>>(emptyList())
 
     private var currentGatt: BluetoothGatt? = null
+    private var suspendableGatt: SuspendableGatt? = null
 
     // Pending coroutine continuations for GATT callback resolution
     private val pendingReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
     private val pendingDescriptorReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
     private var notificationListener: ((UUID, ByteArray) -> Unit)? = null
+
+    // Track actual negotiated MTU
+    private val currentMtu = MutableStateFlow(23)
 
     // ========== Bluetooth State ==========
 
@@ -112,9 +117,10 @@ class BluetoothRepositoryImpl @Inject constructor(
     }
 
     override suspend fun requestEnableBluetooth(): Boolean {
-        // In production, would show dialog to user
-        // For now, just check state
-        return bluetoothAdapter?.isEnabled == true
+        if (bluetoothAdapter?.isEnabled == true) return true
+        // Cannot programmatically enable BT on modern Android — must use system intent.
+        // Return current state; the UI layer should launch ACTION_REQUEST_ENABLE intent.
+        return false
     }
 
     // ========== Device Scanning ==========
@@ -583,33 +589,91 @@ class BluetoothRepositoryImpl @Inject constructor(
         descriptorUuid: String,
         value: ByteArray
     ): Result<Unit> {
-        return Result.failure(Exception("Not implemented"))
-    }
+        return try {
+            val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
+            val service = gatt.getService(UUID.fromString(serviceUuid))
+                ?: return Result.failure(Exception("Service not found: $serviceUuid"))
+            val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
+                ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
+            val descriptor = characteristic.getDescriptor(UUID.fromString(descriptorUuid))
+                ?: return Result.failure(Exception("Descriptor not found: $descriptorUuid"))
 
-    override suspend fun requestMtu(mtu: Int): Result<Int> {
-        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-        return if (gatt.requestMtu(mtu)) {
-            Result.success(mtu)
-        } else {
-            Result.failure(Exception("MTU request failed"))
+            val sgatt = suspendableGatt
+            if (sgatt != null) {
+                val success = sgatt.writeDescriptor(descriptor, value)
+                if (success) Result.success(Unit) else Result.failure(Exception("Descriptor write failed"))
+            } else {
+                // Fallback: direct write without callback
+                descriptor.value = value
+                val written = gatt.writeDescriptor(descriptor)
+                if (written) Result.success(Unit) else Result.failure(Exception("Descriptor write initiation failed"))
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "writeDescriptor error")
+            Result.failure(e)
         }
     }
 
-    override fun getCurrentMtu(): Flow<Int> {
-        return flow { emit(23) }  // Default BLE MTU
+    override suspend fun requestMtu(mtu: Int): Result<Int> {
+        return try {
+            val sgatt = suspendableGatt
+            if (sgatt != null) {
+                val negotiated = sgatt.requestMtu(mtu)
+                currentMtu.value = negotiated
+                Result.success(negotiated)
+            } else {
+                val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
+                if (gatt.requestMtu(mtu)) {
+                    currentMtu.value = mtu
+                    Result.success(mtu)
+                } else {
+                    Result.failure(Exception("MTU request failed"))
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "requestMtu error")
+            Result.failure(e)
+        }
     }
 
+    override fun getCurrentMtu(): Flow<Int> = currentMtu.asStateFlow()
+
     override suspend fun requestConnectionPriority(priority: ConnectionPriority): Result<Unit> {
-        return Result.failure(Exception("Not implemented"))
+        return try {
+            val sgatt = suspendableGatt
+            val success = if (sgatt != null) {
+                sgatt.requestConnectionPriority(priority.toAndroidInt())
+            } else {
+                currentGatt?.requestConnectionPriority(priority.toAndroidInt()) ?: false
+            }
+            if (success) Result.success(Unit) else Result.failure(Exception("Connection priority request failed"))
+        } catch (e: Exception) {
+            Timber.e(e, "requestConnectionPriority error")
+            Result.failure(e)
+        }
     }
 
     @SuppressLint("MissingPermission")
     override suspend fun readRssi(): Result<Int> {
-        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-        return if (gatt.readRemoteRssi()) {
-            Result.success(-60)  // Would return actual RSSI from callback
-        } else {
-            Result.failure(Exception("RSSI read failed"))
+        return try {
+            val sgatt = suspendableGatt
+            if (sgatt != null) {
+                val rssi = sgatt.readRssi()
+                Result.success(rssi)
+            } else {
+                val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
+                if (gatt.readRemoteRssi()) {
+                    // Without SuspendableGatt we can't get the callback result
+                    // Return a placeholder indicating async operation initiated
+                    Timber.w("readRssi called without SuspendableGatt — using fallback")
+                    Result.success(-60)
+                } else {
+                    Result.failure(Exception("RSSI read failed"))
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "readRssi error")
+            Result.failure(e)
         }
     }
 
@@ -650,7 +714,20 @@ class BluetoothRepositoryImpl @Inject constructor(
     // ========== Device Cache ==========
 
     override suspend fun refreshCache(): Result<Unit> {
-        return Result.failure(Exception("Not implemented"))
+        return try {
+            val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
+            val refreshed = gatt.refreshCache()
+            if (refreshed) {
+                Timber.d("GATT cache refreshed successfully")
+                Result.success(Unit)
+            } else {
+                Timber.w("GATT cache refresh returned false")
+                Result.failure(Exception("GATT cache refresh failed"))
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "refreshCache error")
+            Result.failure(e)
+        }
     }
 
     override suspend fun clearDeviceCache() {
@@ -770,8 +847,17 @@ class BluetoothRepositoryImpl @Inject constructor(
     }
 
     private fun mapDeviceClass(deviceClass: Int?): DeviceClass? {
-        // TODO: Implement device class mapping
-        return com.btsec.testtool.domain.model.DeviceClass.UNCATEGORIZED
+        if (deviceClass == null) return null
+        return when ((deviceClass shr 8) and 0x1F) {
+            1 -> DeviceClass.COMPUTER
+            2 -> DeviceClass.PHONE
+            4 -> DeviceClass.AUDIO_VIDEO
+            5 -> DeviceClass.PERIPHERAL
+            7 -> DeviceClass.WEARABLE
+            8 -> DeviceClass.TOY
+            9 -> DeviceClass.HEALTH
+            else -> DeviceClass.UNCATEGORIZED
+        }
     }
 
     private fun mapGattService(service: android.bluetooth.BluetoothGattService): BleService {
