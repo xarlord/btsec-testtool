@@ -11,6 +11,10 @@ package com.btsec.testtool.data.report
 import android.content.Context
 import android.net.Uri
 import com.btsec.testtool.data.common.PathValidator
+import com.btsec.testtool.data.local.dao.ReportDao
+import com.btsec.testtool.data.local.toDomain
+import com.btsec.testtool.data.local.toDomainReports
+import com.btsec.testtool.data.local.toEntity
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ReportRepository
 import com.btsec.testtool.domain.repository.ReportTemplate
@@ -28,9 +32,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import java.io.File
 import java.time.Instant
-import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,13 +42,15 @@ import javax.inject.Singleton
  * Implementation of report repository.
  *
  * Handles creation, storage, export, and sharing of security assessment reports.
+ * Report persistence is backed by Room via [ReportDao].
  */
 @Singleton
 class ReportRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val reportDao: ReportDao
 ) : ReportRepository {
 
-    private val reports = MutableStateFlow<List<SecurityReport>>(emptyList())
+    // In-memory stores for templates and logs (not Room-backed yet)
     private val templates = MutableStateFlow<List<ReportTemplate>>(emptyList())
     private val logs = MutableStateFlow<List<ReportOperation>>(emptyList())
 
@@ -231,50 +237,67 @@ class ReportRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveReport(report: SecurityReport): Result<Unit> {
-        val current = reports.value.toMutableList()
-        // Remove existing report with same ID
-        current.removeAll { it.id == report.id }
-        current.add(report)
-        reports.value = current
-        return Result.success(Unit)
+        return try {
+            reportDao.insertReport(report.toEntity())
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to save report to Room")
+            Result.failure(e)
+        }
     }
 
     override suspend fun getReportById(id: String): SecurityReport? {
-        return reports.value.find { it.id == id }
+        return try {
+            reportDao.getReportById(id)?.toDomain()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get report by id")
+            null
+        }
     }
 
     override fun getAllReports(): Flow<List<SecurityReport>> {
-        return reports
+        return reportDao.getAllReports().map { entities ->
+            entities.toDomainReports()
+        }
     }
 
     override fun getReportsByAuthId(authId: String): Flow<List<SecurityReport>> {
-        return reports.map { it.filter { it.authId == authId } }
+        return reportDao.getReportsByAuthId(authId).map { entities ->
+            entities.toDomainReports()
+        }
     }
 
     override fun getReportsByStatus(status: ReportStatus): Flow<List<SecurityReport>> {
-        return reports.map { it.filter { it.status == status } }
+        return reportDao.getReportsByStatus(status.name).map { entities ->
+            entities.toDomainReports()
+        }
     }
 
     override fun getReportsInRange(start: Instant, end: Instant): Flow<List<SecurityReport>> {
-        return reports.map { it.filter { it.generatedAt in start..end } }
+        return reportDao.getReportsInRange(
+            start.toEpochMilli(),
+            end.toEpochMilli()
+        ).map { entities -> entities.toDomainReports() }
     }
 
     override suspend fun deleteReport(reportId: String): Result<Unit> {
-        val updated = reports.value.filter { it.id != reportId }
-        reports.value = updated
-        return Result.success(Unit)
+        return try {
+            reportDao.deleteReportById(reportId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to delete report")
+            Result.failure(e)
+        }
     }
 
     override suspend fun archiveReport(reportId: String): Result<Unit> {
-        val updated = reports.value.map { report ->
-            if (report.id == reportId) {
-                report.copy(status = ReportStatus.ARCHIVED)
-            } else {
-                report
-            }
+        return try {
+            reportDao.updateReportStatus(reportId, ReportStatus.ARCHIVED.name)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to archive report")
+            Result.failure(e)
         }
-        reports.value = updated
-        return Result.success(Unit)
     }
 
     override suspend fun exportToPdf(reportId: String, outputPath: String): Result<File> {
@@ -351,9 +374,9 @@ class ReportRepositoryImpl @Inject constructor(
     }
 
     override fun getReportStatistics(): Flow<ReportStatistics> {
-        return flow {
-            val allReports = reports.value
-            emit(ReportStatistics(
+        return reportDao.getAllReports().map { entities ->
+            val allReports = entities.toDomainReports()
+            ReportStatistics(
                 totalReports = allReports.size,
                 reportsByStatus = allReports.groupBy { it.status }.mapValues { it.value.size },
                 reportsByMonth = allReports.groupBy {
@@ -366,14 +389,14 @@ class ReportRepositoryImpl @Inject constructor(
                     start = allReports.minByOrNull { it.generatedAt }?.generatedAt ?: Instant.now(),
                     end = allReports.maxByOrNull { it.generatedAt }?.generatedAt ?: Instant.now()
                 )
-            ))
+            )
         }
     }
 
     override fun getReportsSummary(): Flow<ReportsSummary> {
-        return flow {
-            val allReports = reports.value
-            emit(ReportsSummary(
+        return reportDao.getAllReports().map { entities ->
+            val allReports = entities.toDomainReports()
+            ReportsSummary(
                 totalReports = allReports.size,
                 draftReports = allReports.count { it.status == ReportStatus.DRAFT },
                 finalReports = allReports.count { it.status == ReportStatus.FINAL },
@@ -381,7 +404,7 @@ class ReportRepositoryImpl @Inject constructor(
                 criticalVulnerabilitiesTotal = allReports.sumOf { it.vulnerabilities.count { it.severity == VulnerabilitySeverity.CRITICAL } },
                 highVulnerabilitiesTotal = allReports.sumOf { it.vulnerabilities.count { it.severity == VulnerabilitySeverity.HIGH } },
                 pendingActions = 0
-            ))
+            )
         }
     }
 
