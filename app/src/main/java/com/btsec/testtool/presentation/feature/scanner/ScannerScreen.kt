@@ -42,6 +42,7 @@ fun ScannerScreen(
     authId: String,
     onBack: () -> Unit
 ) {
+    val viewModel: ScannerViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val isScanning = remember { mutableStateOf(false) }
     val devices = remember { mutableStateOf(emptyList<BluetoothDevice>()) }
     val error = remember { mutableStateOf<String?>(null) }
@@ -104,7 +105,13 @@ fun ScannerScreen(
                     )
                 }
                 else -> {
-                    DeviceList(devices = devices.value, isScanning = isScanning.value)
+                    DeviceList(
+                        devices = devices.value,
+                        isScanning = isScanning.value,
+                        onDeviceSelected = { device ->
+                            viewModel.selectDevice(device.address)
+                        }
+                    )
                 }
             }
         }
@@ -143,21 +150,24 @@ private fun ScanControls(
 }
 
 @Composable
-private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean) {
+private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean, onDeviceSelected: (BluetoothDevice) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(devices) { device ->
-            DeviceCard(device = device)
+            DeviceCard(device = device, onClick = { onDeviceSelected(device) })
         }
     }
 }
 
 @Composable
-private fun DeviceCard(device: BluetoothDevice) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+private fun DeviceCard(device: BluetoothDevice, onClick: () -> Unit = {}) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = device.name ?: "Unknown", style = MaterialTheme.typography.titleMedium)
             Text(text = device.address, style = MaterialTheme.typography.bodySmall)
@@ -294,6 +304,10 @@ class ScannerViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun selectDevice(address: String) {
+        scanningUseCase.selectDevice(address)
     }
 }
 

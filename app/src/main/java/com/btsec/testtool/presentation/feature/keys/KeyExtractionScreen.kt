@@ -312,7 +312,8 @@ private fun KeyExtractionContent(
 
 @HiltViewModel
 class KeyExtractionViewModel @Inject constructor(
-    private val keyExtractionUseCase: KeyExtractionUseCase
+    private val keyExtractionUseCase: KeyExtractionUseCase,
+    private val scanningUseCase: com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(KeyExtractionUiState())
@@ -341,25 +342,19 @@ class KeyExtractionViewModel @Inject constructor(
 
     fun startExtraction() {
         viewModelScope.launch {
-            val placeholderDevice = BluetoothDevice(
-                address = "00:00:00:00:00:00",
-                name = "Target Device",
-                type = BluetoothType.BLE,
-                deviceClass = null,
-                bondState = BondState.NONE,
-                rssi = null,
-                txPower = null,
-                firstSeen = java.time.Instant.now(),
-                lastSeen = java.time.Instant.now()
-            )
+            val device = scanningUseCase.getSelectedDevice()
+            if (device == null) {
+                _uiState.update { it.copy(error = "No device selected. Please scan and select a device first.") }
+                return@launch
+            }
             keyExtractionUseCase.extractKey(
-                device = placeholderDevice,
+                device = device,
                 keyType = _uiState.value.selectedKeyType,
                 method = _uiState.value.selectedMethod
             )
 
             // Load encryption analysis
-            val analysis = keyExtractionUseCase.analyzeEncryptionStrength(placeholderDevice)
+            val analysis = keyExtractionUseCase.analyzeEncryptionStrength(device)
             _uiState.update { it.copy(encryptionAnalysis = analysis) }
         }
     }

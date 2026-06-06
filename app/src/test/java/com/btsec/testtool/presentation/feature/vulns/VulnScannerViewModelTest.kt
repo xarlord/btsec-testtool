@@ -14,6 +14,7 @@ import com.btsec.testtool.domain.repository.ScanStatus
 import com.btsec.testtool.domain.repository.VulnerabilityStatistics
 import com.btsec.testtool.domain.repository.DateRange
 import com.btsec.testtool.domain.usecase.VulnerabilityScanningUseCase
+import com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,7 @@ import kotlin.test.assertTrue
 class VulnScannerViewModelTest {
 
     private val mockVulnScanningUseCase: VulnerabilityScanningUseCase = mockk(relaxed = true)
+    private val mockScanningUseCase: BluetoothScanningUseCase = mockk(relaxed = true)
     private lateinit var viewModel: VulnScannerViewModel
 
     @BeforeEach
@@ -67,7 +69,7 @@ class VulnScannerViewModelTest {
                 )
             )
         )
-        viewModel = VulnScannerViewModel(mockVulnScanningUseCase)
+        viewModel = VulnScannerViewModel(mockVulnScanningUseCase, mockScanningUseCase)
     }
 
     @AfterEach

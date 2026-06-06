@@ -14,6 +14,7 @@ import com.btsec.testtool.domain.model.FuzzStatus
 import com.btsec.testtool.domain.repository.FuzzingStatistics
 import com.btsec.testtool.domain.repository.DateRange
 import com.btsec.testtool.domain.usecase.FuzzingUseCase
+import com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,7 @@ import kotlin.test.assertTrue
 class FuzzerViewModelTest {
 
     private val mockFuzzingUseCase: FuzzingUseCase = mockk(relaxed = true)
+    private val mockScanningUseCase: BluetoothScanningUseCase = mockk(relaxed = true)
     private lateinit var viewModel: FuzzerViewModel
 
     @BeforeEach
@@ -61,7 +63,8 @@ class FuzzerViewModelTest {
             )
         )
         every { mockFuzzingUseCase.getCriticalFindings() } returns flowOf(emptyList())
-        viewModel = FuzzerViewModel(mockFuzzingUseCase)
+        every { mockScanningUseCase.getSelectedDeviceAddress() } returns flowOf(null)
+        viewModel = FuzzerViewModel(mockFuzzingUseCase, mockScanningUseCase)
     }
 
     @AfterEach

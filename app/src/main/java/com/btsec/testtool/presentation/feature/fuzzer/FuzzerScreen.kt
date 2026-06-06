@@ -111,6 +111,45 @@ private fun FuzzerContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Selected Device Info
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (uiState.selectedDeviceName != null)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Bluetooth,
+                        contentDescription = "Selected device",
+                        tint = if (uiState.selectedDeviceName != null)
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        else
+                            MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = if (uiState.selectedDeviceName != null)
+                            "Target: ${uiState.selectedDeviceName}"
+                        else
+                            "No device selected — go to Scanner to select a device",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (uiState.selectedDeviceName != null)
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        else
+                            MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        }
+
         // Configuration Section
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -308,7 +347,8 @@ private fun FuzzerContent(
 
 @HiltViewModel
 class FuzzerViewModel @Inject constructor(
-    private val fuzzingUseCase: FuzzingUseCase
+    private val fuzzingUseCase: FuzzingUseCase,
+    private val scanningUseCase: com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FuzzerUiState())
@@ -335,6 +375,16 @@ class FuzzerViewModel @Inject constructor(
                 _uiState.update { it.copy(findings = findings) }
             }
         }
+        viewModelScope.launch {
+            scanningUseCase.getSelectedDeviceAddress().collect { address ->
+                if (address != null) {
+                    val device = scanningUseCase.getDevice(address)
+                    _uiState.update { it.copy(selectedDeviceName = device?.name ?: address) }
+                } else {
+                    _uiState.update { it.copy(selectedDeviceName = null) }
+                }
+            }
+        }
     }
 
     fun updateMethod(method: FuzzMethod) {
@@ -351,20 +401,13 @@ class FuzzerViewModel @Inject constructor(
 
     fun startFuzzing() {
         viewModelScope.launch {
-            // Use a placeholder device — in production would come from scan results
-            val placeholderDevice = BluetoothDevice(
-                address = "00:00:00:00:00:00",
-                name = "Select Device",
-                type = BluetoothType.UNKNOWN,
-                deviceClass = null,
-                bondState = BondState.NONE,
-                rssi = null,
-                txPower = null,
-                firstSeen = java.time.Instant.now(),
-                lastSeen = java.time.Instant.now()
-            )
+            val device = scanningUseCase.getSelectedDevice()
+            if (device == null) {
+                _uiState.update { it.copy(error = "No device selected. Please scan and select a device first.") }
+                return@launch
+            }
             val config = FuzzConfig(
-                targetDevice = placeholderDevice,
+                targetDevice = device,
                 targetService = null,
                 targetCharacteristic = null,
                 fuzzMethod = _uiState.value.selectedMethod,
@@ -399,5 +442,6 @@ data class FuzzerUiState(
     val progress: FuzzProgress? = null,
     val findings: List<FuzzFinding> = emptyList(),
     val statistics: FuzzingStatistics? = null,
-    val error: String? = null
+    val error: String? = null,
+    val selectedDeviceName: String? = null
 )

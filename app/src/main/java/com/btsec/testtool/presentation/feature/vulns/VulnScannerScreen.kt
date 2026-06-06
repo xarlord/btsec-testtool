@@ -343,7 +343,8 @@ private fun StatItem(label: String, count: Int, color: Color) {
 
 @HiltViewModel
 class VulnScannerViewModel @Inject constructor(
-    private val vulnScanningUseCase: VulnerabilityScanningUseCase
+    private val vulnScanningUseCase: VulnerabilityScanningUseCase,
+    private val scanningUseCase: com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VulnScannerUiState())
@@ -384,18 +385,12 @@ class VulnScannerViewModel @Inject constructor(
 
     fun startScan() {
         viewModelScope.launch {
-            val placeholderDevice = BluetoothDevice(
-                address = "00:00:00:00:00:00",
-                name = "Target Device",
-                type = BluetoothType.BLE,
-                deviceClass = null,
-                bondState = BondState.NONE,
-                rssi = null,
-                txPower = null,
-                firstSeen = java.time.Instant.now(),
-                lastSeen = java.time.Instant.now()
-            )
-            vulnScanningUseCase.startVulnerabilityScan(placeholderDevice)
+            val device = scanningUseCase.getSelectedDevice()
+            if (device == null) {
+                _uiState.update { it.copy(error = "No device selected. Please scan and select a device first.") }
+                return@launch
+            }
+            vulnScanningUseCase.startVulnerabilityScan(device)
         }
     }
 
