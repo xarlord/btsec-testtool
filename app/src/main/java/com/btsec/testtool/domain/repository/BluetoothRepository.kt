@@ -209,6 +209,18 @@ interface BluetoothRepository {
      */
     suspend fun readRssi(): Result<Int>
 
+    // ========== Selected Device ==========
+
+    /**
+     * Get the currently selected device address.
+     */
+    fun getSelectedDeviceAddress(): Flow<String?>
+
+    /**
+     * Select a device for testing operations.
+     */
+    fun selectDevice(address: String?)
+
     // ========== Device Cache ==========
 
     /**

@@ -97,6 +97,29 @@ class BluetoothScanningUseCase @Inject constructor(
     }
 
     /**
+     * Get the currently selected device address.
+     */
+    fun getSelectedDeviceAddress(): Flow<String?> {
+        return bluetoothRepository.getSelectedDeviceAddress()
+    }
+
+    /**
+     * Select a device for testing operations.
+     */
+    fun selectDevice(address: String?) {
+        bluetoothRepository.selectDevice(address)
+    }
+
+    /**
+     * Get the currently selected device.
+     */
+    suspend fun getSelectedDevice(): BluetoothDevice? {
+        val address = bluetoothRepository.getSelectedDeviceAddress().first()
+        if (address == null) return null
+        return bluetoothRepository.getDevice(address)
+    }
+
+    /**
      * Get devices grouped by type.
      */
     fun getDevicesByType(): Flow<Map<BluetoothType, List<BluetoothDevice>>> {

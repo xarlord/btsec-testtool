@@ -104,6 +104,9 @@ class BluetoothRepositoryImpl @Inject constructor(
     // Track actual negotiated MTU
     private val currentMtu = MutableStateFlow(23)
 
+    // Currently selected device for testing operations
+    private val selectedDeviceAddress = MutableStateFlow<String?>(null)
+
     // ========== Bluetooth State ==========
 
     override fun isBluetoothEnabled(): Flow<Boolean> {
@@ -194,6 +197,16 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     override suspend fun getDevice(address: String): BluetoothDevice? {
         return scanResults.value.find { it.address == address }
+    }
+
+    // ========== Selected Device ==========
+
+    override fun getSelectedDeviceAddress(): Flow<String?> {
+        return selectedDeviceAddress
+    }
+
+    override fun selectDevice(address: String?) {
+        selectedDeviceAddress.value = address
     }
 
     // ========== Device Connection ==========
