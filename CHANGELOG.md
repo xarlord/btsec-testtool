@@ -1,3 +1,10 @@
+## [1.5.13](https://github.com/xarlord/btsec-testtool/compare/v1.5.12...v1.5.13) (2026-06-06)
+
+
+### Bug Fixes
+
+* **#201,#207:** wire VulnerabilityTestEngine into scanner + real audit log export ([#218](https://github.com/xarlord/btsec-testtool/issues/218)) ([72a08a1](https://github.com/xarlord/btsec-testtool/commit/72a08a1a3ea98a214a0ff9256809a3b15a92d91e)), closes [#201](https://github.com/xarlord/btsec-testtool/issues/201) [#207](https://github.com/xarlord/btsec-testtool/issues/207) [#201](https://github.com/xarlord/btsec-testtool/issues/201) [#207](https://github.com/xarlord/btsec-testtool/issues/207)
+
 ## [1.5.12](https://github.com/xarlord/btsec-testtool/compare/v1.5.11...v1.5.12) (2026-06-06)
 
 
