@@ -1,0 +1,4 @@
+💡 What: Added stable `key` parameters to `LazyColumn` `items()` calls across the application (Scanner, VulnScanner, Fuzzer, and KeyExtraction screens).
+🎯 Why: Without keys, Compose uses item position for rendering. If the list order changes or items are inserted/removed, Compose is forced to recompose all items that shifted position, leading to jank and CPU spikes in dynamic lists.
+📊 Impact: Prevents unnecessary recompositions of list items during Bluetooth scanning, fuzzing, and vulnerability discovery where lists update frequently. Reduces CPU usage during rapid list updates.
+🔬 Measurement: Verify by monitoring UI performance and recomposition counts in Android Studio Layout Inspector while discovering new devices or fuzz findings.

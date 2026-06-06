@@ -1,0 +1,3 @@
+## 2026-06-06 - Compose LazyColumn Performance Optimization
+**Learning:** When using `LazyColumn` or `LazyRow` in Jetpack Compose to display dynamic lists, not providing a `key` parameter to the `items()` function can cause unnecessary and expensive recompositions. Compose uses the position of the item by default to determine if it has changed, which causes performance bottlenecks when items are added, removed, or reordered.
+**Action:** Always provide a stable, unique `key` parameter (e.g., `key = { it.id }`) to `items()` inside `LazyColumn` or `LazyRow` to prevent unnecessary recompositions and ensure efficient list rendering.
