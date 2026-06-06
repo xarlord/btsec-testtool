@@ -1,3 +1,10 @@
+## [1.5.9](https://github.com/xarlord/btsec-testtool/compare/v1.5.8...v1.5.9) (2026-06-06)
+
+
+### Bug Fixes
+
+* **quality:** extract string resources, begin UI decomposition ([#184](https://github.com/xarlord/btsec-testtool/issues/184)) ([d5a9751](https://github.com/xarlord/btsec-testtool/commit/d5a9751391d7d058bc7de6fc387ff6780186c7d2)), closes [#133](https://github.com/xarlord/btsec-testtool/issues/133) [#129](https://github.com/xarlord/btsec-testtool/issues/129) [#125](https://github.com/xarlord/btsec-testtool/issues/125)
+
 ## [1.5.8](https://github.com/xarlord/btsec-testtool/compare/v1.5.7...v1.5.8) (2026-06-06)
 
 
