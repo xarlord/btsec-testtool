@@ -30,8 +30,10 @@ import com.btsec.testtool.domain.repository.ReportsSummary
 import com.btsec.testtool.domain.usecase.ReportGenerationUseCase
 import com.btsec.testtool.presentation.feature.scanner.ErrorView
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -337,6 +339,7 @@ private fun GenerateReportDialog(
 
 @HiltViewModel
 class ReportsViewModel @Inject constructor(
+    @ApplicationContext private val context: android.content.Context,
     private val reportGenerationUseCase: ReportGenerationUseCase
 ) : ViewModel() {
 
@@ -371,13 +374,15 @@ class ReportsViewModel @Inject constructor(
 
     fun exportReport(reportId: String, format: ExportFormat) {
         viewModelScope.launch {
+            val exportDir = context.cacheDir.resolve("exports").apply { mkdirs() }
+            val outputPath = File(exportDir, "report_$reportId.${format.name.lowercase()}").absolutePath
             when (format) {
-                ExportFormat.JSON -> reportGenerationUseCase.exportToJson(reportId, "/tmp/report.json")
-                ExportFormat.HTML -> reportGenerationUseCase.exportToHtml(reportId, "/tmp/report.html")
-                ExportFormat.PDF -> reportGenerationUseCase.exportToPdf(reportId, "/tmp/report.pdf")
-                ExportFormat.CSV -> reportGenerationUseCase.exportToCsv(reportId, "/tmp/report.csv")
-                ExportFormat.XML -> reportGenerationUseCase.exportToJson(reportId, "/tmp/report.xml")
-                ExportFormat.MARKDOWN -> reportGenerationUseCase.exportToJson(reportId, "/tmp/report.md")
+                ExportFormat.JSON -> reportGenerationUseCase.exportToJson(reportId, outputPath)
+                ExportFormat.HTML -> reportGenerationUseCase.exportToHtml(reportId, outputPath)
+                ExportFormat.PDF -> reportGenerationUseCase.exportToPdf(reportId, outputPath)
+                ExportFormat.CSV -> reportGenerationUseCase.exportToCsv(reportId, outputPath)
+                ExportFormat.XML -> reportGenerationUseCase.exportToJson(reportId, outputPath)
+                ExportFormat.MARKDOWN -> reportGenerationUseCase.exportToJson(reportId, outputPath)
             }
         }
     }

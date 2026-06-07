@@ -238,7 +238,7 @@ fun SettingsScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("About", style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
-                        Text("BTSec TestTool v1.2.1", style = MaterialTheme.typography.bodyMedium)
+                        Text("BTSec TestTool ${com.btsec.testtool.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
                         Text("Bluetooth Security Testing Tool", style = MaterialTheme.typography.bodySmall)
                         Spacer(Modifier.height(4.dp))
                         Text(
