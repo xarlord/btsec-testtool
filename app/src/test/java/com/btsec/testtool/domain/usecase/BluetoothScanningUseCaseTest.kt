@@ -11,9 +11,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class BluetoothScanningUseCaseTest {
 
@@ -22,7 +22,7 @@ class BluetoothScanningUseCaseTest {
     private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
     private val consentRepo: ConsentRepository = mockk(relaxed = true)
 
-    @Before
+    @BeforeEach
     fun setup() {
         useCase = BluetoothScanningUseCase(btRepo, authUseCase, consentRepo)
     }

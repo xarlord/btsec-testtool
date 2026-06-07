@@ -11,9 +11,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class FuzzingUseCaseTest {
 
@@ -23,7 +23,7 @@ class FuzzingUseCaseTest {
     private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
     private val consentRepo: ConsentRepository = mockk(relaxed = true)
 
-    @Before
+    @BeforeEach
     fun setup() {
         useCase = FuzzingUseCase(fuzzRepo, btRepo, authUseCase, consentRepo)
     }

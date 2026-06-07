@@ -11,9 +11,9 @@ import com.btsec.testtool.domain.repository.KeyExtractionRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class ReportGenerationUseCaseTest {
@@ -25,7 +25,7 @@ class ReportGenerationUseCaseTest {
     private val keyRepo: KeyExtractionRepository = mockk(relaxed = true)
     private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
 
-    @Before
+    @BeforeEach
     fun setup() {
         useCase = ReportGenerationUseCase(reportRepo, vulnRepo, fuzzRepo, keyRepo, authUseCase)
     }

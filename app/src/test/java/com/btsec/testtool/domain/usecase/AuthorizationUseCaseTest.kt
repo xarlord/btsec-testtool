@@ -7,9 +7,9 @@ package com.btsec.testtool.domain.usecase
 import com.btsec.testtool.domain.repository.AuthorizationRepository
 import com.btsec.testtool.domain.repository.ConsentRepository
 import io.mockk.mockk
-import org.junit.Before
-import org.junit.Test
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class AuthorizationUseCaseTest {
 
@@ -17,7 +17,7 @@ class AuthorizationUseCaseTest {
     private val authRepo: AuthorizationRepository = mockk(relaxed = true)
     private val consentRepo: ConsentRepository = mockk(relaxed = true)
 
-    @Before
+    @BeforeEach
     fun setup() {
         useCase = AuthorizationUseCase(authRepo, consentRepo)
     }
