@@ -98,6 +98,7 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     // Pending coroutine continuations for GATT callback resolution
     private val pendingReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
+    private val pendingWrites = ConcurrentHashMap<String, (Result<Unit>) -> Unit>()
     private val pendingDescriptorReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
     private var notificationListener: ((UUID, ByteArray) -> Unit)? = null
 
@@ -127,6 +128,10 @@ class BluetoothRepositoryImpl @Inject constructor(
     }
 
     // ========== Device Scanning ==========
+
+    // Track active scan callback for proper stopScan
+    @Volatile
+    private var activeScanCallback: ScanCallback? = null
 
     @SuppressLint("MissingPermission")  // Permissions checked before use
     override fun startScan(filter: String?): Flow<BluetoothDevice> {
@@ -173,17 +178,22 @@ class BluetoothRepositoryImpl @Inject constructor(
                 .setReportDelay(0)
                 .build()
 
+            activeScanCallback = scanCallback
             scanner.startScan(scanCallback)
 
             awaitClose {
                 scanner.stopScan(scanCallback)
+                activeScanCallback = null
                 isScanning.value = false
             }
         }
     }
 
     override suspend fun stopScan() {
-        bluetoothAdapter?.bluetoothLeScanner?.stopScan(object : ScanCallback() {})
+        activeScanCallback?.let { callback ->
+            bluetoothAdapter?.bluetoothLeScanner?.stopScan(callback)
+        }
+        activeScanCallback = null
         isScanning.value = false
     }
 
@@ -276,6 +286,10 @@ class BluetoothRepositoryImpl @Inject constructor(
                         callback(Result.failure(Exception("GATT disconnected")))
                     }
                     pendingReads.clear()
+                    pendingWrites.values.forEach { callback ->
+                        callback(Result.failure(Exception("GATT disconnected")))
+                    }
+                    pendingWrites.clear()
                     pendingDescriptorReads.values.forEach { callback ->
                         callback(Result.failure(Exception("GATT disconnected")))
                     }
@@ -357,6 +371,24 @@ class BluetoothRepositoryImpl @Inject constructor(
                 } else {
                     Timber.w("Descriptor read failed: ${descriptor.uuid}, status=$status")
                     callback(Result.failure(Exception("Descriptor read failed with status: $status")))
+                }
+            }
+        }
+
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            val key = characteristic.uuid.toString()
+            val callback = pendingWrites.remove(key)
+            if (callback != null) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Timber.d("Characteristic write success: ${characteristic.uuid}")
+                    callback(Result.success(Unit))
+                } else {
+                    Timber.w("Characteristic write failed: ${characteristic.uuid}, status=$status")
+                    callback(Result.failure(Exception("Characteristic write failed with status: $status")))
                 }
             }
         }
@@ -444,10 +476,32 @@ class BluetoothRepositoryImpl @Inject constructor(
             WriteType.SIGNED -> BluetoothGattCharacteristic.WRITE_TYPE_SIGNED
         }
 
-        return if (gatt.writeCharacteristic(characteristic)) {
-            Result.success(Unit)
-        } else {
-            Result.failure(Exception("Write failed"))
+        return try {
+            suspendCancellableCoroutine { cont ->
+                val key = characteristicUuid
+                pendingWrites[key] = { result ->
+                    if (cont.isActive) {
+                        cont.resume(result)
+                    }
+                }
+                cont.invokeOnCancellation {
+                    pendingWrites.remove(key)
+                }
+
+                if (!gatt.writeCharacteristic(characteristic)) {
+                    pendingWrites.remove(key)
+                    if (cont.isActive) {
+                        cont.resume(Result.failure(Exception("Failed to initiate characteristic write")))
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            pendingWrites.remove(characteristicUuid)
+            Timber.w("writeCharacteristic cancelled: $characteristicUuid")
+            Result.failure(Exception("Operation cancelled"))
+        } catch (e: Exception) {
+            Timber.e(e, "writeCharacteristic error: $characteristicUuid")
+            Result.failure(e)
         }
     }
 
