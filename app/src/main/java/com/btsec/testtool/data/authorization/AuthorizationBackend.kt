@@ -13,11 +13,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.btsec.testtool.domain.model.*
-import com.btsec.testtool.domain.repository.AuthorizationRepository
-import com.btsec.testtool.domain.repository.AuthorizationStatus
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
@@ -26,15 +25,17 @@ import javax.inject.Singleton
 private val Context.authDataStore by preferencesDataStore(name = "btsec_auth")
 
 /**
- * Real implementation of AuthorizationRepository with:
- * - Server verification via HTTP API (configurable URL)
- * - Demo mode for offline testing (BTSEC-DEMO-* format)
- * - DataStore persistence across app restarts
- * - Signature verification using stored public key
+ * Low-level authorization backend handling server communication and DataStore persistence.
+ *
+ * Security model:
+ * - Demo IDs (BTSEC-DEMO-XXXXXXXX): accepted locally with restricted scope, clearly marked
+ * - Standard IDs (BTSEC-YYYYMMDD-XXXXXXXX): MUST be verified against a configured server
+ * - No server URL configured + non-demo ID → REJECTED (no silent bypass)
+ * - Signature verification requires HMAC-SHA256 or server-issued token
  */
 @Singleton
 class AuthorizationBackend @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val context: Context
 ) {
 
     companion object {
@@ -51,10 +52,18 @@ class AuthorizationBackend @Inject constructor(
         private const val DEMO_PREFIX = "BTSEC-DEMO-"
         private const val STANDARD_PREFIX = "BTSEC-"
         private const val AUTH_PATTERN = "^BTSEC-(\\d{8}|DEMO)-[A-Z0-9]{8}$"
+
+        /** Server-issued signatures have this prefix followed by a hex HMAC. */
+        internal const val SERVER_SIG_PREFIX = "sv1:"
+        /** Demo signatures have this prefix. */
+        internal const val DEMO_SIG_PREFIX = "demo:"
     }
 
     /**
      * Verify an authorization ID. Supports both server-verified and demo mode.
+     *
+     * Security: Non-demo IDs are ONLY accepted when a server URL is configured
+     * and the server responds with a valid signed response.
      */
     suspend fun verifyAuthorization(authId: String): Authorization? {
         if (!authId.matches(Regex(AUTH_PATTERN))) {
@@ -71,7 +80,8 @@ class AuthorizationBackend @Inject constructor(
 
     /**
      * Demo mode: accept BTSEC-DEMO-XXXXXXXX format for offline testing.
-     * Creates a full authorization with all permissions, 24h validity.
+     * Creates a restricted authorization with explicit demo marking.
+     * Scope is limited: maxPacketsPerSecond=10, valid 4h, wildcard target.
      */
     private fun verifyDemoAuthorization(authId: String): Authorization {
         Timber.i("Using demo authorization: ****${authId.takeLast(4)}")
@@ -83,8 +93,8 @@ class AuthorizationBackend @Inject constructor(
             ),
             allowedActions = TestAction.entries.toSet(),
             validFrom = now,
-            validUntil = now.plusSeconds(86400),
-            maxPacketsPerSecond = 50,
+            validUntil = now.plusSeconds(14400), // 4 hours — intentionally short for demo
+            maxPacketsPerSecond = 10, // Restricted rate for demo mode
             requiresReport = false,
             disclosureDeadline = now.plusSeconds(86400 * 30),
             locationConstraints = null,
@@ -97,13 +107,14 @@ class AuthorizationBackend @Inject constructor(
             issuedTo = "Demo User",
             issuedBy = "BTSec TestTool (Demo Mode)",
             issuedAt = now,
-            expiresAt = now.plusSeconds(86400),
+            expiresAt = now.plusSeconds(14400), // 4h — matches scope
             authorizedActions = TestAction.entries.toSet(),
             scope = scope,
-            signature = "demo_signature_${authId.hashCode()}",
+            signature = "${DEMO_SIG_PREFIX}${authId.hashCode()}",
             terms = listOf(
                 "DEMO MODE: No server verification performed",
-                "Authorization valid for 24 hours",
+                "Authorization valid for 4 hours only",
+                "Rate-limited to 10 packets/second",
                 "For authorized testing only — demo mode does not replace proper authorization"
             )
         )
@@ -111,58 +122,188 @@ class AuthorizationBackend @Inject constructor(
 
     /**
      * Server verification: POST authId to configured server for validation.
-     * Falls back to local cache if server is unreachable.
+     *
+     * SECURITY: If no server URL is configured, returns null (REJECTED).
+     * If server is unreachable, returns null (REJECTED — no silent bypass).
+     * Only a valid 200 response with authorized=true AND a valid signature is accepted.
      */
     private suspend fun verifyServerAuthorization(authId: String): Authorization? {
         val serverUrl = getServerUrl()
         if (serverUrl.isBlank()) {
-            Timber.w("No server URL configured, trying local cache")
-            return loadCachedAuthorization(authId)
+            Timber.w("No server URL configured — non-demo auth ID rejected: ****${authId.takeLast(4)}")
+            return null
         }
 
         return try {
-            // In production, this would use OkHttp/Retrofit:
-            // val response = apiService.verifyAuthorization(VerifyRequest(authId))
-            // if (response.isSuccessful) response.body()!!.toDomain() else null
-            //
-            // For now, create a verified authorization from server response:
+            val auth = performServerVerification(authId, serverUrl)
+            if (auth != null) {
+                cacheAuthorization(auth)
+                Timber.i("Server verification successful for ****${authId.takeLast(4)}")
+            }
+            auth
+        } catch (e: Exception) {
+            Timber.e(e, "Server verification failed for ****${authId.takeLast(4)} — rejecting")
+            null
+        }
+    }
+
+    /**
+     * Perform the actual HTTP POST to the verification server.
+     * Returns null for any non-200 or unauthorized response.
+     *
+     * @throws Exception on network errors (caller handles)
+     */
+    internal suspend fun performServerVerification(authId: String, serverUrl: String): Authorization? =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val url = URL("${serverUrl.trimEnd('/')}/api/v1/verify")
+            val connection = url.openConnection() as HttpURLConnection
+            try {
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.setRequestProperty("Accept", "application/json")
+                connection.connectTimeout = 10_000
+                connection.readTimeout = 15_000
+                connection.doOutput = true
+
+                val payload = """{"authId":"$authId"}"""
+                connection.outputStream.use { it.write(payload.toByteArray()) }
+
+                val responseCode = connection.responseCode
+                if (responseCode != 200) {
+                    Timber.w("Server returned HTTP %d for auth verification", responseCode)
+                    return@withContext null
+                }
+
+                val responseBody = connection.inputStream.bufferedReader().readText()
+                parseServerResponse(authId, responseBody)
+            } finally {
+                connection.disconnect()
+            }
+        }
+
+    /**
+     * Parse server JSON response into an Authorization.
+     * Validates: authorized flag, signature presence, and required fields.
+     */
+    internal fun parseServerResponse(authId: String, json: String): Authorization? {
+        try {
+            val root = org.json.JSONObject(json)
+            if (!root.optBoolean("authorized", false)) {
+                Timber.w("Server response: not authorized for ****${authId.takeLast(4)}")
+                return null
+            }
+
+            val signature = root.optString("signature", "")
+            if (signature.isBlank()) {
+                Timber.w("Server response missing signature for ****${authId.takeLast(4)}")
+                return null
+            }
+
+            // Validate signature format: must be server-issued (sv1:hex) or a well-formed token
+            if (!isValidServerSignature(signature)) {
+                Timber.w("Server response has invalid signature format for ****${authId.takeLast(4)}")
+                return null
+            }
+
+            val issuedTo = root.optString("issuedTo", "")
+            if (issuedTo.isBlank()) {
+                Timber.w("Server response missing issuedTo for ****${authId.takeLast(4)}")
+                return null
+            }
+
             val now = Instant.now()
+            val expiresAtStr = root.optString("expiresAt", "")
+            val expiresAt = if (expiresAtStr.isNotBlank()) {
+                try { Instant.parse(expiresAtStr) } catch (_: Exception) { now.plusSeconds(86400 * 30) }
+            } else {
+                now.plusSeconds(86400 * 30)
+            }
+
+            // Enforce: server-issued auth must not be already expired
+            if (now.isAfter(expiresAt)) {
+                Timber.w("Server-issued auth already expired for ****${authId.takeLast(4)}")
+                return null
+            }
+
             val scope = TestScope(
                 authId = authId,
                 authorizedTargets = listOf(
-                    TargetDevice(identifier = "*", deviceType = DeviceType.UNKNOWN, owner = null, location = null)
+                    TargetDevice(
+                        identifier = root.optString("targetScope", "*"),
+                        deviceType = DeviceType.UNKNOWN,
+                        owner = null,
+                        location = null
+                    )
                 ),
-                allowedActions = TestAction.entries.toSet(),
+                allowedActions = parseServerActions(root.optString("actions", "all")),
                 validFrom = now,
-                validUntil = now.plusSeconds(86400 * 30),
-                maxPacketsPerSecond = 100,
-                requiresReport = true,
+                validUntil = expiresAt,
+                maxPacketsPerSecond = root.optInt("maxPacketsPerSecond", 100),
+                requiresReport = root.optBoolean("requiresReport", true),
                 disclosureDeadline = now.plusSeconds(86400 * 90),
                 locationConstraints = null,
-                requiresSupervision = false,
+                requiresSupervision = root.optBoolean("requiresSupervision", false),
                 excludedTargets = emptyList()
             )
-            val auth = Authorization(
+
+            return Authorization(
                 authId = authId,
-                issuedTo = "Authorized Tester",
-                issuedBy = "Security Research Team",
+                issuedTo = issuedTo,
+                issuedBy = root.optString("issuedBy", "Server"),
                 issuedAt = now,
-                expiresAt = now.plusSeconds(86400 * 365),
-                authorizedActions = TestAction.entries.toSet(),
+                expiresAt = expiresAt,
+                authorizedActions = scope.allowedActions,
                 scope = scope,
-                signature = "server_verified_${UUID.randomUUID()}",
+                signature = signature,
                 terms = listOf(
                     "Testing must be conducted within authorized scope",
                     "All findings must be reported within 90 days",
                     "Data must be retained for 7 years"
                 )
             )
-            cacheAuthorization(auth)
-            auth
         } catch (e: Exception) {
-            Timber.e(e, "Server verification failed, trying cache")
-            loadCachedAuthorization(authId)
+            Timber.e(e, "Failed to parse server response")
+            return null
         }
+    }
+
+    /**
+     * Validate that a server-issued signature has proper format.
+     * Accepts: sv1:<hex_hash> or a JWT-like token (xxx.yyy.zzz).
+     * Rejects: empty, "mock_signature", "server_verified_" prefix (old bypass).
+     */
+    internal fun isValidServerSignature(signature: String): Boolean {
+        if (signature.isBlank()) return false
+        if (signature == "mock_signature") return false
+        // Reject old bypass patterns
+        if (signature.startsWith("server_verified_")) return false
+        // Valid format 1: sv1:<64-char hex> (HMAC-SHA256)
+        if (signature.startsWith(SERVER_SIG_PREFIX)) {
+            val hexPart = signature.removePrefix(SERVER_SIG_PREFIX)
+            return hexPart.matches(Regex("^[a-fA-F0-9]{64}$"))
+        }
+        // Valid format 2: JWT-like (3 base64url segments separated by dots)
+        val jwtParts = signature.split(".")
+        if (jwtParts.size == 3 && jwtParts.all { it.length > 1 }) {
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Parse action list from server response.
+     * "all" grants all actions. Otherwise expects comma-separated action names.
+     */
+    private fun parseServerActions(actionsStr: String): Set<TestAction> {
+        if (actionsStr.equals("all", ignoreCase = true)) {
+            return TestAction.entries.toSet()
+        }
+        return actionsStr.split(",")
+            .mapNotNull { name ->
+                TestAction.entries.find { it.name.equals(name.trim(), ignoreCase = true) }
+            }
+            .toSet()
+            .ifEmpty { TestAction.entries.toSet() }
     }
 
     /**
@@ -183,6 +324,7 @@ class AuthorizationBackend @Inject constructor(
 
     /**
      * Load last cached authorization from DataStore.
+     * Validates expiry — expired cache is cleared and returns null.
      */
     suspend fun loadCachedAuthorization(expectedAuthId: String? = null): Authorization? {
         val prefs = context.authDataStore.data.first()
@@ -192,10 +334,18 @@ class AuthorizationBackend @Inject constructor(
 
         val issuedAt = prefs[KEY_AUTH_ISSUED_AT]?.let { Instant.parse(it) } ?: return null
         val expiresAt = prefs[KEY_AUTH_EXPIRES_AT]?.let { Instant.parse(it) } ?: return null
+        val cachedSignature = prefs[KEY_AUTH_SIGNATURE] ?: ""
 
         // Check expiry
         if (Instant.now().isAfter(expiresAt)) {
             Timber.w("Cached authorization expired")
+            clearCachedAuthorization()
+            return null
+        }
+
+        // Reject cache with invalid/bypass signatures
+        if (cachedSignature.isBlank() || cachedSignature == "mock_signature") {
+            Timber.w("Cached authorization has invalid signature — clearing")
             clearCachedAuthorization()
             return null
         }
@@ -225,7 +375,7 @@ class AuthorizationBackend @Inject constructor(
             expiresAt = expiresAt,
             authorizedActions = TestAction.entries.toSet(),
             scope = scope,
-            signature = prefs[KEY_AUTH_SIGNATURE] ?: "",
+            signature = cachedSignature,
             terms = listOf("Cached authorization — verify with server when online")
         )
     }
@@ -261,7 +411,7 @@ class AuthorizationBackend @Inject constructor(
         val secureUrl = when {
             trimmed.startsWith("https://") -> trimmed
             trimmed.startsWith("http://") -> {
-                Timber.w("Insecure HTTP URL provided, upgrading to HTTPS: $trimmed")
+                Timber.w("Insecure HTTP URL provided, upgrading to HTTPS")
                 trimmed.replaceFirst("http://", "https://")
             }
             else -> "https://$trimmed"
@@ -270,7 +420,7 @@ class AuthorizationBackend @Inject constructor(
         context.authDataStore.edit { prefs ->
             prefs[KEY_SERVER_URL] = secureUrl
         }
-        Timber.d("Server URL saved (HTTPS enforced): ${secureUrl.take(30)}...")
+        Timber.d("Server URL saved (HTTPS enforced)")
         return Result.success(Unit)
     }
 

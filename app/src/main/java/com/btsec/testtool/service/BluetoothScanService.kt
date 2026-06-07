@@ -14,9 +14,15 @@ import android.content.Intent
 import android.os.IBinder
 import android.content.pm.ServiceInfo
 import android.os.Build
+import kotlinx.coroutines.*
 import timber.log.Timber
 import com.btsec.testtool.BtSecTestToolApplication.Companion.CHANNEL_ID_SERVICE
 import com.btsec.testtool.BtSecTestToolApplication.Companion.NOTIFICATION_ID_SCAN
+import com.btsec.testtool.data.bluetooth.BluetoothRepositoryImpl
+import com.btsec.testtool.domain.model.BluetoothDevice
+import com.btsec.testtool.domain.repository.BluetoothRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * Foreground service for background Bluetooth scanning operations.
@@ -26,7 +32,12 @@ import com.btsec.testtool.BtSecTestToolApplication.Companion.NOTIFICATION_ID_SCA
  *
  * Security: All incoming Intents are validated against the authorization system
  * before any scanning operation proceeds.
+ *
+ * Fix for #206: Service now actually performs BLE scanning by collecting the
+ * scan flow from BluetoothRepository, maintaining scan state across lifecycle,
+ * and properly stopping the scan when commanded.
  */
+@AndroidEntryPoint
 class BluetoothScanService : Service() {
 
     companion object {
@@ -34,18 +45,25 @@ class BluetoothScanService : Service() {
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
         const val ACTION_START_SCAN = "com.btsec.testtool.action.START_SCAN"
         const val ACTION_STOP_SCAN = "com.btsec.testtool.action.STOP_SCAN"
-        private val AUTH_ID_PATTERN = Regex("^BTSEC-\\d{8}-[A-Z0-9]{8}$")
+        private val AUTH_ID_PATTERN = Regex("^BTSEC-(\\d{8}|DEMO)-[A-Z0-9]{8}$")
     }
+
+    @Inject lateinit var bluetoothRepository: BluetoothRepository
+
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scanJob: Job? = null
+    private var discoveredDevices = mutableMapOf<String, BluetoothDevice>()
+    private var isScanning = false
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundNotification()
+        startForegroundNotification("Initializing...")
+        Timber.i("BluetoothScanService created")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!validateAuthorization(intent)) {
-            Timber.w( "Unauthorized intent received — stopping service. " +
-                "Intent action: ${intent?.action}, extras: ${intent?.extras?.keySet()}")
+            Timber.w("Unauthorized intent received — stopping service")
             stopSelf()
             return START_NOT_STICKY
         }
@@ -53,11 +71,12 @@ class BluetoothScanService : Service() {
         when (intent?.action) {
             ACTION_START_SCAN -> {
                 val authId = intent.getStringExtra(EXTRA_AUTH_ID) ?: ""
-                Timber.i( "Starting authorized BLE scan with auth: ${authId.take(10)}***")
-                // Scan logic handled by BluetoothRepository via ViewModel
+                val filter = intent.getStringExtra("filter_address")
+                startBleScan(authId, filter)
             }
             ACTION_STOP_SCAN -> {
-                Timber.i( "Stopping BLE scan")
+                Timber.i("Stopping BLE scan via action")
+                stopBleScan()
                 stopSelf()
             }
         }
@@ -66,52 +85,101 @@ class BluetoothScanService : Service() {
     }
 
     /**
+     * Start actual BLE scanning by collecting the scan flow from BluetoothRepository.
+     * Results are tracked in discoveredDevices and the notification is updated.
+     */
+    private fun startBleScan(authId: String, filterAddress: String?) {
+        if (isScanning) {
+            Timber.w("Scan already in progress — ignoring duplicate start")
+            return
+        }
+
+        isScanning = true
+        discoveredDevices.clear()
+        updateNotification("Scanning... (0 devices)")
+
+        scanJob = serviceScope.launch {
+            try {
+                bluetoothRepository.startScan(filterAddress).collect { device ->
+                    discoveredDevices[device.address] = device
+                    val count = discoveredDevices.size
+                    updateNotification("Scanning... ($count device${if (count != 1) "s" else ""})")
+                    Timber.d("Found device: ${device.address} (${device.name ?: "unknown"}) — total: $count")
+                }
+            } catch (e: CancellationException) {
+                Timber.i("Scan job cancelled — normal shutdown")
+            } catch (e: Exception) {
+                Timber.e(e, "Scan flow error")
+                updateNotification("Scan error: ${e.message}")
+            } finally {
+                isScanning = false
+                updateNotification("Scan complete (${discoveredDevices.size} devices found)")
+            }
+        }
+
+        Timber.i("Started BLE scan with auth: ${authId.take(10)}***")
+    }
+
+    /**
+     * Stop the active BLE scan.
+     */
+    private fun stopBleScan() {
+        scanJob?.cancel()
+        scanJob = null
+        isScanning = false
+
+        // Also tell the repository to stop (in case flow collection wasn't the only entry point)
+        serviceScope.launch {
+            try {
+                bluetoothRepository.stopScan()
+            } catch (e: Exception) {
+                Timber.w(e, "Error stopping repository scan")
+            }
+        }
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        stopBleScan()
+        serviceScope.cancel()
+        Timber.d("BluetoothScanService destroyed — found ${discoveredDevices.size} devices total")
+        super.onDestroy()
+    }
+
+    /**
      * Validate that the incoming Intent carries proper authorization.
-     * Checks: intent non-null, auth ID present and matches format, auth token present.
      */
     private fun validateAuthorization(intent: Intent?): Boolean {
         if (intent == null) return false
         if (intent.action != ACTION_START_SCAN && intent.action != ACTION_STOP_SCAN) return false
 
-        // STOP_SCAN doesn't require auth (it's a cancellation)
+        // STOP_SCAN doesn't require full auth (it's a cancellation)
         if (intent.action == ACTION_STOP_SCAN) return true
 
         val authId = intent.getStringExtra(EXTRA_AUTH_ID)
         val authToken = intent.getStringExtra(EXTRA_AUTH_TOKEN)
 
         if (authId.isNullOrBlank()) {
-            Timber.w( "Missing auth ID in scan intent")
+            Timber.w("Missing auth ID in scan intent")
             return false
         }
 
         if (!AUTH_ID_PATTERN.matches(authId)) {
-            Timber.w( "Invalid auth ID format in scan intent: ${authId.take(10)}***")
+            Timber.w("Invalid auth ID format in scan intent: ${authId.take(10)}***")
             return false
         }
 
         if (authToken.isNullOrBlank()) {
-            Timber.w( "Missing auth token in scan intent")
+            Timber.w("Missing auth token in scan intent")
             return false
         }
 
         return true
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onDestroy() {
-        Timber.d( "BluetoothScanService destroyed")
-        super.onDestroy()
-    }
-
-    private fun startForegroundNotification() {
-        val notification = Notification.Builder(this, CHANNEL_ID_SERVICE)
-            .setContentTitle("BTSec Scan Active")
-            .setContentText("Bluetooth security scanning in progress")
-            .setSmallIcon(android.R.drawable.ic_menu_search)
-            .setOngoing(true)
-            .build()
-
+    private fun startForegroundNotification(text: String) {
+        val notification = buildNotification(text)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
                 NOTIFICATION_ID_SCAN,
@@ -121,5 +189,24 @@ class BluetoothScanService : Service() {
         } else {
             startForeground(NOTIFICATION_ID_SCAN, notification)
         }
+    }
+
+    private fun updateNotification(text: String) {
+        try {
+            val notification = buildNotification(text)
+            val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+            manager.notify(NOTIFICATION_ID_SCAN, notification)
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to update scan notification")
+        }
+    }
+
+    private fun buildNotification(text: String): Notification {
+        return Notification.Builder(this, CHANNEL_ID_SERVICE)
+            .setContentTitle("BTSec Scan Active")
+            .setContentText(text)
+            .setSmallIcon(android.R.drawable.ic_menu_search)
+            .setOngoing(true)
+            .build()
     }
 }
