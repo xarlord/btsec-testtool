@@ -355,7 +355,7 @@
     <string name="settings_clear_auth">Clear Authorization</string>
     <string name="settings_clear_all">Clear All Data</string>
     <string name="settings_about_card">About</string>
-    <string name="settings_app_version">BTSec TestTool v1.2.1</string>
+    <string name="settings_app_version">BTSec TestTool v%1$s</string>
     <string name="settings_app_subtitle">Bluetooth Security Testing Tool</string>
     <string name="settings_warning_notice">⚠️ This tool is for AUTHORIZED security testing only.\nUnauthorized use is prohibited and may be illegal.</string>
 
@@ -375,4 +375,63 @@
 
     <!-- Demo Mode Banner -->
     <string name="demo_mode_banner">⚠️ DEMO MODE — Not for production use</string>
+
+    <!-- Content Descriptions (Issue #225 — localized) -->
+    <string name="cd_navigate_back">Navigate back</string>
+    <string name="cd_settings">Settings</string>
+    <string name="cd_authorization_status">Authorization status</string>
+    <string name="cd_start_key_extraction">Start key extraction</string>
+    <string name="cd_cancel_key_extraction">Cancel key extraction</string>
+    <string name="cd_step_completed">Step %1$s completed</string>
+    <string name="cd_step_in_progress">Step %1$s in progress</string>
+    <string name="cd_step_pending">Step %1$s pending</string>
+    <string name="cd_key_extracted">Key successfully extracted</string>
+    <string name="cd_key_extraction_failed">Key extraction failed</string>
+    <string name="cd_selected_device">Selected device</string>
+    <string name="cd_start_fuzzing">Start fuzzing</string>
+    <string name="cd_pause_fuzzing">Pause fuzzing</string>
+    <string name="cd_stop_fuzzing">Stop fuzzing</string>
+    <string name="cd_finding_severity">Finding severity: %1$s</string>
+    <string name="cd_start_vuln_scan">Start vulnerability scan</string>
+    <string name="cd_stop_vuln_scan">Stop vulnerability scan</string>
+    <string name="cd_verified_vulnerability">Verified vulnerability</string>
+    <string name="cd_verify_vulnerability">Verify vulnerability</string>
+    <string name="cd_bluetooth_status">Bluetooth status</string>
+    <string name="cd_permission_granted">Permission granted</string>
+    <string name="cd_permission_denied">Permission denied</string>
+    <string name="cd_save_settings">Save settings</string>
+    <string name="cd_demo_authorization">Demo authorization</string>
+    <string name="cd_sign_out">Sign out</string>
+    <string name="cd_clear_data">Clear data</string>
+    <string name="cd_generate_new_report">Generate new report</string>
+    <string name="cd_no_reports_available">No reports available</string>
+    <string name="cd_generate_first_report">Generate first report</string>
+    <string name="cd_archive_report">Archive report</string>
+    <string name="cd_delete_report">Delete report</string>
+    <string name="cd_total_reports">Total reports</string>
+    <string name="cd_draft_reports">Draft reports</string>
+    <string name="cd_final_reports">Final reports</string>
+
+    <!-- Fuzzer Screen (additional hardcoded strings from Issue #225) -->
+    <string name="fuzzer_target_device">Target: %1$s</string>
+    <string name="fuzzer_no_device_selected">No device selected — go to Scanner to select a device</string>
+    <string name="fuzzer_start_btn">Start</string>
+    <string name="fuzzer_pause_btn">Pause</string>
+    <string name="fuzzer_stop_btn">Stop</string>
+    <string name="fuzzer_progress_title">Progress</string>
+    <string name="fuzzer_sent_format">Sent: %1$d</string>
+    <string name="fuzzer_received_format">Received: %1$d</string>
+    <string name="fuzzer_errors_format">Errors: %1$d</string>
+    <string name="fuzzer_findings_count_format">Findings: %1$d</string>
+    <string name="fuzzer_pct_complete_format">%1$d%% complete</string>
+    <string name="fuzzer_no_findings_msg">No fuzzing findings. The target handled all packets without issues.</string>
+    <string name="fuzzer_findings_section">Findings</string>
+    <string name="fuzzer_stats_section">Statistics</string>
+
+    <!-- Reports Screen (additional hardcoded strings) -->
+    <string name="reports_report_card_title_default">Bluetooth Security Assessment</string>
+
+    <!-- VulnScanner labels (Issue #225) -->
+    <string name="vuln_verified">Verified</string>
+    <string name="vuln_verify">Verify</string>
 </resources>

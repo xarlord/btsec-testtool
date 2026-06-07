@@ -9,85 +9,107 @@
 package com.btsec.testtool.presentation.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.btsec.testtool.R
+
+// ── Security Tool Custom Palette (#137) ──
+
+// Primary: cyber-teal
+private val CyberTeal = Color(0xFF00BFA5)
+private val CyberTealDark = Color(0xFF00897B)
+private val CyberTealLight = Color(0xFF64FFDA)
+
+// Secondary: amber/orange for warnings
+private val Amber = Color(0xFFFFB300)
+private val AmberDark = Color(0xFFFF8F00)
+private val AmberLight = Color(0xFFFFE082)
+
+// Error: vulnerability red
+private val VulnRed = Color(0xFFEF5350)
+private val VulnRedDark = Color(0xFFC62828)
+private val VulnRedLight = Color(0xFFFFCDD2)
+
+// Backgrounds: deep navy/charcoal
+private val DeepNavy = Color(0xFF0D1B2A)
+private val NavySurface = Color(0xFF1B2838)
+private val NavySurfaceVariant = Color(0xFF243447)
+
+// Light theme backgrounds
+private val LightBg = Color(0xFFF5F7FA)
+private val LightSurface = Color(0xFFFFFFFF)
+private val LightSurfaceVariant = Color(0xFFE8ECF0)
 
 /**
- * BTSec Test Tool theme configuration.
- *
- * This theme provides a professional security-focused appearance
- * with color coding for vulnerability severities.
+ * Light color scheme with security-tool branding.
  */
 private val LightColors = lightColorScheme(
-    primary = Color(0xFF1B5E20),
+    primary = CyberTealDark,
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFF4C8C52),
-    onPrimaryContainer = Color(0xFF003907),
-    secondary = Color(0xFF0288D1),
+    primaryContainer = Color(0xFFB2DFDB),
+    onPrimaryContainer = Color(0xFF003B31),
+    secondary = AmberDark,
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFF4FC3F7),
-    onSecondaryContainer = Color(0xFF001F29),
+    secondaryContainer = Color(0xFFFFE082),
+    onSecondaryContainer = Color(0xFF3E2E00),
     tertiary = Color(0xFF3A6481),
     onTertiary = Color(0xFFFFFFFF),
     tertiaryContainer = Color(0xFFBCE6FF),
     onTertiaryContainer = Color(0xFF001F30),
-    error = Color(0xFFBA1A1A),
+    error = VulnRedDark,
     onError = Color(0xFFFFFFFF),
-    errorContainer = Color(0xFFFFDAD6),
+    errorContainer = VulnRedLight,
     onErrorContainer = Color(0xFF410002),
-    background = Color(0xFFFFFBFE),
-    onBackground = Color(0xFF1A1C1B),
-    surface = Color(0xFFFFFBFE),
-    onSurface = Color(0xFF1A1C1B),
-    surfaceVariant = Color(0xFFDFE4DF),
-    onSurfaceVariant = Color(0xFF424940),
+    background = LightBg,
+    onBackground = Color(0xFF1A1C1E),
+    surface = LightSurface,
+    onSurface = Color(0xFF1A1C1E),
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = Color(0xFF41484D),
     outline = Color(0xFF727972),
-    inverseOnSurface = Color(0xFFEFF1EE),
+    inverseOnSurface = Color(0xFFF1F0F4),
     inverseSurface = Color(0xFF2E3130),
-    inversePrimary = Color(0xFF4C8C52),
+    inversePrimary = CyberTealLight,
 )
 
+/**
+ * Dark color scheme with security-tool branding — deep navy background,
+ * cyber-teal primary, amber secondary, vulnerability red for errors.
+ */
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFF4C8C52),
-    onPrimary = Color(0xFF003907),
-    primaryContainer = Color(0xFF006D1F),
-    onPrimaryContainer = Color(0xFF6FE86E),
-    secondary = Color(0xFF4FC3F7),
-    onSecondary = Color(0xFF001F29),
-    secondaryContainer = Color(0xFF004A58),
-    onSecondaryContainer = Color(0xFF86E6FF),
+    primary = CyberTeal,
+    onPrimary = Color(0xFF003B31),
+    primaryContainer = Color(0xFF00897B),
+    onPrimaryContainer = CyberTealLight,
+    secondary = Amber,
+    onSecondary = Color(0xFF3E2E00),
+    secondaryContainer = AmberDark,
+    onSecondaryContainer = AmberLight,
     tertiary = Color(0xFFBCE6FF),
     onTertiary = Color(0xFF001F30),
     tertiaryContainer = Color(0xFF004C6D),
     onTertiaryContainer = Color(0xFFC6E8FF),
-    error = Color(0xFFFFB4AB),
+    error = VulnRed,
     onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
-    background = Color(0xFF1A1C1B),
-    onBackground = Color(0xFFE2E2E6),
-    surface = Color(0xFF1A1C1B),
-    onSurface = Color(0xFFE2E2E6),
-    surfaceVariant = Color(0xFF2E3130),
-    onSurfaceVariant = Color(0xFFC4C7C5),
+    errorContainer = VulnRedDark,
+    onErrorContainer = VulnRedLight,
+    background = DeepNavy,
+    onBackground = Color(0xFFE2E6EA),
+    surface = NavySurface,
+    onSurface = Color(0xFFE2E6EA),
+    surfaceVariant = NavySurfaceVariant,
+    onSurfaceVariant = Color(0xFFC4C8CC),
     outline = Color(0xFF8D918F),
-    inverseOnSurface = Color(0xFF1A1C1B),
-    inverseSurface = Color(0xFFE2E2E6),
-    inversePrimary = Color(0xFF4C8C52),
+    inverseOnSurface = DeepNavy,
+    inverseSurface = Color(0xFFE2E6EA),
+    inversePrimary = CyberTealDark,
 )
 
 // Custom colors for vulnerability severities
@@ -100,21 +122,18 @@ val InfoColor = Color(0xFF1976D2)
 /**
  * Main theme for BTSec Test Tool.
  *
- * Uses Material 3 design with dynamic colors on supported devices.
+ * Uses the custom security-tool palette for consistent branding
+ * across all devices. Dynamic colors are disabled (#176) to
+ * preserve the professional security appearance.
  */
 @Composable
 fun BTSecTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColors
-        else -> LightColors
-    }
+    // #176: Always use custom security palette — dynamic colors disabled
+    // to maintain consistent branding for a security tool.
+    val colorScheme = if (darkTheme) DarkColors else LightColors
 
     val view = LocalView.current
     if (!view.isInEditMode) {

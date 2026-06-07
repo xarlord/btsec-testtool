@@ -8,7 +8,20 @@
  */
 package com.btsec.testtool.presentation.feature.dashboard
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Security
@@ -22,6 +35,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -36,12 +50,28 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
+ * Responsive breakpoint thresholds (dp).
+ */
+private const val COMPACT_MAX_WIDTH = 599
+private const val MEDIUM_MAX_WIDTH = 839
+
+/**
+ * Screen size classification for responsive layouts.
+ */
+private enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
+
+/**
  * Dashboard Screen - Main hub for the application.
  *
  * This screen displays:
  * - Current authorization status
  * - Quick access to all features
  * - Navigation to feature screens
+ *
+ * Responsive layout (#136):
+ * - Compact (phone portrait): Single column layout
+ * - Medium (phone landscape/small tablet): Two-column feature grid
+ * - Expanded (tablet): Three-column feature grid, side-by-side panels
  */
 @Composable
 fun DashboardScreen(
@@ -54,6 +84,14 @@ fun DashboardScreen(
     onNavigateToSettings: () -> Unit = {},
     onBack: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp
+    val windowSize = when {
+        screenWidthDp < COMPACT_MAX_WIDTH -> WindowSizeClass.COMPACT
+        screenWidthDp < MEDIUM_MAX_WIDTH -> WindowSizeClass.MEDIUM
+        else -> WindowSizeClass.EXPANDED
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -62,7 +100,7 @@ fun DashboardScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = stringResource(R.string.cd_navigate_back)
                         )
                     }
                 },
@@ -70,22 +108,35 @@ fun DashboardScreen(
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            contentDescription = stringResource(R.string.cd_settings)
                         )
                     }
                 }
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            AuthorizationInfoCard(authId = authId)
-            FeatureGrid(
+        when (windowSize) {
+            WindowSizeClass.COMPACT -> CompactLayout(
+                padding = padding,
+                authId = authId,
+                onNavigateToScanner = onNavigateToScanner,
+                onNavigateToFuzzer = onNavigateToFuzzer,
+                onNavigateToKeys = onNavigateToKeys,
+                onNavigateToVulns = onNavigateToVulns,
+                onNavigateToReports = onNavigateToReports
+            )
+            WindowSizeClass.MEDIUM -> MediumLayout(
+                padding = padding,
+                authId = authId,
+                onNavigateToScanner = onNavigateToScanner,
+                onNavigateToFuzzer = onNavigateToFuzzer,
+                onNavigateToKeys = onNavigateToKeys,
+                onNavigateToVulns = onNavigateToVulns,
+                onNavigateToReports = onNavigateToReports
+            )
+            WindowSizeClass.EXPANDED -> ExpandedLayout(
+                padding = padding,
+                authId = authId,
                 onNavigateToScanner = onNavigateToScanner,
                 onNavigateToFuzzer = onNavigateToFuzzer,
                 onNavigateToKeys = onNavigateToKeys,
@@ -95,6 +146,304 @@ fun DashboardScreen(
         }
     }
 }
+
+// ════════════════════════════════════════════════════════
+// Compact: phone portrait — single column
+// ════════════════════════════════════════════════════════
+
+@Composable
+private fun CompactLayout(
+    padding: PaddingValues,
+    authId: String,
+    onNavigateToScanner: () -> Unit,
+    onNavigateToFuzzer: () -> Unit,
+    onNavigateToKeys: () -> Unit,
+    onNavigateToVulns: () -> Unit,
+    onNavigateToReports: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        AuthorizationInfoCard(authId = authId)
+        FeatureGridCompact(
+            onNavigateToScanner = onNavigateToScanner,
+            onNavigateToFuzzer = onNavigateToFuzzer,
+            onNavigateToKeys = onNavigateToKeys,
+            onNavigateToVulns = onNavigateToVulns,
+            onNavigateToReports = onNavigateToReports
+        )
+    }
+}
+
+@Composable
+private fun FeatureGridCompact(
+    onNavigateToScanner: () -> Unit,
+    onNavigateToFuzzer: () -> Unit,
+    onNavigateToKeys: () -> Unit,
+    onNavigateToVulns: () -> Unit,
+    onNavigateToReports: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.dashboard_features),
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            FeatureCard(
+                icon = Icons.Filled.Scanner,
+                title = stringResource(R.string.nav_scanner),
+                description = stringResource(R.string.dashboard_scan_desc),
+                onClick = onNavigateToScanner,
+                modifier = Modifier.weight(1f)
+            )
+            FeatureCard(
+                icon = Icons.Filled.BugReport,
+                title = stringResource(R.string.nav_vulns),
+                description = stringResource(R.string.dashboard_vulns_desc),
+                onClick = onNavigateToVulns,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            FeatureCard(
+                icon = Icons.Filled.Science,
+                title = stringResource(R.string.nav_fuzzer),
+                description = stringResource(R.string.dashboard_fuzz_desc),
+                onClick = onNavigateToFuzzer,
+                modifier = Modifier.weight(1f)
+            )
+            FeatureCard(
+                icon = Icons.Filled.Key,
+                title = stringResource(R.string.nav_keys),
+                description = stringResource(R.string.dashboard_keys_desc),
+                onClick = onNavigateToKeys,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        FeatureCard(
+            icon = Icons.Filled.Assessment,
+            title = stringResource(R.string.nav_reports),
+            description = stringResource(R.string.dashboard_reports_desc),
+            onClick = onNavigateToReports,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+// ════════════════════════════════════════════════════════
+// Medium: phone landscape / small tablet — two columns
+// ════════════════════════════════════════════════════════
+
+@Composable
+private fun MediumLayout(
+    padding: PaddingValues,
+    authId: String,
+    onNavigateToScanner: () -> Unit,
+    onNavigateToFuzzer: () -> Unit,
+    onNavigateToKeys: () -> Unit,
+    onNavigateToVulns: () -> Unit,
+    onNavigateToReports: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        AuthorizationInfoCard(authId = authId)
+        FeatureGridTwoColumns(
+            onNavigateToScanner = onNavigateToScanner,
+            onNavigateToFuzzer = onNavigateToFuzzer,
+            onNavigateToKeys = onNavigateToKeys,
+            onNavigateToVulns = onNavigateToVulns,
+            onNavigateToReports = onNavigateToReports
+        )
+    }
+}
+
+@Composable
+private fun FeatureGridTwoColumns(
+    onNavigateToScanner: () -> Unit,
+    onNavigateToFuzzer: () -> Unit,
+    onNavigateToKeys: () -> Unit,
+    onNavigateToVulns: () -> Unit,
+    onNavigateToReports: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.dashboard_features),
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            FeatureCard(
+                icon = Icons.Filled.Scanner,
+                title = stringResource(R.string.nav_scanner),
+                description = stringResource(R.string.dashboard_scan_desc),
+                onClick = onNavigateToScanner,
+                modifier = Modifier.weight(1f)
+            )
+            FeatureCard(
+                icon = Icons.Filled.BugReport,
+                title = stringResource(R.string.nav_vulns),
+                description = stringResource(R.string.dashboard_vulns_desc),
+                onClick = onNavigateToVulns,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            FeatureCard(
+                icon = Icons.Filled.Science,
+                title = stringResource(R.string.nav_fuzzer),
+                description = stringResource(R.string.dashboard_fuzz_desc),
+                onClick = onNavigateToFuzzer,
+                modifier = Modifier.weight(1f)
+            )
+            FeatureCard(
+                icon = Icons.Filled.Key,
+                title = stringResource(R.string.nav_keys),
+                description = stringResource(R.string.dashboard_keys_desc),
+                onClick = onNavigateToKeys,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        FeatureCard(
+            icon = Icons.Filled.Assessment,
+            title = stringResource(R.string.nav_reports),
+            description = stringResource(R.string.dashboard_reports_desc),
+            onClick = onNavigateToReports,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+// ════════════════════════════════════════════════════════
+// Expanded: tablet — three+ columns, side-by-side panels
+// ════════════════════════════════════════════════════════
+
+@Composable
+private fun ExpandedLayout(
+    padding: PaddingValues,
+    authId: String,
+    onNavigateToScanner: () -> Unit,
+    onNavigateToFuzzer: () -> Unit,
+    onNavigateToKeys: () -> Unit,
+    onNavigateToVulns: () -> Unit,
+    onNavigateToReports: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(32.dp),
+        horizontalArrangement = Arrangement.spacedBy(32.dp)
+    ) {
+        // Left panel: Authorization info
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AuthorizationInfoCard(authId = authId)
+        }
+
+        // Right panel: Feature grid with 3-column layout
+        Column(
+            modifier = Modifier
+                .weight(2.5f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.dashboard_features),
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                FeatureCard(
+                    icon = Icons.Filled.Scanner,
+                    title = stringResource(R.string.nav_scanner),
+                    description = stringResource(R.string.dashboard_scan_desc),
+                    onClick = onNavigateToScanner,
+                    modifier = Modifier.weight(1f)
+                )
+                FeatureCard(
+                    icon = Icons.Filled.BugReport,
+                    title = stringResource(R.string.nav_vulns),
+                    description = stringResource(R.string.dashboard_vulns_desc),
+                    onClick = onNavigateToVulns,
+                    modifier = Modifier.weight(1f)
+                )
+                FeatureCard(
+                    icon = Icons.Filled.Science,
+                    title = stringResource(R.string.nav_fuzzer),
+                    description = stringResource(R.string.dashboard_fuzz_desc),
+                    onClick = onNavigateToFuzzer,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                FeatureCard(
+                    icon = Icons.Filled.Key,
+                    title = stringResource(R.string.nav_keys),
+                    description = stringResource(R.string.dashboard_keys_desc),
+                    onClick = onNavigateToKeys,
+                    modifier = Modifier.weight(1f)
+                )
+                FeatureCard(
+                    icon = Icons.Filled.Assessment,
+                    title = stringResource(R.string.nav_reports),
+                    description = stringResource(R.string.dashboard_reports_desc),
+                    onClick = onNavigateToReports,
+                    modifier = Modifier.weight(1f)
+                )
+                // Spacer to balance the 2-item row with the 3-item row above
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════
+// Shared components
+// ════════════════════════════════════════════════════════
 
 @Composable
 private fun AuthorizationInfoCard(authId: String) {
@@ -110,90 +459,23 @@ private fun AuthorizationInfoCard(authId: String) {
         ) {
             Icon(
                 imageVector = Icons.Default.Security,
-                contentDescription = "Authorization status",
+                contentDescription = stringResource(R.string.cd_authorization_status),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = "Authorized",
+                    text = stringResource(R.string.dashboard_authorized),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = "Authorization ID: $authId",
+                    text = stringResource(R.string.dashboard_auth_id_label, authId),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun FeatureGrid(
-    onNavigateToScanner: () -> Unit,
-    onNavigateToFuzzer: () -> Unit,
-    onNavigateToKeys: () -> Unit,
-    onNavigateToVulns: () -> Unit,
-    onNavigateToReports: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = "Features",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            FeatureCard(
-                icon = Icons.Filled.Scanner,
-                title = stringResource(R.string.nav_scanner),
-                description = "Scan for Bluetooth devices",
-                onClick = onNavigateToScanner,
-                modifier = Modifier.weight(1f)
-            )
-            FeatureCard(
-                icon = Icons.Filled.BugReport,
-                title = stringResource(R.string.nav_vulns),
-                description = "Scan for vulnerabilities",
-                onClick = onNavigateToVulns,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            FeatureCard(
-                icon = Icons.Filled.Science,
-                title = stringResource(R.string.nav_fuzzer),
-                description = "Fuzz Bluetooth protocols",
-                onClick = onNavigateToFuzzer,
-                modifier = Modifier.weight(1f)
-            )
-            FeatureCard(
-                icon = Icons.Filled.Key,
-                title = stringResource(R.string.nav_keys),
-                description = "Extract Bluetooth keys",
-                onClick = onNavigateToKeys,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        FeatureCard(
-            icon = Icons.Filled.Assessment,
-            title = stringResource(R.string.nav_reports),
-            description = "View and generate reports",
-            onClick = onNavigateToReports,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 
@@ -230,6 +512,10 @@ private fun FeatureCard(
         }
     }
 }
+
+// ════════════════════════════════════════════════════════
+// ViewModel
+// ════════════════════════════════════════════════════════
 
 /**
  * ViewModel for the Dashboard screen.
@@ -279,3 +565,5 @@ data class DashboardUiState(
     val isValid: Boolean = false,
     val details: com.btsec.testtool.domain.usecase.AuthorizationDetails? = null
 )
+
+

@@ -134,7 +134,7 @@ private fun VulnScannerContent(
                                 onClick = onStartScan,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
+                                Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.cd_start_vuln_scan))
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(R.string.vuln_scan_all))
                             }
@@ -144,7 +144,7 @@ private fun VulnScannerContent(
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                             ) {
-                                Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
+                                Icon(Icons.Default.Stop, contentDescription = stringResource(R.string.cd_stop_vuln_scan))
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(R.string.scanner_stop))
                             }
@@ -264,14 +264,14 @@ private fun VulnScannerContent(
                             if (vuln.verified) {
                                 AssistChip(
                                     onClick = {},
-                                    label = { Text("Verified") },
-                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = "Verified vulnerability", modifier = Modifier.size(16.dp)) }
+                                    label = { Text(stringResource(R.string.vuln_verified)) },
+                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = stringResource(R.string.cd_verified_vulnerability), modifier = Modifier.size(16.dp)) }
                                 )
                             }
                             AssistChip(
                                 onClick = { onVerify(vuln.id) },
-                                label = { Text("Verify") },
-                                leadingIcon = { Icon(Icons.Default.FactCheck, contentDescription = "Verify vulnerability", modifier = Modifier.size(16.dp)) }
+                                label = { Text(stringResource(R.string.vuln_verify)) },
+                                leadingIcon = { Icon(Icons.Default.FactCheck, contentDescription = stringResource(R.string.cd_verify_vulnerability), modifier = Modifier.size(16.dp)) }
                             )
                         }
                     }

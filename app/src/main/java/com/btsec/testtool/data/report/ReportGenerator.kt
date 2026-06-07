@@ -35,9 +35,37 @@ class ReportGenerator @Inject constructor() {
         keyExtractionResults: List<KeyExtractionResult>
     ): SecurityReport {
         val now = Instant.now()
+        val findings = buildFindings(vulnerabilityResults, targetDevices)
+        val recommendations = buildRecommendations(vulnerabilityResults, targetDevices)
+        val executiveSummary = buildExecutiveSummary(
+            now, targetDevices, vulnerabilityResults, fuzzingResults, keyExtractionResults
+        )
+        val appendix = buildAppendix(vulnerabilityResults)
+        val vulnerabilities = mapDetectedVulnerabilities(vulnerabilityResults, targetDevices, now)
 
-        // Build findings — group by category+severity
-        val findings = vulnerabilityResults
+        return SecurityReport(
+            id = "rpt-${System.currentTimeMillis()}",
+            authId = authId,
+            title = "BTSec Assessment - ${targetDevices.firstOrNull()?.name ?: "Unknown"}",
+            generatedAt = now,
+            testPeriod = ReportPeriod(now.minus(1, ChronoUnit.HOURS), now),
+            targetDevices = targetDevices,
+            vulnerabilities = vulnerabilities,
+            fuzzingResults = fuzzingResults,
+            keyExtractionResults = keyExtractionResults,
+            executiveSummary = executiveSummary.trim(),
+            findings = findings,
+            recommendations = recommendations,
+            appendix = appendix,
+            status = ReportStatus.FINAL
+        )
+    }
+
+    private fun buildFindings(
+        vulnerabilityResults: List<VulnerabilityTestResult>,
+        targetDevices: List<BluetoothDevice>
+    ): List<ReportFinding> {
+        return vulnerabilityResults
             .groupBy { Pair(mapCategory(it.vulnerability.category), it.vulnerability.severity) }
             .map { (catSev, results) ->
                 ReportFinding(
@@ -48,9 +76,13 @@ class ReportGenerator @Inject constructor() {
                     affectedDevices = targetDevices.map { it.address }
                 )
             }
+    }
 
-        // Build recommendations from detected vulnerabilities
-        val recommendations = vulnerabilityResults
+    private fun buildRecommendations(
+        vulnerabilityResults: List<VulnerabilityTestResult>,
+        targetDevices: List<BluetoothDevice>
+    ): List<Recommendation> {
+        return vulnerabilityResults
             .filter { it.detected }
             .sortedByDescending { it.vulnerability.cvssScore }
             .map { result ->
@@ -64,8 +96,15 @@ class ReportGenerator @Inject constructor() {
                 )
             }
             .distinctBy { it.title }
+    }
 
-        // Build executive summary
+    private fun buildExecutiveSummary(
+        now: Instant,
+        targetDevices: List<BluetoothDevice>,
+        vulnerabilityResults: List<VulnerabilityTestResult>,
+        fuzzingResults: List<FuzzResult>,
+        keyExtractionResults: List<KeyExtractionResult>
+    ): String = buildString {
         val detectedCount = vulnerabilityResults.count { it.detected }
         val totalScanned = vulnerabilityResults.size
         val criticalCount = vulnerabilityResults.count {
@@ -75,26 +114,25 @@ class ReportGenerator @Inject constructor() {
             it.detected && it.vulnerability.severity == VulnerabilitySeverity.HIGH
         }
 
-        val executiveSummary = buildString {
-            appendLine("Bluetooth Security Assessment Report")
-            appendLine("Generated: $now")
-            appendLine("Target devices: ${targetDevices.size}")
-            appendLine("Vulnerabilities scanned: $totalScanned")
-            appendLine("Vulnerabilities detected: $detectedCount")
-            if (criticalCount > 0) appendLine("⚠️ Critical: $criticalCount")
-            if (highCount > 0) appendLine("🔴 High: $highCount")
-            appendLine()
-            appendLine("Fuzzing sessions: ${fuzzingResults.size}")
-            appendLine("Key extraction attempts: ${keyExtractionResults.size}")
-            if (detectedCount == 0) {
-                appendLine("No critical vulnerabilities detected. Continue monitoring.")
-            } else {
-                appendLine("IMMEDIATE ACTION REQUIRED: $detectedCount vulnerabilities need remediation.")
-            }
+        appendLine("Bluetooth Security Assessment Report")
+        appendLine("Generated: $now")
+        appendLine("Target devices: ${targetDevices.size}")
+        appendLine("Vulnerabilities scanned: $totalScanned")
+        appendLine("Vulnerabilities detected: $detectedCount")
+        if (criticalCount > 0) appendLine("⚠️ Critical: $criticalCount")
+        if (highCount > 0) appendLine("🔴 High: $highCount")
+        appendLine()
+        appendLine("Fuzzing sessions: ${fuzzingResults.size}")
+        appendLine("Key extraction attempts: ${keyExtractionResults.size}")
+        if (detectedCount == 0) {
+            appendLine("No critical vulnerabilities detected. Continue monitoring.")
+        } else {
+            appendLine("IMMEDIATE ACTION REQUIRED: $detectedCount vulnerabilities need remediation.")
         }
+    }
 
-        // Build appendix
-        val appendix = ReportAppendix(
+    private fun buildAppendix(vulnerabilityResults: List<VulnerabilityTestResult>): ReportAppendix {
+        return ReportAppendix(
             toolsUsed = listOf("BTSec TestTool v1.2.1", "BLE Fuzzing Engine", "Vulnerability Scanner"),
             testMethodology = "Automated scanning using CVE-specific test vectors, BLE packet fuzzing, and key extraction analysis.",
             limitations = listOf(
@@ -112,57 +150,31 @@ class ReportGenerator @Inject constructor() {
             ),
             references = vulnerabilityResults.flatMap { it.vulnerability.references }.distinct()
         )
+    }
 
-        // Map detected vulnerabilities to domain Vulnerability objects
-        val vulnerabilities = vulnerabilityResults.filter { it.detected }.map { result ->
+    private fun mapDetectedVulnerabilities(
+        vulnerabilityResults: List<VulnerabilityTestResult>,
+        targetDevices: List<BluetoothDevice>,
+        now: Instant
+    ): List<Vulnerability> {
+        val fallbackDevice = BluetoothDevice(
+            address = "00:00:00:00:00:00", name = "Unknown",
+            type = BluetoothType.UNKNOWN, deviceClass = null, bondState = BondState.NONE,
+            rssi = null, txPower = null, firstSeen = now, lastSeen = now
+        )
+        return vulnerabilityResults.filter { it.detected }.map { result ->
             val def = result.vulnerability
             Vulnerability(
-                id = "vuln-${def.cveId}",
-                cveId = def.cveId,
-                name = def.name,
-                description = def.description,
-                severity = def.severity,
+                id = "vuln-${def.cveId}", cveId = def.cveId, name = def.name,
+                description = def.description, severity = def.severity,
                 cvssScore = def.cvssScore,
-                affectedDevice = targetDevices.firstOrNull() ?: BluetoothDevice(
-                    address = "00:00:00:00:00:00",
-                    name = "Unknown",
-                    type = BluetoothType.UNKNOWN,
-                    deviceClass = null,
-                    bondState = BondState.NONE,
-                    rssi = null,
-                    txPower = null,
-                    firstSeen = now,
-                    lastSeen = now
-                ),
-                discoveredAt = now,
-                category = def.category,
+                affectedDevice = targetDevices.firstOrNull() ?: fallbackDevice,
+                discoveredAt = now, category = def.category,
                 affectedBluetoothVersions = def.affectedVersions.split(","),
-                references = def.references,
-                mitigation = def.mitigation,
-                verified = false,
-                notes = "Detected via automated scan. Confidence: ${result.confidence}"
+                references = def.references, mitigation = def.mitigation,
+                verified = false, notes = "Detected via automated scan. Confidence: ${result.confidence}"
             )
         }
-
-        return SecurityReport(
-            id = "rpt-${System.currentTimeMillis()}",
-            authId = authId,
-            title = "BTSec Assessment - ${targetDevices.firstOrNull()?.name ?: "Unknown"}",
-            generatedAt = now,
-            testPeriod = ReportPeriod(
-                start = now.minus(1, ChronoUnit.HOURS),
-                end = now
-            ),
-            targetDevices = targetDevices,
-            vulnerabilities = vulnerabilities,
-            fuzzingResults = fuzzingResults,
-            keyExtractionResults = keyExtractionResults,
-            executiveSummary = executiveSummary.trim(),
-            findings = findings,
-            recommendations = recommendations,
-            appendix = appendix,
-            status = ReportStatus.FINAL
-        )
     }
 
     /**

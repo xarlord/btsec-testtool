@@ -18,10 +18,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.btsec.testtool.R
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.*
 import com.btsec.testtool.domain.usecase.KeyExtractionStartResult
@@ -45,10 +47,10 @@ fun KeyExtractionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Key Extraction") },
+                title = { Text(stringResource(R.string.keys_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_navigate_back))
                     }
                 }
             )
@@ -108,7 +110,7 @@ private fun KeyExtractionContent(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Key Extraction Configuration", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.keys_config_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(12.dp))
 
                     // Key Type Selector
@@ -118,7 +120,7 @@ private fun KeyExtractionContent(
                             value = uiState.selectedKeyType.name,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Key Type") },
+                            label = { Text(stringResource(R.string.keys_type_label)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = keyTypeExpanded) },
                             modifier = Modifier.fillMaxWidth().menuAnchor()
                         )
@@ -141,7 +143,7 @@ private fun KeyExtractionContent(
                             value = uiState.selectedMethod.name.replace("_", " "),
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Extraction Method") },
+                            label = { Text(stringResource(R.string.keys_method_label)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
                             modifier = Modifier.fillMaxWidth().menuAnchor()
                         )
@@ -167,9 +169,9 @@ private fun KeyExtractionContent(
                                 onClick = onStart,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.VpnKey, contentDescription = "Start key extraction")
+                                Icon(Icons.Default.VpnKey, contentDescription = stringResource(R.string.cd_start_key_extraction))
                                 Spacer(Modifier.width(4.dp))
-                                Text("Extract Key")
+                                Text(stringResource(R.string.keys_extract_btn))
                             }
                         } else {
                             OutlinedButton(
@@ -177,9 +179,9 @@ private fun KeyExtractionContent(
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                             ) {
-                                Icon(Icons.Default.Cancel, contentDescription = "Cancel key extraction")
+                                Icon(Icons.Default.Cancel, contentDescription = stringResource(R.string.cd_cancel_key_extraction))
                                 Spacer(Modifier.width(4.dp))
-                                Text("Cancel")
+                                Text(stringResource(R.string.cancel))
                             }
                         }
                     }
@@ -192,7 +194,7 @@ private fun KeyExtractionContent(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Extraction Progress", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.keys_progress_title), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
 
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -210,9 +212,9 @@ private fun KeyExtractionContent(
                                         else -> Icons.Default.RadioButtonUnchecked
                                     },
                                     contentDescription = when {
-                                        isDone -> "Step ${step.name} completed"
-                                        isActive -> "Step ${step.name} in progress"
-                                        else -> "Step ${step.name} pending"
+                                        isDone -> stringResource(R.string.cd_step_completed, step.name)
+                                        isActive -> stringResource(R.string.cd_step_in_progress, step.name)
+                                        else -> stringResource(R.string.cd_step_pending, step.name)
                                     },
                                     tint = when {
                                         isDone -> Color(0xFF4CAF50)
@@ -237,25 +239,25 @@ private fun KeyExtractionContent(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Encryption Analysis", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.keys_encryption_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
 
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Encryption:")
-                        Text(if (uiState.encryptionAnalysis?.encryptionEnabled == true) "Enabled" else "Disabled")
+                        Text(stringResource(R.string.keys_encryption))
+                        Text(if (uiState.encryptionAnalysis?.encryptionEnabled == true) stringResource(R.string.keys_enabled) else stringResource(R.string.keys_disabled))
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Key Size:")
-                        Text("${uiState.encryptionAnalysis?.encryptionKeySize ?: 128} bits")
+                        Text(stringResource(R.string.keys_key_size))
+                        Text(stringResource(R.string.keys_key_size_value, uiState.encryptionAnalysis?.encryptionKeySize ?: 128))
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Secure Connections:")
-                        Text(if (uiState.encryptionAnalysis?.supportsSecureConnections == true) "Yes" else "No")
+                        Text(stringResource(R.string.keys_secure_connections))
+                        Text(if (uiState.encryptionAnalysis?.supportsSecureConnections == true) stringResource(R.string.keys_yes) else stringResource(R.string.keys_no_label))
                     }
 
                     if (uiState.encryptionAnalysis?.pairingMethod != null) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Pairing Method:")
+                            Text(stringResource(R.string.keys_pairing_method))
                             Text(uiState.encryptionAnalysis!!.pairingMethod!!.name.replace("_", " "))
                         }
                     }
@@ -267,12 +269,12 @@ private fun KeyExtractionContent(
         if (uiState.results.isEmpty() && uiState.extractionStatus == ExtractionStatus.COMPLETED) {
             item {
                 EmptyView(
-                    message = "No keys were extracted. Try a different extraction method or key type.",
+                    message = stringResource(R.string.keys_no_keys_found),
                     icon = Icons.Default.VpnKey
                 )
             }
         } else if (uiState.results.isNotEmpty()) {
-            item { Text("Extraction Results", style = MaterialTheme.typography.titleMedium) }
+            item { Text(stringResource(R.string.keys_results_title), style = MaterialTheme.typography.titleMedium) }
             items(uiState.results) { result ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Row(
@@ -281,18 +283,18 @@ private fun KeyExtractionContent(
                     ) {
                         Icon(
                             if (result.extracted) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                            contentDescription = if (result.extracted) "Key successfully extracted" else "Key extraction failed",
+                            contentDescription = if (result.extracted) stringResource(R.string.cd_key_extracted) else stringResource(R.string.cd_key_extraction_failed),
                             tint = if (result.extracted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline
                         )
                         Spacer(Modifier.width(12.dp))
                         Column {
                             Text(result.keyType.name, style = MaterialTheme.typography.titleSmall)
                             Text(
-                                "Method: ${result.method.name.replace("_", " ")}",
+                                stringResource(R.string.keys_method_label_value, result.method.name.replace("_", " ")),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "Confidence: ${result.confidence.name}",
+                                stringResource(R.string.keys_confidence_label, result.confidence.name),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             if (result.notes != null) {

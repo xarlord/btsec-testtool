@@ -44,16 +44,15 @@ class BluetoothScanService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!validateAuthorization(intent)) {
-            Timber.w( "Unauthorized intent received — stopping service. " +
-                "Intent action: ${intent?.action}, extras: ${intent?.extras?.keySet()}")
+            Timber.w("Unauthorized intent received — stopping service. " +
+                "Intent action: ${intent?.action}")
             stopSelf()
             return START_NOT_STICKY
         }
 
         when (intent?.action) {
             ACTION_START_SCAN -> {
-                val authId = intent.getStringExtra(EXTRA_AUTH_ID) ?: ""
-                Timber.i( "Starting authorized BLE scan with auth: ${authId.take(10)}***")
+                Timber.i("Starting authorized BLE scan with auth: ***REDACTED***")
                 // Scan logic handled by BluetoothRepository via ViewModel
             }
             ACTION_STOP_SCAN -> {
@@ -80,17 +79,17 @@ class BluetoothScanService : Service() {
         val authToken = intent.getStringExtra(EXTRA_AUTH_TOKEN)
 
         if (authId.isNullOrBlank()) {
-            Timber.w( "Missing auth ID in scan intent")
+            Timber.w("Missing auth ID in scan intent")
             return false
         }
 
         if (!AUTH_ID_PATTERN.matches(authId)) {
-            Timber.w( "Invalid auth ID format in scan intent: ${authId.take(10)}***")
+            Timber.d("Invalid auth ID format in scan intent: length=${authId.length}")
             return false
         }
 
         if (authToken.isNullOrBlank()) {
-            Timber.w( "Missing auth token in scan intent")
+            Timber.w("Missing auth token in scan intent")
             return false
         }
 
@@ -106,8 +105,8 @@ class BluetoothScanService : Service() {
 
     private fun startForegroundNotification() {
         val notification = Notification.Builder(this, CHANNEL_ID_SERVICE)
-            .setContentTitle("BTSec Scan Active")
-            .setContentText("Bluetooth security scanning in progress")
+            .setContentTitle(getString(com.btsec.testtool.R.string.scanner_scanning_bt))
+            .setContentText(getString(com.btsec.testtool.R.string.scanner_scanning))
             .setSmallIcon(android.R.drawable.ic_menu_search)
             .setOngoing(true)
             .build()

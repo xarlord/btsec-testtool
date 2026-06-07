@@ -17,9 +17,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.btsec.testtool.R
 import com.btsec.testtool.data.authorization.AuthorizationBackend
 import com.btsec.testtool.service.BluetoothState
 import com.btsec.testtool.service.BluetoothStateManager
@@ -39,10 +41,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_navigate_back))
                     }
                 }
             )
@@ -59,7 +61,7 @@ fun SettingsScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Bluetooth Status", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.settings_bt_status), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -69,7 +71,7 @@ fun SettingsScreen(
                                     BluetoothState.OFF -> Icons.Default.BluetoothDisabled
                                     else -> Icons.Default.BluetoothSearching
                                 },
-                                contentDescription = "Bluetooth status",
+                                contentDescription = stringResource(R.string.cd_bluetooth_status),
                                 tint = when (uiState.btState) {
                                     BluetoothState.ON -> MaterialTheme.colorScheme.primary
                                     BluetoothState.OFF -> MaterialTheme.colorScheme.error
@@ -79,11 +81,11 @@ fun SettingsScreen(
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 when (uiState.btState) {
-                                    BluetoothState.ON -> "Bluetooth Enabled"
-                                    BluetoothState.OFF -> "Bluetooth Disabled"
-                                    BluetoothState.TURNING_ON -> "Turning On..."
-                                    BluetoothState.TURNING_OFF -> "Turning Off..."
-                                    BluetoothState.UNAVAILABLE -> "Bluetooth Unavailable"
+                                    BluetoothState.ON -> stringResource(R.string.settings_bt_enabled)
+                                    BluetoothState.OFF -> stringResource(R.string.settings_bt_disabled)
+                                    BluetoothState.TURNING_ON -> stringResource(R.string.settings_bt_turning_on)
+                                    BluetoothState.TURNING_OFF -> stringResource(R.string.settings_bt_turning_off)
+                                    BluetoothState.UNAVAILABLE -> stringResource(R.string.settings_bt_unavailable)
                                 }
                             )
                         }
@@ -91,7 +93,7 @@ fun SettingsScreen(
                         if (uiState.btState != BluetoothState.ON) {
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                "Bluetooth must be enabled for scanning and testing.",
+                                stringResource(R.string.settings_bt_required),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -104,14 +106,14 @@ fun SettingsScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Permissions", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.settings_permissions), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
 
                         val perms = listOf(
-                            "Bluetooth Scan" to uiState.hasBtScan,
-                            "Bluetooth Connect" to uiState.hasBtConnect,
-                            "Location Access" to uiState.hasLocation,
-                            "Notifications" to true // Assume granted for settings
+                            stringResource(R.string.settings_perm_bt_scan) to uiState.hasBtScan,
+                            stringResource(R.string.settings_perm_bt_connect) to uiState.hasBtConnect,
+                            stringResource(R.string.settings_perm_location) to uiState.hasLocation,
+                            stringResource(R.string.settings_perm_notifications) to true // Assume granted for settings
                         )
                         perms.forEach { (name, granted) ->
                             Row(
@@ -120,14 +122,14 @@ fun SettingsScreen(
                             ) {
                                 Icon(
                                     if (granted) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                                    contentDescription = if (granted) "Permission granted" else "Permission denied",
+                                    contentDescription = if (granted) stringResource(R.string.cd_permission_granted) else stringResource(R.string.cd_permission_denied),
                                     tint = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(name, modifier = Modifier.weight(1f))
                                 Text(
-                                    if (granted) "Granted" else "Denied",
+                                    if (granted) stringResource(R.string.settings_perm_granted) else stringResource(R.string.settings_perm_denied),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                                 )
@@ -137,7 +139,7 @@ fun SettingsScreen(
                         if (!uiState.allPermissionsGranted) {
                             Spacer(Modifier.height(8.dp))
                             OutlinedButton(onClick = { viewModel.requestPermissions() }) {
-                                Text("Request Permissions")
+                                Text(stringResource(R.string.settings_request_perms))
                             }
                         }
                     }
@@ -148,15 +150,15 @@ fun SettingsScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Authorization", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.settings_auth_card), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
 
                         var serverUrl by remember { mutableStateOf(uiState.serverUrl) }
                         OutlinedTextField(
                             value = serverUrl,
                             onValueChange = { serverUrl = it },
-                            label = { Text("Server URL") },
-                            placeholder = { Text("https://auth.btsec.example.com") },
+                            label = { Text(stringResource(R.string.settings_server_url)) },
+                            placeholder = { Text(stringResource(R.string.settings_server_url_placeholder)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
@@ -165,18 +167,18 @@ fun SettingsScreen(
                             onClick = { viewModel.updateServerUrl(serverUrl) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Save, contentDescription = "Save settings")
+                            Icon(Icons.Default.Save, contentDescription = stringResource(R.string.cd_save_settings))
                             Spacer(Modifier.width(4.dp))
-                            Text("Save Server URL")
+                            Text(stringResource(R.string.settings_save_server))
                         }
 
                         Spacer(Modifier.height(12.dp))
                         Divider()
                         Spacer(Modifier.height(12.dp))
 
-                        Text("Demo Mode", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.settings_demo_mode), style = MaterialTheme.typography.titleSmall)
                         Text(
-                            "Use BTSEC-DEMO-XXXXXXXX format for offline testing without server verification.",
+                            stringResource(R.string.settings_demo_desc),
                             style = MaterialTheme.typography.bodySmall
                         )
                         Spacer(Modifier.height(8.dp))
@@ -184,9 +186,9 @@ fun SettingsScreen(
                             onClick = { viewModel.generateDemoAuth() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.VpnKey, contentDescription = "Demo authorization")
+                            Icon(Icons.Default.VpnKey, contentDescription = stringResource(R.string.cd_demo_authorization))
                             Spacer(Modifier.width(4.dp))
-                            Text("Generate Demo Authorization ID")
+                            Text(stringResource(R.string.settings_generate_demo))
                         }
 
                         if (uiState.demoAuthId != null) {
@@ -207,16 +209,16 @@ fun SettingsScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Data Management", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.settings_data_management), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
 
                         OutlinedButton(
                             onClick = { viewModel.clearAuthorization() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Logout, contentDescription = "Sign out")
+                            Icon(Icons.Default.Logout, contentDescription = stringResource(R.string.cd_sign_out))
                             Spacer(Modifier.width(4.dp))
-                            Text("Clear Authorization")
+                            Text(stringResource(R.string.settings_clear_auth))
                         }
                         Spacer(Modifier.height(8.dp))
                         OutlinedButton(
@@ -224,9 +226,9 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                         ) {
-                            Icon(Icons.Default.DeleteForever, contentDescription = "Clear data")
+                            Icon(Icons.Default.DeleteForever, contentDescription = stringResource(R.string.cd_clear_data))
                             Spacer(Modifier.width(4.dp))
-                            Text("Clear All Data")
+                            Text(stringResource(R.string.settings_clear_all))
                         }
                     }
                 }
@@ -236,14 +238,13 @@ fun SettingsScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("About", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.settings_about_card), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
-                        Text("BTSec TestTool ${com.btsec.testtool.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
-                        Text("Bluetooth Security Testing Tool", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.settings_app_version, com.btsec.testtool.BuildConfig.VERSION_NAME), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.settings_app_subtitle), style = MaterialTheme.typography.bodySmall)
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "⚠️ This tool is for AUTHORIZED security testing only.\n" +
-                            "Unauthorized use is prohibited and may be illegal.",
+                            stringResource(R.string.settings_warning_notice),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error
                         )

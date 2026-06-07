@@ -128,7 +128,7 @@ private fun FuzzerContent(
                 ) {
                     Icon(
                         Icons.Default.Bluetooth,
-                        contentDescription = "Selected device",
+                        contentDescription = stringResource(R.string.cd_selected_device),
                         tint = if (uiState.selectedDeviceName != null)
                             MaterialTheme.colorScheme.onPrimaryContainer
                         else
@@ -137,9 +137,9 @@ private fun FuzzerContent(
                     Spacer(Modifier.width(12.dp))
                     Text(
                         text = if (uiState.selectedDeviceName != null)
-                            "Target: ${uiState.selectedDeviceName}"
+                            stringResource(R.string.fuzzer_target_device, uiState.selectedDeviceName)
                         else
-                            "No device selected — go to Scanner to select a device",
+                            stringResource(R.string.fuzzer_no_device_selected),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (uiState.selectedDeviceName != null)
                             MaterialTheme.colorScheme.onPrimaryContainer
@@ -214,9 +214,9 @@ private fun FuzzerContent(
                                     onClick = onStart,
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = "Start fuzzing")
+                                    Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.cd_start_fuzzing))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("Start")
+                                    Text(stringResource(R.string.fuzzer_start))
                                 }
                             }
                             FuzzStatus.RUNNING -> {
@@ -224,18 +224,18 @@ private fun FuzzerContent(
                                     onClick = onPause,
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Icon(Icons.Default.Pause, contentDescription = "Pause fuzzing")
+                                    Icon(Icons.Default.Pause, contentDescription = stringResource(R.string.cd_pause_fuzzing))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("Pause")
+                                    Text(stringResource(R.string.fuzzer_pause_btn))
                                 }
                                 OutlinedButton(
                                     onClick = onStop,
                                     modifier = Modifier.weight(1f),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                 ) {
-                                    Icon(Icons.Default.Stop, contentDescription = "Stop fuzzing")
+                                    Icon(Icons.Default.Stop, contentDescription = stringResource(R.string.cd_stop_fuzzing))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("Stop")
+                                    Text(stringResource(R.string.fuzzer_stop_btn))
                                 }
                             }
                         }
@@ -249,7 +249,7 @@ private fun FuzzerContent(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Progress", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.fuzzer_progress_title), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
 
                         val progressPct = uiState.progress?.getProgressPercentage()?.toFloat() ?: 0f
@@ -261,14 +261,14 @@ private fun FuzzerContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Sent: ${uiState.progress?.packetsSent ?: 0}", style = MaterialTheme.typography.bodySmall)
-                            Text("Received: ${uiState.progress?.packetsReceived ?: 0}", style = MaterialTheme.typography.bodySmall)
-                            Text("Errors: ${uiState.progress?.errors ?: 0}", style = MaterialTheme.typography.bodySmall)
-                            Text("Findings: ${uiState.progress?.findings ?: 0}", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.fuzzer_sent_format, uiState.progress?.packetsSent ?: 0), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.fuzzer_received_format, uiState.progress?.packetsReceived ?: 0), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.fuzzer_errors_format, uiState.progress?.errors ?: 0), style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.fuzzer_findings_count_format, uiState.progress?.findings ?: 0), style = MaterialTheme.typography.bodySmall)
                         }
 
                         Text(
-                            "${(progressPct).toInt()}% complete",
+                            stringResource(R.string.fuzzer_pct_complete_format, progressPct.toInt()),
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -281,13 +281,13 @@ private fun FuzzerContent(
         if (uiState.findings.isEmpty() && uiState.status == FuzzStatus.COMPLETED) {
             item {
                 EmptyView(
-                    message = "No fuzzing findings. The target handled all packets without issues.",
+                    message = stringResource(R.string.fuzzer_no_findings_msg),
                     icon = Icons.Default.CheckCircle
                 )
             }
         } else if (uiState.findings.isNotEmpty()) {
             item {
-                Text("Findings", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.fuzzer_findings_section), style = MaterialTheme.typography.titleMedium)
             }
             items(uiState.findings) { finding ->
                 Card(
@@ -305,7 +305,7 @@ private fun FuzzerContent(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 Icons.Default.Warning,
-                                contentDescription = "Finding severity: ${finding.severity.name}",
+                                contentDescription = stringResource(R.string.cd_finding_severity, finding.severity.name),
                                 tint = when (finding.severity) {
                                     VulnerabilitySeverity.CRITICAL -> Color.Red
                                     VulnerabilitySeverity.HIGH -> Color(0xFFFF6D00)
@@ -322,7 +322,7 @@ private fun FuzzerContent(
                         }
                         Text(finding.description, style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            "Category: ${finding.category.name.replace("_", " ")}",
+                            stringResource(R.string.fuzzer_category_label, finding.category.name.replace("_", " ")),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }

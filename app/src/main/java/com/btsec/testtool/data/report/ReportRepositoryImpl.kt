@@ -16,13 +16,8 @@ import com.btsec.testtool.data.local.dao.FuzzingDao
 import com.btsec.testtool.data.local.dao.KeyExtractionDao
 import com.btsec.testtool.data.local.dao.ReportDao
 import com.btsec.testtool.data.local.dao.VulnerabilityDao
-import com.btsec.testtool.data.local.toDomain
-import com.btsec.testtool.data.local.toDomainDevices
-import com.btsec.testtool.data.local.toDomainFuzzResults
-import com.btsec.testtool.data.local.toDomainKeyResults
-import com.btsec.testtool.data.local.toDomainReports
-import com.btsec.testtool.data.local.toDomainDefinitions
-import com.btsec.testtool.data.local.toEntity
+import com.btsec.testtool.data.local.*
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ReportRepository
@@ -316,29 +311,37 @@ class ReportRepositoryImpl @Inject constructor(
         reportDao.updateReportStatus(reportId, ReportStatus.ARCHIVED.name); Result.success(Unit)
     } catch (e: Exception) { Timber.e(e, "Failed to archive report"); Result.failure(e) }
 
-    override suspend fun exportToPdf(reportId: String, outputPath: String): Result<File> = try {
-        val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
-        val html = exportFormatters.toHtml(report.toDomain())
-        getSafeFile(outputPath).onSuccess { it.writeText(html) }
-    } catch (e: Exception) { Timber.e(e, "exportToPdf failed"); Result.failure(e) }
+    override suspend fun exportToPdf(reportId: String, outputPath: String): Result<File> {
+        return try {
+            val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
+            val html = exportFormatters.toHtml(report.toDomain())
+            getSafeFile(outputPath).onSuccess { it.writeText(html) }
+        } catch (e: Exception) { Timber.e(e, "exportToPdf failed"); Result.failure(e) }
+    }
 
-    override suspend fun exportToHtml(reportId: String, outputPath: String): Result<File> = try {
-        val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
-        val html = exportFormatters.toHtml(report.toDomain())
-        getSafeFile(outputPath).onSuccess { it.writeText(html) }
-    } catch (e: Exception) { Timber.e(e, "exportToHtml failed"); Result.failure(e) }
+    override suspend fun exportToHtml(reportId: String, outputPath: String): Result<File> {
+        return try {
+            val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
+            val html = exportFormatters.toHtml(report.toDomain())
+            getSafeFile(outputPath).onSuccess { it.writeText(html) }
+        } catch (e: Exception) { Timber.e(e, "exportToHtml failed"); Result.failure(e) }
+    }
 
-    override suspend fun exportToJson(reportId: String, outputPath: String): Result<File> = try {
-        val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
-        val json = exportFormatters.toJson(report.toDomain())
-        getSafeFile(outputPath).onSuccess { it.writeText(json) }
-    } catch (e: Exception) { Timber.e(e, "exportToJson failed"); Result.failure(e) }
+    override suspend fun exportToJson(reportId: String, outputPath: String): Result<File> {
+        return try {
+            val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
+            val json = exportFormatters.toJson(report.toDomain())
+            getSafeFile(outputPath).onSuccess { it.writeText(json) }
+        } catch (e: Exception) { Timber.e(e, "exportToJson failed"); Result.failure(e) }
+    }
 
-    override suspend fun exportToCsv(reportId: String, outputPath: String): Result<File> = try {
-        val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
-        val csv = exportFormatters.toCsv(report.toDomain())
-        getSafeFile(outputPath).onSuccess { it.writeText(csv) }
-    } catch (e: Exception) { Timber.e(e, "exportToCsv failed"); Result.failure(e) }
+    override suspend fun exportToCsv(reportId: String, outputPath: String): Result<File> {
+        return try {
+            val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
+            val csv = exportFormatters.toCsv(report.toDomain())
+            getSafeFile(outputPath).onSuccess { it.writeText(csv) }
+        } catch (e: Exception) { Timber.e(e, "exportToCsv failed"); Result.failure(e) }
+    }
 
     override fun getAvailableExportFormats(): List<ExportFormat> =
         listOf(ExportFormat.PDF, ExportFormat.HTML, ExportFormat.JSON, ExportFormat.CSV, ExportFormat.MARKDOWN)
@@ -360,8 +363,9 @@ class ReportRepositoryImpl @Inject constructor(
         return Result.success(results)
     }
 
-    override suspend fun prepareReportForSharing(reportId: String): Result<Uri> = try {
-        val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
+    override suspend fun prepareReportForSharing(reportId: String): Result<Uri> {
+        return try {
+            val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
         val exportDir = File(context.cacheDir, "shared_reports").apply { mkdirs() }
         val htmlFile = File(exportDir, "report_$reportId.html")
         htmlFile.writeText(exportFormatters.toHtml(report.toDomain()))
@@ -370,6 +374,7 @@ class ReportRepositoryImpl @Inject constructor(
         )
         Result.success(uri)
     } catch (e: Exception) { Timber.e(e, "prepareReportForSharing failed"); Result.failure(e) }
+    }
 
     override suspend fun shareReport(reportId: String, format: ExportFormat): Result<Unit> =
         Result.success(Unit)

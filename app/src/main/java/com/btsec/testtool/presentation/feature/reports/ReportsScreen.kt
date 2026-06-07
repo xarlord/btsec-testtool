@@ -18,10 +18,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.btsec.testtool.R
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ExportFormat
 import com.btsec.testtool.domain.repository.ReportConfig
@@ -50,17 +52,17 @@ fun ReportsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reports") },
+                title = { Text(stringResource(R.string.reports_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_navigate_back))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showGenerateDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Generate new report")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_generate_new_report))
             }
         }
     ) { padding ->
@@ -122,7 +124,7 @@ private fun ReportsContent(
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Report Summary", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.reports_summary_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
 
                     val summary = uiState.summary
@@ -131,9 +133,9 @@ private fun ReportsContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            StatChip("Total", summary.totalReports, Icons.Default.Description, "Total reports")
-                            StatChip("Draft", summary.draftReports, Icons.Default.Edit, "Draft reports")
-                            StatChip("Final", summary.finalReports, Icons.Default.CheckCircle, "Final reports")
+                            StatChip(stringResource(R.string.reports_total), summary.totalReports, Icons.Default.Description, stringResource(R.string.cd_total_reports))
+                            StatChip(stringResource(R.string.reports_draft), summary.draftReports, Icons.Default.Edit, stringResource(R.string.cd_draft_reports))
+                            StatChip(stringResource(R.string.reports_final), summary.finalReports, Icons.Default.CheckCircle, stringResource(R.string.cd_final_reports))
                         }
                         Spacer(Modifier.height(8.dp))
                         Row(
@@ -141,22 +143,22 @@ private fun ReportsContent(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Text(
-                                "Critical Vulns: ${summary.criticalVulnerabilitiesTotal}",
+                                stringResource(R.string.reports_critical_vulns, summary.criticalVulnerabilitiesTotal),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Red
                             )
                             Text(
-                                "High Vulns: ${summary.highVulnerabilitiesTotal}",
+                                stringResource(R.string.reports_high_vulns, summary.highVulnerabilitiesTotal),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFFFF6D00)
                             )
                             Text(
-                                "Pending: ${summary.pendingActions}",
+                                stringResource(R.string.reports_pending, summary.pendingActions),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     } else {
-                        Text("No report data available", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.reports_no_data), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -172,21 +174,24 @@ private fun ReportsContent(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             Icons.Default.Assessment,
-                            contentDescription = "No reports available",
+                            contentDescription = stringResource(R.string.cd_no_reports_available),
                             modifier = Modifier.size(64.dp),
                             tint = MaterialTheme.colorScheme.outline
                         )
                         Spacer(Modifier.height(16.dp))
-                        Text("No reports yet", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.reports_no_reports), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Generate your first security assessment report",
+                            stringResource(R.string.reports_no_reports_hint),
                             style = MaterialTheme.typography.bodySmall
                         )
                         Spacer(Modifier.height(16.dp))
-                        FilledTonalButton(onClick = { onGenerate("Bluetooth Security Assessment", true, true, true) }) {
-                            Icon(Icons.Default.Add, contentDescription = "Generate first report")
+                        FilledTonalButton(onClick = {
+                            val ctx = LocalContext.current
+                            onGenerate(ctx.getString(R.string.reports_report_card_title_default), true, true, true)
+                        }) {
+                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_generate_first_report))
                             Spacer(Modifier.width(4.dp))
-                            Text("Generate Report")
+                            Text(stringResource(R.string.reports_generate))
                         }
                     }
                 }
@@ -237,11 +242,11 @@ private fun ReportCard(
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "Generated: ${report.generatedAt}",
+                stringResource(R.string.reports_generated, report.generatedAt),
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                "Devices: ${report.targetDevices.size} • Vulns: ${report.vulnerabilities.size}",
+                stringResource(R.string.reports_devices_vulns, report.targetDevices.size, report.vulnerabilities.size),
                 style = MaterialTheme.typography.bodySmall
             )
 
@@ -258,10 +263,10 @@ private fun ReportCard(
                     Text("PDF", style = MaterialTheme.typography.labelSmall)
                 }
                 IconButton(onClick = onArchive) {
-                    Icon(Icons.Default.Archive, contentDescription = "Archive report", modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Archive, contentDescription = stringResource(R.string.cd_archive_report), modifier = Modifier.size(18.dp))
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete report", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.cd_delete_report), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -271,10 +276,10 @@ private fun ReportCard(
 @Composable
 private fun StatusBadge(status: ReportStatus) {
     val (color, text) = when (status) {
-        ReportStatus.DRAFT -> Color(0xFF9E9E9E) to "Draft"
-        ReportStatus.REVIEW -> Color(0xFF2196F3) to "Review"
-        ReportStatus.FINAL -> Color(0xFF4CAF50) to "Final"
-        ReportStatus.ARCHIVED -> Color(0xFF795548) to "Archived"
+        ReportStatus.DRAFT -> Color(0xFF9E9E9E) to stringResource(R.string.reports_status_draft)
+        ReportStatus.REVIEW -> Color(0xFF2196F3) to stringResource(R.string.reports_status_review)
+        ReportStatus.FINAL -> Color(0xFF4CAF50) to stringResource(R.string.reports_status_final)
+        ReportStatus.ARCHIVED -> Color(0xFF795548) to stringResource(R.string.reports_status_archived)
     }
     Surface(shape = MaterialTheme.shapes.small, color = color.copy(alpha = 0.15f)) {
         Text(
@@ -292,47 +297,48 @@ private fun GenerateReportDialog(
     onDismiss: () -> Unit,
     onGenerate: (String, Boolean, Boolean, Boolean) -> Unit
 ) {
-    var title by remember { mutableStateOf("Bluetooth Security Assessment") }
+    val defaultTitle = stringResource(R.string.reports_report_card_title_default)
+    var title by remember { mutableStateOf(defaultTitle) }
     var includeVulns by remember { mutableStateOf(true) }
     var includeFuzzing by remember { mutableStateOf(true) }
     var includeKeys by remember { mutableStateOf(true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Generate Report") },
+        title = { Text(stringResource(R.string.reports_generate_dialog_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Report Title") },
+                    label = { Text(stringResource(R.string.reports_report_title)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Switch(checked = includeVulns, onCheckedChange = { includeVulns = it })
                     Spacer(Modifier.width(8.dp))
-                    Text("Include Vulnerabilities")
+                    Text(stringResource(R.string.reports_include_vulns))
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Switch(checked = includeFuzzing, onCheckedChange = { includeFuzzing = it })
                     Spacer(Modifier.width(8.dp))
-                    Text("Include Fuzzing Results")
+                    Text(stringResource(R.string.reports_include_fuzzing))
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Switch(checked = includeKeys, onCheckedChange = { includeKeys = it })
                     Spacer(Modifier.width(8.dp))
-                    Text("Include Key Extraction")
+                    Text(stringResource(R.string.reports_include_keys))
                 }
             }
         },
         confirmButton = {
             FilledTonalButton(onClick = { onGenerate(title, includeVulns, includeFuzzing, includeKeys) }) {
-                Text("Generate")
+                Text(stringResource(R.string.reports_generate_btn))
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
+            OutlinedButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }

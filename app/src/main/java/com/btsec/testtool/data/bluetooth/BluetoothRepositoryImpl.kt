@@ -25,8 +25,7 @@ import com.btsec.testtool.domain.model.BluetoothDevice
 import com.btsec.testtool.domain.model.BondState
 import com.btsec.testtool.domain.model.ConnectionState
 import com.btsec.testtool.data.local.dao.BluetoothDao
-import com.btsec.testtool.data.local.toDomainOperations
-import com.btsec.testtool.data.local.toEntity
+import com.btsec.testtool.data.local.*
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import com.btsec.testtool.domain.repository.BluetoothState
 import com.btsec.testtool.domain.repository.BluetoothOperation
