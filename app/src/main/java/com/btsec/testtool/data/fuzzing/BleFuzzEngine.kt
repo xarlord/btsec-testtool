@@ -228,7 +228,10 @@ class BleFuzzEngine @Inject constructor(
                 val s = svc?.let { g.getService(UUID.fromString(it)) } ?: return SendResult.Error(null, "Service not found")
                 val c = chr?.let { s.getCharacteristic(UUID.fromString(it)) } ?: return SendResult.Error(null, "Char not found")
                 c.value = value; c.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                if (g.writeCharacteristic(c)) SendResult.Success(value) else SendResult.Error(null, "write returned false")
+                // writeCharacteristic is async — we don't get the device response here.
+                // Return null response to indicate "write initiated but no response data available".
+                // Response analysis will be skipped for RealGatt writes (handled in SimGatt instead).
+                if (g.writeCharacteristic(c)) SendResult.Success(null) else SendResult.Error(null, "write returned false")
             } catch (e: SecurityException) { SendResult.Error(null, "Permission: ${e.message}") }
         }
 

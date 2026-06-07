@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import java.time.Instant
@@ -239,12 +240,17 @@ class BluetoothRepositoryImpl @Inject constructor(
                 device.connectGatt(context, false, gattCallback)
             }
 
-            // Emit connection state updates
-            connectionState.collect { state ->
-                trySend(state)
+            // Emit connection state updates — launch in the producer's scope
+            // so the coroutine is cancelled when the flow collector is cancelled.
+            // StateFlow.collect suspends forever, so we must NOT call it directly.
+            launch {
+                connectionState.collect { state ->
+                    trySend(state)
+                }
             }
 
             awaitClose {
+                // launch{} is cancelled automatically when the flow collector stops.
                 currentGatt?.close()
                 currentGatt = null
                 connectionState.value = ConnectionState.Disconnected
@@ -731,11 +737,11 @@ class BluetoothRepositoryImpl @Inject constructor(
                 val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
                 if (gatt.readRemoteRssi()) {
                     // Without SuspendableGatt we can't get the callback result
-                    // Return a placeholder indicating async operation initiated
-                    Timber.w("readRssi called without SuspendableGatt — using fallback")
-                    Result.success(-60)
+                    // Return failure rather than a fabricated value
+                    Timber.w("readRssi called without SuspendableGatt — cannot get actual RSSI")
+                    Result.failure(Exception("RSSI callback unavailable without SuspendableGatt"))
                 } else {
-                    Result.failure(Exception("RSSI read failed"))
+                    Result.failure(Exception("RSSI read initiation failed"))
                 }
             }
         } catch (e: Exception) {
