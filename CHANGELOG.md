@@ -1,3 +1,10 @@
+## [1.5.18](https://github.com/xarlord/btsec-testtool/compare/v1.5.17...v1.5.18) (2026-06-07)
+
+
+### Bug Fixes
+
+* **#252,#253,#254:** fix connect() flow leak, fake RSSI, fuzz response confusion ([2c0681b](https://github.com/xarlord/btsec-testtool/commit/2c0681b2d420b13a707cf7720550bd12fb948c3b)), closes [#253](https://github.com/xarlord/btsec-testtool/issues/253) [#254](https://github.com/xarlord/btsec-testtool/issues/254)
+
 ## [1.5.17](https://github.com/xarlord/btsec-testtool/compare/v1.5.16...v1.5.17) (2026-06-07)
 
 
