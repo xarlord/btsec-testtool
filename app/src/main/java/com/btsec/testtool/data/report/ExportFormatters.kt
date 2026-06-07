@@ -9,6 +9,16 @@
 package com.btsec.testtool.data.report
 
 import com.btsec.testtool.domain.model.*
+import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.colors.DeviceRgb
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.properties.UnitValue
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -17,7 +27,8 @@ import javax.inject.Singleton
 
 /**
  * Export formatters for security reports.
- * Supports JSON, HTML, CSV output formats.
+ * Supports JSON, HTML, CSV, and PDF output formats.
+ * PDF generation uses iText 7.
  */
 @Singleton
 class ExportFormatters @Inject constructor() {
@@ -167,7 +178,229 @@ class ExportFormatters @Inject constructor() {
         return sb.toString()
     }
 
-    // ── Helpers ──
+    /**
+     * Export report as PDF using iText 7.
+     *
+     * Generates a structured PDF document with:
+     * - Title and metadata header
+     * - Executive summary
+     * - Target devices table
+     * - Vulnerabilities table (color-coded severity)
+     * - Findings table
+     * - Recommendations table
+     *
+     * @return ByteArray containing the raw PDF bytes
+     */
+    fun toPdf(report: SecurityReport): ByteArray {
+        val baos = ByteArrayOutputStream()
+        val pdfWriter = PdfWriter(baos)
+        val pdfDoc = PdfDocument(pdfWriter)
+        val document = Document(pdfDoc)
+
+        // Colors
+        val cyanTitle = DeviceRgb(0, 212, 255)
+        val purpleHeading = DeviceRgb(123, 104, 238)
+        val darkBg = DeviceRgb(22, 33, 62)
+        val critColor = DeviceRgb(255, 68, 68)
+        val highColor = DeviceRgb(255, 136, 0)
+        val medColor = DeviceRgb(255, 204, 0)
+        val lowColor = DeviceRgb(68, 255, 68)
+
+        // Title
+        document.add(
+            Paragraph("🔒 ${report.title}")
+                .setFontSize(22f)
+                .setFontColor(cyanTitle)
+                .setMarginBottom(4f)
+        )
+        document.add(
+            Paragraph("Generated: ${report.generatedAt} | Status: ${report.status.name} | ID: ${report.id}")
+                .setFontSize(9f)
+                .setFontColor(ColorConstants.GRAY)
+                .setMarginBottom(16f)
+        )
+
+        // Executive Summary
+        document.add(
+            Paragraph("Executive Summary")
+                .setFontSize(16f)
+                .setFontColor(purpleHeading)
+                .setMarginTop(16f)
+                .setMarginBottom(8f)
+        )
+        document.add(
+            Paragraph(report.executiveSummary)
+                .setFontSize(10f)
+                .setMarginBottom(12f)
+        )
+
+        // Test Period
+        document.add(
+            Paragraph("Test Period: ${report.testPeriod.start} — ${report.testPeriod.end}")
+                .setFontSize(9f)
+                .setFontColor(ColorConstants.GRAY)
+                .setMarginBottom(12f)
+        )
+
+        // Target Devices Table
+        if (report.targetDevices.isNotEmpty()) {
+            document.add(
+                Paragraph("Target Devices")
+                    .setFontSize(14f)
+                    .setFontColor(purpleHeading)
+                    .setMarginTop(16f)
+                    .setMarginBottom(8f)
+            )
+            val deviceTable = Table(UnitValue.createPercentArray(floatArrayOf(35f, 35f, 30f)))
+                .useAllAvailableWidth()
+                .setMarginBottom(12f)
+            deviceTable.addHeaderCell(headerCell("Address"))
+            deviceTable.addHeaderCell(headerCell("Name"))
+            deviceTable.addHeaderCell(headerCell("Type"))
+            report.targetDevices.forEach { device ->
+                deviceTable.addCell(dataCell(device.address))
+                deviceTable.addCell(dataCell(device.name ?: "Unknown"))
+                deviceTable.addCell(dataCell(device.type.name))
+            }
+            document.add(deviceTable)
+        }
+
+        // Vulnerabilities Table
+        if (report.vulnerabilities.isNotEmpty()) {
+            document.add(
+                Paragraph("Vulnerabilities Detected")
+                    .setFontSize(14f)
+                    .setFontColor(purpleHeading)
+                    .setMarginTop(16f)
+                    .setMarginBottom(8f)
+            )
+            val vulnTable = Table(UnitValue.createPercentArray(floatArrayOf(15f, 30f, 20f, 15f, 20f)))
+                .useAllAvailableWidth()
+                .setMarginBottom(12f)
+            vulnTable.addHeaderCell(headerCell("CVE"))
+            vulnTable.addHeaderCell(headerCell("Name"))
+            vulnTable.addHeaderCell(headerCell("Severity"))
+            vulnTable.addHeaderCell(headerCell("CVSS"))
+            vulnTable.addHeaderCell(headerCell("Category"))
+            report.vulnerabilities.forEach { vuln ->
+                vulnTable.addCell(dataCell(vuln.cveId ?: "N/A"))
+                vulnTable.addCell(dataCell(vuln.name))
+                val sevColor = severityColor(vuln.severity, critColor, highColor, medColor, lowColor)
+                vulnTable.addCell(
+                    Cell().add(
+                        Paragraph(vuln.severity.name)
+                            .setFontColor(sevColor)
+                            .setFontSize(9f)
+                            .setBold()
+                    )
+                )
+                vulnTable.addCell(dataCell(vuln.cvssScore?.toString() ?: "N/A"))
+                vulnTable.addCell(dataCell(vuln.category.name))
+            }
+            document.add(vulnTable)
+        }
+
+        // Findings Table
+        if (report.findings.isNotEmpty()) {
+            document.add(
+                Paragraph("Findings")
+                    .setFontSize(14f)
+                    .setFontColor(purpleHeading)
+                    .setMarginTop(16f)
+                    .setMarginBottom(8f)
+            )
+            val findingTable = Table(UnitValue.createPercentArray(floatArrayOf(25f, 20f, 10f, 45f)))
+                .useAllAvailableWidth()
+                .setMarginBottom(12f)
+            findingTable.addHeaderCell(headerCell("Category"))
+            findingTable.addHeaderCell(headerCell("Severity"))
+            findingTable.addHeaderCell(headerCell("Count"))
+            findingTable.addHeaderCell(headerCell("Description"))
+            report.findings.forEach { finding ->
+                findingTable.addCell(dataCell(finding.category.name))
+                val sevColor = severityColor(finding.severity, critColor, highColor, medColor, lowColor)
+                findingTable.addCell(
+                    Cell().add(
+                        Paragraph(finding.severity.name)
+                            .setFontColor(sevColor)
+                            .setFontSize(9f)
+                            .setBold()
+                    )
+                )
+                findingTable.addCell(dataCell(finding.count.toString()))
+                findingTable.addCell(dataCell(finding.description))
+            }
+            document.add(findingTable)
+        }
+
+        // Recommendations Table
+        if (report.recommendations.isNotEmpty()) {
+            document.add(
+                Paragraph("Recommendations")
+                    .setFontSize(14f)
+                    .setFontColor(purpleHeading)
+                    .setMarginTop(16f)
+                    .setMarginBottom(8f)
+            )
+            val recTable = Table(UnitValue.createPercentArray(floatArrayOf(15f, 30f, 55f)))
+                .useAllAvailableWidth()
+                .setMarginBottom(12f)
+            recTable.addHeaderCell(headerCell("Priority"))
+            recTable.addHeaderCell(headerCell("Title"))
+            recTable.addHeaderCell(headerCell("Implementation"))
+            report.recommendations.forEach { rec ->
+                recTable.addCell(dataCell(rec.priority.name))
+                recTable.addCell(dataCell(rec.title))
+                recTable.addCell(dataCell(rec.implementation))
+            }
+            document.add(recTable)
+        }
+
+        // Footer
+        document.add(
+            Paragraph("—")
+                .setMarginTop(20f)
+                .setFontColor(ColorConstants.GRAY)
+        )
+        document.add(
+            Paragraph("Generated by BTSec TestTool")
+                .setFontSize(9f)
+                .setFontColor(ColorConstants.GRAY)
+        )
+
+        document.close()
+        return baos.toByteArray()
+    }
+
+    // ── PDF helper builders ──
+
+    private fun headerCell(text: String): Cell {
+        return Cell().add(
+            Paragraph(text).setFontSize(9f).setBold().setFontColor(ColorConstants.WHITE)
+        ).setBackgroundColor(DeviceRgb(22, 33, 62))
+    }
+
+    private fun dataCell(text: String): Cell {
+        return Cell().add(
+            Paragraph(text).setFontSize(9f)
+        )
+    }
+
+    private fun severityColor(
+        severity: VulnerabilitySeverity,
+        critical: DeviceRgb,
+        high: DeviceRgb,
+        medium: DeviceRgb,
+        low: DeviceRgb
+    ) = when (severity) {
+        VulnerabilitySeverity.CRITICAL -> critical
+        VulnerabilitySeverity.HIGH -> high
+        VulnerabilitySeverity.MEDIUM -> medium
+        VulnerabilitySeverity.LOW -> low
+        else -> ColorConstants.GRAY
+    }
+
+    // ── String Helpers ──
 
     private fun escapeJson(s: String): String =
         s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")

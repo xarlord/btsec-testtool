@@ -13,6 +13,7 @@ import android.bluetooth.*
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ConnectionPriority
 import com.btsec.testtool.domain.repository.WriteType
+import timber.log.Timber
 import java.time.Instant
 
 /**
@@ -120,10 +121,13 @@ fun BluetoothGatt.refreshCache(): Boolean {
         method.isAccessible = true
         method.invoke(this) as? Boolean ?: false
     } catch (e: NoSuchMethodException) {
+        Timber.d(e, "GATT refresh method not available on this device")
         false
     } catch (e: SecurityException) {
+        Timber.d(e, "GATT refresh method not accessible")
         false
     } catch (e: Exception) {
+        Timber.d(e, "GATT cache refresh failed")
         false
     }
 }

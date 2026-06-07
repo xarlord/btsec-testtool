@@ -761,6 +761,7 @@ class BluetoothRepositoryImpl @Inject constructor(
             method.isAccessible = true
             method.invoke(device) as Boolean
         } catch (e: Exception) {
+            Timber.w(e, "removeBond failed for device %s", address)
             false
         }
     }

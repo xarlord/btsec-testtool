@@ -182,7 +182,10 @@ class BleFuzzEngine @Inject constructor(
         val mgr = context.getSystemService(Context.BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager
         val dev = mgr?.adapter?.getRemoteDevice(config.targetDevice.address)
         if (dev != null) RealGatt(dev, context, cs) else SimGatt(cs)
-    } catch (_: Exception) { SimGatt(cs) }
+    } catch (e: Exception) {
+        android.util.Log.w(TAG, "connectToDevice: failed for ${config.targetDevice.address}, falling back to SimGatt — ${e.message}")
+        SimGatt(cs)
+    }
 
     private suspend fun sendPacket(w: GattWrapper, c: FuzzConfig, p: ByteArray): SendResult {
         var last: SendResult = SendResult.Error(null, "No attempt")
@@ -217,7 +220,7 @@ class BleFuzzEngine @Inject constructor(
             override fun onCharacteristicRead(g: BluetoothGatt, c: BluetoothGattCharacteristic, status: Int) {}
         }
 
-        init { try { gatt = device.connectGatt(ctx, false, cb) } catch (_: SecurityException) { connState.value = ConnectionState.Error("Permission denied") } }
+        init { try { gatt = device.connectGatt(ctx, false, cb) } catch (e: SecurityException) { android.util.Log.e(TAG, "RealGatt: permission denied connecting to ${device.address}", e); connState.value = ConnectionState.Error("Permission denied") } }
 
         override fun writeCharacteristic(svc: String?, chr: String?, value: ByteArray): SendResult {
             val g = gatt ?: return SendResult.Disconnected(null)
@@ -235,15 +238,18 @@ class BleFuzzEngine @Inject constructor(
                 val s = svc?.let { g.getService(UUID.fromString(it)) } ?: return null
                 val c = chr?.let { s.getCharacteristic(UUID.fromString(it)) } ?: return null
                 if (g.readCharacteristic(c)) c.value else null
-            } catch (_: SecurityException) { null }
+            } catch (e: SecurityException) {
+                android.util.Log.w(TAG, "readCharacteristic: permission denied for $svc/$chr — ${e.message}")
+                null
+            }
         }
 
         override fun disconnect() {
             try {
                 gatt?.disconnect()
                 gatt?.close()
-            } catch (_: Exception) {
-                // ignore
+            } catch (e: Exception) {
+                android.util.Log.w(TAG, "disconnect: error closing GATT — ${e.message}")
             }
             gatt = null
         }

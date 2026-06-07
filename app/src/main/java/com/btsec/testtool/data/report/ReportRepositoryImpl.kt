@@ -366,11 +366,9 @@ class ReportRepositoryImpl @Inject constructor(
         return try {
             val report = reportDao.getReportById(reportId) ?: return Result.failure(Exception("Report not found"))
             val domainReport = report.toDomain()
-            val html = exportFormatters.toHtml(domainReport)
+            val pdfBytes = exportFormatters.toPdf(domainReport)
             getSafeFile(outputPath).onSuccess { file ->
-                // PDF via HTML — proper PDF generation requires a library like iTextPDF
-                // For now, write styled HTML that can be printed to PDF
-                file.writeText(html)
+                file.writeBytes(pdfBytes)
             }
         } catch (e: Exception) {
             Timber.e(e, "exportToPdf failed")
