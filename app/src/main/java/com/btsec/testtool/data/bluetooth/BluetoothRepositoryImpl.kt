@@ -18,68 +18,52 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
-import android.os.ParcelUuid
-import com.btsec.testtool.domain.model.BleCharacteristic
-import com.btsec.testtool.domain.model.BleDescriptor
 import com.btsec.testtool.domain.model.BleService
 import com.btsec.testtool.domain.model.BluetoothDevice
 import com.btsec.testtool.domain.model.BondState
-import com.btsec.testtool.domain.model.CharacteristicPermissions
-import com.btsec.testtool.domain.model.CharacteristicProperties
 import com.btsec.testtool.domain.model.ConnectionState
-import com.btsec.testtool.domain.model.BluetoothType
-import com.btsec.testtool.domain.model.DeviceClass
-import com.btsec.testtool.domain.model.FuzzConfig
-import com.btsec.testtool.domain.model.FuzzDataPattern
-import com.btsec.testtool.domain.model.FuzzError
 import com.btsec.testtool.data.local.dao.BluetoothDao
-import com.btsec.testtool.data.local.toDomain
 import com.btsec.testtool.data.local.toDomainOperations
 import com.btsec.testtool.data.local.toEntity
-import com.btsec.testtool.domain.model.FuzzMethod
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import com.btsec.testtool.domain.repository.BluetoothState
 import com.btsec.testtool.domain.repository.BluetoothOperation
 import com.btsec.testtool.domain.repository.CapturedPacket
 import com.btsec.testtool.domain.repository.ConnectionPriority
-import com.btsec.testtool.domain.repository.PacketDirection
 import com.btsec.testtool.domain.repository.PacketStatistics
-import com.btsec.testtool.domain.repository.PacketType
 import com.btsec.testtool.domain.repository.WriteType
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
-import java.time.Instant
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * Implementation of Bluetooth repository.
  *
  * Interfaces with Android's Bluetooth stack for device scanning,
  * connection, and BLE operations.
+ *
+ * Operations are delegated to:
+ * - [ScanOperationsHelper] for BLE scanning
+ * - [GattOperationsHelper] for GATT connect/read/write/subscribe/MTU/RSSI
+ * - [ReflectionHelper] for safe hidden-API reflection calls
  */
 @Singleton
 class BluetoothRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val bluetoothDao: BluetoothDao
+    private val bluetoothDao: BluetoothDao,
+    private val scanHelper: ScanOperationsHelper,
+    private val gattHelper: GattOperationsHelper
 ) : BluetoothRepository {
 
     private val bluetoothManager: BluetoothManager =
@@ -87,25 +71,8 @@ class BluetoothRepositoryImpl @Inject constructor(
     private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
     private val bluetoothState = MutableStateFlow(BluetoothState.OFF)
-    private val scanResults = MutableStateFlow<List<BluetoothDevice>>(emptyList())
-    private val isScanning = MutableStateFlow(false)
-    private val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    private val connectedDevice = MutableStateFlow<BluetoothDevice?>(null)
-    private val discoveredServices = MutableStateFlow<List<BleService>>(emptyList())
-
-    private var currentGatt: BluetoothGatt? = null
-    private var suspendableGatt: SuspendableGatt? = null
-
-    // Pending coroutine continuations for GATT callback resolution
-    private val pendingReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
-    private val pendingDescriptorReads = ConcurrentHashMap<String, (Result<ByteArray>) -> Unit>()
-    private var notificationListener: ((UUID, ByteArray) -> Unit)? = null
-
-    // Track actual negotiated MTU
-    private val currentMtu = MutableStateFlow(23)
-
-    // Currently selected device for testing operations
     private val selectedDeviceAddress = MutableStateFlow<String?>(null)
+    private var suspendableGatt: SuspendableGatt? = null
 
     // ========== Bluetooth State ==========
 
@@ -121,14 +88,12 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     override suspend fun requestEnableBluetooth(): Boolean {
         if (bluetoothAdapter?.isEnabled == true) return true
-        // Cannot programmatically enable BT on modern Android — must use system intent.
-        // Return current state; the UI layer should launch ACTION_REQUEST_ENABLE intent.
         return false
     }
 
     // ========== Device Scanning ==========
 
-    @SuppressLint("MissingPermission")  // Permissions checked before use
+    @SuppressLint("MissingPermission")
     override fun startScan(filter: String?): Flow<BluetoothDevice> {
         return callbackFlow {
             val scanner = bluetoothAdapter?.bluetoothLeScanner
@@ -137,73 +102,49 @@ class BluetoothRepositoryImpl @Inject constructor(
                 return@callbackFlow
             }
 
-            isScanning.value = true
+            scanHelper.markScanStarted()
 
             val scanCallback = object : ScanCallback() {
                 override fun onScanResult(callbackType: Int, result: ScanResult) {
-                    result.device?.let { device ->
-                        val btDevice = mapScanResult(device, result)
-                        if (filter == null || device.address == filter) {
-                            trySend(btDevice)
-                            updateScanResults(btDevice)
-                        }
-                    }
+                    scanHelper.processScanResult(result, filter) { trySend(it) }
                 }
 
                 override fun onBatchScanResults(results: MutableList<ScanResult>) {
                     results.forEach { result ->
-                        result.device?.let { device ->
-                            val btDevice = mapScanResult(device, result)
-                            if (filter == null || device.address == filter) {
-                                trySend(btDevice)
-                                updateScanResults(btDevice)
-                            }
-                        }
+                        scanHelper.processScanResult(result, filter) { trySend(it) }
                     }
                 }
 
                 override fun onScanFailed(errorCode: Int) {
-                    // Handle scan failure
-                    isScanning.value = false
+                    scanHelper.markScanStopped()
                 }
             }
-
-            val settings = ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .setReportDelay(0)
-                .build()
 
             scanner.startScan(scanCallback)
 
             awaitClose {
                 scanner.stopScan(scanCallback)
-                isScanning.value = false
+                scanHelper.markScanStopped()
             }
         }
     }
 
     override suspend fun stopScan() {
         bluetoothAdapter?.bluetoothLeScanner?.stopScan(object : ScanCallback() {})
-        isScanning.value = false
+        scanHelper.markScanStopped()
     }
 
-    override fun isScanning(): Flow<Boolean> {
-        return isScanning
-    }
+    override fun isScanning(): Flow<Boolean> = scanHelper.isScanning
 
-    override fun getScanResults(): Flow<List<BluetoothDevice>> {
-        return scanResults
-    }
+    override fun getScanResults(): Flow<List<BluetoothDevice>> = scanHelper.scanResults
 
     override suspend fun getDevice(address: String): BluetoothDevice? {
-        return scanResults.value.find { it.address == address }
+        return scanHelper.scanResults.value.find { it.address == address }
     }
 
     // ========== Selected Device ==========
 
-    override fun getSelectedDeviceAddress(): Flow<String?> {
-        return selectedDeviceAddress
-    }
+    override fun getSelectedDeviceAddress(): Flow<String?> = selectedDeviceAddress
 
     override fun selectDevice(address: String?) {
         selectedDeviceAddress.value = address
@@ -221,74 +162,50 @@ class BluetoothRepositoryImpl @Inject constructor(
                 return@callbackFlow
             }
 
-            connectionState.value = ConnectionState.Connecting
+            gattHelper.connectionState.value = ConnectionState.Connecting
 
-            currentGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val gatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 device.connectGatt(context, false, gattCallback, AndroidBluetoothDevice.TRANSPORT_LE)
             } else {
                 device.connectGatt(context, false, gattCallback)
             }
 
-            // Emit connection state updates
-            connectionState.collect { state ->
+            gattHelper.setGatt(gatt)
+
+            gattHelper.connectionState.collect { state ->
                 trySend(state)
             }
 
             awaitClose {
-                currentGatt?.close()
-                currentGatt = null
-                connectionState.value = ConnectionState.Disconnected
+                gattHelper.getGatt()?.close()
+                gattHelper.setGatt(null)
+                gattHelper.connectionState.value = ConnectionState.Disconnected
             }
         }
     }
 
     override suspend fun disconnect() {
-        currentGatt?.disconnect()
-        currentGatt?.close()
-        currentGatt = null
-        connectionState.value = ConnectionState.Disconnected
-        connectedDevice.value = null
+        val gatt = gattHelper.getGatt()
+        gatt?.disconnect()
+        gatt?.close()
+        gattHelper.setGatt(null)
+        gattHelper.connectionState.value = ConnectionState.Disconnected
+        gattHelper.connectedDevice.value = null
     }
 
-    override fun getConnectionState(): Flow<ConnectionState> {
-        return connectionState
-    }
+    override fun getConnectionState(): Flow<ConnectionState> = gattHelper.connectionState
 
-    override fun getConnectedDevice(): Flow<BluetoothDevice?> {
-        return connectedDevice
-    }
+    override fun getConnectedDevice(): Flow<BluetoothDevice?> = gattHelper.connectedDevice
 
     // ========== GATT Callback ==========
 
     private val gattCallback = object : CustomBluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            when (newState) {
-                BluetoothGatt.STATE_CONNECTED -> {
-                    connectionState.value = ConnectionState.Connected
-                    connectedDevice.value = mapBluetoothDevice(gatt.device)
-                    gatt.discoverServices()
-                }
-                BluetoothGatt.STATE_DISCONNECTED -> {
-                    connectionState.value = ConnectionState.Disconnected
-                    connectedDevice.value = null
-                    // Cancel any pending reads on disconnect
-                    pendingReads.values.forEach { callback ->
-                        callback(Result.failure(Exception("GATT disconnected")))
-                    }
-                    pendingReads.clear()
-                    pendingDescriptorReads.values.forEach { callback ->
-                        callback(Result.failure(Exception("GATT disconnected")))
-                    }
-                    pendingDescriptorReads.clear()
-                }
-            }
+            gattHelper.onConnectionStateChanged(gatt, newState)
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                val services = gatt.services?.map { mapGattService(it) } ?: emptyList()
-                discoveredServices.value = services
-            }
+            gattHelper.onServicesDiscovered(gatt, status)
         }
 
         override fun onCharacteristicRead(
@@ -297,17 +214,7 @@ class BluetoothRepositoryImpl @Inject constructor(
             value: ByteArray,
             status: Int
         ) {
-            val key = characteristic.uuid.toString()
-            val callback = pendingReads.remove(key)
-            if (callback != null) {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    Timber.d("Characteristic read success: ${characteristic.uuid}, ${value.size} bytes")
-                    callback(Result.success(value))
-                } else {
-                    Timber.w("Characteristic read failed: ${characteristic.uuid}, status=$status")
-                    callback(Result.failure(Exception("Characteristic read failed with status: $status")))
-                }
-            }
+            gattHelper.onCharacteristicRead(characteristic, value, status)
         }
 
         // Legacy callback for API < 33
@@ -327,8 +234,7 @@ class BluetoothRepositoryImpl @Inject constructor(
             characteristic: BluetoothGattCharacteristic,
             value: ByteArray
         ) {
-            Timber.d("Notification received: ${characteristic.uuid}, ${value.size} bytes")
-            notificationListener?.invoke(characteristic.uuid, value)
+            gattHelper.onCharacteristicChanged(characteristic, value)
         }
 
         // Legacy callback for API < 33
@@ -348,17 +254,7 @@ class BluetoothRepositoryImpl @Inject constructor(
             status: Int,
             value: ByteArray
         ) {
-            val key = "${descriptor.characteristic.uuid}_${descriptor.uuid}"
-            val callback = pendingDescriptorReads.remove(key)
-            if (callback != null) {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    Timber.d("Descriptor read success: ${descriptor.uuid}, ${value.size} bytes")
-                    callback(Result.success(value))
-                } else {
-                    Timber.w("Descriptor read failed: ${descriptor.uuid}, status=$status")
-                    callback(Result.failure(Exception("Descriptor read failed with status: $status")))
-                }
-            }
+            gattHelper.onDescriptorRead(descriptor, status, value)
         }
 
         // Legacy callback for API < 33
@@ -376,87 +272,28 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     // ========== BLE Operations ==========
 
-    override fun discoverServices(): Flow<List<BleService>> {
-        return discoveredServices
-    }
+    override fun discoverServices(): Flow<List<BleService>> = gattHelper.discoveredServices
 
-    override fun getServices(): Flow<List<BleService>> {
-        return discoveredServices
-    }
+    override fun getServices(): Flow<List<BleService>> = gattHelper.discoveredServices
 
-    @SuppressLint("MissingPermission")
     override suspend fun readCharacteristic(
         serviceUuid: String,
         characteristicUuid: String
-    ): Result<ByteArray> {
-        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-        val service = gatt.getService(UUID.fromString(serviceUuid))
-            ?: return Result.failure(Exception("Service not found: $serviceUuid"))
-        val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
-            ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
+    ): Result<ByteArray> = gattHelper.readCharacteristic(serviceUuid, characteristicUuid)
 
-        return try {
-            suspendCancellableCoroutine { cont ->
-                val key = characteristicUuid
-                pendingReads[key] = { result ->
-                    if (cont.isActive) {
-                        cont.resume(result)
-                    }
-                }
-                cont.invokeOnCancellation {
-                    pendingReads.remove(key)
-                }
-
-                if (!gatt.readCharacteristic(characteristic)) {
-                    pendingReads.remove(key)
-                    if (cont.isActive) {
-                        cont.resume(Result.failure(Exception("Failed to initiate characteristic read")))
-                    }
-                }
-            }
-        } catch (e: CancellationException) {
-            pendingReads.remove(characteristicUuid)
-            Timber.w("readCharacteristic cancelled: $characteristicUuid")
-            Result.failure(Exception("Operation cancelled"))
-        } catch (e: Exception) {
-            Timber.e(e, "readCharacteristic error: $characteristicUuid")
-            Result.failure(e)
-        }
-    }
-
-    @SuppressLint("MissingPermission")
     override suspend fun writeCharacteristic(
         serviceUuid: String,
         characteristicUuid: String,
         value: ByteArray,
         writeType: WriteType
-    ): Result<Unit> {
-        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-        val service = gatt.getService(UUID.fromString(serviceUuid))
-            ?: return Result.failure(Exception("Service not found"))
-        val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
-            ?: return Result.failure(Exception("Characteristic not found"))
-
-        characteristic.value = value
-        characteristic.writeType = when (writeType) {
-            WriteType.DEFAULT -> BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-            WriteType.WITHOUT_RESPONSE -> BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-            WriteType.SIGNED -> BluetoothGattCharacteristic.WRITE_TYPE_SIGNED
-        }
-
-        return if (gatt.writeCharacteristic(characteristic)) {
-            Result.success(Unit)
-        } else {
-            Result.failure(Exception("Write failed"))
-        }
-    }
+    ): Result<Unit> = gattHelper.writeCharacteristic(serviceUuid, characteristicUuid, value, writeType)
 
     @SuppressLint("MissingPermission")
     override fun subscribeToCharacteristic(
         serviceUuid: String,
         characteristicUuid: String
     ): Flow<ByteArray> = callbackFlow {
-        val gatt = currentGatt
+        val gatt = gattHelper.getGatt()
         if (gatt == null) {
             Timber.w("subscribeToCharacteristic: not connected")
             close()
@@ -483,8 +320,8 @@ class BluetoothRepositoryImpl @Inject constructor(
 
         // Set up notification listener for this characteristic
         val targetUuid = UUID.fromString(characteristicUuid)
-        val previousListener = notificationListener
-        notificationListener = { uuid, value ->
+        val previousListener = gattHelper.getNotificationListener()
+        gattHelper.setNotificationListener { uuid, value ->
             if (uuid == targetUuid) {
                 trySend(value)
             }
@@ -494,7 +331,7 @@ class BluetoothRepositoryImpl @Inject constructor(
         // Enable local notification
         if (!gatt.setCharacteristicNotification(characteristic, true)) {
             Timber.w("subscribeToCharacteristic: setCharacteristicNotification failed")
-            notificationListener = previousListener
+            gattHelper.setNotificationListener(previousListener)
             close()
             return@callbackFlow
         }
@@ -510,7 +347,7 @@ class BluetoothRepositoryImpl @Inject constructor(
 
         awaitClose {
             Timber.d("subscribeToCharacteristic: cleaning up $characteristicUuid")
-            notificationListener = previousListener
+            gattHelper.setNotificationListener(previousListener)
             try {
                 gatt.setCharacteristicNotification(characteristic, false)
                 if (cccDescriptor != null) {
@@ -528,18 +365,16 @@ class BluetoothRepositoryImpl @Inject constructor(
         serviceUuid: String,
         characteristicUuid: String
     ): Result<Unit> {
-        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
+        val gatt = gattHelper.getGatt() ?: return Result.failure(Exception("Not connected"))
         val service = gatt.getService(UUID.fromString(serviceUuid))
             ?: return Result.failure(Exception("Service not found: $serviceUuid"))
         val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
             ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
 
         return try {
-            // Disable local notification
             if (!gatt.setCharacteristicNotification(characteristic, false)) {
                 Timber.w("unsubscribeFromCharacteristic: setCharacteristicNotification(false) failed")
             }
-            // Write CCC descriptor to disable remote notifications
             val cccUuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
             val cccDescriptor = characteristic.getDescriptor(cccUuid)
             if (cccDescriptor != null) {
@@ -553,142 +388,27 @@ class BluetoothRepositoryImpl @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
     override suspend fun readDescriptor(
         serviceUuid: String,
         characteristicUuid: String,
         descriptorUuid: String
-    ): Result<ByteArray> {
-        val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-        val service = gatt.getService(UUID.fromString(serviceUuid))
-            ?: return Result.failure(Exception("Service not found: $serviceUuid"))
-        val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
-            ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
-        val descriptor = characteristic.getDescriptor(UUID.fromString(descriptorUuid))
-            ?: return Result.failure(Exception("Descriptor not found: $descriptorUuid"))
-
-        return try {
-            suspendCancellableCoroutine { cont ->
-                val key = "${characteristicUuid}_${descriptorUuid}"
-                pendingDescriptorReads[key] = { result ->
-                    if (cont.isActive) {
-                        cont.resume(result)
-                    }
-                }
-                cont.invokeOnCancellation {
-                    pendingDescriptorReads.remove(key)
-                }
-
-                if (!gatt.readDescriptor(descriptor)) {
-                    pendingDescriptorReads.remove(key)
-                    if (cont.isActive) {
-                        cont.resume(Result.failure(Exception("Failed to initiate descriptor read")))
-                    }
-                }
-            }
-        } catch (e: CancellationException) {
-            pendingDescriptorReads.remove("${characteristicUuid}_${descriptorUuid}")
-            Timber.w("readDescriptor cancelled: $descriptorUuid")
-            Result.failure(Exception("Operation cancelled"))
-        } catch (e: Exception) {
-            Timber.e(e, "readDescriptor error: $descriptorUuid")
-            Result.failure(e)
-        }
-    }
+    ): Result<ByteArray> = gattHelper.readDescriptor(serviceUuid, characteristicUuid, descriptorUuid)
 
     override suspend fun writeDescriptor(
         serviceUuid: String,
         characteristicUuid: String,
         descriptorUuid: String,
         value: ByteArray
-    ): Result<Unit> {
-        return try {
-            val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-            val service = gatt.getService(UUID.fromString(serviceUuid))
-                ?: return Result.failure(Exception("Service not found: $serviceUuid"))
-            val characteristic = service.getCharacteristic(UUID.fromString(characteristicUuid))
-                ?: return Result.failure(Exception("Characteristic not found: $characteristicUuid"))
-            val descriptor = characteristic.getDescriptor(UUID.fromString(descriptorUuid))
-                ?: return Result.failure(Exception("Descriptor not found: $descriptorUuid"))
+    ): Result<Unit> = gattHelper.writeDescriptor(serviceUuid, characteristicUuid, descriptorUuid, value)
 
-            val sgatt = suspendableGatt
-            if (sgatt != null) {
-                val success = sgatt.writeDescriptor(descriptor, value)
-                if (success) Result.success(Unit) else Result.failure(Exception("Descriptor write failed"))
-            } else {
-                // Fallback: direct write without callback
-                descriptor.value = value
-                val written = gatt.writeDescriptor(descriptor)
-                if (written) Result.success(Unit) else Result.failure(Exception("Descriptor write initiation failed"))
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "writeDescriptor error")
-            Result.failure(e)
-        }
-    }
+    override suspend fun requestMtu(mtu: Int): Result<Int> = gattHelper.requestMtu(mtu)
 
-    override suspend fun requestMtu(mtu: Int): Result<Int> {
-        return try {
-            val sgatt = suspendableGatt
-            if (sgatt != null) {
-                val negotiated = sgatt.requestMtu(mtu)
-                currentMtu.value = negotiated
-                Result.success(negotiated)
-            } else {
-                val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-                if (gatt.requestMtu(mtu)) {
-                    currentMtu.value = mtu
-                    Result.success(mtu)
-                } else {
-                    Result.failure(Exception("MTU request failed"))
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "requestMtu error")
-            Result.failure(e)
-        }
-    }
+    override fun getCurrentMtu(): Flow<Int> = gattHelper.currentMtu.asStateFlow()
 
-    override fun getCurrentMtu(): Flow<Int> = currentMtu.asStateFlow()
+    override suspend fun requestConnectionPriority(priority: ConnectionPriority): Result<Unit> =
+        gattHelper.requestConnectionPriority(priority)
 
-    override suspend fun requestConnectionPriority(priority: ConnectionPriority): Result<Unit> {
-        return try {
-            val sgatt = suspendableGatt
-            val success = if (sgatt != null) {
-                sgatt.requestConnectionPriority(priority.toAndroidInt())
-            } else {
-                currentGatt?.requestConnectionPriority(priority.toAndroidInt()) ?: false
-            }
-            if (success) Result.success(Unit) else Result.failure(Exception("Connection priority request failed"))
-        } catch (e: Exception) {
-            Timber.e(e, "requestConnectionPriority error")
-            Result.failure(e)
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    override suspend fun readRssi(): Result<Int> {
-        return try {
-            val sgatt = suspendableGatt
-            if (sgatt != null) {
-                val rssi = sgatt.readRssi()
-                Result.success(rssi)
-            } else {
-                val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-                if (gatt.readRemoteRssi()) {
-                    // Without SuspendableGatt we can't get the callback result
-                    // Return a placeholder indicating async operation initiated
-                    Timber.w("readRssi called without SuspendableGatt — using fallback")
-                    Result.success(-60)
-                } else {
-                    Result.failure(Exception("RSSI read failed"))
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "readRssi error")
-            Result.failure(e)
-        }
-    }
+    override suspend fun readRssi(): Result<Int> = gattHelper.readRssi()
 
     // ========== Bonding ==========
 
@@ -701,14 +421,7 @@ class BluetoothRepositoryImpl @Inject constructor(
     @SuppressLint("MissingPermission")
     override suspend fun removeBond(address: String): Boolean {
         val device = bluetoothAdapter?.getRemoteDevice(address) ?: return false
-        return try {
-            // removeBond() is a hidden API, need to use reflection
-            val method = device.javaClass.getDeclaredMethod("removeBond")
-            method.isAccessible = true
-            method.invoke(device) as Boolean
-        } catch (e: Exception) {
-            false
-        }
+        return gattHelper.removeBond(device)
     }
 
     override fun getBondState(address: String): Flow<BondState> {
@@ -728,8 +441,8 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     override suspend fun refreshCache(): Result<Unit> {
         return try {
-            val gatt = currentGatt ?: return Result.failure(Exception("Not connected"))
-            val refreshed = gatt.refreshCache()
+            val gatt = gattHelper.getGatt() ?: return Result.failure(Exception("Not connected"))
+            val refreshed = gattHelper.refreshGattCache(gatt)
             if (refreshed) {
                 Timber.d("GATT cache refreshed successfully")
                 Result.success(Unit)
@@ -744,17 +457,14 @@ class BluetoothRepositoryImpl @Inject constructor(
     }
 
     override suspend fun clearDeviceCache() {
-        scanResults.value = emptyList()
+        scanHelper.clearScanResults()
     }
 
-    override fun getCachedDevices(): Flow<List<BluetoothDevice>> {
-        return scanResults
-    }
+    override fun getCachedDevices(): Flow<List<BluetoothDevice>> = scanHelper.scanResults
 
     // ========== Packet Monitoring ==========
 
     override fun startPacketMonitoring(): Flow<CapturedPacket> {
-        // Would require root and monitor mode
         return flow { }
     }
 
@@ -763,7 +473,7 @@ class BluetoothRepositoryImpl @Inject constructor(
     }
 
     override suspend fun isPacketMonitoringAvailable(): Boolean {
-        return false  // Requires root and specific hardware
+        return false
     }
 
     override fun getPacketStatistics(): Flow<PacketStatistics> {
@@ -794,114 +504,6 @@ class BluetoothRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "Failed to clear bluetooth operation logs")
         }
-    }
-
-    // ========== Helper Methods ==========
-
-    private fun updateScanResults(device: BluetoothDevice) {
-        val current = scanResults.value.toMutableList()
-        val existingIndex = current.indexOfFirst { it.address == device.address }
-        if (existingIndex >= 0) {
-            current[existingIndex] = device
-        } else {
-            current.add(device)
-        }
-        scanResults.value = current
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun mapScanResult(device: android.bluetooth.BluetoothDevice, result: ScanResult): BluetoothDevice {
-        return BluetoothDevice(
-            address = device.address,
-            name = device.name,
-            type = if (device.type == AndroidBluetoothDevice.DEVICE_TYPE_LE) {
-                BluetoothType.BLE
-            } else if (device.type == AndroidBluetoothDevice.DEVICE_TYPE_CLASSIC) {
-                BluetoothType.CLASSIC
-            } else {
-                BluetoothType.DUAL_MODE
-            },
-            deviceClass = mapDeviceClass(device.bluetoothClass?.deviceClass),
-            bondState = when (device.bondState) {
-                AndroidBluetoothDevice.BOND_BONDED -> BondState.BONDED
-                AndroidBluetoothDevice.BOND_BONDING -> BondState.BONDING
-                else -> BondState.NONE
-            },
-            rssi = result.rssi,
-            txPower = result.txPower,
-            firstSeen = Instant.now(),
-            lastSeen = Instant.now(),
-            scanCount = 1,
-            services = result.scanRecord?.serviceUuids?.map { it.toString() } ?: emptyList(),
-            manufacturerData = emptyMap()
-        )
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun mapBluetoothDevice(device: android.bluetooth.BluetoothDevice): BluetoothDevice {
-        return BluetoothDevice(
-            address = device.address,
-            name = device.name,
-            type = BluetoothType.BLE,
-            deviceClass = null,
-            bondState = when (device.bondState) {
-                AndroidBluetoothDevice.BOND_BONDED -> BondState.BONDED
-                AndroidBluetoothDevice.BOND_BONDING -> BondState.BONDING
-                else -> BondState.NONE
-            },
-            rssi = null,
-            txPower = null,
-            firstSeen = Instant.now(),
-            lastSeen = Instant.now(),
-            scanCount = 1,
-            services = emptyList(),
-            manufacturerData = emptyMap()
-        )
-    }
-
-    private fun mapDeviceClass(deviceClass: Int?): DeviceClass? {
-        if (deviceClass == null) return null
-        return when ((deviceClass shr 8) and 0x1F) {
-            1 -> DeviceClass.COMPUTER
-            2 -> DeviceClass.PHONE
-            4 -> DeviceClass.AUDIO_VIDEO
-            5 -> DeviceClass.PERIPHERAL
-            7 -> DeviceClass.WEARABLE
-            8 -> DeviceClass.TOY
-            9 -> DeviceClass.HEALTH
-            else -> DeviceClass.UNCATEGORIZED
-        }
-    }
-
-    private fun mapGattService(service: android.bluetooth.BluetoothGattService): BleService {
-        return BleService(
-            uuid = service.uuid.toString(),
-            primary = service.type == android.bluetooth.BluetoothGattService.SERVICE_TYPE_PRIMARY,
-            characteristics = service.characteristics.map { mapGattCharacteristic(it) }
-        )
-    }
-
-    private fun mapGattCharacteristic(
-        characteristic: android.bluetooth.BluetoothGattCharacteristic
-    ): BleCharacteristic {
-        val props = characteristic.properties
-        return BleCharacteristic(
-            uuid = characteristic.uuid.toString(),
-            properties = CharacteristicProperties(
-                read = props and BluetoothGattCharacteristic.PROPERTY_READ != 0,
-                write = props and BluetoothGattCharacteristic.PROPERTY_WRITE != 0,
-                writeWithoutResponse = props and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0,
-                notify = props and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0,
-                indicate = props and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0,
-                signedWrite = props and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0,
-                extendedProperties = props and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0
-            ),
-            permissions = null,
-            value = characteristic.value,
-            descriptors = characteristic.descriptors.map {
-                BleDescriptor(it.uuid.toString(), it.value)
-            }
-        )
     }
 }
 

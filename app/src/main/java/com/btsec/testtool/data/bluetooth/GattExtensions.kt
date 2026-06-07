@@ -13,6 +13,7 @@ import android.bluetooth.*
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ConnectionPriority
 import com.btsec.testtool.domain.repository.WriteType
+import timber.log.Timber
 import java.time.Instant
 
 /**
@@ -46,7 +47,6 @@ fun android.bluetooth.BluetoothDevice.toDomainModel(): com.btsec.testtool.domain
 }
 
 private fun mapDeviceClass(deviceClass: Int): DeviceClass {
-    // Major class mapping from Bluetooth spec
     return when ((deviceClass shr 8) and 0x1F) {
         1 -> DeviceClass.COMPUTER
         2 -> DeviceClass.PHONE
@@ -110,20 +110,17 @@ fun WriteType.toAndroidInt(): Int {
 }
 
 /**
- * Refresh the GATT cache using reflection.
- * The refresh() method is hidden in the Android API.
+ * Refresh the GATT cache using reflection via [ReflectionHelper].
+ *
+ * The `refresh()` method is hidden in the Android API, so it requires
+ * reflection. This extension delegates to [ReflectionHelper] which
+ * validates the method name against a whitelist and logs the usage.
  */
 @SuppressLint("MissingPermission")
-fun BluetoothGatt.refreshCache(): Boolean {
-    return try {
-        val method = BluetoothGatt::class.java.getDeclaredMethod("refresh")
-        method.isAccessible = true
-        method.invoke(this) as? Boolean ?: false
-    } catch (e: NoSuchMethodException) {
-        false
-    } catch (e: SecurityException) {
-        false
-    } catch (e: Exception) {
-        false
-    }
+fun BluetoothGatt.refreshCache(reflectionHelper: ReflectionHelper): Boolean {
+    return reflectionHelper.invokeHiddenMethod(
+        target = this,
+        clazz = BluetoothGatt::class.java,
+        methodName = "refresh"
+    ).getOrNull() as? Boolean ?: false
 }
