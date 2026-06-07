@@ -62,7 +62,7 @@ class ConsentRepositoryImpl @Inject constructor(
             consentDao.insertConsentRecord(record.toEntity())
             record
         } catch (e: Exception) {
-            Timber.e(e, "Failed to persist consent record")
+            Timber.e(e, "Failed to persist consent record for authId=%s action=%s", authId, action.name)
             null
         }
     }
@@ -391,7 +391,8 @@ class ConsentRepositoryImpl @Inject constructor(
             // Query actual audit logs from Room
             val auditLogs = try {
                 consentDao.getAllAuditLogs().first()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to load audit logs for export")
                 emptyList()
             }
 
