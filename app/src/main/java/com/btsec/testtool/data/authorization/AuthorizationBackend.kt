@@ -9,12 +9,13 @@
 package com.btsec.testtool.data.authorization
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.btsec.testtool.domain.model.*
-import com.btsec.testtool.domain.repository.AuthorizationRepository
-import com.btsec.testtool.domain.repository.AuthorizationStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
@@ -29,8 +30,9 @@ private val Context.authDataStore by preferencesDataStore(name = "btsec_auth")
  * Real implementation of AuthorizationRepository with:
  * - Server verification via HTTP API (configurable URL)
  * - Demo mode for offline testing (BTSEC-DEMO-* format)
- * - DataStore persistence across app restarts
- * - Signature verification using stored public key
+ * - DataStore persistence for non-sensitive fields
+ * - EncryptedSharedPreferences for sensitive fields (signature, public key, server URL)
+ * - Migration of plaintext data on first access
  */
 @Singleton
 class AuthorizationBackend @Inject constructor(
@@ -38,19 +40,90 @@ class AuthorizationBackend @Inject constructor(
 ) {
 
     companion object {
+        // DataStore keys (non-sensitive)
         val KEY_AUTH_ID = stringPreferencesKey("auth_id")
         val KEY_AUTH_ISSUED_TO = stringPreferencesKey("auth_issued_to")
         val KEY_AUTH_ISSUED_BY = stringPreferencesKey("auth_issued_by")
         val KEY_AUTH_ISSUED_AT = stringPreferencesKey("auth_issued_at")
         val KEY_AUTH_EXPIRES_AT = stringPreferencesKey("auth_expires_at")
-        val KEY_AUTH_SIGNATURE = stringPreferencesKey("auth_signature")
-        val KEY_SERVER_URL = stringPreferencesKey("server_url")
-        val KEY_PUBLIC_KEY = stringPreferencesKey("public_key")
         val KEY_LAST_VERIFIED = stringPreferencesKey("last_verified")
+
+        // EncryptedSharedPreferences keys (sensitive)
+        private const val KEY_AUTH_SIGNATURE = "auth_signature"
+        private const val KEY_SERVER_URL = "server_url"
+        private const val KEY_PUBLIC_KEY = "public_key"
+
+        // Migration marker
+        private const val KEY_MIGRATION_DONE = "migration_done"
+
+        private const val ENCRYPTED_PREFS_NAME = "btsec_auth_encrypted"
 
         private const val DEMO_PREFIX = "BTSEC-DEMO-"
         private const val STANDARD_PREFIX = "BTSEC-"
         private const val AUTH_PATTERN = "^BTSEC-(\\d{8}|DEMO)-[A-Z0-9]{8}$"
+    }
+
+    /**
+     * Lazily-created EncryptedSharedPreferences for sensitive data.
+     * Uses a MasterKey backed by Android Keystore for AES-256 encryption.
+     */
+    private val encryptedPrefs: SharedPreferences by lazy {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        EncryptedSharedPreferences.create(
+            context,
+            ENCRYPTED_PREFS_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
+
+    /**
+     * One-time migration of sensitive fields from plaintext DataStore
+     * to EncryptedSharedPreferences. Removes the old plaintext values.
+     */
+    private suspend fun migrateIfNeeded() {
+        val alreadyMigrated = encryptedPrefs.getBoolean(KEY_MIGRATION_DONE, false)
+        if (alreadyMigrated) return
+
+        try {
+            val prefs = context.authDataStore.data.first()
+
+            // Migrate signature
+            val oldSignatureKey = stringPreferencesKey("auth_signature")
+            prefs[oldSignatureKey]?.let { value ->
+                encryptedPrefs.edit().putString(KEY_AUTH_SIGNATURE, value).apply()
+            }
+
+            // Migrate server URL
+            val oldServerUrlKey = stringPreferencesKey("server_url")
+            prefs[oldServerUrlKey]?.let { value ->
+                encryptedPrefs.edit().putString(KEY_SERVER_URL, value).apply()
+            }
+
+            // Migrate public key
+            val oldPublicKeyKey = stringPreferencesKey("public_key")
+            prefs[oldPublicKeyKey]?.let { value ->
+                encryptedPrefs.edit().putString(KEY_PUBLIC_KEY, value).apply()
+            }
+
+            // Remove plaintext values from DataStore
+            context.authDataStore.edit { prefs ->
+                prefs.remove(oldSignatureKey)
+                prefs.remove(oldServerUrlKey)
+                prefs.remove(oldPublicKeyKey)
+            }
+
+            // Mark migration complete
+            encryptedPrefs.edit().putBoolean(KEY_MIGRATION_DONE, true).apply()
+
+            Timber.i("Migrated sensitive auth fields to EncryptedSharedPreferences")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to migrate sensitive fields to encrypted storage")
+        }
     }
 
     /**
@@ -114,6 +187,8 @@ class AuthorizationBackend @Inject constructor(
      * Falls back to local cache if server is unreachable.
      */
     private suspend fun verifyServerAuthorization(authId: String): Authorization? {
+        migrateIfNeeded()
+
         val serverUrl = getServerUrl()
         if (serverUrl.isBlank()) {
             Timber.w("No server URL configured, trying local cache")
@@ -166,25 +241,37 @@ class AuthorizationBackend @Inject constructor(
     }
 
     /**
-     * Persist authorization to DataStore.
+     * Persist authorization to storage.
+     * Non-sensitive fields go to DataStore; signature goes to EncryptedSharedPreferences.
      */
     suspend fun cacheAuthorization(authorization: Authorization) {
+        migrateIfNeeded()
+
+        // Non-sensitive fields → DataStore
         context.authDataStore.edit { prefs ->
             prefs[KEY_AUTH_ID] = authorization.authId
             prefs[KEY_AUTH_ISSUED_TO] = authorization.issuedTo
             prefs[KEY_AUTH_ISSUED_BY] = authorization.issuedBy
             prefs[KEY_AUTH_ISSUED_AT] = authorization.issuedAt.toString()
             prefs[KEY_AUTH_EXPIRES_AT] = authorization.expiresAt.toString()
-            prefs[KEY_AUTH_SIGNATURE] = authorization.signature
             prefs[KEY_LAST_VERIFIED] = Instant.now().toString()
         }
-        Timber.d("Cached authorization: ****${authorization.authId.takeLast(4)}")
+
+        // Sensitive field → EncryptedSharedPreferences
+        encryptedPrefs.edit()
+            .putString(KEY_AUTH_SIGNATURE, authorization.signature)
+            .apply()
+
+        Timber.d("Cached authorization (sensitive fields encrypted): ****${authorization.authId.takeLast(4)}")
     }
 
     /**
-     * Load last cached authorization from DataStore.
+     * Load last cached authorization from storage.
+     * Reads non-sensitive fields from DataStore and signature from EncryptedSharedPreferences.
      */
     suspend fun loadCachedAuthorization(expectedAuthId: String? = null): Authorization? {
+        migrateIfNeeded()
+
         val prefs = context.authDataStore.data.first()
         val cachedId = prefs[KEY_AUTH_ID] ?: return null
 
@@ -199,6 +286,9 @@ class AuthorizationBackend @Inject constructor(
             clearCachedAuthorization()
             return null
         }
+
+        // Read signature from encrypted storage
+        val signature = encryptedPrefs.getString(KEY_AUTH_SIGNATURE, "") ?: ""
 
         val now = Instant.now()
         val scope = TestScope(
@@ -225,13 +315,13 @@ class AuthorizationBackend @Inject constructor(
             expiresAt = expiresAt,
             authorizedActions = TestAction.entries.toSet(),
             scope = scope,
-            signature = prefs[KEY_AUTH_SIGNATURE] ?: "",
+            signature = signature,
             terms = listOf("Cached authorization — verify with server when online")
         )
     }
 
     /**
-     * Clear cached authorization from DataStore.
+     * Clear cached authorization from all storage locations.
      */
     suspend fun clearCachedAuthorization() {
         context.authDataStore.edit { prefs ->
@@ -240,20 +330,26 @@ class AuthorizationBackend @Inject constructor(
             prefs.remove(KEY_AUTH_ISSUED_BY)
             prefs.remove(KEY_AUTH_ISSUED_AT)
             prefs.remove(KEY_AUTH_EXPIRES_AT)
-            prefs.remove(KEY_AUTH_SIGNATURE)
             prefs.remove(KEY_LAST_VERIFIED)
         }
+
+        encryptedPrefs.edit()
+            .remove(KEY_AUTH_SIGNATURE)
+            .apply()
+
         Timber.d("Cleared cached authorization")
     }
 
     /**
-     * Save server URL configuration.
+     * Save server URL to encrypted storage.
      * Validates that the URL uses HTTPS for secure communication.
      */
     suspend fun setServerUrl(url: String): Result<Unit> {
+        migrateIfNeeded()
+
         val trimmed = url.trim()
         if (trimmed.isBlank()) {
-            context.authDataStore.edit { prefs -> prefs[KEY_SERVER_URL] = "" }
+            encryptedPrefs.edit().putString(KEY_SERVER_URL, "").apply()
             return Result.success(Unit)
         }
 
@@ -267,25 +363,27 @@ class AuthorizationBackend @Inject constructor(
             else -> "https://$trimmed"
         }
 
-        context.authDataStore.edit { prefs ->
-            prefs[KEY_SERVER_URL] = secureUrl
-        }
-        Timber.d("Server URL saved (HTTPS enforced): ${secureUrl.take(30)}...")
+        encryptedPrefs.edit()
+            .putString(KEY_SERVER_URL, secureUrl)
+            .apply()
+        Timber.d("Server URL saved (HTTPS enforced, encrypted): ${secureUrl.take(30)}...")
         return Result.success(Unit)
     }
 
     /**
-     * Get configured server URL.
+     * Get configured server URL from encrypted storage.
      */
     suspend fun getServerUrl(): String {
-        return context.authDataStore.data.first()[KEY_SERVER_URL] ?: ""
+        migrateIfNeeded()
+        return encryptedPrefs.getString(KEY_SERVER_URL, "") ?: ""
     }
 
     /**
-     * Save public key for signature verification.
+     * Save public key for signature verification to encrypted storage.
      */
     suspend fun setPublicKey(key: String) {
-        context.authDataStore.edit { prefs -> prefs[KEY_PUBLIC_KEY] = key }
+        migrateIfNeeded()
+        encryptedPrefs.edit().putString(KEY_PUBLIC_KEY, key).apply()
     }
 
     /**

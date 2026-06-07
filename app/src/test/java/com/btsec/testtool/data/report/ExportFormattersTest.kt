@@ -10,9 +10,12 @@ package com.btsec.testtool.data.report
 
 import com.btsec.testtool.TestHelpers
 import com.btsec.testtool.domain.model.*
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.Instant
 
@@ -21,6 +24,7 @@ import java.time.Instant
  * Covers JSON, HTML, CSV export paths including edge cases and injection prevention.
  *
  * Addresses GitHub issue #228: No tests for ExportFormatters.
+ * Addresses GitHub issue #237: JSON injection vulnerability in toJson().
  */
 class ExportFormattersTest {
 
@@ -94,46 +98,63 @@ class ExportFormattersTest {
     // ── JSON Tests ──
 
     @Test
+    @DisplayName("JSON output is valid parseable JSON")
+    fun toJson_producesValidJson() {
+        val json = formatters.toJson(testReport)
+        // Should parse without exception
+        val parsed = JSONObject(json)
+        assertEquals("report-001", parsed.getString("id"))
+    }
+
+    @Test
     @DisplayName("JSON contains all required fields")
     fun toJson_containsAllRequiredFields() {
-        val json = formatters.toJson(testReport)
+        val parsed = JSONObject(formatters.toJson(testReport))
 
-        assertTrue(json.contains("\"id\": \"report-001\""))
-        assertTrue(json.contains("\"authId\":"))
-        assertTrue(json.contains("\"title\":"))
-        assertTrue(json.contains("\"status\":"))
-        assertTrue(json.contains("\"executiveSummary\":"))
+        assertTrue(parsed.has("id"))
+        assertTrue(parsed.has("authId"))
+        assertTrue(parsed.has("title"))
+        assertTrue(parsed.has("status"))
+        assertTrue(parsed.has("executiveSummary"))
+        assertTrue(parsed.has("generatedAt"))
     }
 
     @Test
     @DisplayName("JSON contains target devices")
     fun toJson_containsTargetDevices() {
-        val json = formatters.toJson(testReport)
+        val parsed = JSONObject(formatters.toJson(testReport))
+        val devices = parsed.getJSONArray("targetDevices")
 
-        assertTrue(json.contains("\"targetDevices\": ["))
-        assertTrue(json.contains("AA:BB:CC:DD:EE:FF"))
-        assertTrue(json.contains("Test Device"))
+        assertEquals(1, devices.length())
+        val device = devices.getJSONObject(0)
+        assertEquals("AA:BB:CC:DD:EE:FF", device.getString("address"))
+        assertEquals("Test Device", device.getString("name"))
     }
 
     @Test
     @DisplayName("JSON contains vulnerabilities")
     fun toJson_containsVulnerabilities() {
-        val json = formatters.toJson(testReport)
+        val parsed = JSONObject(formatters.toJson(testReport))
+        val vulns = parsed.getJSONArray("vulnerabilities")
 
-        assertTrue(json.contains("\"vulnerabilities\": ["))
-        assertTrue(json.contains("CVE-2024-0001"))
-        assertTrue(json.contains("\"severity\":"))
-        assertTrue(json.contains("\"cvssScore\":"))
+        assertEquals(1, vulns.length())
+        val vuln = vulns.getJSONObject(0)
+        assertEquals("CVE-2024-0001", vuln.getString("cveId"))
+        assertTrue(vuln.has("name"))
+        assertTrue(vuln.has("severity"))
+        assertTrue(vuln.has("cvssScore"))
     }
 
     @Test
     @DisplayName("JSON contains findings")
     fun toJson_containsFindings() {
-        val json = formatters.toJson(testReport)
+        val parsed = JSONObject(formatters.toJson(testReport))
+        val findings = parsed.getJSONArray("findings")
 
-        assertTrue(json.contains("\"findings\": ["))
-        assertTrue(json.contains("\"category\":"))
-        assertTrue(json.contains("Unexpected responses detected"))
+        assertEquals(1, findings.length())
+        val finding = findings.getJSONObject(0)
+        assertEquals("UNEXPECTED_RESPONSE", finding.getString("category"))
+        assertEquals("Unexpected responses detected", finding.getString("description"))
     }
 
     @Test
@@ -143,9 +164,9 @@ class ExportFormattersTest {
             title = "Report with \"quotes\" and \\backslashes\\"
         )
         val json = formatters.toJson(reportWithSpecialChars)
+        val parsed = JSONObject(json)
 
-        assertTrue(json.contains("\\\"quotes\\\""))
-        assertTrue(json.contains("\\\\backslashes\\\\"))
+        assertEquals("Report with \"quotes\" and \\backslashes\\", parsed.getString("title"))
     }
 
     @Test
@@ -156,11 +177,11 @@ class ExportFormattersTest {
             vulnerabilities = emptyList(),
             findings = emptyList()
         )
-        val json = formatters.toJson(emptyReport)
+        val parsed = JSONObject(formatters.toJson(emptyReport))
 
-        assertTrue(json.contains("\"targetDevices\": ["))
-        assertTrue(json.contains("\"vulnerabilities\": ["))
-        assertTrue(json.contains("\"findings\": ["))
+        assertEquals(0, parsed.getJSONArray("targetDevices").length())
+        assertEquals(0, parsed.getJSONArray("vulnerabilities").length())
+        assertEquals(0, parsed.getJSONArray("findings").length())
     }
 
     @Test
@@ -170,9 +191,315 @@ class ExportFormattersTest {
             executiveSummary = "Line one\nLine two\nLine three"
         )
         val json = formatters.toJson(reportWithNewlines)
+        val parsed = JSONObject(json)
 
-        assertTrue(json.contains("\\n"))
-        assertFalse(json.contains("Line one\n"))
+        // JSONObject will have escaped the newlines; parsing back should give the original
+        assertEquals("Line one\nLine two\nLine three", parsed.getString("executiveSummary"))
+
+        // The raw JSON string must NOT contain a literal newline inside the string value
+        val summaryStart = json.indexOf("\"executiveSummary\"")
+        val valueStart = json.indexOf("\"", json.indexOf(":", summaryStart) + 1) + 1
+        val valueEnd = json.indexOf("\"", valueStart)
+        val rawValue = json.substring(valueStart, valueEnd)
+        assertFalse(rawValue.contains("\n"), "Raw JSON must not contain literal newlines")
+    }
+
+    @Test
+    @DisplayName("JSON handles device with null name using fallback")
+    fun toJson_handlesDeviceWithNullName() {
+        val baseDevice = TestHelpers.createTestBluetoothDevice()
+        val deviceWithNullName = baseDevice.copy(name = null)
+        val report = testReport.copy(targetDevices = listOf(deviceWithNullName))
+        val parsed = JSONObject(formatters.toJson(report))
+
+        assertEquals("Unknown", parsed.getJSONArray("targetDevices").getJSONObject(0).getString("name"))
+    }
+
+    // ── JSON Injection / Control Character Tests (Issue #237) ──
+
+    @Nested
+    @DisplayName("JSON injection and control character tests (#237)")
+    inner class JsonInjectionTests {
+
+        @Test
+        @DisplayName("Control characters in id field are safely escaped")
+        fun toJson_controlCharsInId_areSafe() {
+            val report = testReport.copy(
+                id = "report\u0001\u0002injected"
+            )
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            assertEquals("report\u0001\u0002injected", parsed.getString("id"))
+            // Ensure the raw JSON does not contain literal control characters
+            assertFalse(json.contains("\u0001"))
+            assertFalse(json.contains("\u0002"))
+        }
+
+        @Test
+        @DisplayName("Control characters in authId field are safely escaped")
+        fun toJson_controlCharsInAuthId_areSafe() {
+            val report = testReport.copy(
+                authId = "auth\t\u0000id"
+            )
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            assertEquals("auth\t\u0000id", parsed.getString("authId"))
+            assertFalse(json.contains("\u0000"))
+        }
+
+        @Test
+        @DisplayName("Control characters in title field are safely escaped")
+        fun toJson_controlCharsInTitle_areSafe() {
+            val report = testReport.copy(
+                title = "title\twith\ttabs"
+            )
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            assertEquals("title\twith\ttabs", parsed.getString("title"))
+            assertFalse(json.contains("\t"))
+        }
+
+        @Test
+        @DisplayName("Control characters in executiveSummary are safely escaped")
+        fun toJson_controlCharsInSummary_areSafe() {
+            val report = testReport.copy(
+                executiveSummary = "sum\u000Cmary\b\r\nwith\u0000controls"
+            )
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            assertEquals("sum\u000Cmary\b\r\nwith\u0000controls", parsed.getString("executiveSummary"))
+            // Raw JSON should not contain literal control characters (except escaped forms)
+            assertFalse(json.contains("\u0000"))
+            assertFalse(json.contains("\u000C"))
+            assertFalse(json.contains("\b"))
+        }
+
+        @Test
+        @DisplayName("JSON injection in device address is safely escaped")
+        fun toJson_injectionInDeviceAddress_isSafe() {
+            val maliciousDevice = TestHelpers.createTestBluetoothDevice(
+                address = "AA:BB:CC:DD:EE:FF\",\"evil\":\"pwned"
+            )
+            val report = testReport.copy(targetDevices = listOf(maliciousDevice))
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            val deviceObj = parsed.getJSONArray("targetDevices").getJSONObject(0)
+            assertEquals("AA:BB:CC:DD:EE:FF\",\"evil\":\"pwned", deviceObj.getString("address"))
+            assertFalse(deviceObj.has("evil"), "Injection must not create new JSON keys")
+        }
+
+        @Test
+        @DisplayName("JSON injection in device name is safely escaped")
+        fun toJson_injectionInDeviceName_isSafe() {
+            val maliciousDevice = TestHelpers.createTestBluetoothDevice(
+                name = "Device\",\"injected\":true,\"rest\":\""
+            )
+            val report = testReport.copy(targetDevices = listOf(maliciousDevice))
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            val deviceObj = parsed.getJSONArray("targetDevices").getJSONObject(0)
+            assertFalse(deviceObj.has("injected"), "Injection must not create new JSON keys")
+            assertEquals(
+                "Device\",\"injected\":true,\"rest\":\"",
+                deviceObj.getString("name")
+            )
+        }
+
+        @Test
+        @DisplayName("JSON injection in cveId field is safely escaped")
+        fun toJson_injectionInCveId_isSafe() {
+            val vuln = testReport.vulnerabilities.first().copy(
+                cveId = "CVE\",\"evil\":\"injected"
+            )
+            val report = testReport.copy(vulnerabilities = listOf(vuln))
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            val vulnObj = parsed.getJSONArray("vulnerabilities").getJSONObject(0)
+            assertFalse(vulnObj.has("evil"), "Injection must not create new JSON keys")
+            assertEquals("CVE\",\"evil\":\"injected", vulnObj.getString("cveId"))
+        }
+
+        @Test
+        @DisplayName("JSON injection in vulnerability name is safely escaped")
+        fun toJson_injectionInVulnName_isSafe() {
+            val vuln = testReport.vulnerabilities.first().copy(
+                name = "Vuln\",\"pwned\":true,\"x\":\""
+            )
+            val report = testReport.copy(vulnerabilities = listOf(vuln))
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            val vulnObj = parsed.getJSONArray("vulnerabilities").getJSONObject(0)
+            assertFalse(vulnObj.has("pwned"), "Injection must not create new JSON keys")
+        }
+
+        @Test
+        @DisplayName("JSON injection in severity field is safely escaped")
+        fun toJson_injectionInSeverity_isSafe() {
+            // severity is an enum, so this is naturally safe, but test the output
+            val json = formatters.toJson(testReport)
+            val parsed = JSONObject(json)
+
+            val vulnObj = parsed.getJSONArray("vulnerabilities").getJSONObject(0)
+            assertEquals("HIGH", vulnObj.getString("severity"))
+        }
+
+        @Test
+        @DisplayName("JSON injection in finding category is safely escaped")
+        fun toJson_injectionInFindingCategory_isSafe() {
+            // category is an enum, so naturally safe. Test the output.
+            val json = formatters.toJson(testReport)
+            val parsed = JSONObject(json)
+
+            val findingObj = parsed.getJSONArray("findings").getJSONObject(0)
+            assertEquals("UNEXPECTED_RESPONSE", findingObj.getString("category"))
+        }
+
+        @Test
+        @DisplayName("JSON injection in finding description is safely escaped")
+        fun toJson_injectionInFindingDescription_isSafe() {
+            val finding = testReport.findings.first().copy(
+                description = "finding\",\"evil\":true,\"x\":\""
+            )
+            val report = testReport.copy(findings = listOf(finding))
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            val findingObj = parsed.getJSONArray("findings").getJSONObject(0)
+            assertFalse(findingObj.has("evil"), "Injection must not create new JSON keys")
+        }
+
+        @Test
+        @DisplayName("Null byte in string field does not break JSON structure")
+        fun toJson_nullByteInField_doesNotBreakJson() {
+            val report = testReport.copy(
+                title = "Report\u0000with null"
+            )
+            val json = formatters.toJson(report)
+            // Must be parseable
+            val parsed = JSONObject(json)
+            assertEquals("Report\u0000with null", parsed.getString("title"))
+        }
+
+        @Test
+        @DisplayName("All ASCII control characters (0x00-0x1F) are safely handled")
+        fun toJson_allControlCharacters_areSafe() {
+            val controlChars = (0x00..0x1F).map { it.toChar() }.joinToString("")
+            val report = testReport.copy(
+                title = "prefix${controlChars}suffix"
+            )
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            assertEquals("prefix${controlChars}suffix", parsed.getString("title"))
+            // Raw JSON must not contain literal control chars (except whitespace in indentation)
+            // Check some specific ones
+            for (code in 0x00..0x1F) {
+                val ch = code.toChar()
+                // Tabs and newlines in the indentation are fine; inside values they must be escaped
+                if (ch == '\n' || ch == '\r' || ch == '\t') continue  // these appear in indentation
+                assertFalse(json.contains(ch), "Raw JSON must not contain literal control char U+${"%04X".format(code)}")
+            }
+        }
+
+        @Test
+        @DisplayName("Backslash and quote combination does not escape out of JSON")
+        fun toJson_backslashQuoteCombo_doesNotEscape() {
+            val report = testReport.copy(
+                executiveSummary = "\\\"},\"injected\":true,{\"x\":\""
+            )
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            assertFalse(parsed.has("injected"), "Must not allow injection via backslash-quote combo")
+            assertEquals("\\\"},\"injected\":true,{\"x\":\"", parsed.getString("executiveSummary"))
+        }
+
+        @Test
+        @DisplayName("Unicode surrogate pairs and special characters are preserved")
+        fun toJson_unicodeChars_arePreserved() {
+            val report = testReport.copy(
+                title = "Test 🔒 Security \u00e9\u00e8\u00ea Report"
+            )
+            val json = formatters.toJson(report)
+            val parsed = JSONObject(json)
+
+            assertEquals("Test 🔒 Security \u00e9\u00e8\u00ea Report", parsed.getString("title"))
+        }
+    }
+
+    // ── escapeJson helper tests ──
+
+    @Nested
+    @DisplayName("escapeJson helper completeness")
+    inner class EscapeJsonTests {
+
+        @Test
+        @DisplayName("Escapes double quotes")
+        fun escapeJson_escapesDoubleQuotes() {
+            assertEquals("\\\"test\\\"", formatters.escapeJson("\"test\""))
+        }
+
+        @Test
+        @DisplayName("Escapes backslashes")
+        fun escapeJson_escapesBackslashes() {
+            assertEquals("\\\\test\\\\", formatters.escapeJson("\\test\\"))
+        }
+
+        @Test
+        @DisplayName("Escapes newlines")
+        fun escapeJson_escapesNewlines() {
+            assertEquals("line1\\nline2", formatters.escapeJson("line1\nline2"))
+        }
+
+        @Test
+        @DisplayName("Escapes carriage returns")
+        fun escapeJson_escapesCarriageReturns() {
+            assertEquals("a\\rb", formatters.escapeJson("a\rb"))
+        }
+
+        @Test
+        @DisplayName("Escapes tabs")
+        fun escapeJson_escapesTabs() {
+            assertEquals("a\\tb", formatters.escapeJson("a\tb"))
+        }
+
+        @Test
+        @DisplayName("Escapes backspace")
+        fun escapeJson_escapesBackspace() {
+            assertEquals("a\\bb", formatters.escapeJson("a\bb"))
+        }
+
+        @Test
+        @DisplayName("Escapes form feed")
+        fun escapeJson_escapesFormFeed() {
+            assertEquals("a\\fb", formatters.escapeJson("a\u000Cb"))
+        }
+
+        @Test
+        @DisplayName("Escapes null byte")
+        fun escapeJson_escapesNullByte() {
+            assertEquals("a\\u0000b", formatters.escapeJson("a\u0000b"))
+        }
+
+        @Test
+        @DisplayName("Escapes other control characters")
+        fun escapeJson_escapesOtherControlChars() {
+            assertEquals("a\\u0001b\\u001fc", formatters.escapeJson("a\u0001b\u001Fc"))
+        }
+
+        @Test
+        @DisplayName("Does not escape normal characters")
+        fun escapeJson_doesNotEscapeNormalChars() {
+            assertEquals("hello world", formatters.escapeJson("hello world"))
+        }
     }
 
     // ── HTML Tests ──
@@ -266,6 +593,24 @@ class ExportFormattersTest {
         assertTrue(html.contains("class=\"high\""))
     }
 
+    @Test
+    @DisplayName("HTML omits vulnerability section when empty")
+    fun toHtml_omitsVulnerabilitySectionWhenEmpty() {
+        val report = testReport.copy(vulnerabilities = emptyList())
+        val html = formatters.toHtml(report)
+
+        assertFalse(html.contains("Vulnerabilities Detected"))
+    }
+
+    @Test
+    @DisplayName("HTML omits recommendations section when empty")
+    fun toHtml_omitsRecommendationsSectionWhenEmpty() {
+        val report = testReport.copy(recommendations = emptyList())
+        val html = formatters.toHtml(report)
+
+        assertFalse(html.contains("Recommendations</h2>"))
+    }
+
     // ── CSV Tests ──
 
     @Test
@@ -328,37 +673,6 @@ class ExportFormattersTest {
         assertTrue(csv.startsWith("Type,CVE/ID,"))
         val lines = csv.lines().filter { it.isNotBlank() }
         assertEquals(1, lines.size)
-    }
-
-    // ── Edge Cases ──
-
-    @Test
-    @DisplayName("JSON handles device with null name using fallback")
-    fun toJson_handlesDeviceWithNullName() {
-        val baseDevice = TestHelpers.createTestBluetoothDevice()
-        val deviceWithNullName = baseDevice.copy(name = null)
-        val report = testReport.copy(targetDevices = listOf(deviceWithNullName))
-        val json = formatters.toJson(report)
-
-        assertTrue(json.contains("Unknown"))
-    }
-
-    @Test
-    @DisplayName("HTML omits vulnerability section when empty")
-    fun toHtml_omitsVulnerabilitySectionWhenEmpty() {
-        val report = testReport.copy(vulnerabilities = emptyList())
-        val html = formatters.toHtml(report)
-
-        assertFalse(html.contains("Vulnerabilities Detected"))
-    }
-
-    @Test
-    @DisplayName("HTML omits recommendations section when empty")
-    fun toHtml_omitsRecommendationsSectionWhenEmpty() {
-        val report = testReport.copy(recommendations = emptyList())
-        val html = formatters.toHtml(report)
-
-        assertFalse(html.contains("Recommendations</h2>"))
     }
 
     @Test

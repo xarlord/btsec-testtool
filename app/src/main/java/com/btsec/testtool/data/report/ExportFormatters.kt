@@ -9,6 +9,8 @@
 package com.btsec.testtool.data.report
 
 import com.btsec.testtool.domain.model.*
+import org.json.JSONArray
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,57 +28,57 @@ class ExportFormatters @Inject constructor() {
 
     /**
      * Export report as JSON string.
+     *
+     * Uses JSONObject/JSONArray to build the output, ensuring all string values
+     * are properly escaped (control characters, special chars, etc.) and
+     * eliminating any risk of JSON injection via malformed field values.
      */
     fun toJson(report: SecurityReport): String {
-        val sb = StringBuilder()
-        sb.appendLine("{")
-        sb.appendLine("  \"id\": \"${report.id}\",")
-        sb.appendLine("  \"authId\": \"${report.authId}\",")
-        sb.appendLine("  \"title\": \"${escapeJson(report.title)}\",")
-        sb.appendLine("  \"generatedAt\": \"${report.generatedAt}\",")
-        sb.appendLine("  \"status\": \"${report.status}\",")
+        val root = JSONObject()
+        root.put("id", report.id)
+        root.put("authId", report.authId)
+        root.put("title", report.title)
+        root.put("generatedAt", report.generatedAt.toString())
+        root.put("status", report.status.name)
 
         // Target devices
-        sb.appendLine("  \"targetDevices\": [")
-        report.targetDevices.forEachIndexed { i, device ->
-            sb.append("    {\"address\": \"${device.address}\", \"name\": \"${escapeJson(device.name ?: "Unknown")}\"}")
-            if (i < report.targetDevices.lastIndex) sb.append(",")
-            sb.appendLine()
+        val devicesArray = JSONArray()
+        for (device in report.targetDevices) {
+            val deviceObj = JSONObject()
+            deviceObj.put("address", device.address)
+            deviceObj.put("name", device.name ?: "Unknown")
+            devicesArray.put(deviceObj)
         }
-        sb.appendLine("  ],")
+        root.put("targetDevices", devicesArray)
 
         // Vulnerabilities
-        sb.appendLine("  \"vulnerabilities\": [")
-        report.vulnerabilities.forEachIndexed { i, vuln ->
-            sb.appendLine("    {")
-            sb.appendLine("      \"cveId\": \"${vuln.cveId}\",")
-            sb.appendLine("      \"name\": \"${escapeJson(vuln.name)}\",")
-            sb.appendLine("      \"severity\": \"${vuln.severity}\",")
-            sb.appendLine("      \"cvssScore\": ${vuln.cvssScore}")
-            sb.append("    }")
-            if (i < report.vulnerabilities.lastIndex) sb.append(",")
-            sb.appendLine()
+        val vulnsArray = JSONArray()
+        for (vuln in report.vulnerabilities) {
+            val vulnObj = JSONObject()
+            vulnObj.put("cveId", vuln.cveId)
+            vulnObj.put("name", vuln.name)
+            vulnObj.put("severity", vuln.severity.name)
+            vulnObj.put("cvssScore", vuln.cvssScore)
+            vulnsArray.put(vulnObj)
         }
-        sb.appendLine("  ],")
+        root.put("vulnerabilities", vulnsArray)
 
         // Findings
-        sb.appendLine("  \"findings\": [")
-        report.findings.forEachIndexed { i, finding ->
-            sb.appendLine("    {")
-            sb.appendLine("      \"category\": \"${finding.category}\",")
-            sb.appendLine("      \"severity\": \"${finding.severity}\",")
-            sb.appendLine("      \"count\": ${finding.count},")
-            sb.appendLine("      \"description\": \"${escapeJson(finding.description)}\"")
-            sb.append("    }")
-            if (i < report.findings.lastIndex) sb.append(",")
-            sb.appendLine()
+        val findingsArray = JSONArray()
+        for (finding in report.findings) {
+            val findingObj = JSONObject()
+            findingObj.put("category", finding.category.name)
+            findingObj.put("severity", finding.severity.name)
+            findingObj.put("count", finding.count)
+            findingObj.put("description", finding.description)
+            findingsArray.put(findingObj)
         }
-        sb.appendLine("  ],")
+        root.put("findings", findingsArray)
 
         // Executive summary
-        sb.appendLine("  \"executiveSummary\": \"${escapeJson(report.executiveSummary)}\"")
-        sb.appendLine("}")
-        return sb.toString()
+        root.put("executiveSummary", report.executiveSummary)
+
+        return root.toString(2)
     }
 
     /**
@@ -111,7 +113,7 @@ class ExportFormatters @Inject constructor() {
             // Target devices
             appendLine("<h2>Target Devices</h2><table><tr><th>Address</th><th>Name</th><th>Type</th></tr>")
             report.targetDevices.forEach { device ->
-                appendLine("<tr><td>${device.address}</td><td>${escapeHtml(device.name ?: "Unknown")}</td><td>${device.type}</td></tr>")
+                appendLine("<tr><td>${escapeHtml(device.address)}</td><td>${escapeHtml(device.name ?: "Unknown")}</td><td>${escapeHtml(device.type.name)}</td></tr>")
             }
             appendLine("</table>")
 
@@ -121,7 +123,7 @@ class ExportFormatters @Inject constructor() {
                 appendLine("<tr><th>CVE</th><th>Name</th><th>Severity</th><th>CVSS</th></tr>")
                 report.vulnerabilities.forEach { vuln ->
                     val cssClass = vuln.severity.name.lowercase()
-                    appendLine("<tr><td>${vuln.cveId}</td><td>${escapeHtml(vuln.name)}</td><td class=\"$cssClass\">${vuln.severity}</td><td>${vuln.cvssScore}</td></tr>")
+                    appendLine("<tr><td>${escapeHtml(vuln.cveId ?: "")}</td><td>${escapeHtml(vuln.name)}</td><td class=\"$cssClass\">${vuln.severity}</td><td>${vuln.cvssScore}</td></tr>")
                 }
                 appendLine("</table>")
             }
@@ -130,7 +132,7 @@ class ExportFormatters @Inject constructor() {
             appendLine("<h2>Findings</h2><table><tr><th>Category</th><th>Severity</th><th>Count</th><th>Description</th></tr>")
             report.findings.forEach { finding ->
                 val cssClass = finding.severity.name.lowercase()
-                appendLine("<tr><td>${finding.category}</td><td class=\"$cssClass\">${finding.severity}</td><td>${finding.count}</td><td>${escapeHtml(finding.description)}</td></tr>")
+                appendLine("<tr><td>${escapeHtml(finding.category.name)}</td><td class=\"$cssClass\">${finding.severity}</td><td>${finding.count}</td><td>${escapeHtml(finding.description)}</td></tr>")
             }
             appendLine("</table>")
 
@@ -169,8 +171,39 @@ class ExportFormatters @Inject constructor() {
 
     // ── Helpers ──
 
-    private fun escapeJson(s: String): String =
-        s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
+    /**
+     * Escape a string for safe inclusion in JSON string values.
+     *
+     * Handles all characters that require escaping per RFC 8259 §7:
+     * quotation mark, reverse solidus, and all control characters (U+0000–U+001F).
+     *
+     * This method is retained for backward compatibility. New code should
+     * prefer [JSONObject]/[JSONArray] which handle escaping automatically.
+     */
+    internal fun escapeJson(s: String): String {
+        val sb = StringBuilder(s.length + 16)
+        for (ch in s) {
+            when (ch) {
+                '"' -> sb.append("\\\"")
+                '\\' -> sb.append("\\\\")
+                '\n' -> sb.append("\\n")
+                '\r' -> sb.append("\\r")
+                '\t' -> sb.append("\\t")
+                '\b' -> sb.append("\\b")
+                '\u000C' -> sb.append("\\f")  // form feed
+                else -> {
+                    if (ch.code < 0x20) {
+                        // Other control characters → \uXXXX
+                        sb.append("\\u")
+                        sb.append(String.format("%04x", ch.code))
+                    } else {
+                        sb.append(ch)
+                    }
+                }
+            }
+        }
+        return sb.toString()
+    }
 
     private fun escapeHtml(s: String): String =
         s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")

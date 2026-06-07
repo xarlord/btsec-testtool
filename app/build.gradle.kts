@@ -31,8 +31,8 @@ android {
         versionCode = Versions.versionCode
         versionName = Versions.versionName
 
-        // Test instrumentation
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Test instrumentation — use HiltTestRunner for @HiltAndroidTest support
+        testInstrumentationRunner = "com.btsec.testtool.HiltTestRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
 
         // Vector drawable support
@@ -333,6 +333,7 @@ dependencies {
     testImplementation("app.cash.turbine:turbine:${Versions.turbine}")
     testImplementation("com.google.truth:truth:${Versions.truth}")
     testImplementation("org.robolectric:robolectric:${Versions.robolectric}")
+    testImplementation("org.json:json:20231013")
 
     // Android Testing
     androidTestImplementation("androidx.test.ext:junit:${Versions.androidxJunit}")
