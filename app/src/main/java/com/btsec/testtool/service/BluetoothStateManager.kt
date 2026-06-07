@@ -165,6 +165,10 @@ class BluetoothStateManager @Inject constructor(
     }
 
     private fun registerReceiver() {
+       // Unregister existing receiver to prevent leaks on double-registration
+       receiver?.let { oldReceiver ->
+           try { context.unregisterReceiver(oldReceiver) } catch (_: Exception) { /* not registered */ }
+       }
        receiver = object : BroadcastReceiver() {
            override fun onReceive(ctx: Context, intent: Intent) {
                when (intent.action) {
@@ -185,5 +189,5 @@ class BluetoothStateManager @Inject constructor(
            }
        }
        context.registerReceiver(receiver!!, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
-    }
+   }
 }

@@ -64,33 +64,41 @@ class AuthorizationRepositoryImpl @Inject constructor(
     /**
      * Make real HTTP call to verification server.
      * POST to {serverUrl}/api/v1/verify with {"authId": "..."}
+     *
+     * Runs on [Dispatchers.IO] to avoid NetworkOnMainThreadException.
      */
-    private fun verifyWithServer(authId: String): Authorization? {
-        val url = java.net.URL("${serverUrl.trimEnd('/')}/api/v1/verify")
-        val connection = url.openConnection() as java.net.HttpURLConnection
-        try {
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.setRequestProperty("Accept", "application/json")
-            connection.connectTimeout = 10_000
-            connection.readTimeout = 15_000
-            connection.doOutput = true
+    private suspend fun verifyWithServer(authId: String): Authorization? =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val url = java.net.URL("${serverUrl.trimEnd('/')}/api/v1/verify")
+                val connection = url.openConnection() as java.net.HttpURLConnection
+                try {
+                    connection.requestMethod = "POST"
+                    connection.setRequestProperty("Content-Type", "application/json")
+                    connection.setRequestProperty("Accept", "application/json")
+                    connection.connectTimeout = 10_000
+                    connection.readTimeout = 15_000
+                    connection.doOutput = true
 
-            val payload = """{"authId":"$authId"}"""
-            connection.outputStream.use { it.write(payload.toByteArray()) }
+                    val payload = """{"authId":"$authId"}"""
+                    connection.outputStream.use { it.write(payload.toByteArray()) }
 
-            val responseCode = connection.responseCode
-            if (responseCode != 200) {
-                Timber.w( "Server returned HTTP $responseCode for auth verification")
-                return null
+                    val responseCode = connection.responseCode
+                    if (responseCode != 200) {
+                        Timber.w("Server returned HTTP $responseCode for auth verification")
+                        return@withContext null
+                    }
+
+                    val responseBody = connection.inputStream.bufferedReader().readText()
+                    parseServerResponse(authId, responseBody)
+                } finally {
+                    connection.disconnect()
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Server verification HTTP call failed")
+                null
             }
-
-            val responseBody = connection.inputStream.bufferedReader().readText()
-            return parseServerResponse(authId, responseBody)
-        } finally {
-            connection.disconnect()
         }
-    }
 
     private fun parseServerResponse(authId: String, json: String): Authorization? {
         // Parse server response and create Authorization object
@@ -228,9 +236,10 @@ class AuthorizationRepositoryImpl @Inject constructor(
 
     /**
      * Validate authorization ID format.
+     * Accepts both standard (BTSEC-YYYYMMDD-XXXXXXXX) and demo (BTSEC-DEMO-XXXXXXXX) formats.
      */
     private fun isValidAuthIdFormat(authId: String): Boolean {
-        return authId.matches(Regex("^BTSEC-\\d{8}-[A-Z0-9]{8}$"))
+        return authId.matches(Regex("^BTSEC-(\\d{8}|DEMO)-[A-Z0-9]{8}$"))
     }
 
     /**

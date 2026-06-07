@@ -70,7 +70,7 @@ private fun AuthorizationContent(
 ) {
     Scaffold(
         topBar = {
-            SmallTopAppBar(
+            TopAppBar(
                 title = { Text(stringResource(R.string.authorization_title)) }
             )
         }
