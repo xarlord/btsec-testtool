@@ -9,13 +9,25 @@
 package com.btsec.testtool.data.local
 
 import androidx.room.TypeConverter
+import com.btsec.testtool.domain.model.ByteArraySerializer
+import com.btsec.testtool.domain.model.InstantSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.contextual
 import java.time.Instant
 
 /**
  * JSON instance used by mapper extension functions.
+ * Includes contextual serializers for Instant and ByteArray.
  */
-internal val mapperJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+internal val mapperJson = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+    serializersModule = SerializersModule {
+        contextual(Instant::class, InstantSerializer)
+        contextual(ByteArray::class, ByteArraySerializer)
+    }
+}
 
 /**
  * Room TypeConverters for complex types.

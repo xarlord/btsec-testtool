@@ -326,8 +326,9 @@ class KeyExtractionRepositoryImpl @Inject constructor(
 
     override suspend fun supportsSecureConnections(device: BluetoothDevice): Boolean {
         return try {
-            val btDevice = bluetoothAdapter?.getRemoteDevice(device.address)
-            btDevice?.type != android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC
+            val adapter = bluetoothAdapter ?: return false
+            val btDevice = adapter.getRemoteDevice(device.address)
+            btDevice.type != android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC
         } catch (_: SecurityException) { false }
     }
 

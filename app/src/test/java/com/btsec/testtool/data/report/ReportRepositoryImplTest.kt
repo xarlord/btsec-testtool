@@ -222,7 +222,8 @@ class ReportRepositoryImplTest {
             description = "desc", severity = VulnerabilitySeverity.HIGH,
             cvssScore = 7.5, affectedDevice = device, discoveredAt = testInstant,
             category = VulnerabilityCategory.ENCRYPTION,
-            affectedBluetoothVersions = emptyList()
+            affectedBluetoothVersions = emptyList(),
+            mitigation = null
         )
 
         val result = repository.generateVulnerabilityReport("AUTH-001", listOf(vuln))

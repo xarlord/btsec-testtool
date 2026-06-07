@@ -15,6 +15,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.coVerify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -291,7 +292,7 @@ class FuzzingRepositoryImplTest {
             val saved = repository.getAllFuzzingResults().first()
             assertEquals(1, saved.size)
 
-            verify { bleFuzzEngine.executeFuzzing(any(), any(), any()) }
+            coVerify { bleFuzzEngine.executeFuzzing(any(), any(), any()) }
         }
     }
 

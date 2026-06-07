@@ -31,6 +31,8 @@ import com.btsec.testtool.domain.model.ReportPeriod
 import com.btsec.testtool.domain.model.ReportFinding
 import com.btsec.testtool.domain.model.Recommendation
 import com.btsec.testtool.domain.model.ReportAppendix
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import timber.log.Timber
 import java.time.Instant
 

@@ -8,11 +8,13 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
  * Represents a discovered Bluetooth device.
  */
+@Serializable
 data class BluetoothDevice(
     val address: String,              // MAC address
     val name: String?,                 // Device name (nullable)
@@ -21,11 +23,13 @@ data class BluetoothDevice(
     val bondState: BondState,          // Pairing state
     val rssi: Int?,                    // Signal strength (dBm)
     val txPower: Int?,                 // TX Power (dBm)
+    @Serializable(with = InstantSerializer::class)
     val firstSeen: Instant,            // First discovery timestamp
+    @Serializable(with = InstantSerializer::class)
     val lastSeen: Instant,             // Last seen timestamp
     val scanCount: Int = 1,            // Number of times discovered
     val services: List<String> = emptyList(),  // UUIDs of discovered services
-    val manufacturerData: Map<Int, ByteArray> = emptyMap()  // Company ID -> data
+    val manufacturerData: Map<Int, @Serializable(with = ByteArraySerializer::class) ByteArray> = emptyMap()  // Company ID -> data
 ) {
     /**
      * Check if this is a BLE device.
@@ -46,6 +50,7 @@ data class BluetoothDevice(
 /**
  * Bluetooth device type enumeration.
  */
+@Serializable
 enum class BluetoothType {
     BLE,           // Bluetooth Low Energy only
     CLASSIC,       // Classic Bluetooth only
@@ -56,6 +61,7 @@ enum class BluetoothType {
 /**
  * Bluetooth device class categories.
  */
+@Serializable
 enum class DeviceClass {
     COMPUTER,
     PHONE,
@@ -73,6 +79,7 @@ enum class DeviceClass {
 /**
  * Bond (pairing) state enumeration.
  */
+@Serializable
 enum class BondState {
     NONE,      // Not paired
     BONDING,   // Pairing in progress

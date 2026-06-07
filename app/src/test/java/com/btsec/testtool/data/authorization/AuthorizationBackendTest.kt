@@ -123,7 +123,7 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Accept sv1: prefix with mixed case hex")
         fun acceptMixedCaseHex() {
-            val sig = "${serverSigPrefix}aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123"
+            val sig = "${serverSigPrefix}aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123456789aAbBcCdDeEfF01234567"
             assertTrue(testHelper.isValidServerSignature(sig))
         }
 
@@ -479,6 +479,17 @@ class AuthorizationBackendTest {
  * without needing Android Context.
  */
 class SignatureTestHelper {
+    private fun parseTestActions(actionsStr: String): Set<TestAction> {
+        if (actionsStr.equals("all", ignoreCase = true)) {
+            return TestAction.entries.toSet()
+        }
+        return actionsStr.split(",")
+            .mapNotNull { name ->
+                TestAction.entries.find { it.name.equals(name.trim(), ignoreCase = true) }
+            }
+            .toSet()
+    }
+
     fun isValidServerSignature(signature: String): Boolean {
         if (signature.isBlank()) return false
         if (signature == "mock_signature") return false
@@ -498,14 +509,22 @@ class SignatureTestHelper {
         // Mirror the exact logic from AuthorizationBackend.parseServerResponse
         try {
             val root = org.json.JSONObject(json)
-            if (!root.optBoolean("authorized", false)) return null
+            if (!root.optBoolean("authorized", false)) {
+                return null
+            }
 
             val signature = root.optString("signature", "")
-            if (signature.isBlank()) return null
-            if (!isValidServerSignature(signature)) return null
+            if (signature.isBlank()) {
+                return null
+            }
+            if (!isValidServerSignature(signature)) {
+                return null
+            }
 
             val issuedTo = root.optString("issuedTo", "")
-            if (issuedTo.isBlank()) return null
+            if (issuedTo.isBlank()) {
+                return null
+            }
 
             val now = java.time.Instant.now()
             val expiresAtStr = root.optString("expiresAt", "")
@@ -515,7 +534,9 @@ class SignatureTestHelper {
                 now.plusSeconds(86400 * 30)
             }
 
-            if (now.isAfter(expiresAt)) return null
+            if (now.isAfter(expiresAt)) {
+                return null
+            }
 
             val scope = TestScope(
                 authId = authId,
@@ -527,7 +548,7 @@ class SignatureTestHelper {
                         location = null
                     )
                 ),
-                allowedActions = TestAction.entries.toSet(),
+                allowedActions = parseTestActions(root.optString("actions", "all")),
                 validFrom = now,
                 validUntil = expiresAt,
                 maxPacketsPerSecond = root.optInt("maxPacketsPerSecond", 100),

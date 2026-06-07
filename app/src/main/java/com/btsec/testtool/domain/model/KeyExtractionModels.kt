@@ -8,11 +8,14 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 import java.time.Instant
 
 /**
  * Key extraction target types.
  */
+@Serializable
 enum class KeyType {
     IRK,           // Identity Resolving Key
     LTK,           // Long Term Key
@@ -24,15 +27,18 @@ enum class KeyType {
 /**
  * Key extraction result.
  */
+@Serializable
 data class KeyExtractionResult(
     val id: String,
     val targetDevice: BluetoothDevice,
     val keyType: KeyType,
     val extracted: Boolean,
+    @Serializable(with = ByteArraySerializer::class)
     val keyValue: ByteArray?,          // Extracted key (encrypted storage)
     val method: ExtractionMethod,
     val confidence: ExtractionConfidence,
-    val timestamp: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val timestamp: @Contextual Instant,
     val notes: String? = null
 ) {
     /**
@@ -44,6 +50,7 @@ data class KeyExtractionResult(
 /**
  * Key extraction methods.
  */
+@Serializable
 enum class ExtractionMethod {
     PASSIVE_MONITORING,     // Monitor pairing traffic
     ACTIVE_PROMPT,          // Prompt device during pairing
@@ -59,6 +66,7 @@ enum class ExtractionMethod {
 /**
  * Extraction confidence levels.
  */
+@Serializable
 enum class ExtractionConfidence {
     CERTAIN,         // Definitely correct
     HIGH,            // Very likely correct

@@ -8,6 +8,8 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 import java.time.Instant
 
 /**
@@ -25,12 +27,13 @@ import java.time.Instant
  * @property scope Testing scope definition
  * @property signature Digital signature for verification
  */
+@Serializable
 data class Authorization(
     val authId: String,
     val issuedTo: String,
     val issuedBy: String,
-    val issuedAt: Instant,
-    val expiresAt: Instant,
+    val issuedAt: @Contextual Instant,
+    val expiresAt: @Contextual Instant,
     val authorizedActions: Set<TestAction>,
     val scope: TestScope,
     val signature: String,
@@ -40,6 +43,7 @@ data class Authorization(
 /**
  * Types of testing actions that can be authorized.
  */
+@Serializable
 enum class TestAction {
     SCAN_DEVICES,
     CONNECT_DEVICE,
@@ -57,15 +61,19 @@ enum class TestAction {
  * Defines what targets may be tested, what actions are allowed,
  * and time/other constraints.
  */
+@Serializable
 data class TestScope(
     val authId: String,
     val authorizedTargets: List<TargetDevice>,
     val allowedActions: Set<TestAction>,
-    val validFrom: Instant,
-    val validUntil: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val validFrom: @Contextual Instant,
+    @Serializable(with = InstantSerializer::class)
+    val validUntil: @Contextual Instant,
     val maxPacketsPerSecond: Int = 100,
     val requiresReport: Boolean = true,
-    val disclosureDeadline: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val disclosureDeadline: @Contextual Instant,
     val locationConstraints: String? = null,
     val requiresSupervision: Boolean = false,
     val excludedTargets: List<String> = emptyList()
@@ -114,6 +122,7 @@ data class TestScope(
 /**
  * Represents a target device for testing.
  */
+@Serializable
 data class TargetDevice(
     val identifier: String,      // MAC address or pattern
     val deviceType: DeviceType,
@@ -125,6 +134,7 @@ data class TargetDevice(
 /**
  * Device types for testing classification.
  */
+@Serializable
 enum class DeviceType {
     PHONE,
     TABLET,
@@ -139,11 +149,13 @@ enum class DeviceType {
 /**
  * Consent record for tracking user consent.
  */
+@Serializable
 data class ConsentRecord(
     val id: String,
     val authId: String,
     val action: String,
-    val timestamp: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val timestamp: @Contextual Instant,
     val authorized: Boolean,
     val deviceInfo: DeviceInfo,
     val userSignature: String? = null
@@ -152,6 +164,7 @@ data class ConsentRecord(
 /**
  * Device information for logging.
  */
+@Serializable
 data class DeviceInfo(
     val platform: String,
     val model: String,

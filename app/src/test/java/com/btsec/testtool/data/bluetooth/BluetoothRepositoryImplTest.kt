@@ -32,6 +32,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.coVerify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -364,7 +365,7 @@ class BluetoothRepositoryImplTest {
         @Test
         @DisplayName("createBond returns false when adapter returns null device")
         fun createBondReturnsFalseOnNullDevice() = runTest {
-            every { bluetoothAdapter.getRemoteDevice(any()) } returns null
+            every { bluetoothAdapter.getRemoteDevice(any<String>()) } returns null
             val result = repository.createBond(testDeviceAddress)
             assertFalse(result)
         }
@@ -372,7 +373,7 @@ class BluetoothRepositoryImplTest {
         @Test
         @DisplayName("removeBond returns false when adapter returns null device")
         fun removeBondReturnsFalseOnNullDevice() = runTest {
-            every { bluetoothAdapter.getRemoteDevice(any()) } returns null
+            every { bluetoothAdapter.getRemoteDevice(any<String>()) } returns null
             val result = repository.removeBond(testDeviceAddress)
             assertFalse(result)
         }
@@ -435,7 +436,7 @@ class BluetoothRepositoryImplTest {
 
             repository.logOperation(testOperation)
 
-            verify { bluetoothDao.insertOperation(any()) }
+            coVerify { bluetoothDao.insertOperation(any()) }
         }
 
         @Test
@@ -454,7 +455,7 @@ class BluetoothRepositoryImplTest {
 
             repository.clearOperationLogs()
 
-            verify { bluetoothDao.deleteAllOperations() }
+            coVerify { bluetoothDao.deleteAllOperations() }
         }
 
         @Test

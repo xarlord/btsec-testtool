@@ -8,11 +8,14 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 import java.time.Instant
 
 /**
  * Fuzzing configuration.
  */
+@Serializable
 data class FuzzConfig(
     val targetDevice: BluetoothDevice,
     val targetService: BleService?,    // Service to fuzz (null = all)
@@ -32,6 +35,7 @@ data class FuzzConfig(
 /**
  * Fuzzing methods.
  */
+@Serializable
 enum class FuzzMethod {
     BIT_FLIP,              // Flip individual bits
     BYTE_FLIP,             // Flip entire bytes
@@ -50,10 +54,12 @@ enum class FuzzMethod {
 /**
  * Fuzzing data patterns.
  */
+@Serializable
 data class FuzzDataPattern(
     val name: String,
     val description: String,
     val patternType: PatternType,
+    @Serializable(with = ByteArraySerializer::class)
     val data: ByteArray,
     val length: Int = data.size
 )
@@ -61,6 +67,7 @@ data class FuzzDataPattern(
 /**
  * Pattern types for fuzzing.
  */
+@Serializable
 enum class PatternType {
     MALFORMED,         // Malformed data
     OVERLONG,          // Excessively long data
@@ -76,11 +83,14 @@ enum class PatternType {
 /**
  * Fuzzing test result.
  */
+@Serializable
 data class FuzzResult(
     val id: String,
     val config: FuzzConfig,
-    val startTime: Instant,
-    val endTime: Instant?,
+    @Serializable(with = InstantSerializer::class)
+    val startTime: @Contextual Instant,
+    @Serializable(with = InstantSerializer::class)
+    val endTime: @Contextual Instant?,
     val status: FuzzStatus,
     val packetsSent: Int,
     val packetsReceived: Int,
@@ -111,6 +121,7 @@ data class FuzzResult(
 /**
  * Fuzzing status.
  */
+@Serializable
 enum class FuzzStatus {
     PENDING,
     RUNNING,
@@ -122,18 +133,22 @@ enum class FuzzStatus {
 /**
  * Fuzzing error record.
  */
+@Serializable
 data class FuzzError(
-    val timestamp: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val timestamp: @Contextual Instant,
     val packetNumber: Int,
     val errorCode: Int?,              // Android/error code
     val errorMessage: String,
     val severity: ErrorSeverity,
+    @Serializable(with = ByteArraySerializer::class)
     val packetData: ByteArray? = null  // Problematic packet
 )
 
 /**
  * Error severity levels.
  */
+@Serializable
 enum class ErrorSeverity {
     CRITICAL,     // Device crashed/rebooted
     HIGH,         // Device disconnected/error state
@@ -145,12 +160,16 @@ enum class ErrorSeverity {
 /**
  * Fuzzing finding (potential vulnerability).
  */
+@Serializable
 data class FuzzFinding(
-    val timestamp: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val timestamp: @Contextual Instant,
     val packetNumber: Int,
     val description: String,
     val severity: VulnerabilitySeverity,
+    @Serializable(with = ByteArraySerializer::class)
     val packetData: ByteArray?,
+    @Serializable(with = ByteArraySerializer::class)
     val response: ByteArray?,
     val category: FindingCategory,
     val reproducible: Boolean = false,
@@ -160,6 +179,7 @@ data class FuzzFinding(
 /**
  * Finding categories from fuzzing.
  */
+@Serializable
 enum class FindingCategory {
     CRASH,              // Device/service crash
     HANG,               // Device/service hang

@@ -8,16 +8,20 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 import java.time.Instant
 
 /**
  * Security assessment report.
  */
+@Serializable
 data class SecurityReport(
     val id: String,
     val authId: String,
     val title: String,
-    val generatedAt: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val generatedAt: @Contextual Instant,
     val testPeriod: ReportPeriod,
     val targetDevices: List<BluetoothDevice>,
     val vulnerabilities: List<Vulnerability>,
@@ -33,14 +37,18 @@ data class SecurityReport(
 /**
  * Report time period.
  */
+@Serializable
 data class ReportPeriod(
-    val start: Instant,
+    @Serializable(with = InstantSerializer::class)
+    val start: @Contextual Instant,
+    @Serializable(with = InstantSerializer::class)
     val end: Instant
 )
 
 /**
  * Report finding summary.
  */
+@Serializable
 data class ReportFinding(
     val category: FindingCategory,
     val severity: VulnerabilitySeverity,
@@ -52,6 +60,7 @@ data class ReportFinding(
 /**
  * Security recommendations.
  */
+@Serializable
 data class Recommendation(
     val priority: RecommendationPriority,
     val title: String,
@@ -64,6 +73,7 @@ data class Recommendation(
 /**
  * Recommendation priority levels.
  */
+@Serializable
 enum class RecommendationPriority {
     CRITICAL,
     HIGH,
@@ -74,6 +84,7 @@ enum class RecommendationPriority {
 /**
  * Report appendix information.
  */
+@Serializable
 data class ReportAppendix(
     val toolsUsed: List<String>,
     val testMethodology: String,
@@ -85,6 +96,7 @@ data class ReportAppendix(
 /**
  * Report status.
  */
+@Serializable
 enum class ReportStatus {
     DRAFT,
     REVIEW,
