@@ -31,6 +31,9 @@ import com.btsec.testtool.domain.model.ReportPeriod
 import com.btsec.testtool.domain.model.ReportFinding
 import com.btsec.testtool.domain.model.Recommendation
 import com.btsec.testtool.domain.model.ReportAppendix
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.builtins.ListSerializer
 import timber.log.Timber
 import java.time.Instant
 
@@ -81,8 +84,8 @@ fun FuzzResult.toEntity(): FuzzResultEntity {
         status = status.name,
         packetsSent = packetsSent,
         packetsReceived = packetsReceived,
-        errors = mapperJson.encodeToString(errors),
-        findings = mapperJson.encodeToString(findings),
+        errors = mapperJson.encodeToString(ListSerializer(FuzzError.serializer()), errors),
+        findings = mapperJson.encodeToString(ListSerializer(FuzzFinding.serializer()), findings),
         captureFile = captureFile,
         reportGenerated = reportGenerated
     )
@@ -215,14 +218,14 @@ fun SecurityReport.toEntity(): SecurityReportEntity {
         generatedAt = generatedAt.toEpochMilli(),
         testPeriodStart = testPeriod.start.toEpochMilli(),
         testPeriodEnd = testPeriod.end.toEpochMilli(),
-        targetDevices = mapperJson.encodeToString(targetDevices),
-        vulnerabilities = mapperJson.encodeToString(vulnerabilities),
-        fuzzingResults = mapperJson.encodeToString(fuzzingResults),
-        keyExtractionResults = mapperJson.encodeToString(keyExtractionResults),
+        targetDevices = mapperJson.encodeToString(ListSerializer(BluetoothDevice.serializer()), targetDevices),
+        vulnerabilities = mapperJson.encodeToString(ListSerializer(Vulnerability.serializer()), vulnerabilities),
+        fuzzingResults = mapperJson.encodeToString(ListSerializer(FuzzResult.serializer()), fuzzingResults),
+        keyExtractionResults = mapperJson.encodeToString(ListSerializer(KeyExtractionResult.serializer()), keyExtractionResults),
         executiveSummary = executiveSummary,
-        findings = mapperJson.encodeToString(findings),
-        recommendations = mapperJson.encodeToString(recommendations),
-        appendix = mapperJson.encodeToString(appendix),
+        findings = mapperJson.encodeToString(ListSerializer(ReportFinding.serializer()), findings),
+        recommendations = mapperJson.encodeToString(ListSerializer(Recommendation.serializer()), recommendations),
+        appendix = mapperJson.encodeToString(ReportAppendix.serializer(), appendix),
         status = status.name
     )
 }
