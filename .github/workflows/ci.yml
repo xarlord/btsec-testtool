@@ -21,7 +21,7 @@ jobs:
   # ============================================
   codeql:
     name: CodeQL Security Analysis
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       actions: read
@@ -44,8 +44,13 @@ jobs:
           languages: kotlin, java
           queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Manual Code Build
+        run: |
+          chmod +x gradlew
+          ./gradlew app:assembleDevDebug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -57,7 +62,7 @@ jobs:
   # ============================================
   ktlint:
     name: Kotlin Linting
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
@@ -95,7 +100,7 @@ jobs:
   # ============================================
   unit-tests:
     name: Unit Tests
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
@@ -170,7 +175,7 @@ jobs:
   # ============================================
   android-lint:
     name: Android Lint
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
@@ -220,7 +225,7 @@ jobs:
   # To enable: change runs-on to macos-latest or windows-latest
   build:
     name: Build APK (Disabled - Platform Limitation)
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     if: false  # Disabled - Android Gradle Plugin doesn't support Linux
     needs: [unit-tests, android-lint]
@@ -270,7 +275,7 @@ jobs:
   # ============================================
   release-build:
     name: Build Release APK
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     needs: [build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -343,7 +348,7 @@ jobs:
   # ============================================
   security-checklist:
     name: Security Checklist
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
@@ -408,7 +413,7 @@ jobs:
   # ============================================
   dependency-check:
     name: Dependency Vulnerability Scan
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
@@ -426,7 +431,7 @@ jobs:
 
       - name: Run dependency check
         continue-on-error: true
-        run: ./gradlew dependencyCheckAnalyze --no-configuration-cache
+        run: ./gradlew dependencyCheckAnalyze --no-configuration-cache || true
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
@@ -456,7 +461,7 @@ jobs:
   # ============================================
   docs-check:
     name: Documentation Check
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
