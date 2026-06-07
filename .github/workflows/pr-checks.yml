@@ -261,6 +261,33 @@ jobs:
           fi
 
   # ============================================
+  # TDD Enforcement — Tests Required for Changes
+  # ============================================
+  test-presence-check:
+    name: "🚦 Tests Required for Changes"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check test presence for changed files
+        run: |
+          python scripts/test-enforcement/check-test-presence.py \
+            --base ${{ github.base_ref }} \
+            --verbose
+
+  # ============================================
   # PR Labeler
   # ============================================
   label-pr:
