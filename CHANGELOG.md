@@ -1,3 +1,10 @@
+## [1.5.16](https://github.com/xarlord/btsec-testtool/compare/v1.5.15...v1.5.16) (2026-06-07)
+
+
+### Bug Fixes
+
+* **#234,#235,#236,#238,#239,#240:** review fixes — main-thread crash, /tmp paths, demo auth, version, receiver leak ([#241](https://github.com/xarlord/btsec-testtool/issues/241)) ([b0b5832](https://github.com/xarlord/btsec-testtool/commit/b0b5832abd6206528e9b435b3357edf02cf1b240)), closes [#236](https://github.com/xarlord/btsec-testtool/issues/236) [#235](https://github.com/xarlord/btsec-testtool/issues/235) [#239](https://github.com/xarlord/btsec-testtool/issues/239) [#234](https://github.com/xarlord/btsec-testtool/issues/234) [#238](https://github.com/xarlord/btsec-testtool/issues/238) [#240](https://github.com/xarlord/btsec-testtool/issues/240)
+
 ## [1.5.15](https://github.com/xarlord/btsec-testtool/compare/v1.5.14...v1.5.15) (2026-06-06)
 
 
