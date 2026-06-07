@@ -1,3 +1,10 @@
+## [1.5.19](https://github.com/xarlord/btsec-testtool/compare/v1.5.18...v1.5.19) (2026-06-07)
+
+
+### Bug Fixes
+
+* **#255:** fix kotlinx.serialization List serializer ambiguity in mappers ([dd7a605](https://github.com/xarlord/btsec-testtool/commit/dd7a605c89774fe502f006f9063e23d733a135c6))
+
 ## [1.5.18](https://github.com/xarlord/btsec-testtool/compare/v1.5.17...v1.5.18) (2026-06-07)
 
 
