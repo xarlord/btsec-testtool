@@ -118,79 +118,9 @@ private fun ReportsContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Summary Card
-        item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Report Summary", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-
-                    val summary = uiState.summary
-                    if (summary != null) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            StatChip("Total", summary.totalReports, Icons.Default.Description, "Total reports")
-                            StatChip("Draft", summary.draftReports, Icons.Default.Edit, "Draft reports")
-                            StatChip("Final", summary.finalReports, Icons.Default.CheckCircle, "Final reports")
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Text(
-                                "Critical Vulns: ${summary.criticalVulnerabilitiesTotal}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Red
-                            )
-                            Text(
-                                "High Vulns: ${summary.highVulnerabilitiesTotal}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFFFF6D00)
-                            )
-                            Text(
-                                "Pending: ${summary.pendingActions}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    } else {
-                        Text("No report data available", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
-        }
-
-        // Report List
+        item { SummaryCard(uiState.summary) }
         if (uiState.reports.isEmpty()) {
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(48.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.Default.Assessment,
-                            contentDescription = "No reports available",
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        Text("No reports yet", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "Generate your first security assessment report",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        FilledTonalButton(onClick = { onGenerate("Bluetooth Security Assessment", true, true, true) }) {
-                            Icon(Icons.Default.Add, contentDescription = "Generate first report")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Generate Report")
-                        }
-                    }
-                }
-            }
+            item { EmptyReportsView(onGenerate) }
         } else {
             items(uiState.reports, key = { it.id }) { report ->
                 ReportCard(
@@ -203,12 +133,93 @@ private fun ReportsContent(
         }
     }
 
-    // Generate Report Dialog
     if (showGenerateDialog) {
         GenerateReportDialog(
             onDismiss = onDismissDialog,
             onGenerate = onGenerate
         )
+    }
+}
+
+@Composable
+private fun SummaryCard(summary: ReportsSummary?) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Report Summary", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+
+            if (summary != null) {
+                SummaryStatsRow(summary)
+                Spacer(Modifier.height(8.dp))
+                SummaryVulnRow(summary)
+            } else {
+                Text("No report data available", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryStatsRow(summary: ReportsSummary) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        StatChip("Total", summary.totalReports, Icons.Default.Description, "Total reports")
+        StatChip("Draft", summary.draftReports, Icons.Default.Edit, "Draft reports")
+        StatChip("Final", summary.finalReports, Icons.Default.CheckCircle, "Final reports")
+    }
+}
+
+@Composable
+private fun SummaryVulnRow(summary: ReportsSummary) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Text(
+            "Critical Vulns: ${summary.criticalVulnerabilitiesTotal}",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Red
+        )
+        Text(
+            "High Vulns: ${summary.highVulnerabilitiesTotal}",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFFFF6D00)
+        )
+        Text(
+            "Pending: ${summary.pendingActions}",
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@Composable
+private fun EmptyReportsView(onGenerate: (String, Boolean, Boolean, Boolean) -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Default.Assessment,
+                contentDescription = "No reports available",
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.outline
+            )
+            Spacer(Modifier.height(16.dp))
+            Text("No reports yet", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Generate your first security assessment report",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(Modifier.height(16.dp))
+            FilledTonalButton(onClick = { onGenerate("Bluetooth Security Assessment", true, true, true) }) {
+                Icon(Icons.Default.Add, contentDescription = "Generate first report")
+                Spacer(Modifier.width(4.dp))
+                Text("Generate Report")
+            }
+        }
     }
 }
 
@@ -230,40 +241,57 @@ private fun ReportCard(
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                StatusBadge(report.status)
-                Spacer(Modifier.width(8.dp))
-                Text(report.title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            }
+            ReportCardHeader(report)
             Spacer(Modifier.height(4.dp))
-            Text(
-                "Generated: ${report.generatedAt}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                "Devices: ${report.targetDevices.size} • Vulns: ${report.vulnerabilities.size}",
-                style = MaterialTheme.typography.bodySmall
-            )
-
+            ReportCardDetails(report)
             Spacer(Modifier.height(8.dp))
+            ReportCardActions(onExport, onArchive, onDelete)
+        }
+    }
+}
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                FilledTonalButton(onClick = { onExport(ExportFormat.JSON) }, contentPadding = PaddingValues(horizontal = 8.dp)) {
-                    Text("JSON", style = MaterialTheme.typography.labelSmall)
-                }
-                OutlinedButton(onClick = { onExport(ExportFormat.HTML) }, contentPadding = PaddingValues(horizontal = 8.dp)) {
-                    Text("HTML", style = MaterialTheme.typography.labelSmall)
-                }
-                OutlinedButton(onClick = { onExport(ExportFormat.PDF) }, contentPadding = PaddingValues(horizontal = 8.dp)) {
-                    Text("PDF", style = MaterialTheme.typography.labelSmall)
-                }
-                IconButton(onClick = onArchive) {
-                    Icon(Icons.Default.Archive, contentDescription = "Archive report", modifier = Modifier.size(18.dp))
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete report", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
-                }
-            }
+@Composable
+private fun ReportCardHeader(report: SecurityReport) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        StatusBadge(report.status)
+        Spacer(Modifier.width(8.dp))
+        Text(report.title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun ReportCardDetails(report: SecurityReport) {
+    Text(
+        "Generated: ${report.generatedAt}",
+        style = MaterialTheme.typography.bodySmall
+    )
+    Text(
+        "Devices: ${report.targetDevices.size} • Vulns: ${report.vulnerabilities.size}",
+        style = MaterialTheme.typography.bodySmall
+    )
+}
+
+@Composable
+private fun ReportCardActions(
+    onExport: (ExportFormat) -> Unit,
+    onArchive: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        FilledTonalButton(onClick = { onExport(ExportFormat.JSON) }, contentPadding = PaddingValues(horizontal = 8.dp)) {
+            Text("JSON", style = MaterialTheme.typography.labelSmall)
+        }
+        OutlinedButton(onClick = { onExport(ExportFormat.HTML) }, contentPadding = PaddingValues(horizontal = 8.dp)) {
+            Text("HTML", style = MaterialTheme.typography.labelSmall)
+        }
+        OutlinedButton(onClick = { onExport(ExportFormat.PDF) }, contentPadding = PaddingValues(horizontal = 8.dp)) {
+            Text("PDF", style = MaterialTheme.typography.labelSmall)
+        }
+        IconButton(onClick = onArchive) {
+            Icon(Icons.Default.Archive, contentDescription = "Archive report", modifier = Modifier.size(18.dp))
+        }
+        IconButton(onClick = onDelete) {
+            Icon(Icons.Default.Delete, contentDescription = "Delete report", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
         }
     }
 }
@@ -309,21 +337,9 @@ private fun GenerateReportDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(checked = includeVulns, onCheckedChange = { includeVulns = it })
-                    Spacer(Modifier.width(8.dp))
-                    Text("Include Vulnerabilities")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(checked = includeFuzzing, onCheckedChange = { includeFuzzing = it })
-                    Spacer(Modifier.width(8.dp))
-                    Text("Include Fuzzing Results")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(checked = includeKeys, onCheckedChange = { includeKeys = it })
-                    Spacer(Modifier.width(8.dp))
-                    Text("Include Key Extraction")
-                }
+                IncludeToggle("Include Vulnerabilities", includeVulns) { includeVulns = it }
+                IncludeToggle("Include Fuzzing Results", includeFuzzing) { includeFuzzing = it }
+                IncludeToggle("Include Key Extraction", includeKeys) { includeKeys = it }
             }
         },
         confirmButton = {
@@ -337,6 +353,15 @@ private fun GenerateReportDialog(
     )
 }
 
+@Composable
+private fun IncludeToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Spacer(Modifier.width(8.dp))
+        Text(label)
+    }
+}
+
 @HiltViewModel
 class ReportsViewModel @Inject constructor(
     @ApplicationContext private val context: android.content.Context,
@@ -348,11 +373,19 @@ class ReportsViewModel @Inject constructor(
 
     init {
         _uiState.update { it.copy(isLoading = true) }
+        observeReports()
+        observeSummary()
+    }
+
+    private fun observeReports() {
         viewModelScope.launch {
             reportGenerationUseCase.getAllReports().collect { reports ->
                 _uiState.update { it.copy(reports = reports, isLoading = false) }
             }
         }
+    }
+
+    private fun observeSummary() {
         viewModelScope.launch {
             reportGenerationUseCase.getReportsSummary().collect { summary ->
                 _uiState.update { it.copy(summary = summary, isLoading = false) }

@@ -62,19 +62,7 @@ fun VulnScannerScreen(
     ) { padding ->
         when {
             uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(R.string.vuln_loading),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
+                VulnLoadingIndicator(padding)
             }
             uiState.error != null -> {
                 Column(modifier = Modifier.padding(padding)) {
@@ -98,6 +86,23 @@ fun VulnScannerScreen(
 }
 
 @Composable
+private fun VulnLoadingIndicator(padding: PaddingValues) {
+    Box(
+        modifier = Modifier.fillMaxSize().padding(padding),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.vuln_loading),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
 private fun VulnScannerContent(
     padding: PaddingValues,
     uiState: VulnScannerUiState,
@@ -112,198 +117,228 @@ private fun VulnScannerContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Scan Controls
-        item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.vuln_scan_title), style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
+        item { VulnScanControls(uiState, onStartScan, onStopScan) }
+        if (uiState.scanStatus == ScanStatus.RUNNING) {
+            item { VulnScanProgress(uiState) }
+        }
+        item { VulnDefinitionsSection(uiState) }
+        item { VulnDiscoveredSection(uiState, onVerify) }
+        item { VulnStatisticsCard(uiState) }
+    }
+}
 
+@Composable
+private fun VulnScanControls(
+    uiState: VulnScannerUiState,
+    onStartScan: () -> Unit,
+    onStopScan: () -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.vuln_scan_title), style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                stringResource(R.string.vuln_scan_description),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (uiState.scanStatus != ScanStatus.RUNNING) {
+                    FilledTonalButton(
+                        onClick = onStartScan,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.vuln_scan_all))
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = onStopScan,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.scanner_stop))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VulnScanProgress(uiState: VulnScannerUiState) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.vuln_scanning_progress), style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(8.dp))
+
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+
+            Spacer(Modifier.height(4.dp))
+
+            uiState.scanProgress?.let { progress ->
+                Text(
+                    stringResource(R.string.vuln_checking_progress, progress.vulnerabilitiesChecked, progress.totalVulnerabilities, progress.vulnerabilitiesFound),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                progress.currentVulnerability?.let { vuln ->
                     Text(
-                        stringResource(R.string.vuln_scan_description),
-                        style = MaterialTheme.typography.bodySmall
+                        stringResource(R.string.vuln_current, vuln.name),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    Spacer(Modifier.height(12.dp))
+                }
+            }
+        }
+    }
+}
 
+@Composable
+private fun VulnDefinitionsSection(uiState: VulnScannerUiState) {
+    if (uiState.definitions.isEmpty()) {
+        EmptyView(
+            message = stringResource(R.string.vuln_no_definitions),
+            icon = Icons.Default.BugReport
+        )
+    } else {
+        VulnDefinitionList(uiState)
+    }
+}
+
+@Composable
+private fun VulnDefinitionList(uiState: VulnScannerUiState) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.vuln_known_database), style = MaterialTheme.typography.titleMedium)
+        uiState.definitions.forEach { def ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        SeverityBadge(def.severity)
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            def.cveId,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(def.name, style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        def.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 3
+                    )
+                    Spacer(Modifier.height(4.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        if (uiState.scanStatus != ScanStatus.RUNNING) {
-                            FilledTonalButton(
-                                onClick = onStartScan,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
-                                Spacer(Modifier.width(4.dp))
-                                Text(stringResource(R.string.vuln_scan_all))
-                            }
-                        } else {
-                            OutlinedButton(
-                                onClick = onStopScan,
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                            ) {
-                                Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
-                                Spacer(Modifier.width(4.dp))
-                                Text(stringResource(R.string.scanner_stop))
-                            }
-                        }
+                        Text(stringResource(R.string.vuln_cvss_label, def.cvssScore.toString()), style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.vuln_year_label, def.yearDiscovered), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
         }
+    }
+}
 
-        // Scan Progress
-        if (uiState.scanStatus == ScanStatus.RUNNING) {
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(stringResource(R.string.vuln_scanning_progress), style = MaterialTheme.typography.titleSmall)
-                        Spacer(Modifier.height(8.dp))
+@Composable
+private fun VulnDiscoveredSection(
+    uiState: VulnScannerUiState,
+    onVerify: (String) -> Unit
+) {
+    if (uiState.discoveredVulns.isNotEmpty()) {
+        DiscoveredVulnList(uiState, onVerify)
+    } else if (uiState.scanStatus == ScanStatus.COMPLETED) {
+        EmptyView(
+            message = stringResource(R.string.vuln_none_discovered),
+            icon = Icons.Default.CheckCircle
+        )
+    }
+}
 
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-
-                        Spacer(Modifier.height(4.dp))
-
-                        uiState.scanProgress?.let { progress ->
-                            Text(
-                                stringResource(R.string.vuln_checking_progress, progress.vulnerabilitiesChecked, progress.totalVulnerabilities, progress.vulnerabilitiesFound),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            progress.currentVulnerability?.let { vuln ->
-                                Text(
-                                    stringResource(R.string.vuln_current, vuln.name),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+@Composable
+private fun DiscoveredVulnList(
+    uiState: VulnScannerUiState,
+    onVerify: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.vuln_discovered_title, uiState.discoveredVulns.size),
+            style = MaterialTheme.typography.titleMedium
+        )
+        uiState.discoveredVulns.forEach { vuln ->
+            DiscoveredVulnCard(vuln, onVerify)
         }
+    }
+}
 
-        // Known Vulnerability Definitions
-        if (uiState.definitions.isEmpty()) {
-            item {
-                EmptyView(
-                    message = stringResource(R.string.vuln_no_definitions),
-                    icon = Icons.Default.BugReport
-                )
+@Composable
+private fun DiscoveredVulnCard(vuln: Vulnerability, onVerify: (String) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = when (vuln.severity) {
+                VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
+                VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
+                VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
+                else -> MaterialTheme.colorScheme.surfaceVariant
             }
-        } else {
-            item {
-                Text(stringResource(R.string.vuln_known_database), style = MaterialTheme.typography.titleMedium)
+        )
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SeverityBadge(vuln.severity)
+                Spacer(Modifier.width(8.dp))
+                Text(vuln.name, style = MaterialTheme.typography.titleSmall)
             }
-
-            items(uiState.definitions) { def ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            SeverityBadge(def.severity)
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                def.cveId,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        Text(def.name, style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            def.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 3
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(stringResource(R.string.vuln_cvss_label, def.cvssScore.toString()), style = MaterialTheme.typography.bodySmall)
-                            Text(stringResource(R.string.vuln_year_label, def.yearDiscovered), style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
+            vuln.cveId?.let {
+                Text(it, style = MaterialTheme.typography.labelMedium)
             }
-        }
-
-        // Discovered Vulnerabilities
-        if (uiState.discoveredVulns.isNotEmpty()) {
-            item {
-                Text(
-                    stringResource(R.string.vuln_discovered_title, uiState.discoveredVulns.size),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-            items(uiState.discoveredVulns) { vuln ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = when (vuln.severity) {
-                            VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
-                            VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
-                            VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
-                            else -> MaterialTheme.colorScheme.surfaceVariant
-                        }
+            Text(vuln.description, style = MaterialTheme.typography.bodySmall, maxLines = 2)
+            Spacer(Modifier.height(4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (vuln.verified) {
+                    AssistChip(
+                        onClick = {},
+                        label = { Text("Verified") },
+                        leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = "Verified vulnerability", modifier = Modifier.size(16.dp)) }
                     )
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            SeverityBadge(vuln.severity)
-                            Spacer(Modifier.width(8.dp))
-                            Text(vuln.name, style = MaterialTheme.typography.titleSmall)
-                        }
-                        vuln.cveId?.let {
-                            Text(it, style = MaterialTheme.typography.labelMedium)
-                        }
-                        Text(vuln.description, style = MaterialTheme.typography.bodySmall, maxLines = 2)
-                        Spacer(Modifier.height(4.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (vuln.verified) {
-                                AssistChip(
-                                    onClick = {},
-                                    label = { Text("Verified") },
-                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = "Verified vulnerability", modifier = Modifier.size(16.dp)) }
-                                )
-                            }
-                            AssistChip(
-                                onClick = { onVerify(vuln.id) },
-                                label = { Text("Verify") },
-                                leadingIcon = { Icon(Icons.Default.FactCheck, contentDescription = "Verify vulnerability", modifier = Modifier.size(16.dp)) }
-                            )
-                        }
-                    }
                 }
-            }
-        } else if (uiState.scanStatus == ScanStatus.COMPLETED) {
-            item {
-                EmptyView(
-                    message = stringResource(R.string.vuln_none_discovered),
-                    icon = Icons.Default.CheckCircle
+                AssistChip(
+                    onClick = { onVerify(vuln.id) },
+                    label = { Text("Verify") },
+                    leadingIcon = { Icon(Icons.Default.FactCheck, contentDescription = "Verify vulnerability", modifier = Modifier.size(16.dp)) }
                 )
             }
         }
+    }
+}
 
-        // Statistics
-        item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.fuzzer_stats_title), style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    val stats = uiState.statistics
-                    if (stats != null) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                            StatItem(stringResource(R.string.vuln_critical), stats.criticalCount, Color.Red)
-                            StatItem(stringResource(R.string.vuln_high), stats.highCount, Color(0xFFFF6D00))
-                            StatItem(stringResource(R.string.vuln_medium), stats.mediumCount, Color(0xFFFFAB00))
-                            StatItem(stringResource(R.string.vuln_low), stats.lowCount, Color(0xFF4CAF50))
-                        }
-                    } else {
-                        Text(stringResource(R.string.vuln_no_scan_data), style = MaterialTheme.typography.bodySmall)
-                    }
+@Composable
+private fun VulnStatisticsCard(uiState: VulnScannerUiState) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.fuzzer_stats_title), style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            val stats = uiState.statistics
+            if (stats != null) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    StatItem(stringResource(R.string.vuln_critical), stats.criticalCount, Color.Red)
+                    StatItem(stringResource(R.string.vuln_high), stats.highCount, Color(0xFFFF6D00))
+                    StatItem(stringResource(R.string.vuln_medium), stats.mediumCount, Color(0xFFFFAB00))
+                    StatItem(stringResource(R.string.vuln_low), stats.lowCount, Color(0xFF4CAF50))
                 }
+            } else {
+                Text(stringResource(R.string.vuln_no_scan_data), style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -352,16 +387,30 @@ class VulnScannerViewModel @Inject constructor(
 
     init {
         _uiState.update { it.copy(isLoading = true) }
+        observeScanStatus()
+        observeScanProgress()
+        observeDefinitions()
+        observeDiscoveredVulns()
+        observeStatistics()
+    }
+
+    private fun observeScanStatus() {
         viewModelScope.launch {
             vulnScanningUseCase.getScanStatus().collect { status ->
                 _uiState.update { it.copy(scanStatus = status, isLoading = false) }
             }
         }
+    }
+
+    private fun observeScanProgress() {
         viewModelScope.launch {
             vulnScanningUseCase.getScanProgress().collect { progress ->
                 _uiState.update { it.copy(scanProgress = progress) }
             }
         }
+    }
+
+    private fun observeDefinitions() {
         viewModelScope.launch {
             try {
                 vulnScanningUseCase.getAllVulnerabilityDefinitions().collect { defs ->
@@ -371,11 +420,17 @@ class VulnScannerViewModel @Inject constructor(
                 _uiState.update { it.copy(error = e.message ?: "Failed to load definitions", isLoading = false) }
             }
         }
+    }
+
+    private fun observeDiscoveredVulns() {
         viewModelScope.launch {
             vulnScanningUseCase.getAllDiscoveredVulnerabilities().collect { vulns ->
                 _uiState.update { it.copy(discoveredVulns = vulns) }
             }
         }
+    }
+
+    private fun observeStatistics() {
         viewModelScope.launch {
             vulnScanningUseCase.getVulnerabilityStatistics().collect { stats ->
                 _uiState.update { it.copy(statistics = stats) }
@@ -406,7 +461,6 @@ class VulnScannerViewModel @Inject constructor(
 
     fun retry() {
         _uiState.update { it.copy(error = null, isLoading = true) }
-        // Re-trigger loading by re-collecting flows (they're already active via init)
         _uiState.update { it.copy(isLoading = false) }
     }
 }

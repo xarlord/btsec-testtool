@@ -48,208 +48,234 @@ fun SettingsScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Bluetooth Status Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Bluetooth Status", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
+        SettingsList(padding = padding, uiState = uiState, viewModel = viewModel)
+    }
+}
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                when (uiState.btState) {
-                                    BluetoothState.ON -> Icons.Default.Bluetooth
-                                    BluetoothState.OFF -> Icons.Default.BluetoothDisabled
-                                    else -> Icons.Default.BluetoothSearching
-                                },
-                                contentDescription = "Bluetooth status",
-                                tint = when (uiState.btState) {
-                                    BluetoothState.ON -> MaterialTheme.colorScheme.primary
-                                    BluetoothState.OFF -> MaterialTheme.colorScheme.error
-                                    else -> MaterialTheme.colorScheme.outline
-                                }
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                when (uiState.btState) {
-                                    BluetoothState.ON -> "Bluetooth Enabled"
-                                    BluetoothState.OFF -> "Bluetooth Disabled"
-                                    BluetoothState.TURNING_ON -> "Turning On..."
-                                    BluetoothState.TURNING_OFF -> "Turning Off..."
-                                    BluetoothState.UNAVAILABLE -> "Bluetooth Unavailable"
-                                }
-                            )
-                        }
+@Composable
+private fun SettingsList(
+    padding: PaddingValues,
+    uiState: SettingsUiState,
+    viewModel: SettingsViewModel
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item { BluetoothStatusCard(uiState) }
+        item { PermissionsCard(uiState, viewModel) }
+        item { AuthorizationCard(uiState, viewModel) }
+        item { DataManagementCard(viewModel) }
+        item { AboutCard() }
+    }
+}
 
-                        if (uiState.btState != BluetoothState.ON) {
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                "Bluetooth must be enabled for scanning and testing.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
+@Composable
+private fun BluetoothStatusCard(uiState: SettingsUiState) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Bluetooth Status", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    when (uiState.btState) {
+                        BluetoothState.ON -> Icons.Default.Bluetooth
+                        BluetoothState.OFF -> Icons.Default.BluetoothDisabled
+                        else -> Icons.Default.BluetoothSearching
+                    },
+                    contentDescription = "Bluetooth status",
+                    tint = when (uiState.btState) {
+                        BluetoothState.ON -> MaterialTheme.colorScheme.primary
+                        BluetoothState.OFF -> MaterialTheme.colorScheme.error
+                        else -> MaterialTheme.colorScheme.outline
                     }
-                }
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    when (uiState.btState) {
+                        BluetoothState.ON -> "Bluetooth Enabled"
+                        BluetoothState.OFF -> "Bluetooth Disabled"
+                        BluetoothState.TURNING_ON -> "Turning On..."
+                        BluetoothState.TURNING_OFF -> "Turning Off..."
+                        BluetoothState.UNAVAILABLE -> "Bluetooth Unavailable"
+                    }
+                )
             }
 
-            // Permissions Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Permissions", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
+            if (uiState.btState != BluetoothState.ON) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Bluetooth must be enabled for scanning and testing.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
 
-                        val perms = listOf(
-                            "Bluetooth Scan" to uiState.hasBtScan,
-                            "Bluetooth Connect" to uiState.hasBtConnect,
-                            "Location Access" to uiState.hasLocation,
-                            "Notifications" to true // Assume granted for settings
-                        )
-                        perms.forEach { (name, granted) ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    if (granted) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                                    contentDescription = if (granted) "Permission granted" else "Permission denied",
-                                    tint = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(name, modifier = Modifier.weight(1f))
-                                Text(
-                                    if (granted) "Granted" else "Denied",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
+@Composable
+private fun PermissionsCard(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Permissions", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
 
-                        if (!uiState.allPermissionsGranted) {
-                            Spacer(Modifier.height(8.dp))
-                            OutlinedButton(onClick = { viewModel.requestPermissions() }) {
-                                Text("Request Permissions")
-                            }
-                        }
-                    }
-                }
+            val perms = listOf(
+                "Bluetooth Scan" to uiState.hasBtScan,
+                "Bluetooth Connect" to uiState.hasBtConnect,
+                "Location Access" to uiState.hasLocation,
+                "Notifications" to true
+            )
+            perms.forEach { (name, granted) ->
+                PermissionRow(name, granted)
             }
 
-            // Authorization Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Authorization", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
-
-                        var serverUrl by remember { mutableStateOf(uiState.serverUrl) }
-                        OutlinedTextField(
-                            value = serverUrl,
-                            onValueChange = { serverUrl = it },
-                            label = { Text("Server URL") },
-                            placeholder = { Text("https://auth.btsec.example.com") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        FilledTonalButton(
-                            onClick = { viewModel.updateServerUrl(serverUrl) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(Icons.Default.Save, contentDescription = "Save settings")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Save Server URL")
-                        }
-
-                        Spacer(Modifier.height(12.dp))
-                        Divider()
-                        Spacer(Modifier.height(12.dp))
-
-                        Text("Demo Mode", style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            "Use BTSEC-DEMO-XXXXXXXX format for offline testing without server verification.",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = { viewModel.generateDemoAuth() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(Icons.Default.VpnKey, contentDescription = "Demo authorization")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Generate Demo Authorization ID")
-                        }
-
-                        if (uiState.demoAuthId != null) {
-                            Spacer(Modifier.height(8.dp))
-                            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-                                Text(
-                                    uiState.demoAuthId!!,
-                                    modifier = Modifier.padding(12.dp),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                    }
+            if (!uiState.allPermissionsGranted) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(onClick = { viewModel.requestPermissions() }) {
+                    Text("Request Permissions")
                 }
             }
+        }
+    }
+}
 
-            // Data Management Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Data Management", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
+@Composable
+private fun PermissionRow(name: String, granted: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        Icon(
+            if (granted) Icons.Default.CheckCircle else Icons.Default.Cancel,
+            contentDescription = if (granted) "Permission granted" else "Permission denied",
+            tint = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(name, modifier = Modifier.weight(1f))
+        Text(
+            if (granted) "Granted" else "Denied",
+            style = MaterialTheme.typography.labelSmall,
+            color = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+        )
+    }
+}
 
-                        OutlinedButton(
-                            onClick = { viewModel.clearAuthorization() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(Icons.Default.Logout, contentDescription = "Sign out")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Clear Authorization")
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = { viewModel.clearAllData() },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Icon(Icons.Default.DeleteForever, contentDescription = "Clear data")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Clear All Data")
-                        }
-                    }
-                }
+@Composable
+private fun AuthorizationCard(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Authorization", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+
+            ServerUrlSection(uiState, viewModel)
+            Divider(modifier = Modifier.padding(vertical = 12.dp))
+            DemoModeSection(uiState, viewModel)
+        }
+    }
+}
+
+@Composable
+private fun ServerUrlSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+    var serverUrl by remember { mutableStateOf(uiState.serverUrl) }
+    OutlinedTextField(
+        value = serverUrl,
+        onValueChange = { serverUrl = it },
+        label = { Text("Server URL") },
+        placeholder = { Text("https://auth.btsec.example.com") },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
+    Spacer(Modifier.height(8.dp))
+    FilledTonalButton(
+        onClick = { viewModel.updateServerUrl(serverUrl) },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(Icons.Default.Save, contentDescription = "Save settings")
+        Spacer(Modifier.width(4.dp))
+        Text("Save Server URL")
+    }
+}
+
+@Composable
+private fun DemoModeSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+    Text("Demo Mode", style = MaterialTheme.typography.titleSmall)
+    Text(
+        "Use BTSEC-DEMO-XXXXXXXX format for offline testing without server verification.",
+        style = MaterialTheme.typography.bodySmall
+    )
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(
+        onClick = { viewModel.generateDemoAuth() },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(Icons.Default.VpnKey, contentDescription = "Demo authorization")
+        Spacer(Modifier.width(4.dp))
+        Text("Generate Demo Authorization ID")
+    }
+
+    if (uiState.demoAuthId != null) {
+        Spacer(Modifier.height(8.dp))
+        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+            Text(
+                uiState.demoAuthId!!,
+                modifier = Modifier.padding(12.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun DataManagementCard(viewModel: SettingsViewModel) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Data Management", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = { viewModel.clearAuthorization() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Logout, contentDescription = "Sign out")
+                Spacer(Modifier.width(4.dp))
+                Text("Clear Authorization")
             }
-
-            // About Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("About", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
-                        Text("BTSec TestTool ${com.btsec.testtool.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
-                        Text("Bluetooth Security Testing Tool", style = MaterialTheme.typography.bodySmall)
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            "⚠️ This tool is for AUTHORIZED security testing only.\n" +
-                            "Unauthorized use is prohibited and may be illegal.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { viewModel.clearAllData() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(Icons.Default.DeleteForever, contentDescription = "Clear data")
+                Spacer(Modifier.width(4.dp))
+                Text("Clear All Data")
             }
+        }
+    }
+}
+
+@Composable
+private fun AboutCard() {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("About", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Text("BTSec TestTool ${com.btsec.testtool.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
+            Text("Bluetooth Security Testing Tool", style = MaterialTheme.typography.bodySmall)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "⚠️ This tool is for AUTHORIZED security testing only.\n" +
+                "Unauthorized use is prohibited and may be illegal.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
         }
     }
 }
@@ -264,11 +290,20 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
+        observeBluetoothState()
+        observePermissions()
+        loadInitialSettings()
+    }
+
+    private fun observeBluetoothState() {
         viewModelScope.launch {
             btStateManager.bluetoothState.collect { state ->
                 _uiState.update { it.copy(btState = state) }
             }
         }
+    }
+
+    private fun observePermissions() {
         viewModelScope.launch {
             btStateManager.permissionsGranted.collect { granted ->
                 _uiState.update { it.copy(allPermissionsGranted = granted) }
@@ -279,6 +314,9 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(hasLocation = loc) }
             }
         }
+    }
+
+    private fun loadInitialSettings() {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(

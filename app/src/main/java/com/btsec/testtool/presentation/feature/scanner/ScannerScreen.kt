@@ -21,18 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.btsec.testtool.R
 import com.btsec.testtool.domain.model.BluetoothDevice
-import com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
-import com.btsec.testtool.domain.usecase.ScanResult
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Scanner Screen - Bluetooth device scanning.
@@ -43,77 +34,95 @@ fun ScannerScreen(
     onBack: () -> Unit
 ) {
     val viewModel: ScannerViewModel = androidx.hilt.navigation.compose.hiltViewModel()
-    val isScanning = remember { mutableStateOf(false) }
-    val devices = remember { mutableStateOf(emptyList<BluetoothDevice>()) }
-    val error = remember { mutableStateOf<String?>(null) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.scanner_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_navigate_up)
-                        )
-                    }
-                }
-            )
+            ScannerTopBar(onBack = onBack)
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             ScanControls(
-                isScanning = isScanning.value,
-                deviceCount = devices.value.size,
-                onStartScan = {
-                    isScanning.value = true
-                    error.value = null
-                },
-                onStopScan = { isScanning.value = false }
+                isScanning = uiState.isScanning,
+                deviceCount = uiState.devices.size,
+                onStartScan = { viewModel.startScan(authId) },
+                onStopScan = { viewModel.stopScan() }
             )
             Spacer(modifier = Modifier.height(16.dp))
-            when {
-                error.value != null -> {
-                    ErrorView(
-                        error = error.value!!,
-                        onRetry = {
-                            error.value = null
-                            isScanning.value = true
-                        }
-                    )
-                }
-                isScanning.value -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator()
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = stringResource(R.string.scanner_scanning_bt),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-                devices.value.isEmpty() -> {
-                    EmptyView(
-                        message = stringResource(R.string.scanner_no_devices_hint),
-                        icon = Icons.Default.BluetoothSearching
-                    )
-                }
-                else -> {
-                    DeviceList(
-                        devices = devices.value,
-                        isScanning = isScanning.value,
-                        onDeviceSelected = { device ->
-                            viewModel.selectDevice(device.address)
-                        }
-                    )
-                }
+            ScannerContent(
+                uiState = uiState,
+                authId = authId,
+                viewModel = viewModel
+            )
+        }
+    }
+}
+
+@Composable
+private fun ScannerTopBar(onBack: () -> Unit) {
+    TopAppBar(
+        title = { Text(stringResource(R.string.scanner_title)) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(R.string.cd_navigate_up)
+                )
             }
+        }
+    )
+}
+
+@Composable
+private fun ScannerContent(
+    uiState: ScannerUiState,
+    authId: String,
+    viewModel: ScannerViewModel
+) {
+    when {
+        uiState.error != null -> {
+            ErrorView(
+                error = uiState.error!!,
+                onRetry = {
+                    viewModel.clearError()
+                    viewModel.startScan(authId)
+                }
+            )
+        }
+        uiState.isScanning -> {
+            ScanningIndicator()
+        }
+        uiState.devices.isEmpty() -> {
+            EmptyView(
+                message = stringResource(R.string.scanner_no_devices_hint),
+                icon = Icons.Default.BluetoothSearching
+            )
+        }
+        else -> {
+            DeviceList(
+                devices = uiState.devices,
+                isScanning = uiState.isScanning,
+                onDeviceSelected = { device ->
+                    viewModel.selectDevice(device.address)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ScanningIndicator() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.scanner_scanning_bt),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -238,85 +247,3 @@ fun ErrorView(
         }
     }
 }
-
-/**
- * ViewModel for the Scanner screen.
- */
-@HiltViewModel
-class ScannerViewModel @Inject constructor(
-    private val scanningUseCase: BluetoothScanningUseCase
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(ScannerUiState())
-    val uiState: StateFlow<ScannerUiState> = _uiState.asStateFlow()
-
-    init {
-        collectScanResults()
-    }
-
-    private fun collectScanResults() {
-        viewModelScope.launch {
-            scanningUseCase.getScanResults().collect { devices ->
-                _uiState.value = _uiState.value.copy(
-                    devices = devices,
-                    deviceCount = devices.size
-                )
-            }
-        }
-        viewModelScope.launch {
-            scanningUseCase.isScanning().collect { scanning ->
-                _uiState.value = _uiState.value.copy(isScanning = scanning)
-            }
-        }
-    }
-
-    fun startScan(authId: String) {
-        viewModelScope.launch {
-            when (val result = scanningUseCase.startScan()) {
-                is ScanResult.Started -> {
-                    // Scan started successfully
-                }
-                is ScanResult.ConsentRequired -> {
-                    _uiState.value = _uiState.value.copy(
-                    error = "Consent required for scanning"
-                    )
-                }
-                is ScanResult.NotAuthorized -> {
-                    _uiState.value = _uiState.value.copy(
-                        error = "Not authorized for scanning"
-                    )
-                }
-                is ScanResult.Error -> {
-                    _uiState.value = _uiState.value.copy(
-                        error = result.message
-                    )
-                }
-                else -> {}
-            }
-        }
-    }
-
-    fun stopScan() {
-        viewModelScope.launch {
-            scanningUseCase.stopScan()
-        }
-    }
-
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
-
-    fun selectDevice(address: String) {
-        scanningUseCase.selectDevice(address)
-    }
-}
-
-/**
- * UI state for the Scanner screen.
- */
-data class ScannerUiState(
-    val devices: List<com.btsec.testtool.domain.model.BluetoothDevice> = emptyList(),
-    val deviceCount: Int = 0,
-    val isScanning: Boolean = false,
-    val error: String? = null
-)

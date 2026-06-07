@@ -66,16 +66,7 @@ fun FuzzerScreen(
                 }
             }
             uiState.status == FuzzStatus.RUNNING && uiState.progress == null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(stringResource(R.string.fuzzer_starting), style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
+                FuzzerLoadingIndicator(padding)
             }
             else -> {
                 FuzzerContent(
@@ -89,6 +80,20 @@ fun FuzzerScreen(
                     onPause = { viewModel.pauseFuzzing() }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun FuzzerLoadingIndicator(padding: PaddingValues) {
+    Box(
+        modifier = Modifier.fillMaxSize().padding(padding),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(stringResource(R.string.fuzzer_starting), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -111,236 +116,284 @@ private fun FuzzerContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Selected Device Info
+        item { DeviceInfoCard(uiState) }
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (uiState.selectedDeviceName != null)
-                        MaterialTheme.colorScheme.primaryContainer
-                    else
-                        MaterialTheme.colorScheme.errorContainer
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Bluetooth,
-                        contentDescription = "Selected device",
-                        tint = if (uiState.selectedDeviceName != null)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = if (uiState.selectedDeviceName != null)
-                            "Target: ${uiState.selectedDeviceName}"
-                        else
-                            "No device selected — go to Scanner to select a device",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (uiState.selectedDeviceName != null)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
-            }
+            ConfigCard(uiState, onMethodChange, onPacketCountChange, onRateChange, onStart, onPause, onStop)
         }
-
-        // Configuration Section
-        item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.fuzzer_config_title), style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(12.dp))
-
-                    // Fuzz Method Selector
-                    var methodExpanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(expanded = methodExpanded, onExpandedChange = { methodExpanded = it }) {
-                        OutlinedTextField(
-                            value = uiState.selectedMethod.name,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.fuzzer_method_label)) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
-                            modifier = Modifier.fillMaxWidth().menuAnchor()
-                        )
-                        ExposedDropdownMenu(expanded = methodExpanded, onDismissRequest = { methodExpanded = false }) {
-                            FuzzMethod.entries.forEach { method ->
-                                DropdownMenuItem(
-                                    text = { Text(method.name.replace("_", " ")) },
-                                    onClick = {
-                                        onMethodChange(method)
-                                        methodExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-
-                    // Packet Count
-                    Text(stringResource(R.string.fuzzer_packet_count_label, uiState.packetCount))
-                    Slider(
-                        value = uiState.packetCount.toFloat(),
-                        onValueChange = { onPacketCountChange(it.toInt()) },
-                        valueRange = 10f..10000f
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    // Rate
-                    Text(stringResource(R.string.fuzzer_rate_label, uiState.packetsPerSecond))
-                    Slider(
-                        value = uiState.packetsPerSecond.toFloat(),
-                        onValueChange = { onRateChange(it.toInt()) },
-                        valueRange = 1f..100f
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    // Control Buttons
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        when (uiState.status) {
-                            FuzzStatus.PENDING, FuzzStatus.COMPLETED, FuzzStatus.STOPPED, FuzzStatus.ERROR -> {
-                                FilledTonalButton(
-                                    onClick = onStart,
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = "Start fuzzing")
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Start")
-                                }
-                            }
-                            FuzzStatus.RUNNING -> {
-                                FilledTonalButton(
-                                    onClick = onPause,
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(Icons.Default.Pause, contentDescription = "Pause fuzzing")
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Pause")
-                                }
-                                OutlinedButton(
-                                    onClick = onStop,
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                                ) {
-                                    Icon(Icons.Default.Stop, contentDescription = "Stop fuzzing")
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Stop")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Progress Section
         if (uiState.status == FuzzStatus.RUNNING || uiState.progress != null) {
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Progress", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
-
-                        val progressPct = uiState.progress?.getProgressPercentage()?.toFloat() ?: 0f
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-
-                        Spacer(Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Sent: ${uiState.progress?.packetsSent ?: 0}", style = MaterialTheme.typography.bodySmall)
-                            Text("Received: ${uiState.progress?.packetsReceived ?: 0}", style = MaterialTheme.typography.bodySmall)
-                            Text("Errors: ${uiState.progress?.errors ?: 0}", style = MaterialTheme.typography.bodySmall)
-                            Text("Findings: ${uiState.progress?.findings ?: 0}", style = MaterialTheme.typography.bodySmall)
-                        }
-
-                        Text(
-                            "${(progressPct).toInt()}% complete",
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-            }
+            item { ProgressCard(uiState) }
         }
+        item { FindingsSection(uiState) }
+        item { StatisticsCard(uiState) }
+    }
+}
 
-        // Findings Section
-        if (uiState.findings.isEmpty() && uiState.status == FuzzStatus.COMPLETED) {
-            item {
-                EmptyView(
-                    message = "No fuzzing findings. The target handled all packets without issues.",
-                    icon = Icons.Default.CheckCircle
+@Composable
+private fun DeviceInfoCard(uiState: FuzzerUiState) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (uiState.selectedDeviceName != null)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Bluetooth,
+                contentDescription = "Selected device",
+                tint = if (uiState.selectedDeviceName != null)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onErrorContainer
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = if (uiState.selectedDeviceName != null)
+                    "Target: ${uiState.selectedDeviceName}"
+                else
+                    "No device selected — go to Scanner to select a device",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (uiState.selectedDeviceName != null)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onErrorContainer
+            )
+        }
+    }
+}
+
+@Composable
+private fun ConfigCard(
+    uiState: FuzzerUiState,
+    onMethodChange: (FuzzMethod) -> Unit,
+    onPacketCountChange: (Int) -> Unit,
+    onRateChange: (Int) -> Unit,
+    onStart: () -> Unit,
+    onPause: () -> Unit,
+    onStop: () -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.fuzzer_config_title), style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(12.dp))
+
+            MethodSelector(uiState, onMethodChange)
+            Spacer(Modifier.height(8.dp))
+
+            PacketCountSlider(uiState, onPacketCountChange)
+            Spacer(Modifier.height(8.dp))
+
+            RateSlider(uiState, onRateChange)
+            Spacer(Modifier.height(12.dp))
+
+            ControlButtons(uiState, onStart, onPause, onStop)
+        }
+    }
+}
+
+@Composable
+private fun MethodSelector(uiState: FuzzerUiState, onMethodChange: (FuzzMethod) -> Unit) {
+    var methodExpanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(expanded = methodExpanded, onExpandedChange = { methodExpanded = it }) {
+        OutlinedTextField(
+            value = uiState.selectedMethod.name,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.fuzzer_method_label)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
+            modifier = Modifier.fillMaxWidth().menuAnchor()
+        )
+        ExposedDropdownMenu(expanded = methodExpanded, onDismissRequest = { methodExpanded = false }) {
+            FuzzMethod.entries.forEach { method ->
+                DropdownMenuItem(
+                    text = { Text(method.name.replace("_", " ")) },
+                    onClick = {
+                        onMethodChange(method)
+                        methodExpanded = false
+                    }
                 )
             }
-        } else if (uiState.findings.isNotEmpty()) {
-            item {
-                Text("Findings", style = MaterialTheme.typography.titleMedium)
-            }
-            items(uiState.findings) { finding ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = when (finding.severity) {
-                            VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
-                            VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
-                            VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
-                            else -> Color(0xFFF1F8E9)
-                        }
-                    )
+        }
+    }
+}
+
+@Composable
+private fun PacketCountSlider(uiState: FuzzerUiState, onPacketCountChange: (Int) -> Unit) {
+    Text(stringResource(R.string.fuzzer_packet_count_label, uiState.packetCount))
+    Slider(
+        value = uiState.packetCount.toFloat(),
+        onValueChange = { onPacketCountChange(it.toInt()) },
+        valueRange = 10f..10000f
+    )
+}
+
+@Composable
+private fun RateSlider(uiState: FuzzerUiState, onRateChange: (Int) -> Unit) {
+    Text(stringResource(R.string.fuzzer_rate_label, uiState.packetsPerSecond))
+    Slider(
+        value = uiState.packetsPerSecond.toFloat(),
+        onValueChange = { onRateChange(it.toInt()) },
+        valueRange = 1f..100f
+    )
+}
+
+@Composable
+private fun ControlButtons(
+    uiState: FuzzerUiState,
+    onStart: () -> Unit,
+    onPause: () -> Unit,
+    onStop: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        when (uiState.status) {
+            FuzzStatus.PENDING, FuzzStatus.COMPLETED, FuzzStatus.STOPPED, FuzzStatus.ERROR -> {
+                FilledTonalButton(
+                    onClick = onStart,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Warning,
-                                contentDescription = "Finding severity: ${finding.severity.name}",
-                                tint = when (finding.severity) {
-                                    VulnerabilitySeverity.CRITICAL -> Color.Red
-                                    VulnerabilitySeverity.HIGH -> Color(0xFFFF6D00)
-                                    VulnerabilitySeverity.MEDIUM -> Color(0xFFFFAB00)
-                                    else -> Color(0xFF4CAF50)
-                                },
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                finding.severity.name,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
-                        Text(finding.description, style = MaterialTheme.typography.bodyMedium)
-                        Text(
-                            "Category: ${finding.category.name.replace("_", " ")}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+                    Icon(Icons.Default.PlayArrow, contentDescription = "Start fuzzing")
+                    Spacer(Modifier.width(4.dp))
+                    Text("Start")
+                }
+            }
+            FuzzStatus.RUNNING -> {
+                FilledTonalButton(
+                    onClick = onPause,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Pause, contentDescription = "Pause fuzzing")
+                    Spacer(Modifier.width(4.dp))
+                    Text("Pause")
+                }
+                OutlinedButton(
+                    onClick = onStop,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Icon(Icons.Default.Stop, contentDescription = "Stop fuzzing")
+                    Spacer(Modifier.width(4.dp))
+                    Text("Stop")
                 }
             }
         }
+    }
+}
 
-        // Statistics Section
-        item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Statistics", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Text("Total Tests: ${uiState.statistics?.totalTests ?: 0}")
-                    Text("Total Packets Sent: ${uiState.statistics?.totalPacketsSent ?: 0}")
-                    Text("Avg Success Rate: ${"%.1f".format(uiState.statistics?.averageSuccessRate ?: 0.0)}%")
-                }
+@Composable
+private fun ProgressCard(uiState: FuzzerUiState) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Progress", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+
+            val progressPct = uiState.progress?.getProgressPercentage()?.toFloat() ?: 0f
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+
+            Spacer(Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Sent: ${uiState.progress?.packetsSent ?: 0}", style = MaterialTheme.typography.bodySmall)
+                Text("Received: ${uiState.progress?.packetsReceived ?: 0}", style = MaterialTheme.typography.bodySmall)
+                Text("Errors: ${uiState.progress?.errors ?: 0}", style = MaterialTheme.typography.bodySmall)
+                Text("Findings: ${uiState.progress?.findings ?: 0}", style = MaterialTheme.typography.bodySmall)
             }
+
+            Text(
+                "${(progressPct).toInt()}% complete",
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun FindingsSection(uiState: FuzzerUiState) {
+    if (uiState.findings.isEmpty() && uiState.status == FuzzStatus.COMPLETED) {
+        EmptyView(
+            message = "No fuzzing findings. The target handled all packets without issues.",
+            icon = Icons.Default.CheckCircle
+        )
+    } else if (uiState.findings.isNotEmpty()) {
+        FindingList(uiState)
+    }
+}
+
+@Composable
+private fun FindingList(uiState: FuzzerUiState) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Text("Findings", style = MaterialTheme.typography.titleMedium)
+        }
+        items(uiState.findings) { finding ->
+            FindingCard(finding)
+        }
+    }
+}
+
+@Composable
+private fun FindingCard(finding: FuzzFinding) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = when (finding.severity) {
+                VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
+                VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
+                VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
+                else -> Color(0xFFF1F8E9)
+            }
+        )
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = "Finding severity: ${finding.severity.name}",
+                    tint = when (finding.severity) {
+                        VulnerabilitySeverity.CRITICAL -> Color.Red
+                        VulnerabilitySeverity.HIGH -> Color(0xFFFF6D00)
+                        VulnerabilitySeverity.MEDIUM -> Color(0xFFFFAB00)
+                        else -> Color(0xFF4CAF50)
+                    },
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    finding.severity.name,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+            Text(finding.description, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "Category: ${finding.category.name.replace("_", " ")}",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatisticsCard(uiState: FuzzerUiState) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Statistics", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Text("Total Tests: ${uiState.statistics?.totalTests ?: 0}")
+            Text("Total Packets Sent: ${uiState.statistics?.totalPacketsSent ?: 0}")
+            Text("Avg Success Rate: ${"%.1f".format(uiState.statistics?.averageSuccessRate ?: 0.0)}%")
         }
     }
 }
@@ -355,26 +408,46 @@ class FuzzerViewModel @Inject constructor(
     val uiState: StateFlow<FuzzerUiState> = _uiState.asStateFlow()
 
     init {
+        observeFuzzingStatus()
+        observeFuzzingProgress()
+        observeFuzzingStatistics()
+        observeCriticalFindings()
+        observeSelectedDevice()
+    }
+
+    private fun observeFuzzingStatus() {
         viewModelScope.launch {
             fuzzingUseCase.getFuzzingStatus().collect { status ->
                 _uiState.update { it.copy(status = status) }
             }
         }
+    }
+
+    private fun observeFuzzingProgress() {
         viewModelScope.launch {
             fuzzingUseCase.getFuzzingProgress().collect { progress ->
                 _uiState.update { it.copy(progress = progress) }
             }
         }
+    }
+
+    private fun observeFuzzingStatistics() {
         viewModelScope.launch {
             fuzzingUseCase.getFuzzingStatistics().collect { stats ->
                 _uiState.update { it.copy(statistics = stats) }
             }
         }
+    }
+
+    private fun observeCriticalFindings() {
         viewModelScope.launch {
             fuzzingUseCase.getCriticalFindings().collect { findings ->
                 _uiState.update { it.copy(findings = findings) }
             }
         }
+    }
+
+    private fun observeSelectedDevice() {
         viewModelScope.launch {
             scanningUseCase.getSelectedDeviceAddress().collect { address ->
                 if (address != null) {

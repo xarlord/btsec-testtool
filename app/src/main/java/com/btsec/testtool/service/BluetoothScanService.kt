@@ -45,15 +45,14 @@ class BluetoothScanService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!validateAuthorization(intent)) {
             Timber.w( "Unauthorized intent received — stopping service. " +
-                "Intent action: ${intent?.action}, extras: ${intent?.extras?.keySet()}")
+                "Intent action: ${intent?.action}")
             stopSelf()
             return START_NOT_STICKY
         }
 
         when (intent?.action) {
             ACTION_START_SCAN -> {
-                val authId = intent.getStringExtra(EXTRA_AUTH_ID) ?: ""
-                Timber.i( "Starting authorized BLE scan with auth: ${authId.take(10)}***")
+                Timber.i( "Starting authorized BLE scan")
                 // Scan logic handled by BluetoothRepository via ViewModel
             }
             ACTION_STOP_SCAN -> {
@@ -85,7 +84,7 @@ class BluetoothScanService : Service() {
         }
 
         if (!AUTH_ID_PATTERN.matches(authId)) {
-            Timber.w( "Invalid auth ID format in scan intent: ${authId.take(10)}***")
+            Timber.w( "Invalid auth ID format in scan intent (length=${authId.length})")
             return false
         }
 

@@ -40,6 +40,7 @@ import com.btsec.testtool.domain.repository.ReportsSummary
 import com.btsec.testtool.domain.repository.DateRange
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -77,109 +78,136 @@ class ReportRepositoryImpl @Inject constructor(
     ): Flow<ReportGenerationProgress> {
         return flow {
             val reportId = generateId()
+            emitInitializingProgress(reportId)
+            emitStepProgress(reportId)
+            val report = try {
+                collectDataAndGenerateReport(authId, config, reportId)
+            } catch (e: Exception) {
+                Timber.e(e, "ReportGenerator failed, creating basic report")
+                createFallbackReport(reportId, authId, config, e)
+            }
+            saveReport(report)
+            emitCompletedProgress(reportId)
+        }
+    }
 
+    private suspend fun FlowCollector<ReportGenerationProgress>.emitInitializingProgress(reportId: String) {
+        emit(ReportGenerationProgress(
+            reportId = reportId,
+            status = ReportGenerationStatus.GENERATING,
+            currentStep = GenerationStep.INITIALIZING,
+            progressPercentage = 0,
+            estimatedCompletionTime = Instant.now().plusSeconds(30),
+            error = null
+        ))
+    }
+
+    private suspend fun FlowCollector<ReportGenerationProgress>.emitStepProgress(reportId: String) {
+        GenerationStep.entries.forEachIndexed { index, step ->
             emit(ReportGenerationProgress(
                 reportId = reportId,
                 status = ReportGenerationStatus.GENERATING,
-                currentStep = GenerationStep.INITIALIZING,
-                progressPercentage = 0,
-                estimatedCompletionTime = Instant.now().plusSeconds(30),
-                error = null
-            ))
-
-            // Use real report generator — collect data from Room
-            GenerationStep.entries.forEachIndexed { index, step ->
-                emit(ReportGenerationProgress(
-                    reportId = reportId,
-                    status = ReportGenerationStatus.GENERATING,
-                    currentStep = step,
-                    progressPercentage = ((index + 1) * 100 / GenerationStep.entries.size),
-                    estimatedCompletionTime = Instant.now().plusSeconds(15),
-                    error = null
-                ))
-            }
-
-            val report = try {
-                // Collect data from Room DAOs
-                val targetDevices = try {
-                    bluetoothDao.getAllDevices().first().toDomainDevices()
-                } catch (e: Exception) {
-                    Timber.w(e, "Failed to load devices for report")
-                    emptyList<BluetoothDevice>()
-                }
-                val vulnResults = try {
-                    vulnerabilityDao.getAllDefinitions().first().toDomainDefinitions().map { def ->
-                        VulnerabilityTestResult(
-                            vulnerability = def,
-                            detected = false,
-                            confidence = DetectionConfidence.LOW,
-                            details = "Included from vulnerability definitions database",
-                            evidence = emptyList(),
-                            timestamp = Instant.now()
-                        )
-                    }
-                } catch (e: Exception) {
-                    Timber.w(e, "Failed to load vulnerabilities for report")
-                    emptyList<VulnerabilityTestResult>()
-                }
-                val fuzzResults = try {
-                    fuzzingDao.getAllFuzzResults().first().toDomainFuzzResults()
-                } catch (e: Exception) {
-                    Timber.w(e, "Failed to load fuzz results for report")
-                    emptyList<FuzzResult>()
-                }
-                val keyResults = try {
-                    keyExtractionDao.getAllKeyExtractionResults().first().toDomainKeyResults()
-                } catch (e: Exception) {
-                    Timber.w(e, "Failed to load key extraction results for report")
-                    emptyList<KeyExtractionResult>()
-                }
-
-                reportGenerator.generateReport(
-                    authId = authId,
-                    config = config,
-                    targetDevices = targetDevices,
-                    vulnerabilityResults = vulnResults,
-                    fuzzingResults = fuzzResults,
-                    keyExtractionResults = keyResults
-                )
-            } catch (e: Exception) {
-                Timber.e(e, "ReportGenerator failed, creating basic report")
-                SecurityReport(
-                    id = reportId,
-                    authId = authId,
-                    title = config.title,
-                    generatedAt = Instant.now(),
-                    testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),
-                    targetDevices = emptyList(),
-                    vulnerabilities = emptyList(),
-                    fuzzingResults = emptyList(),
-                    keyExtractionResults = emptyList(),
-                    executiveSummary = "Report generation encountered an error: ${e.message}",
-                    findings = emptyList(),
-                    recommendations = emptyList(),
-                    appendix = ReportAppendix(
-                        toolsUsed = listOf("BTSec Test Tool v1.0.0"),
-                        testMethodology = "Standard Bluetooth security assessment",
-                        limitations = listOf("Report generator error: ${e.message}"),
-                        glossary = emptyMap(),
-                        references = emptyList()
-                    ),
-                    status = ReportStatus.DRAFT
-                )
-            }
-
-            saveReport(report)
-
-            emit(ReportGenerationProgress(
-                reportId = reportId,
-                status = ReportGenerationStatus.COMPLETED,
-                currentStep = GenerationStep.COMPLETED,
-                progressPercentage = 100,
-                estimatedCompletionTime = Instant.now(),
+                currentStep = step,
+                progressPercentage = ((index + 1) * 100 / GenerationStep.entries.size),
+                estimatedCompletionTime = Instant.now().plusSeconds(15),
                 error = null
             ))
         }
+    }
+
+    private suspend fun collectDataAndGenerateReport(
+        authId: String, config: ReportConfig, reportId: String
+    ): SecurityReport {
+        val targetDevices = loadTargetDevices()
+        val vulnResults = loadVulnerabilityResults()
+        val fuzzResults = loadFuzzResults()
+        val keyResults = loadKeyResults()
+
+        return reportGenerator.generateReport(
+            authId = authId,
+            config = config,
+            targetDevices = targetDevices,
+            vulnerabilityResults = vulnResults,
+            fuzzingResults = fuzzResults,
+            keyExtractionResults = keyResults
+        )
+    }
+
+    private suspend fun loadTargetDevices(): List<BluetoothDevice> {
+        return try {
+            bluetoothDao.getAllDevices().first().toDomainDevices()
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load devices for report")
+            emptyList()
+        }
+    }
+
+    private suspend fun loadVulnerabilityResults(): List<VulnerabilityTestResult> {
+        return try {
+            vulnerabilityDao.getAllDefinitions().first().toDomainDefinitions().map { def ->
+                VulnerabilityTestResult(
+                    vulnerability = def,
+                    detected = false,
+                    confidence = DetectionConfidence.LOW,
+                    details = "Included from vulnerability definitions database",
+                    evidence = emptyList(),
+                    timestamp = Instant.now()
+                )
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load vulnerabilities for report")
+            emptyList()
+        }
+    }
+
+    private suspend fun loadFuzzResults(): List<FuzzResult> {
+        return try {
+            fuzzingDao.getAllFuzzResults().first().toDomainFuzzResults()
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load fuzz results for report")
+            emptyList()
+        }
+    }
+
+    private suspend fun loadKeyResults(): List<KeyExtractionResult> {
+        return try {
+            keyExtractionDao.getAllKeyExtractionResults().first().toDomainKeyResults()
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load key extraction results for report")
+            emptyList()
+        }
+    }
+
+    private fun createFallbackReport(
+        reportId: String, authId: String, config: ReportConfig, e: Exception
+    ): SecurityReport {
+        return SecurityReport(
+            id = reportId, authId = authId, title = config.title,
+            generatedAt = Instant.now(),
+            testPeriod = ReportPeriod(Instant.now().minusSeconds(86400), Instant.now()),
+            targetDevices = emptyList(), vulnerabilities = emptyList(),
+            fuzzingResults = emptyList(), keyExtractionResults = emptyList(),
+            executiveSummary = "Report generation encountered an error: ${e.message}",
+            findings = emptyList(), recommendations = emptyList(),
+            appendix = ReportAppendix(
+                toolsUsed = listOf("BTSec Test Tool v1.0.0"),
+                testMethodology = "Standard Bluetooth security assessment",
+                limitations = listOf("Report generator error: ${e.message}"),
+                glossary = emptyMap(), references = emptyList()
+            ),
+            status = ReportStatus.DRAFT
+        )
+    }
+
+    private suspend fun FlowCollector<ReportGenerationProgress>.emitCompletedProgress(reportId: String) {
+        emit(ReportGenerationProgress(
+            reportId = reportId,
+            status = ReportGenerationStatus.COMPLETED,
+            currentStep = GenerationStep.COMPLETED,
+            progressPercentage = 100,
+            estimatedCompletionTime = Instant.now(),
+            error = null
+        ))
     }
 
     override suspend fun generateSummaryReport(
@@ -472,13 +500,40 @@ class ReportRepositoryImpl @Inject constructor(
         return Result.success(Unit)
     }
 
+    // SECURITY (Issue #231): apiKey must NEVER appear in logs, URL parameters, or error messages.
+    // It must ONLY be transmitted via the Authorization HTTP header.
     override suspend fun uploadReport(
         reportId: String,
         serverUrl: String,
         apiKey: String
     ): Result<String> {
-        // In production, would upload to server
-        return Result.success("upload_id")
+        // Validate inputs — reject blank/empty apiKey immediately
+        require(apiKey.isNotBlank()) { "apiKey must not be blank" }
+        require(reportId.isNotBlank()) { "reportId must not be blank" }
+        require(serverUrl.isNotBlank()) { "serverUrl must not be blank" }
+
+        // SECURITY: apiKey is used ONLY in the Authorization header below.
+        // It must never be appended as a URL query parameter or logged.
+        return try {
+            val report = reportDao.getReportById(reportId)
+            if (report == null) {
+                Timber.e("Upload failed: report not found")
+                return Result.failure(Exception("Report not found for upload"))
+            }
+
+            // In production, upload via HTTP with apiKey in Authorization header only:
+            //   connection.setRequestProperty("Authorization", "Bearer $apiKey")
+            //   Do NOT add apiKey to URL query string.
+            //   Do NOT log the apiKey or any portion of it.
+
+            Timber.i("Report upload initiated for report")
+            // Stub: return a placeholder upload ID
+            Result.success("upload_${generateId()}")
+        } catch (e: Exception) {
+            // SECURITY: Do NOT include apiKey in error message or logged exception
+            Timber.e(e, "Report upload failed")
+            Result.failure(e)
+        }
     }
 
     override fun getReportStatistics(): Flow<ReportStatistics> {
