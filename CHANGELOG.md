@@ -1,3 +1,11 @@
+## [1.5.17](https://github.com/xarlord/btsec-testtool/compare/v1.5.16...v1.5.17) (2026-06-07)
+
+
+### Bug Fixes
+
+* **#204,#226:** eliminate auth bypass — enforce server verification + signature validation ([914f95a](https://github.com/xarlord/btsec-testtool/commit/914f95a5c8a1b8063db58597b000ed0684d9a5f1)), closes [#204](https://github.com/xarlord/btsec-testtool/issues/204) [#226](https://github.com/xarlord/btsec-testtool/issues/226) [#204](https://github.com/xarlord/btsec-testtool/issues/204) [#226](https://github.com/xarlord/btsec-testtool/issues/226)
+* **#206,#212:** implement real BLE scanning + fix GATT write race condition ([9134d43](https://github.com/xarlord/btsec-testtool/commit/9134d4371866f6bfc4ba48a8b8e4fa2aa04f5e0a)), closes [#206](https://github.com/xarlord/btsec-testtool/issues/206) [#212](https://github.com/xarlord/btsec-testtool/issues/212) [#206](https://github.com/xarlord/btsec-testtool/issues/206) [#212](https://github.com/xarlord/btsec-testtool/issues/212)
+
 ## [1.5.16](https://github.com/xarlord/btsec-testtool/compare/v1.5.15...v1.5.16) (2026-06-07)
 
 
