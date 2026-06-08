@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.domain.repository
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
  * since this interface inherits all methods from its parent interfaces.
  *
  * Handles analysis and extraction of Bluetooth encryption keys.
- * This is for authorized security testing only.
+ * This is for AUTHORIZED security testing only.
  *
  * Supported key types:
  * - LTK (Long Term Key) - BLE encryption key
