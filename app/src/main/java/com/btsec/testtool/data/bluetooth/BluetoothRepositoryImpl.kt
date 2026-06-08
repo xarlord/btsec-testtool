@@ -882,7 +882,7 @@ class BluetoothRepositoryImpl @Inject constructor(
             } else {
                 BluetoothType.DUAL_MODE
             },
-            deviceClass = mapDeviceClass(device.bluetoothClass?.deviceClass),
+            deviceClass = device.bluetoothClass?.deviceClass?.let { mapDeviceClass(it) },
             bondState = when (device.bondState) {
                 AndroidBluetoothDevice.BOND_BONDED -> BondState.BONDED
                 AndroidBluetoothDevice.BOND_BONDING -> BondState.BONDING
@@ -918,20 +918,6 @@ class BluetoothRepositoryImpl @Inject constructor(
             services = emptyList(),
             manufacturerData = emptyMap()
         )
-    }
-
-    private fun mapDeviceClass(deviceClass: Int?): DeviceClass? {
-        if (deviceClass == null) return null
-        return when ((deviceClass shr 8) and 0x1F) {
-            1 -> DeviceClass.COMPUTER
-            2 -> DeviceClass.PHONE
-            4 -> DeviceClass.AUDIO_VIDEO
-            5 -> DeviceClass.PERIPHERAL
-            7 -> DeviceClass.WEARABLE
-            8 -> DeviceClass.TOY
-            9 -> DeviceClass.HEALTH
-            else -> DeviceClass.UNCATEGORIZED
-        }
     }
 
     private fun mapGattService(service: android.bluetooth.BluetoothGattService): BleService {

@@ -46,7 +46,7 @@ fun android.bluetooth.BluetoothDevice.toDomainModel(): com.btsec.testtool.domain
     )
 }
 
-private fun mapDeviceClass(deviceClass: Int): DeviceClass {
+internal fun mapDeviceClass(deviceClass: Int): DeviceClass {
     // Major class mapping from Bluetooth spec
     return when ((deviceClass shr 8) and 0x1F) {
         1 -> DeviceClass.COMPUTER
