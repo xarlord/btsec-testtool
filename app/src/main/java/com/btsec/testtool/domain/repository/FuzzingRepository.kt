@@ -12,181 +12,20 @@ import com.btsec.testtool.domain.model.*
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Repository for fuzzing operations.
+ * Composite repository for fuzzing operations.
+ *
+ * Extends [FuzzingReader] and [FuzzingWriter] to provide the full set of
+ * fuzzing capabilities while adhering to the Interface Segregation Principle
+ * (ISP). Existing implementations remain compatible since this interface
+ * inherits all methods from its parent interfaces.
  *
  * Handles Bluetooth protocol fuzzing to discover vulnerabilities.
  * All fuzzing must be authorized before execution.
+ *
+ * @see FuzzingReader
+ * @see FuzzingWriter
  */
-interface FuzzingRepository {
-
-    // ========== Fuzzing Operations ==========
-
-    /**
-     * Start a fuzzing test with the given configuration.
-     *
-     * @param config Fuzzing configuration
-     * @return Flow of fuzzing progress updates
-     */
-    fun startFuzzing(config: FuzzConfig): Flow<FuzzProgress>
-
-    /**
-     * Stop the currently running fuzzing test.
-     */
-    suspend fun stopFuzzing(): Result<Unit>
-
-    /**
-     * Pause the current fuzzing test.
-     */
-    suspend fun pauseFuzzing(): Result<Unit>
-
-    /**
-     * Resume a paused fuzzing test.
-     */
-    suspend fun resumeFuzzing(): Result<Unit>
-
-    /**
-     * Get the current fuzzing status.
-     */
-    fun getFuzzingStatus(): Flow<FuzzStatus>
-
-    /**
-     * Get the current fuzzing progress.
-     */
-    fun getFuzzingProgress(): Flow<FuzzProgress?>
-
-    // ========== Fuzzing Results ==========
-
-    /**
-     * Save a fuzzing result.
-     */
-    suspend fun saveFuzzingResult(result: FuzzResult): Result<Unit>
-
-    /**
-     * Get a fuzzing result by ID.
-     */
-    suspend fun getFuzzingResult(id: String): FuzzResult?
-
-    /**
-     * Get all fuzzing results.
-     */
-    fun getAllFuzzingResults(): Flow<List<FuzzResult>>
-
-    /**
-     * Get fuzzing results for a specific device.
-     */
-    fun getFuzzingResultsForDevice(deviceAddress: String): Flow<List<FuzzResult>>
-
-    /**
-     * Get fuzzing results within a date range.
-     */
-    fun getFuzzingResultsInRange(start: java.time.Instant, end: java.time.Instant): Flow<List<FuzzResult>>
-
-    /**
-     * Delete a fuzzing result.
-     */
-    suspend fun deleteFuzzingResult(id: String): Result<Unit>
-
-    // ========== Fuzzing Findings ==========
-
-    /**
-     * Get findings from a specific fuzzing test.
-     */
-    fun getFindingsForResult(resultId: String): Flow<List<FuzzFinding>>
-
-    /**
-     * Get all findings of a specific severity or higher.
-     */
-    fun getFindingsBySeverity(minSeverity: VulnerabilitySeverity): Flow<List<FuzzFinding>>
-
-    /**
-     * Get findings by category.
-     */
-    fun getFindingsByCategory(category: FindingCategory): Flow<List<FuzzFinding>>
-
-    // ========== Fuzzing Patterns ==========
-
-    /**
-     * Get available fuzzing data patterns.
-     */
-    fun getAvailablePatterns(): Flow<List<FuzzDataPattern>>
-
-    /**
-     * Add a custom fuzzing pattern.
-     */
-    suspend fun addPattern(pattern: FuzzDataPattern): Result<Unit>
-
-    /**
-     * Remove a fuzzing pattern.
-     */
-    suspend fun removePattern(patternName: String): Result<Unit>
-
-    /**
-     * Get fuzzing patterns for a specific category.
-     */
-    suspend fun getPatternsForType(type: PatternType): List<FuzzDataPattern>
-
-    // ========== Predefined Patterns ==========
-
-    /**
-     * Get known exploit patterns from CVE database.
-     * These are patterns from known vulnerabilities.
-     */
-    suspend fun getKnownExploitPatterns(): List<FuzzDataPattern>
-
-    /**
-     * Get boundary value patterns for testing.
-     */
-    suspend fun getBoundaryPatterns(): List<FuzzDataPattern>
-
-    /**
-     * Get format string patterns.
-     */
-    suspend fun getFormatStringPatterns(): List<FuzzDataPattern>
-
-    /**
-     * Get buffer overflow patterns.
-     */
-    suspend fun getBufferOverflowPatterns(): List<FuzzDataPattern>
-
-    // ========== Fuzzing Statistics ==========
-
-    /**
-     * Get fuzzing statistics summary.
-     */
-    fun getFuzzingStatistics(): Flow<FuzzingStatistics>
-
-    /**
-     * Get statistics for a specific device.
-     */
-    suspend fun getStatisticsForDevice(deviceAddress: String): DeviceFuzzingStatistics
-
-    // ========== Rate Limiting ==========
-
-    /**
-     * Check if fuzzing rate complies with authorization limits.
-     *
-     * @param packetsPerSecond Requested rate
-     * @return true if rate is within authorized limits
-     */
-    suspend fun isRateAllowed(packetsPerSecond: Int): Boolean
-
-    /**
-     * Get maximum allowed packets per second from authorization.
-     */
-    suspend fun getMaxAllowedRate(): Int
-
-    // ========== Logging ==========
-
-    /**
-     * Log a fuzzing operation for audit purposes.
-     */
-    suspend fun logFuzzingOperation(operation: FuzzingOperation)
-
-    /**
-     * Get fuzzing operation logs.
-     */
-    fun getFuzzingLogs(): Flow<List<FuzzingOperation>>
-}
+interface FuzzingRepository : FuzzingReader, FuzzingWriter
 
 /**
  * Fuzzing progress information.
