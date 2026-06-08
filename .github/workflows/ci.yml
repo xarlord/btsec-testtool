@@ -97,6 +97,10 @@ jobs:
     name: Unit Tests
     runs-on: macos-latest
     timeout-minutes: 30
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -144,7 +148,7 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          report_paths: '**/build/test-results/test*UnitTest/**/*.xml'
+          report_paths: '**/build/test-results/test*UnitTest/*.xml'
           detailed_summary: true
           include_passed: true
 
@@ -166,6 +170,10 @@ jobs:
     name: Android Lint
     runs-on: macos-latest
     timeout-minutes: 30
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout repository
