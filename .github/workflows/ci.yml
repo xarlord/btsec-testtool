@@ -48,7 +48,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build project manually
-        run: ./gradlew app:assembleDevDebug
+        run: ./gradlew app:assembleDevDebug --no-daemon
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
