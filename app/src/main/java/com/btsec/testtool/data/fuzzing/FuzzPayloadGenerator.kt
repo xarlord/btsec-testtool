@@ -13,6 +13,7 @@ package com.btsec.testtool.data.fuzzing
 import com.btsec.testtool.domain.model.FuzzDataPattern
 import com.btsec.testtool.domain.model.FuzzMethod
 import com.btsec.testtool.domain.model.PatternType
+import java.security.SecureRandom
 import java.util.Random
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,7 +40,7 @@ class FuzzPayloadGenerator @Inject constructor() {
 
     /** Generates [count] payloads for the given [method]. */
     fun generatePayloads(method: FuzzMethod, count: Int, seed: Long?, validPacket: ByteArray? = null): List<ByteArray> {
-        val rng = seed?.let(::Random) ?: Random()
+        val rng: Random = seed?.let { Random(it) } ?: SecureRandom()
         return when (method) {
             FuzzMethod.BIT_FLIP -> bitFlip(rng, count, validPacket)
             FuzzMethod.BYTE_FLIP -> byteFlip(rng, count, validPacket)
