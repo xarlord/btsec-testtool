@@ -1,0 +1,3 @@
+## 2026-02-08 - Added Keyboard Done Action to Auth Form
+**Learning:** Incorporating `KeyboardOptions(imeAction = ImeAction.Done)` and `KeyboardActions` with `LocalFocusManager.clearFocus()` significantly improves form submission UX on Android by removing the need to manually dismiss the keyboard. However, one must explicitly add the same validation logic in `onDone` as the primary submit button so invalid input doesn't bypass constraints.
+**Action:** Always add keyboard actions on text inputs that lead to a primary action on a screen, making sure to reuse the identical enablement logic used for the submit button.
