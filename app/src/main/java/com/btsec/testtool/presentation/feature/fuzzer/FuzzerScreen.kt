@@ -289,7 +289,7 @@ private fun FuzzerContent(
             item {
                 Text("Findings", style = MaterialTheme.typography.titleMedium)
             }
-            items(uiState.findings) { finding ->
+            items(uiState.findings, key = { "${it.timestamp}_${it.packetNumber}" }) { finding ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(

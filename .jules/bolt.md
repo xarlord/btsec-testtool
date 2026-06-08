@@ -1,0 +1,3 @@
+## 2025-02-18 - Jetpack Compose LazyColumn Keys
+**Learning:** In this codebase, multiple complex screens (e.g., FuzzerScreen, KeyExtractionScreen, ScannerScreen, VulnScannerScreen) render dynamic lists using Jetpack Compose's `LazyColumn` without specifying stable `key` parameters for their `items()`. This can lead to significant unnecessary recompositions and potential state loss when items are dynamically added, removed, or reordered, degrading scroll performance and overall responsiveness.
+**Action:** Always verify if `LazyColumn` or `LazyRow` items are using unique, stable keys (like IDs or addresses) rather than defaulting to positional keys, especially for lists displaying real-time scanning or testing results.

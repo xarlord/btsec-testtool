@@ -156,7 +156,7 @@ private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean, onDe
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(devices) { device ->
+        items(devices, key = { it.address }) { device ->
             DeviceCard(device = device, onClick = { onDeviceSelected(device) })
         }
     }

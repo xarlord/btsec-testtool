@@ -273,7 +273,7 @@ private fun KeyExtractionContent(
             }
         } else if (uiState.results.isNotEmpty()) {
             item { Text("Extraction Results", style = MaterialTheme.typography.titleMedium) }
-            items(uiState.results) { result ->
+            items(uiState.results, key = { it.id }) { result ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.padding(12.dp),

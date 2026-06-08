@@ -197,7 +197,7 @@ private fun VulnScannerContent(
                 Text(stringResource(R.string.vuln_known_database), style = MaterialTheme.typography.titleMedium)
             }
 
-            items(uiState.definitions) { def ->
+            items(uiState.definitions, key = { it.cveId }) { def ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -237,7 +237,7 @@ private fun VulnScannerContent(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
-            items(uiState.discoveredVulns) { vuln ->
+            items(uiState.discoveredVulns, key = { it.id }) { vuln ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
