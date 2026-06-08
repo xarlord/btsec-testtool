@@ -8,62 +8,68 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
  * Security assessment report.
  */
+@Serializable
 data class SecurityReport(
     val id: String,
     val authId: String,
     val title: String,
-    val generatedAt: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val generatedAt: Instant,
     val testPeriod: ReportPeriod,
-    val targetDevices: List<BluetoothDevice>,
-    val vulnerabilities: List<Vulnerability>,
-    val fuzzingResults: List<FuzzResult>,
-    val keyExtractionResults: List<KeyExtractionResult>,
-    val executiveSummary: String,
-    val findings: List<ReportFinding>,
-    val recommendations: List<Recommendation>,
+    val targetDevices: List<BluetoothDevice> = emptyList(),
+    val vulnerabilities: List<Vulnerability> = emptyList(),
+    val fuzzingResults: List<FuzzResult> = emptyList(),
+    val keyExtractionResults: List<KeyExtractionResult> = emptyList(),
+    val executiveSummary: String = "",
+    val findings: List<ReportFinding> = emptyList(),
+    val recommendations: List<Recommendation> = emptyList(),
     val appendix: ReportAppendix,
-    val status: ReportStatus
+    val status: ReportStatus = ReportStatus.DRAFT
 )
 
 /**
  * Report time period.
  */
+@Serializable
 data class ReportPeriod(
-    val start: Instant,
-    val end: Instant
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val start: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val end: Instant
 )
 
 /**
  * Report finding summary.
  */
+@Serializable
 data class ReportFinding(
     val category: FindingCategory,
     val severity: VulnerabilitySeverity,
-    val count: Int,
-    val description: String,
-    val affectedDevices: List<String>  // Device addresses
+    val count: Int = 0,
+    val description: String = "",
+    val affectedDevices: List<String> = emptyList()  // Device addresses
 )
 
 /**
  * Security recommendations.
  */
+@Serializable
 data class Recommendation(
-    val priority: RecommendationPriority,
-    val title: String,
-    val description: String,
-    val affectedDevices: List<String>,
-    val implementation: String,
-    val verification: String
+    val priority: RecommendationPriority = RecommendationPriority.MEDIUM,
+    val title: String = "",
+    val description: String = "",
+    val affectedDevices: List<String> = emptyList(),
+    val implementation: String = "",
+    val verification: String = ""
 )
 
 /**
  * Recommendation priority levels.
  */
+@Serializable
 enum class RecommendationPriority {
     CRITICAL,
     HIGH,
@@ -74,17 +80,19 @@ enum class RecommendationPriority {
 /**
  * Report appendix information.
  */
+@Serializable
 data class ReportAppendix(
-    val toolsUsed: List<String>,
-    val testMethodology: String,
-    val limitations: List<String>,
-    val glossary: Map<String, String>,
-    val references: List<String>
+    val toolsUsed: List<String> = emptyList(),
+    val testMethodology: String = "",
+    val limitations: List<String> = emptyList(),
+    val glossary: Map<String, String> = emptyMap(),
+    val references: List<String> = emptyList()
 )
 
 /**
  * Report status.
  */
+@Serializable
 enum class ReportStatus {
     DRAFT,
     REVIEW,

@@ -8,27 +8,30 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
  * Packet capture data.
  */
+@Serializable
 data class PacketCapture(
     val id: String,
     val deviceAddress: String,
-    val startTime: Instant,
-    val endTime: Instant?,
-    val packetCount: Int,
-    val fileType: CaptureFileType,
-    val filePath: String,
-    val fileSizeBytes: Long,
-    val protocols: List<String>,  // Protocols seen
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val startTime: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val endTime: Instant? = null,
+    val packetCount: Int = 0,
+    val fileType: CaptureFileType = CaptureFileType.CUSTOM,
+    val filePath: String = "",
+    val fileSizeBytes: Long = 0L,
+    val protocols: List<String> = emptyList(),  // Protocols seen
     val notes: String? = null
 )
 
 /**
  * Packet capture file types.
  */
+@Serializable
 enum class CaptureFileType {
     PCAP,          // Wireshark PCAP
     PCAPNG,        // Wireshark PCAPNG

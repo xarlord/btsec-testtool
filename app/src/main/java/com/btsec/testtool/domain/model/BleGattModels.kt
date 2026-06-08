@@ -8,22 +8,26 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * BLE Service information.
  */
+@Serializable
 data class BleService(
     val uuid: String,                  // Service UUID
-    val primary: Boolean,              // Is primary service
+    val primary: Boolean = true,              // Is primary service
     val characteristics: List<BleCharacteristic> = emptyList()
 )
 
 /**
  * BLE Characteristic information.
  */
+@Serializable
 data class BleCharacteristic(
     val uuid: String,                  // Characteristic UUID
     val properties: CharacteristicProperties,  // Read/write/notify properties
-    val permissions: CharacteristicPermissions?,  // Permissions
+    val permissions: CharacteristicPermissions? = null,  // Permissions
     val value: ByteArray? = null,      // Current value (if readable)
     val descriptors: List<BleDescriptor> = emptyList()
 ) {
@@ -46,6 +50,7 @@ data class BleCharacteristic(
 /**
  * Characteristic properties.
  */
+@Serializable
 data class CharacteristicProperties(
     val read: Boolean = false,
     val write: Boolean = false,
@@ -59,6 +64,7 @@ data class CharacteristicProperties(
 /**
  * Characteristic permissions.
  */
+@Serializable
 data class CharacteristicPermissions(
     val readAllowed: Boolean = true,
     val readEncrypted: Boolean = false,
@@ -73,6 +79,7 @@ data class CharacteristicPermissions(
 /**
  * BLE Descriptor information.
  */
+@Serializable
 data class BleDescriptor(
     val uuid: String,
     val value: ByteArray? = null

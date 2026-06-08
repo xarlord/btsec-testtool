@@ -13,6 +13,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.btsec.testtool.domain.model.*
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.net.HttpURLConnection
@@ -35,7 +36,7 @@ private val Context.authDataStore by preferencesDataStore(name = "btsec_auth")
  */
 @Singleton
 class AuthorizationBackend @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
 
     companion object {
