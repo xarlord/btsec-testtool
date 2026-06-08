@@ -194,7 +194,7 @@ android {
 
 // Jacoco Test Coverage Configuration
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
+    dependsOn("testDevDebugUnitTest")
 
     reports {
         xml.required.set(true)
@@ -220,7 +220,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/di/**"
     )
 
-    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/devDebug") {
         exclude(fileFilter)
     }
 
