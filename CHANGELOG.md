@@ -1,3 +1,10 @@
+## [1.5.20](https://github.com/xarlord/btsec-testtool/compare/v1.5.19...v1.5.20) (2026-06-08)
+
+
+### Bug Fixes
+
+* **#257,#258,#259:** fix test compilation errors + org.json stub + coVerify + test fixes (PR [#260](https://github.com/xarlord/btsec-testtool/issues/260)) ([79c8d07](https://github.com/xarlord/btsec-testtool/commit/79c8d07fc980cfa34d796c21f6d93499e56fc80b)), closes [#258](https://github.com/xarlord/btsec-testtool/issues/258)
+
 ## [1.5.19](https://github.com/xarlord/btsec-testtool/compare/v1.5.18...v1.5.19) (2026-06-07)
 
 
