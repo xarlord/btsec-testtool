@@ -140,8 +140,6 @@ private fun HexDumpContent(
     viewModel: HexDumpViewModel,
     modifier: Modifier = Modifier
 ) {
-    val clipboardManager = LocalClipboardManager.current
-
     Column(modifier = modifier.fillMaxSize()) {
         // UUID info
         CharacteristicInfo(
