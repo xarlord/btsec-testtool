@@ -14,6 +14,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -224,7 +225,7 @@ class AuthorizationRepositoryImplTest {
         fun storeAndRetrieve() = runTest {
             repository.storeAuthorization(validServerAuth)
             val flow = repository.getCurrentAuthorization()
-            assertEquals(validServerAuth, flow.value)
+            assertEquals(validServerAuth, flow.first())
         }
 
         @Test
@@ -232,7 +233,7 @@ class AuthorizationRepositoryImplTest {
         fun revoke() = runTest {
             repository.storeAuthorization(validServerAuth)
             repository.revokeAuthorization()
-            assertNull(repository.getCurrentAuthorization().value)
+            assertNull(repository.getCurrentAuthorization().first())
         }
 
         @Test
@@ -313,7 +314,7 @@ class AuthorizationRepositoryImplTest {
         fun revokeUpdatesStatus() = runTest {
             repository.storeAuthorization(validServerAuth)
             repository.revokeAuthorization()
-            assertNull(repository.getCurrentAuthorization().value)
+            assertNull(repository.getCurrentAuthorization().first())
         }
     }
 }

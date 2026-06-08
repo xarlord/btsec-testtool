@@ -333,6 +333,7 @@ dependencies {
     testImplementation("app.cash.turbine:turbine:${Versions.turbine}")
     testImplementation("com.google.truth:truth:${Versions.truth}")
     testImplementation("org.robolectric:robolectric:${Versions.robolectric}")
+    testImplementation("org.json:json:20231013")
 
     // Android Testing
     androidTestImplementation("androidx.test.ext:junit:${Versions.androidxJunit}")
