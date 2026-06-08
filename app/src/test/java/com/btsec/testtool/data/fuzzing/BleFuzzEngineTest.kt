@@ -82,10 +82,10 @@ class BleFuzzEngineTest {
     @DisplayName("FuzzStatus has all expected states")
     fun fuzzStatusValues() {
         val statuses = FuzzStatus.values()
-        assertThat(statuses).hasLength(4)
+        assertThat(statuses).hasLength(5)
         assertThat(statuses).asList().containsExactly(
-            FuzzStatus.RUNNING, FuzzStatus.COMPLETED,
-            FuzzStatus.ERROR, FuzzStatus.STOPPED
+            FuzzStatus.PENDING, FuzzStatus.RUNNING, FuzzStatus.COMPLETED,
+            FuzzStatus.STOPPED, FuzzStatus.ERROR
         )
     }
 
@@ -104,10 +104,11 @@ class BleFuzzEngineTest {
     @DisplayName("VulnerabilitySeverity has expected levels")
     fun severityLevels() {
         val levels = VulnerabilitySeverity.values()
-        assertThat(levels).hasLength(4)
+        assertThat(levels).hasLength(6)
         assertThat(levels).asList().containsExactly(
-            VulnerabilitySeverity.LOW, VulnerabilitySeverity.MEDIUM,
-            VulnerabilitySeverity.HIGH, VulnerabilitySeverity.CRITICAL
+            VulnerabilitySeverity.CRITICAL, VulnerabilitySeverity.HIGH,
+            VulnerabilitySeverity.MEDIUM, VulnerabilitySeverity.LOW,
+            VulnerabilitySeverity.NONE, VulnerabilitySeverity.INFORMATIONAL
         )
     }
 }
