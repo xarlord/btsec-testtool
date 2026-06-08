@@ -8,21 +8,23 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
  * Represents a discovered Bluetooth device.
  */
+@Serializable
 data class BluetoothDevice(
     val address: String,              // MAC address
-    val name: String?,                 // Device name (nullable)
-    val type: BluetoothType,              // BLE, Classic, Dual Mode
-    val deviceClass: DeviceClass?,     // Bluetooth device class
-    val bondState: BondState,          // Pairing state
-    val rssi: Int?,                    // Signal strength (dBm)
-    val txPower: Int?,                 // TX Power (dBm)
-    val firstSeen: Instant,            // First discovery timestamp
-    val lastSeen: Instant,             // Last seen timestamp
+    val name: String? = null,         // Device name (nullable)
+    val type: BluetoothType = BluetoothType.UNKNOWN,  // BLE, Classic, Dual Mode
+    val deviceClass: DeviceClass? = null,     // Bluetooth device class
+    val bondState: BondState = BondState.NONE,          // Pairing state
+    val rssi: Int? = null,                    // Signal strength (dBm)
+    val txPower: Int? = null,                 // TX Power (dBm)
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val firstSeen: Instant = Instant.now(),            // First discovery timestamp
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val lastSeen: Instant = Instant.now(),             // Last seen timestamp
     val scanCount: Int = 1,            // Number of times discovered
     val services: List<String> = emptyList(),  // UUIDs of discovered services
     val manufacturerData: Map<Int, ByteArray> = emptyMap()  // Company ID -> data
@@ -46,6 +48,7 @@ data class BluetoothDevice(
 /**
  * Bluetooth device type enumeration.
  */
+@Serializable
 enum class BluetoothType {
     BLE,           // Bluetooth Low Energy only
     CLASSIC,       // Classic Bluetooth only
@@ -56,6 +59,7 @@ enum class BluetoothType {
 /**
  * Bluetooth device class categories.
  */
+@Serializable
 enum class DeviceClass {
     COMPUTER,
     PHONE,
@@ -73,6 +77,7 @@ enum class DeviceClass {
 /**
  * Bond (pairing) state enumeration.
  */
+@Serializable
 enum class BondState {
     NONE,      // Not paired
     BONDING,   // Pairing in progress
@@ -82,14 +87,11 @@ enum class BondState {
 /**
  * Connection state sealed class.
  */
+@Serializable
 sealed class ConnectionState {
-    data object Disconnected : ConnectionState()
-
-    data object Connecting : ConnectionState()
-
-    data object Connected : ConnectionState()
-
-    data object Disconnecting : ConnectionState()
-
-    data class Error(val message: String) : ConnectionState()
+    @Serializable data object Disconnected : ConnectionState()
+    @Serializable data object Connecting : ConnectionState()
+    @Serializable data object Connected : ConnectionState()
+    @Serializable data object Disconnecting : ConnectionState()
+    @Serializable data class Error(val message: String) : ConnectionState()
 }

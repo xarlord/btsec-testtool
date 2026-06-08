@@ -31,6 +31,7 @@ import com.btsec.testtool.domain.repository.WriteType
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -362,18 +363,24 @@ class BluetoothRepositoryImplTest {
     inner class BondingTests {
 
         @Test
-        @DisplayName("createBond returns false when adapter returns null device")
-        fun createBondReturnsFalseOnNullDevice() = runTest {
-            every { bluetoothAdapter.getRemoteDevice(any()) } returns null
-            val result = repository.createBond(testDeviceAddress)
+        @DisplayName("createBond returns false when adapter is null")
+        fun createBondReturnsFalseOnNullAdapter() = runTest {
+            val nullAdapterManager = mockk<BluetoothManager>()
+            every { nullAdapterManager.adapter } returns null
+            every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns nullAdapterManager
+            val repo = BluetoothRepositoryImpl(context, bluetoothDao)
+            val result = repo.createBond(testDeviceAddress)
             assertFalse(result)
         }
 
         @Test
-        @DisplayName("removeBond returns false when adapter returns null device")
-        fun removeBondReturnsFalseOnNullDevice() = runTest {
-            every { bluetoothAdapter.getRemoteDevice(any()) } returns null
-            val result = repository.removeBond(testDeviceAddress)
+        @DisplayName("removeBond returns false when adapter is null")
+        fun removeBondReturnsFalseOnNullAdapter() = runTest {
+            val nullAdapterManager = mockk<BluetoothManager>()
+            every { nullAdapterManager.adapter } returns null
+            every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns nullAdapterManager
+            val repo = BluetoothRepositoryImpl(context, bluetoothDao)
+            val result = repo.removeBond(testDeviceAddress)
             assertFalse(result)
         }
     }
@@ -435,7 +442,7 @@ class BluetoothRepositoryImplTest {
 
             repository.logOperation(testOperation)
 
-            verify { bluetoothDao.insertOperation(any()) }
+            coVerify { bluetoothDao.insertOperation(any()) }
         }
 
         @Test
@@ -454,7 +461,7 @@ class BluetoothRepositoryImplTest {
 
             repository.clearOperationLogs()
 
-            verify { bluetoothDao.deleteAllOperations() }
+            coVerify { bluetoothDao.deleteAllOperations() }
         }
 
         @Test

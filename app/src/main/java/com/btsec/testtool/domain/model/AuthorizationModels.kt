@@ -8,7 +8,21 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import java.time.Instant
+
+/** Serializer for java.time.Instant as epoch milliseconds (Long). */
+object InstantAsEpochMillisSerializer : KSerializer<Instant> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.LONG)
+    override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeLong(value.toEpochMilli())
+    override fun deserialize(decoder: Decoder): Instant = Instant.ofEpochMilli(decoder.decodeLong())
+}
 
 /**
  * Represents authorization for security testing.
@@ -25,13 +39,14 @@ import java.time.Instant
  * @property scope Testing scope definition
  * @property signature Digital signature for verification
  */
+@Serializable
 data class Authorization(
     val authId: String,
     val issuedTo: String,
     val issuedBy: String,
-    val issuedAt: Instant,
-    val expiresAt: Instant,
-    val authorizedActions: Set<TestAction>,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val issuedAt: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val expiresAt: Instant,
+    val authorizedActions: Set<TestAction> = emptySet(),
     val scope: TestScope,
     val signature: String,
     val terms: List<String> = emptyList()
@@ -40,6 +55,7 @@ data class Authorization(
 /**
  * Types of testing actions that can be authorized.
  */
+@Serializable
 enum class TestAction {
     SCAN_DEVICES,
     CONNECT_DEVICE,
@@ -57,15 +73,16 @@ enum class TestAction {
  * Defines what targets may be tested, what actions are allowed,
  * and time/other constraints.
  */
+@Serializable
 data class TestScope(
     val authId: String,
-    val authorizedTargets: List<TargetDevice>,
-    val allowedActions: Set<TestAction>,
-    val validFrom: Instant,
-    val validUntil: Instant,
+    val authorizedTargets: List<TargetDevice> = emptyList(),
+    val allowedActions: Set<TestAction> = emptySet(),
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val validFrom: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val validUntil: Instant,
     val maxPacketsPerSecond: Int = 100,
     val requiresReport: Boolean = true,
-    val disclosureDeadline: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val disclosureDeadline: Instant,
     val locationConstraints: String? = null,
     val requiresSupervision: Boolean = false,
     val excludedTargets: List<String> = emptyList()
@@ -114,17 +131,19 @@ data class TestScope(
 /**
  * Represents a target device for testing.
  */
+@Serializable
 data class TargetDevice(
     val identifier: String,      // MAC address or pattern
-    val deviceType: DeviceType,
-    val owner: String?,
-    val location: String?,
+    val deviceType: DeviceType = DeviceType.UNKNOWN,
+    val owner: String? = null,
+    val location: String? = null,
     val notes: String? = null
 )
 
 /**
  * Device types for testing classification.
  */
+@Serializable
 enum class DeviceType {
     PHONE,
     TABLET,
@@ -139,11 +158,12 @@ enum class DeviceType {
 /**
  * Consent record for tracking user consent.
  */
+@Serializable
 data class ConsentRecord(
     val id: String,
     val authId: String,
     val action: String,
-    val timestamp: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant,
     val authorized: Boolean,
     val deviceInfo: DeviceInfo,
     val userSignature: String? = null
@@ -152,6 +172,7 @@ data class ConsentRecord(
 /**
  * Device information for logging.
  */
+@Serializable
 data class DeviceInfo(
     val platform: String,
     val model: String,

@@ -20,6 +20,7 @@ import com.btsec.testtool.domain.model.TestScope
 import com.btsec.testtool.domain.repository.AuditLogEntry
 import com.btsec.testtool.domain.repository.BluetoothOperation
 import com.btsec.testtool.domain.repository.OperationType
+import kotlinx.serialization.encodeToString
 import timber.log.Timber
 import java.time.Instant
 

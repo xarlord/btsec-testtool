@@ -8,21 +8,23 @@
  */
 package com.btsec.testtool.domain.model
 
+import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
  * Fuzzing configuration.
  */
+@Serializable
 data class FuzzConfig(
     val targetDevice: BluetoothDevice,
-    val targetService: BleService?,    // Service to fuzz (null = all)
-    val targetCharacteristic: BleCharacteristic?,  // Characteristic to fuzz
-    val fuzzMethod: FuzzMethod,        // Fuzzing strategy
-    val packetCount: Int,              // Number of packets to send
-    val packetsPerSecond: Int,         // Rate limiting
-    val randomSeed: Long?,             // Seed for reproducibility
-    val dataPatterns: List<FuzzDataPattern>,  // Data patterns to use
-    val durationSeconds: Int?,         // Max duration (null = count-based)
+    val targetService: BleService? = null,    // Service to fuzz (null = all)
+    val targetCharacteristic: BleCharacteristic? = null,  // Characteristic to fuzz
+    val fuzzMethod: FuzzMethod = FuzzMethod.RANDOM,        // Fuzzing strategy
+    val packetCount: Int = 100,              // Number of packets to send
+    val packetsPerSecond: Int = 10,         // Rate limiting
+    val randomSeed: Long? = null,             // Seed for reproducibility
+    val dataPatterns: List<FuzzDataPattern> = emptyList(),  // Data patterns to use
+    val durationSeconds: Int? = null,         // Max duration (null = count-based)
     val stopOnError: Boolean = true,   // Stop on device error
     val stopOnDisconnect: Boolean = true,  // Stop on disconnect
     val capturePackets: Boolean = true,  // Capture packets
@@ -32,6 +34,7 @@ data class FuzzConfig(
 /**
  * Fuzzing methods.
  */
+@Serializable
 enum class FuzzMethod {
     BIT_FLIP,              // Flip individual bits
     BYTE_FLIP,             // Flip entire bytes
@@ -50,17 +53,19 @@ enum class FuzzMethod {
 /**
  * Fuzzing data patterns.
  */
+@Serializable
 data class FuzzDataPattern(
     val name: String,
     val description: String,
-    val patternType: PatternType,
-    val data: ByteArray,
+    val patternType: PatternType = PatternType.RANDOM,
+    val data: ByteArray = byteArrayOf(),
     val length: Int = data.size
 )
 
 /**
  * Pattern types for fuzzing.
  */
+@Serializable
 enum class PatternType {
     MALFORMED,         // Malformed data
     OVERLONG,          // Excessively long data
@@ -76,17 +81,18 @@ enum class PatternType {
 /**
  * Fuzzing test result.
  */
+@Serializable
 data class FuzzResult(
     val id: String,
     val config: FuzzConfig,
-    val startTime: Instant,
-    val endTime: Instant?,
-    val status: FuzzStatus,
-    val packetsSent: Int,
-    val packetsReceived: Int,
-    val errors: List<FuzzError>,
-    val findings: List<FuzzFinding>,
-    val captureFile: String?,          // Path to packet capture
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val startTime: Instant,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val endTime: Instant? = null,
+    val status: FuzzStatus = FuzzStatus.PENDING,
+    val packetsSent: Int = 0,
+    val packetsReceived: Int = 0,
+    val errors: List<FuzzError> = emptyList(),
+    val findings: List<FuzzFinding> = emptyList(),
+    val captureFile: String? = null,          // Path to packet capture
     val reportGenerated: Boolean = false
 ) {
     /**
@@ -111,6 +117,7 @@ data class FuzzResult(
 /**
  * Fuzzing status.
  */
+@Serializable
 enum class FuzzStatus {
     PENDING,
     RUNNING,
@@ -122,18 +129,20 @@ enum class FuzzStatus {
 /**
  * Fuzzing error record.
  */
+@Serializable
 data class FuzzError(
-    val timestamp: Instant,
-    val packetNumber: Int,
-    val errorCode: Int?,              // Android/error code
-    val errorMessage: String,
-    val severity: ErrorSeverity,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant,
+    val packetNumber: Int = 0,
+    val errorCode: Int? = null,              // Android/error code
+    val errorMessage: String = "",
+    val severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     val packetData: ByteArray? = null  // Problematic packet
 )
 
 /**
  * Error severity levels.
  */
+@Serializable
 enum class ErrorSeverity {
     CRITICAL,     // Device crashed/rebooted
     HIGH,         // Device disconnected/error state
@@ -145,14 +154,15 @@ enum class ErrorSeverity {
 /**
  * Fuzzing finding (potential vulnerability).
  */
+@Serializable
 data class FuzzFinding(
-    val timestamp: Instant,
-    val packetNumber: Int,
-    val description: String,
-    val severity: VulnerabilitySeverity,
-    val packetData: ByteArray?,
-    val response: ByteArray?,
-    val category: FindingCategory,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant,
+    val packetNumber: Int = 0,
+    val description: String = "",
+    val severity: VulnerabilitySeverity = VulnerabilitySeverity.LOW,
+    val packetData: ByteArray? = null,
+    val response: ByteArray? = null,
+    val category: FindingCategory = FindingCategory.UNEXPECTED_RESPONSE,
     val reproducible: Boolean = false,
     val additionalNotes: String? = null
 )
@@ -160,6 +170,7 @@ data class FuzzFinding(
 /**
  * Finding categories from fuzzing.
  */
+@Serializable
 enum class FindingCategory {
     CRASH,              // Device/service crash
     HANG,               // Device/service hang

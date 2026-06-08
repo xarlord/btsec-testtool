@@ -123,7 +123,7 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Accept sv1: prefix with mixed case hex")
         fun acceptMixedCaseHex() {
-            val sig = "${serverSigPrefix}aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123"
+            val sig = "${serverSigPrefix}aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123456789aAbBcCdDeEfF01234567"
             assertTrue(testHelper.isValidServerSignature(sig))
         }
 
@@ -527,7 +527,7 @@ class SignatureTestHelper {
                         location = null
                     )
                 ),
-                allowedActions = TestAction.entries.toSet(),
+                allowedActions = parseServerActions(root.optString("actions", "all")),
                 validFrom = now,
                 validUntil = expiresAt,
                 maxPacketsPerSecond = root.optInt("maxPacketsPerSecond", 100),
@@ -556,5 +556,17 @@ class SignatureTestHelper {
         } catch (e: Exception) {
             return null
         }
+    }
+
+    private fun parseServerActions(actionsStr: String): Set<TestAction> {
+        if (actionsStr.equals("all", ignoreCase = true)) {
+            return TestAction.entries.toSet()
+        }
+        return actionsStr.split(",")
+            .mapNotNull { name ->
+                TestAction.entries.find { it.name.equals(name.trim(), ignoreCase = true) }
+            }
+            .toSet()
+            .ifEmpty { TestAction.entries.toSet() }
     }
 }

@@ -14,6 +14,7 @@ import com.btsec.testtool.domain.model.BluetoothDevice
 import com.btsec.testtool.domain.model.BluetoothType
 import com.btsec.testtool.domain.model.BondState
 import com.btsec.testtool.domain.model.DeviceClass
+import kotlinx.serialization.encodeToString
 import java.time.Instant
 
 // ---------- BluetoothDeviceEntity <-> BluetoothDevice ----------

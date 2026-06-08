@@ -33,7 +33,6 @@ import com.btsec.testtool.domain.model.Recommendation
 import com.btsec.testtool.domain.model.ReportAppendix
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.builtins.ListSerializer
 import timber.log.Timber
 import java.time.Instant
 
@@ -84,8 +83,8 @@ fun FuzzResult.toEntity(): FuzzResultEntity {
         status = status.name,
         packetsSent = packetsSent,
         packetsReceived = packetsReceived,
-        errors = mapperJson.encodeToString(ListSerializer(FuzzError.serializer()), errors),
-        findings = mapperJson.encodeToString(ListSerializer(FuzzFinding.serializer()), findings),
+        errors = mapperJson.encodeToString(errors),
+        findings = mapperJson.encodeToString(findings),
         captureFile = captureFile,
         reportGenerated = reportGenerated
     )
@@ -180,13 +179,7 @@ fun SecurityReportEntity.toDomain(): SecurityReport {
     val appendixData: ReportAppendix = try {
         mapperJson.decodeFromString<ReportAppendix>(appendix)
     } catch (_: Exception) {
-        ReportAppendix(
-            toolsUsed = emptyList(),
-            testMethodology = "",
-            limitations = emptyList(),
-            glossary = emptyMap(),
-            references = emptyList()
-        )
+        ReportAppendix()
     }
 
     return SecurityReport(
@@ -218,14 +211,14 @@ fun SecurityReport.toEntity(): SecurityReportEntity {
         generatedAt = generatedAt.toEpochMilli(),
         testPeriodStart = testPeriod.start.toEpochMilli(),
         testPeriodEnd = testPeriod.end.toEpochMilli(),
-        targetDevices = mapperJson.encodeToString(ListSerializer(BluetoothDevice.serializer()), targetDevices),
-        vulnerabilities = mapperJson.encodeToString(ListSerializer(Vulnerability.serializer()), vulnerabilities),
-        fuzzingResults = mapperJson.encodeToString(ListSerializer(FuzzResult.serializer()), fuzzingResults),
-        keyExtractionResults = mapperJson.encodeToString(ListSerializer(KeyExtractionResult.serializer()), keyExtractionResults),
+        targetDevices = mapperJson.encodeToString(targetDevices),
+        vulnerabilities = mapperJson.encodeToString(vulnerabilities),
+        fuzzingResults = mapperJson.encodeToString(fuzzingResults),
+        keyExtractionResults = mapperJson.encodeToString(keyExtractionResults),
         executiveSummary = executiveSummary,
-        findings = mapperJson.encodeToString(ListSerializer(ReportFinding.serializer()), findings),
-        recommendations = mapperJson.encodeToString(ListSerializer(Recommendation.serializer()), recommendations),
-        appendix = mapperJson.encodeToString(ReportAppendix.serializer(), appendix),
+        findings = mapperJson.encodeToString(findings),
+        recommendations = mapperJson.encodeToString(recommendations),
+        appendix = mapperJson.encodeToString(appendix),
         status = status.name
     )
 }
