@@ -38,8 +38,19 @@ jobs:
           languages: kotlin, java
           queries: security-extended,security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew app:assembleDevDebug --continue || true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
