@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.scanner
@@ -156,7 +156,7 @@ private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean, onDe
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(devices) { device ->
+        items(devices, key = { it.address }) { device ->
             DeviceCard(device = device, onClick = { onDeviceSelected(device) })
         }
     }

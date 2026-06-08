@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.keys
@@ -273,7 +273,7 @@ private fun KeyExtractionContent(
             }
         } else if (uiState.results.isNotEmpty()) {
             item { Text("Extraction Results", style = MaterialTheme.typography.titleMedium) }
-            items(uiState.results) { result ->
+            items(uiState.results, key = { it.id }) { result ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.padding(12.dp),

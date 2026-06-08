@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.fuzzer
@@ -289,7 +289,7 @@ private fun FuzzerContent(
             item {
                 Text("Findings", style = MaterialTheme.typography.titleMedium)
             }
-            items(uiState.findings) { finding ->
+            items(uiState.findings, key = { "${it.timestamp}_${it.packetNumber}" }) { finding ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(

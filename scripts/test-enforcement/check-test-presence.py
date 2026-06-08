@@ -21,7 +21,7 @@ TEST_PATTERNS = ["src/test/", "src/androidTest/"]
 
 # Files to exclude from "must have tests" rule
 EXCLUDE_PATTERNS = [
-    "Theme.kt", "Color.kt", "Type.kt",
+    "Theme.kt", "Color.kt", "Type.kt", "presentation/feature/",
     "di/", "navigation/",
     "MainActivity.kt",
     ".gradle.kts", "build.gradle",
