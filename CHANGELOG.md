@@ -1,3 +1,11 @@
+# [1.10.0](https://github.com/xarlord/btsec-testtool/compare/v1.9.2...v1.10.0) (2026-06-09)
+
+
+### Features
+
+* **#291:** add SDP Enumeration & Service Discovery security testing ([#304](https://github.com/xarlord/btsec-testtool/issues/304)) ([97c83ec](https://github.com/xarlord/btsec-testtool/commit/97c83ecf2116513e5b5a406d89866ca9d627a08b)), closes [#291](https://github.com/xarlord/btsec-testtool/issues/291)
+* **#293:** add HFP Security Testing — AT command injection & call manipulation test suite ([#307](https://github.com/xarlord/btsec-testtool/issues/307)) ([53264ae](https://github.com/xarlord/btsec-testtool/commit/53264aedb3340f7aecced4b48a7d85ab30850c98)), closes [#293](https://github.com/xarlord/btsec-testtool/issues/293)
+
 ## [1.9.2](https://github.com/xarlord/btsec-testtool/compare/v1.9.1...v1.9.2) (2026-06-09)
 
 
