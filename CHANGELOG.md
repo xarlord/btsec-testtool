@@ -1,3 +1,13 @@
+# [1.11.0](https://github.com/xarlord/btsec-testtool/compare/v1.10.0...v1.11.0) (2026-06-09)
+
+
+### Features
+
+* **#292:** add RFCOMM Channel Discovery & Fuzzing with AT command injection dictionary ([#306](https://github.com/xarlord/btsec-testtool/issues/306)) ([3d70148](https://github.com/xarlord/btsec-testtool/commit/3d70148b22f551a9217c173a8d71bd30c2a8ec25)), closes [#292](https://github.com/xarlord/btsec-testtool/issues/292)
+* **#295:** add PBAP & MAP Data Access Security Testing with data exfiltration analysis ([#309](https://github.com/xarlord/btsec-testtool/issues/309)) ([ec27348](https://github.com/xarlord/btsec-testtool/commit/ec273487e87f8fa5a991f9dbd4adfdc05e0ece12)), closes [#295](https://github.com/xarlord/btsec-testtool/issues/295)
+* **#297:** add HCI Snoop Log Capture with btsnoop parser and PCAP export ([#305](https://github.com/xarlord/btsec-testtool/issues/305)) ([24822ea](https://github.com/xarlord/btsec-testtool/commit/24822ea0dddad3e935f1ac4e17fdeb40eea275f6)), closes [#297](https://github.com/xarlord/btsec-testtool/issues/297)
+* **#298:** add Infotainment-Specific CVE Test Suite — BMW/Mercedes/VW/Bosch known exploits ([#308](https://github.com/xarlord/btsec-testtool/issues/308)) ([1b70b3a](https://github.com/xarlord/btsec-testtool/commit/1b70b3a3c496be6de685c52849806d7d4600b575)), closes [#298](https://github.com/xarlord/btsec-testtool/issues/298)
+
 # [1.10.0](https://github.com/xarlord/btsec-testtool/compare/v1.9.2...v1.10.0) (2026-06-09)
 
 
