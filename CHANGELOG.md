@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/xarlord/btsec-testtool/compare/v1.11.0...v1.12.0) (2026-06-09)
+
+
+### Features
+
+* **#294:** add AVRCP Security Testing — media control, browsing, path traversal ([#310](https://github.com/xarlord/btsec-testtool/issues/310)) ([b81fc66](https://github.com/xarlord/btsec-testtool/commit/b81fc669c85889059431a4a1f5e6df3ba6bab3c5)), closes [#294](https://github.com/xarlord/btsec-testtool/issues/294)
+
 # [1.11.0](https://github.com/xarlord/btsec-testtool/compare/v1.10.0...v1.11.0) (2026-06-09)
 
 
