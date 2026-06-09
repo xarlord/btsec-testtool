@@ -16,6 +16,7 @@ import java.io.File
 /**
  * Tests to verify ProGuard/R8 rules include required entries for third-party dependencies.
  * Related to: Issue #285 (R8 minification failure with missing errorprone annotations)
+ * Related to: Issue #300 (R8 minification failure with missing SLF4J StaticLoggerBinder)
  */
 class ProguardRulesTest {
 
@@ -65,6 +66,22 @@ class ProguardRulesTest {
     fun `proguard rules file should not be empty`() {
         assertFalse(proguardFile.readText().isBlank()) {
             "proguard-rules.pro should not be empty"
+        }
+    }
+
+    @Test
+    fun `proguard rules should include dontwarn for slf4j`() {
+        val rules = proguardFile.readText()
+        assertTrue(rules.contains("-dontwarn org.slf4j.**")) {
+            "ProGuard rules should contain -dontwarn for org.slf4j (transitive dependency without backend on Android)"
+        }
+    }
+
+    @Test
+    fun `proguard rules should keep slf4j classes`() {
+        val rules = proguardFile.readText()
+        assertTrue(rules.contains("-keep class org.slf4j.**")) {
+            "ProGuard rules should keep org.slf4j classes"
         }
     }
 }
