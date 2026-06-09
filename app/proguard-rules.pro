@@ -155,6 +155,14 @@
 -dontnote retrofit2.**
 -dontnote okhttp3.**
 
+# Error Prone annotations (transitive via Tink from security-crypto)
+-dontwarn com.google.errorprone.annotations.**
+-keep class com.google.errorprone.annotations.** { *; }
+
+# Google Tink (transitive via androidx.security:security-crypto)
+-dontwarn com.google.crypto.tink.**
+-keep class com.google.crypto.tink.** { *; }
+
 # Obfuscate
 -repackageclasses ''
 -allowaccessmodification
