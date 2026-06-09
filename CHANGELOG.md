@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/xarlord/btsec-testtool/compare/v1.6.1...v1.7.0) (2026-06-09)
+
+
+### Features
+
+* **#194:** add GATT Characteristic Hex Dump Viewer with hex/text/binary views and search ([#278](https://github.com/xarlord/btsec-testtool/issues/278)) ([90173c3](https://github.com/xarlord/btsec-testtool/commit/90173c346cbebf79d0b512178fa97f36280f2226)), closes [#194](https://github.com/xarlord/btsec-testtool/issues/194) [#194](https://github.com/xarlord/btsec-testtool/issues/194)
+
 ## [1.6.1](https://github.com/xarlord/btsec-testtool/compare/v1.6.0...v1.6.1) (2026-06-09)
 
 
