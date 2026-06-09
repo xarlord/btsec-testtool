@@ -1,3 +1,16 @@
+# [1.13.0](https://github.com/xarlord/btsec-testtool/compare/v1.12.0...v1.13.0) (2026-06-09)
+
+
+### Bug Fixes
+
+* **#313:** resolve SecurityRisk redeclaration between SdpModels and RfcommModels ([#314](https://github.com/xarlord/btsec-testtool/issues/314)) ([cf8b25f](https://github.com/xarlord/btsec-testtool/commit/cf8b25ff565274d6b164c757a3533fc07ecd2bc7))
+
+
+### Features
+
+* **#296:** add SAP SIM Access Profile Security Testing with APDU injection ([#311](https://github.com/xarlord/btsec-testtool/issues/311)) ([9238361](https://github.com/xarlord/btsec-testtool/commit/92383611c76734eff6487c23a5bf848238cb36af)), closes [#296](https://github.com/xarlord/btsec-testtool/issues/296)
+* **#299:** add L2CAP Signaling & Protocol-Level Attack Testing ([#312](https://github.com/xarlord/btsec-testtool/issues/312)) ([f1521a5](https://github.com/xarlord/btsec-testtool/commit/f1521a580ff26b2005d509d28597a27990812170)), closes [#299](https://github.com/xarlord/btsec-testtool/issues/299)
+
 # [1.12.0](https://github.com/xarlord/btsec-testtool/compare/v1.11.0...v1.12.0) (2026-06-09)
 
 
