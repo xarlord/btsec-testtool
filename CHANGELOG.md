@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/xarlord/btsec-testtool/compare/v1.8.1...v1.8.2) (2026-06-09)
+
+
+### Bug Fixes
+
+* **#285:** add R8/ProGuard rules for errorprone annotations and Tink crypto ([#286](https://github.com/xarlord/btsec-testtool/issues/286)) ([8109682](https://github.com/xarlord/btsec-testtool/commit/81096823b69c490e0dc406ed8b981831b7da5a2d)), closes [#285](https://github.com/xarlord/btsec-testtool/issues/285)
+
 ## [1.8.1](https://github.com/xarlord/btsec-testtool/compare/v1.8.0...v1.8.1) (2026-06-09)
 
 
