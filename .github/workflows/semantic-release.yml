@@ -98,16 +98,28 @@ jobs:
             ./gradlew assembleRelease
           fi
 
-      - name: Rename APK with version
+      - name: Rename APKs with version
         run: |
           VERSION=${{ steps.get_tag.outputs.tag }}
-          mv app/build/outputs/apk/release/*.apk \
-             app/build/outputs/apk/release/btsec-testtool-$VERSION-release.apk
+          # Product flavors (dev, prod) produce APKs in flavor subdirectories:
+          #   app/build/outputs/apk/dev/release/*.apk
+          #   app/build/outputs/apk/prod/release/*.apk
+          APK_COUNT=0
+          for apk in $(find app/build/outputs/apk -name '*.apk' -type f); do
+            FLAVOR_DIR=$(dirname "$apk")
+            BASENAME=$(basename "$apk" .apk)
+            NEW_NAME="${FLAVOR_DIR}/btsec-testtool-${VERSION}-${BASENAME}.apk"
+            mv "$apk" "$NEW_NAME"
+            APK_COUNT=$((APK_COUNT + 1))
+            echo "Renamed: $apk -> $NEW_NAME"
+          done
+          echo "Total APKs renamed: $APK_COUNT"
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/dev/release/*.apk
+            app/build/outputs/apk/prod/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
