@@ -387,5 +387,24 @@ class SdpEnumerationUseCaseTest {
             assertThat(SecurityRisk.MEDIUM.ordinal).isLessThan(SecurityRisk.LOW.ordinal)
             assertThat(SecurityRisk.LOW.ordinal).isLessThan(SecurityRisk.INFO.ordinal)
         }
+
+        @Test
+        @DisplayName("SecurityRisk should have UNKNOWN value for unclassified services")
+        fun testSecurityRisk_unknownValue() {
+            assertThat(SecurityRisk.UNKNOWN).isNotNull()
+            assertThat(SecurityRisk.INFO.ordinal).isLessThan(SecurityRisk.UNKNOWN.ordinal)
+        }
+
+        @Test
+        @DisplayName("SdpService default securityRisk should be UNKNOWN")
+        fun testSdpService_defaultSecurityRiskIsUnknown() {
+            val service = SdpService(
+                uuid = "DEAD",
+                profile = BtProfile.UNKNOWN,
+                name = "Unknown Service",
+                protocolDescriptors = emptyList()
+            )
+            assertThat(service.securityRisk).isEqualTo(SecurityRisk.UNKNOWN)
+        }
     }
 }
