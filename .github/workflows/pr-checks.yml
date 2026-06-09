@@ -10,6 +10,7 @@ on:
 permissions:
   pull-requests: read
   contents: read
+  issues: read
 
 jobs:
   # ============================================
@@ -25,8 +26,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const body = context.payload.pull_request.body || '';
+            // Fetch PR body via API to avoid empty payload issue
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+            const body = pr.body || '';
             const maxLength = 10000;
+
+            core.info(`PR body length: ${body.length}`);
 
             // Check if PR has description
             if (body.length < 10) {

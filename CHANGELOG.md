@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/xarlord/btsec-testtool/compare/v1.5.20...v1.6.0) (2026-06-08)
+
+
+### Features
+
+* **#143:** add Automated Report Risk Scoring with OWASP/BISTF alignment ([#279](https://github.com/xarlord/btsec-testtool/issues/279)) ([d9a3f3d](https://github.com/xarlord/btsec-testtool/commit/d9a3f3d7c30f7a485a71ae8203a3f94caab41a32)), closes [#143](https://github.com/xarlord/btsec-testtool/issues/143)
+
 ## [1.5.20](https://github.com/xarlord/btsec-testtool/compare/v1.5.19...v1.5.20) (2026-06-08)
 
 

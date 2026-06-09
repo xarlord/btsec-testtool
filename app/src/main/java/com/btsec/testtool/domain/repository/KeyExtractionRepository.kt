@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.domain.repository
@@ -12,10 +12,15 @@ import com.btsec.testtool.domain.model.*
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Repository for Bluetooth key extraction operations.
+ * Composite repository for Bluetooth key extraction operations.
+ *
+ * Extends [KeyExtractionReader] and [KeyExtractionWriter] to provide the full
+ * set of key extraction capabilities while adhering to the Interface
+ * Segregation Principle (ISP). Existing implementations remain compatible
+ * since this interface inherits all methods from its parent interfaces.
  *
  * Handles analysis and extraction of Bluetooth encryption keys.
- * This is for authorized security testing only.
+ * This is for AUTHORIZED security testing only.
  *
  * Supported key types:
  * - LTK (Long Term Key) - BLE encryption key
@@ -24,223 +29,11 @@ import kotlinx.coroutines.flow.Flow
  * - Link Key - Classic Bluetooth pairing key
  *
  * All operations require explicit authorization.
+ *
+ * @see KeyExtractionReader
+ * @see KeyExtractionWriter
  */
-interface KeyExtractionRepository {
-
-    // ========== Key Extraction Operations ==========
-
-    /**
-     * Attempt to extract a specific key type from a device.
-     *
-     * @param device Target device
-     * @param keyType Type of key to extract
-     * @param method Extraction method to use
-     * @return Flow of extraction progress updates
-     */
-    fun extractKey(
-        device: BluetoothDevice,
-        keyType: KeyType,
-        method: ExtractionMethod
-    ): Flow<ExtractionProgress>
-
-    /**
-     * Attempt to extract all possible keys from a device.
-     *
-     * @param device Target device
-     * @return Flow of extraction progress updates for each key type
-     */
-    fun extractAllKeys(device: BluetoothDevice): Flow<ExtractionProgress>
-
-    /**
-     * Cancel the current extraction operation.
-     */
-    suspend fun cancelExtraction(): Result<Unit>
-
-    /**
-     * Get current extraction status.
-     */
-    fun getExtractionStatus(): Flow<ExtractionStatus>
-
-    // ========== Key Extraction Results ==========
-
-    /**
-     * Save an extraction result.
-     * Keys are encrypted before storage.
-     */
-    suspend fun saveExtractionResult(result: KeyExtractionResult): Result<Unit>
-
-    /**
-     * Get extraction result by ID.
-     */
-    suspend fun getExtractionResult(id: String): KeyExtractionResult?
-
-    /**
-     * Get all extraction results.
-     */
-    fun getAllExtractionResults(): Flow<List<KeyExtractionResult>>
-
-    /**
-     * Get extraction results for a specific device.
-     */
-    fun getExtractionResultsForDevice(deviceAddress: String): Flow<List<KeyExtractionResult>>
-
-    /**
-     * Get extraction results by key type.
-     */
-    fun getExtractionResultsByKeyType(keyType: KeyType): Flow<List<KeyExtractionResult>>
-
-    /**
-     * Get successful extractions only.
-     */
-    fun getSuccessfulExtractions(): Flow<List<KeyExtractionResult>>
-
-    /**
-     * Delete an extraction result.
-     */
-    suspend fun deleteExtractionResult(id: String): Result<Unit>
-
-    // ========== Key Analysis ==========
-
-    /**
-     * Analyze a device's key security posture.
-     *
-     * @param device Target device
-     * @return Key security analysis
-     */
-    suspend fun analyzeKeySecurity(device: BluetoothDevice): KeySecurityAnalysis
-
-    /**
-     * Check if a device uses known weak keys.
-     *
-     * @param device Target device
-     * @return List of weak key findings
-     */
-    suspend fun checkForWeakKeys(device: BluetoothDevice): List<WeakKeyFinding>
-
-    /**
-     * Verify if an extracted key is valid.
-     *
-     * @param keyType Type of key
-     * @param keyValue Key value to verify
-     * @param device Device the key belongs to
-     * @return true if key is valid
-     */
-    suspend fun verifyKey(
-        keyType: KeyType,
-        keyValue: ByteArray,
-        device: BluetoothDevice
-    ): Boolean
-
-    /**
-     * Derive additional keys from extracted key material.
-     *
-     * @param extractedKey Already extracted key
-     * @param targetKeyType Type of key to derive
-     * @return Derived key or null if not possible
-     */
-    suspend fun deriveKey(
-        extractedKey: KeyExtractionResult,
-        targetKeyType: KeyType
-    ): ByteArray?
-
-    // ========== Passive Monitoring ==========
-
-    /**
-     * Start monitoring for pairing traffic to capture keys.
-     *
-     * This passively monitors Bluetooth pairing to capture
-     * key exchange traffic for analysis.
-     *
-     * @return Flow of captured key material
-     */
-    fun startPairingMonitor(): Flow<PairingCapture>
-
-    /**
-     * Stop pairing monitoring.
-     */
-    suspend fun stopPairingMonitor(): Result<Unit>
-
-    /**
-     * Get pairing monitor status.
-     */
-    fun isPairingMonitorActive(): Flow<Boolean>
-
-    // ========== Key Databases ==========
-
-    /**
-     * Check if a key matches known default/test keys.
-     *
-     * @param keyType Type of key
-     * @param keyValue Key value to check
-     * @return true if key matches a known default
-     */
-    suspend fun isKnownDefaultKey(keyType: KeyType, keyValue: ByteArray): Boolean
-
-    /**
-     * Get information about a known default key.
-     */
-    suspend fun getDefaultKeyInfo(keyValue: ByteArray): DefaultKeyInfo?
-
-    /**
-     * Add a key to the extracted key database.
-     */
-    suspend fun addToKeyDatabase(deviceAddress: String, keyType: KeyType, keyValue: ByteArray): Result<Unit>
-
-    /**
-     * Look up a device's key in the database.
-     */
-    suspend fun lookupKeyInDatabase(deviceAddress: String, keyType: KeyType): ByteArray?
-
-    // ========== Encryption Analysis ==========
-
-    /**
-     * Analyze BLE encryption strength.
-     *
-     * @param device Target device
-     * @return Encryption analysis
-     */
-    suspend fun analyzeEncryptionStrength(device: BluetoothDevice): EncryptionAnalysis
-
-    /**
-     * Test if device supports Secure Connections (LESC).
-     *
-     * @param device Target device
-     * @return true if LESC is supported
-     */
-    suspend fun supportsSecureConnections(device: BluetoothDevice): Boolean
-
-    /**
-     * Get the encryption key size for a device.
-     *
-     * @param device Target device
-     * @return Key size in bits (typically 128)
-     */
-    suspend fun getEncryptionKeySize(device: BluetoothDevice): Int?
-
-    // ========== Statistics ==========
-
-    /**
-     * Get key extraction statistics.
-     */
-    fun getKeyExtractionStatistics(): Flow<KeyExtractionStatistics>
-
-    /**
-     * Get statistics for a specific device.
-     */
-    suspend fun getStatisticsForDevice(deviceAddress: String): DeviceKeyStatistics
-
-    // ========== Logging ==========
-
-    /**
-     * Log a key extraction operation for audit purposes.
-     */
-    suspend fun logExtractionOperation(operation: KeyExtractionOperation)
-
-    /**
-     * Get extraction operation logs.
-     */
-    fun getExtractionLogs(): Flow<List<KeyExtractionOperation>>
-}
+interface KeyExtractionRepository : KeyExtractionReader, KeyExtractionWriter
 
 /**
  * Key extraction progress information.
