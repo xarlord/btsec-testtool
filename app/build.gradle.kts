@@ -319,6 +319,9 @@ dependencies {
     implementation("com.itextpdf:io:${Versions.iText7}")
     implementation("com.itextpdf:layout:${Versions.iText7}")
 
+    // ZIP encryption
+    implementation("net.lingala.zip4j:zip4j:2.11.5")
+
     // Logging
     implementation("com.jakewharton.timber:timber:${Versions.timber}")
 
