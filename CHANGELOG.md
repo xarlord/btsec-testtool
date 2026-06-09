@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/xarlord/btsec-testtool/compare/v1.8.0...v1.8.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **#283:** fetch full history with tags in release-apks job ([#284](https://github.com/xarlord/btsec-testtool/issues/284)) ([5f3926d](https://github.com/xarlord/btsec-testtool/commit/5f3926d1761cdb80c3c4deffe846f1e688c94a1e)), closes [#283](https://github.com/xarlord/btsec-testtool/issues/283)
+
 # [1.8.0](https://github.com/xarlord/btsec-testtool/compare/v1.7.0...v1.8.0) (2026-06-09)
 
 
