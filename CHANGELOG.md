@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/xarlord/btsec-testtool/compare/v1.9.0...v1.9.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **#300:** add SLF4J dontwarn and keep rules to fix R8 minification failure ([#301](https://github.com/xarlord/btsec-testtool/issues/301)) ([9e37697](https://github.com/xarlord/btsec-testtool/commit/9e37697bc7e8c5c408ae263e4d4251dcd421ef4f))
+
 # [1.9.0](https://github.com/xarlord/btsec-testtool/compare/v1.8.2...v1.9.0) (2026-06-09)
 
 
