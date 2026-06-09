@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/xarlord/btsec-testtool/compare/v1.7.0...v1.8.0) (2026-06-09)
+
+
+### Features
+
+* **#195:** add Scan Result Diff — compare two scan sessions with color-coded device changes ([#277](https://github.com/xarlord/btsec-testtool/issues/277)) ([382b79e](https://github.com/xarlord/btsec-testtool/commit/382b79e425ac633e6390d903a2676678b83f90ef)), closes [#195](https://github.com/xarlord/btsec-testtool/issues/195) [#195](https://github.com/xarlord/btsec-testtool/issues/195)
+
 # [1.7.0](https://github.com/xarlord/btsec-testtool/compare/v1.6.1...v1.7.0) (2026-06-09)
 
 
