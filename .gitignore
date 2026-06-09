@@ -88,3 +88,4 @@ scripts/ktlint.jar
 scripts/ktlint.exe
 scripts/ktlint/
 ktlint/
+.hermes-cron-state
