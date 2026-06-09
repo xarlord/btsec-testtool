@@ -115,4 +115,4 @@ enum class AtCommandCategory {
 /**
  * Security risk levels for AT command testing.
  */
-enum class SecurityRisk { CRITICAL, HIGH, MEDIUM, LOW, INFO }
+enum class SecurityRisk { CRITICAL, HIGH, MEDIUM, LOW, INFO, UNKNOWN }

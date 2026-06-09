@@ -104,12 +104,6 @@ data class ProtocolDescriptor(
 )
 
 /**
- * Severity levels for SDP security findings.
- * Ordered from most to least severe.
- */
-enum class SecurityRisk { CRITICAL, HIGH, MEDIUM, LOW, INFO, UNKNOWN }
-
-/**
  * Aggregated result of a full SDP scan against a single device.
  */
 data class SdpScanResult(
