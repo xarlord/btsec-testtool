@@ -1,3 +1,10 @@
+## [1.9.2](https://github.com/xarlord/btsec-testtool/compare/v1.9.1...v1.9.2) (2026-06-09)
+
+
+### Bug Fixes
+
+* **#302:** fix APK rename path in Semantic Release for product flavors ([#303](https://github.com/xarlord/btsec-testtool/issues/303)) ([a1a853e](https://github.com/xarlord/btsec-testtool/commit/a1a853e5154bdeefb824a6362afdc49cf1eda1cf))
+
 ## [1.9.1](https://github.com/xarlord/btsec-testtool/compare/v1.9.0...v1.9.1) (2026-06-09)
 
 
