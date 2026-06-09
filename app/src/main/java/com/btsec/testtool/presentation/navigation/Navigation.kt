@@ -20,6 +20,7 @@ import com.btsec.testtool.presentation.feature.fuzzer.FuzzerScreen
 import com.btsec.testtool.presentation.feature.hexdump.HexDumpScreen
 import com.btsec.testtool.presentation.feature.keys.KeyExtractionScreen
 import com.btsec.testtool.presentation.feature.reports.ReportsScreen
+import com.btsec.testtool.presentation.feature.diff.ScanDiffScreen
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
 import com.btsec.testtool.presentation.feature.settings.SettingsScreen
 import com.btsec.testtool.presentation.feature.vulns.VulnScannerScreen
@@ -36,6 +37,7 @@ object Routes {
     const val VULNS = "vulns"
     const val REPORTS = "reports"
     const val SETTINGS = "settings"
+    const val SCAN_DIFF = "diff"
     const val HEXDUMP = "hexdump"
 }
 
@@ -155,6 +157,16 @@ fun BTSecNavGraph(
         // Settings screen
         composable(route = Routes.SETTINGS) {
             SettingsScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // Scan Diff screen
+        composable(route = "${Routes.SCAN_DIFF}/{authId}") { backStackEntry ->
+            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
+
+            ScanDiffScreen(
+                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
