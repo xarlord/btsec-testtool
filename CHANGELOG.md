@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/xarlord/btsec-testtool/compare/v1.6.0...v1.6.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **#280:** use GitHub API to fetch PR body for description validation ([#281](https://github.com/xarlord/btsec-testtool/issues/281)) ([6c3c4a9](https://github.com/xarlord/btsec-testtool/commit/6c3c4a90f4a7d36aedcf485ba53b28521c7337b6)), closes [#280](https://github.com/xarlord/btsec-testtool/issues/280)
+
 # [1.6.0](https://github.com/xarlord/btsec-testtool/compare/v1.5.20...v1.6.0) (2026-06-08)
 
 
