@@ -163,6 +163,10 @@
 -dontwarn com.google.crypto.tink.**
 -keep class com.google.crypto.tink.** { *; }
 
+# SLF4J (transitive dependency — no backend on Android)
+-dontwarn org.slf4j.**
+-keep class org.slf4j.** { *; }
+
 # Obfuscate
 -repackageclasses ''
 -allowaccessmodification
