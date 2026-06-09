@@ -1,3 +1,12 @@
+# [1.9.0](https://github.com/xarlord/btsec-testtool/compare/v1.8.2...v1.9.0) (2026-06-09)
+
+
+### Features
+
+* **#142:** add BLE Packet Timeline Visualization with PCAP export ([#290](https://github.com/xarlord/btsec-testtool/issues/290)) ([8fb8c85](https://github.com/xarlord/btsec-testtool/commit/8fb8c8590c44777b4bc3669c6fc7bc558f8350c6)), closes [#142](https://github.com/xarlord/btsec-testtool/issues/142)
+* **#149,#196:** add Dashboard Analytics with Canvas charts + risk trend visualization ([#289](https://github.com/xarlord/btsec-testtool/issues/289)) ([553f9fd](https://github.com/xarlord/btsec-testtool/commit/553f9fd021834af58c82b08f6618d08072732f45)), closes [#149](https://github.com/xarlord/btsec-testtool/issues/149) [#196](https://github.com/xarlord/btsec-testtool/issues/196)
+* **#198:** add Encrypted Export with password-protected ZIP using AES-256 ([#288](https://github.com/xarlord/btsec-testtool/issues/288)) ([ae9b6d0](https://github.com/xarlord/btsec-testtool/commit/ae9b6d069eb0b0d7067154c34ef8af6e15edeb31)), closes [#198](https://github.com/xarlord/btsec-testtool/issues/198)
+
 ## [1.8.2](https://github.com/xarlord/btsec-testtool/compare/v1.8.1...v1.8.2) (2026-06-09)
 
 
