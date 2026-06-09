@@ -1,0 +1,3 @@
+## 2026-02-07 - Implement 'Done' keyboard action to submit Authorization screen form
+**Learning:** For forms inside Jetpack Compose, handling `keyboardActions` (e.g., `onDone`) with `LocalFocusManager.current.clearFocus()` significantly improves accessibility and UX by allowing submission directly from the software keyboard without requiring users to explicitly dismiss the keyboard and find the physical button on the screen.
+**Action:** Consistently set `KeyboardOptions(imeAction = ImeAction.Done)` and map `onDone` to form submission logic for terminal text inputs while ensuring keyboard dismissal via `clearFocus()`.
