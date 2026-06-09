@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.btsec.testtool.presentation.feature.authorization.AuthorizationScreen
 import com.btsec.testtool.presentation.feature.dashboard.DashboardScreen
 import com.btsec.testtool.presentation.feature.fuzzer.FuzzerScreen
+import com.btsec.testtool.presentation.feature.hexdump.HexDumpScreen
 import com.btsec.testtool.presentation.feature.keys.KeyExtractionScreen
 import com.btsec.testtool.presentation.feature.reports.ReportsScreen
 import com.btsec.testtool.presentation.feature.diff.ScanDiffScreen
@@ -37,6 +38,7 @@ object Routes {
     const val REPORTS = "reports"
     const val SETTINGS = "settings"
     const val SCAN_DIFF = "diff"
+    const val HEXDUMP = "hexdump"
 }
 
 /**
@@ -165,6 +167,21 @@ fun BTSecNavGraph(
 
             ScanDiffScreen(
                 authId = authId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // Hex Dump Viewer screen
+        composable(
+            route = "${Routes.HEXDUMP}/{characteristicUuid}/{serviceUuid}"
+        ) { backStackEntry ->
+            val characteristicUuid = backStackEntry.arguments?.getString("characteristicUuid") ?: return@composable
+            val serviceUuid = backStackEntry.arguments?.getString("serviceUuid") ?: return@composable
+
+            HexDumpScreen(
+                characteristicUuid = characteristicUuid,
+                serviceUuid = serviceUuid,
+                characteristicData = byteArrayOf(), // Data would be passed via SavedStateHandle or shared ViewModel in production
                 onBack = { navController.popBackStack() }
             )
         }
