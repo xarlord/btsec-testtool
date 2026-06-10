@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  *
  * MIT License - See LICENSE for full terms.
@@ -21,7 +21,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.Instant
-import java.util.Random
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +29,7 @@ import javax.inject.Singleton
  * BLE fuzzing engine. Connects to a target, sends fuzz payloads at a controlled rate,
  * and detects crashes, hangs, unexpected responses, and information leaks.
  *
- * Falls back to simulated GATT when Android BT hardware is unavailable.
+ * Requires real Bluetooth hardware — no simulated fallback.
  *
  * @property payloadGenerator injects payload generation logic
  */
@@ -46,12 +45,22 @@ class BleFuzzEngine @Inject constructor(
     }
 
     /**
+     * Check whether real Bluetooth LE hardware is available on this device.
+     * Fuzzing cannot proceed without it.
+     */
+    fun isBluetoothHardwareAvailable(): Boolean {
+        val mgr = context.getSystemService(Context.BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager
+        return mgr?.adapter?.bluetoothLeScanner != null
+    }
+
+    /**
      * Execute a fuzzing session against the target defined in [config].
      *
      * @param config    fuzz configuration (target, method, rate, etc.)
      * @param onProgress progress callback per packet
      * @param onFinding  callback for each discovered finding
      * @return [FuzzResult] with full session details
+     * @throws IllegalStateException if Bluetooth hardware is not available
      */
     suspend fun executeFuzzing(
         config: FuzzConfig,
@@ -178,13 +187,13 @@ class BleFuzzEngine @Inject constructor(
 
     // --- Connection ---
 
-    private fun connectToDevice(config: FuzzConfig, cs: MutableStateFlow<ConnectionState>): GattWrapper = try {
+    private fun connectToDevice(config: FuzzConfig, cs: MutableStateFlow<ConnectionState>): GattWrapper {
         val mgr = context.getSystemService(Context.BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager
-        val dev = mgr?.adapter?.getRemoteDevice(config.targetDevice.address)
-        if (dev != null) RealGatt(dev, context, cs) else SimGatt(cs)
-    } catch (e: Exception) {
-        android.util.Log.w(TAG, "connectToDevice: failed for ${config.targetDevice.address}, falling back to SimGatt — ${e.message}")
-        SimGatt(cs)
+            ?: throw IllegalStateException("BluetoothManager not available — fuzzing requires real BLE hardware")
+        val adapter = mgr.adapter
+            ?: throw IllegalStateException("BluetoothAdapter not available — fuzzing requires real BLE hardware")
+        val dev = adapter.getRemoteDevice(config.targetDevice.address)
+        return RealGatt(dev, context, cs)
     }
 
     private suspend fun sendPacket(w: GattWrapper, c: FuzzConfig, p: ByteArray): SendResult {
@@ -228,9 +237,6 @@ class BleFuzzEngine @Inject constructor(
                 val s = svc?.let { g.getService(UUID.fromString(it)) } ?: return SendResult.Error(null, "Service not found")
                 val c = chr?.let { s.getCharacteristic(UUID.fromString(it)) } ?: return SendResult.Error(null, "Char not found")
                 c.value = value; c.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                // writeCharacteristic is async — we don't get the device response here.
-                // Return null response to indicate "write initiated but no response data available".
-                // Response analysis will be skipped for RealGatt writes (handled in SimGatt instead).
                 if (g.writeCharacteristic(c)) SendResult.Success(null) else SendResult.Error(null, "write returned false")
             } catch (e: SecurityException) { SendResult.Error(null, "Permission: ${e.message}") }
         }
@@ -256,22 +262,6 @@ class BleFuzzEngine @Inject constructor(
             }
             gatt = null
         }
-    }
-
-    /** Simulated GATT for testing without real hardware. */
-    private class SimGatt(private val connState: MutableStateFlow<ConnectionState>) : GattWrapper() {
-        private var disconnected = false
-
-        override fun writeCharacteristic(svc: String?, chr: String?, value: ByteArray): SendResult {
-            if (disconnected) return SendResult.Disconnected(null)
-            connState.value = ConnectionState.Connected
-            if (value.size > 512) { disconnected = true; connState.value = ConnectionState.Disconnected; return SendResult.Disconnected(null) }
-            val s = String(value, Charsets.UTF_8)
-            if (s.contains("%n") && s.count { it == '%' } > 8) return SendResult.Timeout
-            return SendResult.Success(value.copyOfRange(0, minOf(value.size, 20)))
-        }
-        override fun readCharacteristic(svc: String?, chr: String?) = byteArrayOf(0x01, 0x02, 0x03, 0x04)
-        override fun disconnect() { disconnected = true; connState.value = ConnectionState.Disconnected }
     }
 
     /** Result of sending a single fuzz packet. */
