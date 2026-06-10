@@ -14,6 +14,8 @@ import com.btsec.testtool.data.consent.ConsentRepositoryImpl
 import com.btsec.testtool.data.fuzzing.FuzzingRepositoryImpl
 import com.btsec.testtool.data.keyextraction.KeyExtractionRepositoryImpl
 import com.btsec.testtool.data.report.ReportRepositoryImpl
+import com.btsec.testtool.data.vulnerability.ProductionBtProbe
+import com.btsec.testtool.data.vulnerability.VulnerabilityProbe
 import com.btsec.testtool.data.vulnerability.VulnerabilityRepositoryImpl
 import com.btsec.testtool.domain.repository.AuthorizationRepository
 import com.btsec.testtool.domain.repository.BluetoothRepository
@@ -83,6 +85,12 @@ abstract class RepositoryModule {
     abstract fun bindVulnerabilityRepository(
         impl: VulnerabilityRepositoryImpl
     ): VulnerabilityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindVulnerabilityProbe(
+        impl: ProductionBtProbe
+    ): VulnerabilityProbe
 }
 
 /**

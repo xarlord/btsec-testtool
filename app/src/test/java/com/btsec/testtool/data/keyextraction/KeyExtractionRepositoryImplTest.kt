@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.data.keyextraction
@@ -30,17 +30,20 @@ import kotlin.test.assertTrue
 /**
  * Unit tests for KeyExtractionRepositoryImpl — verifies CRUD on extraction results,
  * key analysis, encryption analysis, pairing monitor lifecycle, key database operations,
- * statistics, and logging.
+ * statistics, logging, and KNOB attack probing.
  *
  * Android Context is mocked via MockK since the tests run outside of an
  * Android device/emulator. BluetoothAdapter is unavailable so encryption analysis
  * falls back to the unbonded path.
+ *
+ * This is for AUTHORIZED security testing only.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @DisplayName("KeyExtractionRepositoryImpl")
 class KeyExtractionRepositoryImplTest {
 
     private lateinit var context: Context
+    private lateinit var probe: KeyExtractionProbe
     private lateinit var repository: KeyExtractionRepositoryImpl
 
     private val testDevice = BluetoothDevice(
@@ -87,13 +90,178 @@ class KeyExtractionRepositoryImplTest {
         timestamp = timestamp
     )
 
+    /**
+     * Test probe that allows configuring negotiation results for testing.
+     */
+    private class TestProbe(
+        private val negotiationResults: Map<Int, KeyNegotiationResult> = emptyMap(),
+        private val encryptionInfo: EncryptionInfo? = null,
+        private val bonded: Boolean = false
+    ) : KeyExtractionProbe {
+
+        override suspend fun negotiateKeySize(keySizeBytes: Int): KeyNegotiationResult {
+            return negotiationResults[keySizeBytes] ?: KeyNegotiationResult.Rejected(minimumKeySize = 7)
+        }
+
+        override suspend fun readCharacteristic(serviceUuid: String, charUuid: String): ByteArray? = null
+
+        override fun getEncryptionInfo(): EncryptionInfo? = encryptionInfo
+
+        override fun isBonded(): Boolean = bonded
+
+        override fun close() {}
+    }
+
     @BeforeEach
     fun setUp() {
         context = mockk(relaxed = true)
-        // Return null BluetoothManager so adapter == null, which means
-        // encryption analysis will take the "not bonded" path.
         every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns null
-        repository = KeyExtractionRepositoryImpl(context)
+        probe = TestProbe()
+        repository = KeyExtractionRepositoryImpl(context, probe)
+    }
+
+    // ========== KNOB Attack Probing ==========
+
+    @Nested
+    @DisplayName("KNOB attack probing")
+    inner class KnobAttackTests {
+
+        @Test
+        @DisplayName("extractKey should detect KNOB vulnerability when device accepts 1-byte key")
+        fun testExtractKey_knobVulnerable() = runTest {
+            // Probe accepts 1-byte key (KNOB vulnerable)
+            val vulnerableProbe = TestProbe(
+                negotiationResults = mapOf(1 to KeyNegotiationResult.Accepted(acceptedKeySize = 1)),
+                encryptionInfo = null
+            )
+            repository = KeyExtractionRepositoryImpl(context, vulnerableProbe)
+
+            val progressList = repository.extractKey(
+                testDevice, KeyType.LTK, ExtractionMethod.ACTIVE_PROMPT
+            ).first { it.status == ExtractionStatus.COMPLETED }
+
+            assertEquals(ExtractionStatus.COMPLETED, progressList.status)
+            assertEquals(100, progressList.progressPercentage)
+
+            // Verify result was saved with extracted=true
+            val results = repository.getAllExtractionResults().first()
+            assertEquals(1, results.size)
+            assertTrue(results[0].extracted)
+            assertEquals(ExtractionConfidence.HIGH, results[0].confidence)
+            assertTrue(results[0].notes?.contains("KNOB vulnerable") == true)
+        }
+
+        @Test
+        @DisplayName("extractKey should report safe when device rejects all unsafe key sizes")
+        fun testExtractKey_knobSafe() = runTest {
+            // All key sizes rejected (safe device)
+            val safeProbe = TestProbe(
+                negotiationResults = emptyMap(), // defaults to Rejected for all
+                encryptionInfo = EncryptionInfo(
+                    keySize = 16,
+                    encryptionType = "AES-CCM",
+                    isSecureConnection = true
+                )
+            )
+            repository = KeyExtractionRepositoryImpl(context, safeProbe)
+
+            repository.extractKey(
+                testDevice, KeyType.LTK, ExtractionMethod.ACTIVE_PROMPT
+            ).first { it.status == ExtractionStatus.COMPLETED }
+
+            val results = repository.getAllExtractionResults().first()
+            assertEquals(1, results.size)
+            assertFalse(results[0].extracted)
+            assertEquals(ExtractionConfidence.MEDIUM, results[0].confidence)
+            assertTrue(results[0].notes?.contains("16 bytes") == true)
+        }
+
+        @Test
+        @DisplayName("extractKey should handle unavailable platform gracefully")
+        fun testExtractKey_unavailable() = runTest {
+            // Platform cannot probe
+            val unavailableProbe = TestProbe(
+                negotiationResults = mapOf(1 to KeyNegotiationResult.Unavailable),
+                encryptionInfo = null
+            )
+            repository = KeyExtractionRepositoryImpl(context, unavailableProbe)
+
+            repository.extractKey(
+                testDevice, KeyType.LTK, ExtractionMethod.PASSIVE_MONITORING
+            ).first { it.status == ExtractionStatus.COMPLETED }
+
+            val results = repository.getAllExtractionResults().first()
+            assertEquals(1, results.size)
+            assertFalse(results[0].extracted)
+            assertEquals(ExtractionConfidence.LOW, results[0].confidence)
+            assertTrue(results[0].notes?.contains("Could not probe") == true)
+        }
+
+        @Test
+        @DisplayName("extractKey should report MEDIUM confidence with encryption info but no vulnerability")
+        fun testExtractKey_existingEncryption() = runTest {
+            // Device has encryption info but no negotiation vulnerability
+            val encProbe = TestProbe(
+                negotiationResults = emptyMap(), // all rejected
+                encryptionInfo = EncryptionInfo(
+                    keySize = 16,
+                    encryptionType = "AES-CCM",
+                    isSecureConnection = false
+                )
+            )
+            repository = KeyExtractionRepositoryImpl(context, encProbe)
+
+            repository.extractKey(
+                testDevice, KeyType.LTK, ExtractionMethod.PASSIVE_MONITORING
+            ).first { it.status == ExtractionStatus.COMPLETED }
+
+            val results = repository.getAllExtractionResults().first()
+            assertEquals(1, results.size)
+            assertFalse(results[0].extracted)
+            assertEquals(ExtractionConfidence.MEDIUM, results[0].confidence)
+        }
+
+        @Test
+        @DisplayName("extractKey should detect vulnerability with 3-byte key acceptance")
+        fun testExtractKey_knobVulnerable3Byte() = runTest {
+            // Device accepts 3-byte key (still vulnerable)
+            val probe3byte = TestProbe(
+                negotiationResults = mapOf(
+                    1 to KeyNegotiationResult.Rejected(minimumKeySize = 3),
+                    2 to KeyNegotiationResult.Rejected(minimumKeySize = 3),
+                    3 to KeyNegotiationResult.Accepted(acceptedKeySize = 3)
+                ),
+                encryptionInfo = null
+            )
+            repository = KeyExtractionRepositoryImpl(context, probe3byte)
+
+            repository.extractKey(
+                testDevice, KeyType.LTK, ExtractionMethod.ACTIVE_PROMPT
+            ).first { it.status == ExtractionStatus.COMPLETED }
+
+            val results = repository.getAllExtractionResults().first()
+            assertTrue(results[0].extracted)
+            assertEquals(ExtractionConfidence.HIGH, results[0].confidence)
+            assertTrue(results[0].notes?.contains("3-byte") == true)
+        }
+
+        @Test
+        @DisplayName("extractKey should handle negotiation errors gracefully")
+        fun testExtractKey_negotiationError() = runTest {
+            val errorProbe = TestProbe(
+                negotiationResults = mapOf(1 to KeyNegotiationResult.Error("Connection lost")),
+                encryptionInfo = null
+            )
+            repository = KeyExtractionRepositoryImpl(context, errorProbe)
+
+            repository.extractKey(
+                testDevice, KeyType.LTK, ExtractionMethod.ACTIVE_PROMPT
+            ).first { it.status == ExtractionStatus.COMPLETED }
+
+            val results = repository.getAllExtractionResults().first()
+            assertFalse(results[0].extracted)
+            assertEquals(ExtractionConfidence.LOW, results[0].confidence)
+        }
     }
 
     // ========== Result CRUD ==========
@@ -216,7 +384,6 @@ class KeyExtractionRepositoryImplTest {
         @Test
         @DisplayName("analyzeKeySecurity should return POOR score for unbonded device")
         fun analyzeKeySecurityUnbonded() = runTest {
-            // bluetoothAdapter is null → btDevice is null → not bonded
             val analysis = repository.analyzeKeySecurity(testDevice)
 
             assertEquals(testDevice.address, analysis.deviceAddress)
@@ -268,10 +435,7 @@ class KeyExtractionRepositoryImplTest {
         @Test
         @DisplayName("isPairingMonitorActive should reflect state after stop")
         fun pairingMonitorState() = runTest {
-            // Initially false
             assertFalse(repository.isPairingMonitorActive().first())
-
-            // After stop, still false
             repository.stopPairingMonitor()
             assertFalse(repository.isPairingMonitorActive().first())
         }

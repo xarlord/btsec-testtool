@@ -67,6 +67,7 @@ enum class ExtractionStatus {
 enum class ExtractionStep {
     INITIALIZING,
     CONNECTING,
+    NEGOTIATING,
     MONITORING,
     ANALYZING,
     EXTRACTING,
