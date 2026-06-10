@@ -52,19 +52,19 @@ data class SnoopCaptureSession(
     val fileSizeBytes: Long
 )
 
-data class L2CapPacket(
+data class SnoopL2CapPacket(
     val channelId: Int,       // CID (1=signaling, 4=ATT, 6=SMP, etc.)
     val psm: Int? = null,     // Protocol/Service Multiplexer for dynamic channels
     val payload: ByteArray,
     val length: Int
 ) {
-    override fun equals(other: Any?) = this === other || (other is L2CapPacket && channelId == other.channelId && payload.contentEquals(other.payload))
+    override fun equals(other: Any?) = this === other || (other is SnoopL2CapPacket && channelId == other.channelId && payload.contentEquals(other.payload))
     override fun hashCode() = 31 * channelId + payload.contentHashCode()
 }
 
 data class DecodedPacket(
     val record: SnoopRecord,
-    val l2cap: L2CapPacket?,
+    val l2cap: SnoopL2CapPacket?,
     val protocolHint: String,  // "ATT", "SMP", "RFCOMM", "SDP", "L2CAP-Signaling", "Unknown"
     val hexDump: String
 )
