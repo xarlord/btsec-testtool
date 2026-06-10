@@ -1,3 +1,10 @@
+## [1.14.3](https://github.com/xarlord/btsec-testtool/compare/v1.14.2...v1.14.3) (2026-06-10)
+
+
+### Bug Fixes
+
+* **#331:** wire data layer for 9 BR/EDR profile use cases — add RepositoryImpl + DI bindings + tests ([#335](https://github.com/xarlord/btsec-testtool/issues/335)) ([8a8dd4a](https://github.com/xarlord/btsec-testtool/commit/8a8dd4aa9dbb43cbc64e412ce7142ed3e85645f1)), closes [#331](https://github.com/xarlord/btsec-testtool/issues/331)
+
 ## [1.14.2](https://github.com/xarlord/btsec-testtool/compare/v1.14.1...v1.14.2) (2026-06-10)
 
 
