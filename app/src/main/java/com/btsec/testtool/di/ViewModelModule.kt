@@ -10,6 +10,15 @@ package com.btsec.testtool.di
 
 import com.btsec.testtool.data.authorization.AuthorizationRepositoryImpl
 import com.btsec.testtool.data.bluetooth.BluetoothRepositoryImpl
+import com.btsec.testtool.data.bredr.AvrcpSecurityRepositoryImpl
+import com.btsec.testtool.data.bredr.HfpSecurityRepositoryImpl
+import com.btsec.testtool.data.bredr.L2capSecurityRepositoryImpl
+import com.btsec.testtool.data.bredr.MapSecurityRepositoryImpl
+import com.btsec.testtool.data.bredr.PbapSecurityRepositoryImpl
+import com.btsec.testtool.data.bredr.RfcommFuzzingRepositoryImpl
+import com.btsec.testtool.data.bredr.SapSecurityRepositoryImpl
+import com.btsec.testtool.data.bredr.SdpEnumerationRepositoryImpl
+import com.btsec.testtool.data.bredr.SnoopCaptureRepositoryImpl
 import com.btsec.testtool.data.consent.ConsentRepositoryImpl
 import com.btsec.testtool.data.fuzzing.FuzzingRepositoryImpl
 import com.btsec.testtool.data.keyextraction.KeyExtractionRepositoryImpl
@@ -18,11 +27,20 @@ import com.btsec.testtool.data.vulnerability.ProductionBtProbe
 import com.btsec.testtool.data.vulnerability.VulnerabilityProbe
 import com.btsec.testtool.data.vulnerability.VulnerabilityRepositoryImpl
 import com.btsec.testtool.domain.repository.AuthorizationRepository
+import com.btsec.testtool.domain.repository.AvrcpSecurityRepository
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.FuzzingRepository
+import com.btsec.testtool.domain.repository.HfpSecurityRepository
 import com.btsec.testtool.domain.repository.KeyExtractionRepository
+import com.btsec.testtool.domain.repository.L2capSecurityRepository
+import com.btsec.testtool.domain.repository.MapSecurityRepository
+import com.btsec.testtool.domain.repository.PbapSecurityRepository
 import com.btsec.testtool.domain.repository.ReportRepository
+import com.btsec.testtool.domain.repository.RfcommFuzzingRepository
+import com.btsec.testtool.domain.repository.SapSecurityRepository
+import com.btsec.testtool.domain.repository.SdpEnumerationRepository
+import com.btsec.testtool.domain.repository.SnoopCaptureRepository
 import com.btsec.testtool.domain.repository.VulnerabilityRepository
 import com.btsec.testtool.domain.usecase.AuthorizationUseCase
 import com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
@@ -91,6 +109,62 @@ abstract class RepositoryModule {
     abstract fun bindVulnerabilityProbe(
         impl: ProductionBtProbe
     ): VulnerabilityProbe
+
+    // ========== BR/EDR Profile Repositories (#331) ==========
+
+    @Binds
+    @Singleton
+    abstract fun bindSdpEnumerationRepository(
+        impl: SdpEnumerationRepositoryImpl
+    ): SdpEnumerationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRfcommFuzzingRepository(
+        impl: RfcommFuzzingRepositoryImpl
+    ): RfcommFuzzingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHfpSecurityRepository(
+        impl: HfpSecurityRepositoryImpl
+    ): HfpSecurityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAvrcpSecurityRepository(
+        impl: AvrcpSecurityRepositoryImpl
+    ): AvrcpSecurityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPbapSecurityRepository(
+        impl: PbapSecurityRepositoryImpl
+    ): PbapSecurityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMapSecurityRepository(
+        impl: MapSecurityRepositoryImpl
+    ): MapSecurityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSapSecurityRepository(
+        impl: SapSecurityRepositoryImpl
+    ): SapSecurityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindL2capSecurityRepository(
+        impl: L2capSecurityRepositoryImpl
+    ): L2capSecurityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSnoopCaptureRepository(
+        impl: SnoopCaptureRepositoryImpl
+    ): SnoopCaptureRepository
 }
 
 /**
