@@ -10,7 +10,7 @@ package com.btsec.testtool.domain.usecase
 
 import com.btsec.testtool.domain.model.DecodedPacket
 import com.btsec.testtool.domain.model.HciPacketType
-import com.btsec.testtool.domain.model.L2CapPacket
+import com.btsec.testtool.domain.model.SnoopL2CapPacket
 import com.btsec.testtool.domain.model.SnoopCaptureSession
 import com.btsec.testtool.domain.model.SnoopDirection
 import com.btsec.testtool.domain.model.SnoopHeader
@@ -111,7 +111,7 @@ class SnoopCaptureUseCase @Inject constructor() {
         return records
     }
 
-    fun decodeAclPacket(record: SnoopRecord): L2CapPacket? {
+    fun decodeAclPacket(record: SnoopRecord): SnoopL2CapPacket? {
         if (record.packetType != HciPacketType.ACL_DATA) return null
         // ACL data: H4 type byte (1) + ACL header (4) + L2CAP
         // L2CAP starts at offset 5: length(2 LE) + cid(2 LE) + payload
@@ -128,7 +128,7 @@ class SnoopCaptureUseCase @Inject constructor() {
         if (payloadEnd <= payloadStart) return null
         val payload = record.data.copyOfRange(payloadStart, payloadEnd)
 
-        return L2CapPacket(
+        return SnoopL2CapPacket(
             channelId = cid,
             psm = null,
             payload = payload,
