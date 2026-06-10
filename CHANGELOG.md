@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/xarlord/btsec-testtool/compare/v1.13.0...v1.13.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* rename SnoopModels L2CapPacket to SnoopL2CapPacket to resolve collision with L2capModels ([#322](https://github.com/xarlord/btsec-testtool/issues/322)) ([bac18ee](https://github.com/xarlord/btsec-testtool/commit/bac18ee67cfe6b74578a1a56d3c240c2603d4862))
+
 # [1.13.0](https://github.com/xarlord/btsec-testtool/compare/v1.12.0...v1.13.0) (2026-06-09)
 
 
