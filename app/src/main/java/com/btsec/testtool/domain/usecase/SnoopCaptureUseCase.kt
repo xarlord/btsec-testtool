@@ -36,7 +36,7 @@ class SnoopCaptureUseCase @Inject constructor() {
         const val DLT_BLUETOOTH_HCI_H4 = 201
 
         // Epoch for btsnoop timestamps: microseconds since 2000-01-01 00:00:00 UTC
-        private val EPOCH_2000 = Instant.parse("2000-01-01T00:00:00Z").toEpochMilli()
+        val EPOCH_2000 = Instant.parse("2000-01-01T00:00:00Z").toEpochMilli()
     }
 
     fun parseBtsnoopHeader(data: ByteArray): SnoopHeader {

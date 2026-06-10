@@ -41,6 +41,8 @@ import com.btsec.testtool.data.local.toDomain
 import com.btsec.testtool.data.local.toDomainOperations
 import com.btsec.testtool.data.local.toEntity
 import com.btsec.testtool.domain.model.FuzzMethod
+import com.btsec.testtool.domain.model.HciPacketType
+import com.btsec.testtool.domain.model.SnoopDirection
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import com.btsec.testtool.domain.repository.BluetoothState
 import com.btsec.testtool.domain.repository.BluetoothOperation
@@ -50,9 +52,12 @@ import com.btsec.testtool.domain.repository.PacketDirection
 import com.btsec.testtool.domain.repository.PacketStatistics
 import com.btsec.testtool.domain.repository.PacketType
 import com.btsec.testtool.domain.repository.WriteType
+import com.btsec.testtool.domain.usecase.SnoopCaptureUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
@@ -60,9 +65,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
+import java.io.File
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -80,8 +87,17 @@ import kotlin.coroutines.resumeWithException
 @Singleton
 class BluetoothRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val bluetoothDao: BluetoothDao
+    private val bluetoothDao: BluetoothDao,
+    private val snoopCaptureUseCase: SnoopCaptureUseCase
 ) : BluetoothRepository {
+
+    companion object {
+        private const val SNOOP_LOG_PATH = "/data/misc/bluetooth/logs/btsnoop_hci.log"
+        private const val SNOOP_POLL_INTERVAL_MS = 500L
+    }
+
+    private var monitoringJob: Job? = null
+    private var lastSnoopFileSize = 0L
 
     private val bluetoothManager: BluetoothManager =
         context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -814,23 +830,152 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     // ========== Packet Monitoring ==========
 
-    override fun startPacketMonitoring(): Flow<CapturedPacket> {
-        // Would require root and monitor mode
-        return flow { }
+    override fun startPacketMonitoring(): Flow<CapturedPacket> = callbackFlow {
+        val snoopFile = File(SNOOP_LOG_PATH)
+        lastSnoopFileSize = if (snoopFile.exists()) snoopFile.length() else 0L
+        var recordOffset = lastSnoopFileSize.toInt()
+
+        // If file already has data, start parsing from current end (skip existing records)
+        // by setting offset to file length; new records appended after this point are captured.
+        // For a fresh monitoring session we read from the start of any existing file content.
+        if (lastSnoopFileSize > SnoopCaptureUseCase.BTSNOOP_HEADER_SIZE) {
+            // Parse existing records so we know how far into the file we are in record-space
+            try {
+                val existingData = snoopFile.readBytes()
+                val records = snoopCaptureUseCase.parseAllRecords(existingData)
+                // Compute byte offset consumed so far
+                var byteOffset = SnoopCaptureUseCase.BTSNOOP_HEADER_SIZE
+                for (rec in records) {
+                    byteOffset += SnoopCaptureUseCase.RECORD_HEADER_SIZE + rec.includedLength
+                }
+                recordOffset = byteOffset
+                lastSnoopFileSize = existingData.size.toLong()
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to parse existing snoop log during monitoring start")
+            }
+        }
+
+        try {
+            while (isActive) {
+                delay(SNOOP_POLL_INTERVAL_MS)
+                if (!snoopFile.exists()) continue
+
+                val currentSize = snoopFile.length()
+                if (currentSize <= lastSnoopFileSize) continue
+
+                try {
+                    val newData = snoopFile.readBytes()
+                    // Parse only from the header; filter for records beyond our last seen offset
+                    val allRecords = snoopCaptureUseCase.parseAllRecords(newData)
+
+                    // Find byte offset up to where we've already emitted
+                    var byteCursor = SnoopCaptureUseCase.BTSNOOP_HEADER_SIZE
+                    for (record in allRecords) {
+                        val recordStart = byteCursor
+                        val recordBytes = SnoopCaptureUseCase.RECORD_HEADER_SIZE + record.includedLength
+                        byteCursor += recordBytes
+
+                        if (recordStart < recordOffset) continue
+
+                        val packet = mapSnoopRecordToCapturedPacket(record)
+                        trySend(packet)
+                    }
+                    recordOffset = byteCursor
+                    lastSnoopFileSize = currentSize
+                } catch (e: Exception) {
+                    Timber.w(e, "Error parsing snoop log records during monitoring")
+                }
+            }
+        } catch (e: CancellationException) {
+            // Normal cancellation when flow collector is done
+        }
+
+        awaitClose {
+            monitoringJob?.cancel()
+            monitoringJob = null
+        }
     }
 
     override suspend fun stopPacketMonitoring() {
-        // TODO: Implement packet monitoring
+        monitoringJob?.cancel()
+        monitoringJob = null
+        Timber.d("Packet monitoring stopped")
     }
 
     override suspend fun isPacketMonitoringAvailable(): Boolean {
-        return false  // Requires root and specific hardware
+        val snoopFile = File(SNOOP_LOG_PATH)
+        if (snoopFile.exists() && snoopFile.canRead()) {
+            return true
+        }
+        // On Android 11+, check if snoop logging is enabled via content provider
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                val contentUri = android.net.Uri.parse("content://com.android.bluetooth.ble/metadata")
+                context.contentResolver.query(contentUri, null, null, null, null)?.close()
+            } catch (_: Exception) {
+                // Content provider not available, fall through
+            }
+        }
+        return false
     }
 
     override fun getPacketStatistics(): Flow<PacketStatistics> {
         return flow {
-            emit(PacketStatistics(0, 0, 0, 0, 0, null, 0))
+            val snoopFile = File(SNOOP_LOG_PATH)
+            if (!snoopFile.exists() || !snoopFile.canRead()) {
+                emit(PacketStatistics(0, 0, 0, 0, 0, null, 0))
+                return@flow
+            }
+            try {
+                val data = snoopFile.readBytes()
+                val records = snoopCaptureUseCase.parseAllRecords(data)
+                val session = snoopCaptureUseCase.computeSessionStats(records)
+                val startTime = Instant.ofEpochMilli(
+                    SnoopCaptureUseCase.EPOCH_2000 + (session.startTime / 1000)
+                )
+                emit(PacketStatistics(
+                    totalPackets = session.totalPackets,
+                    inboundPackets = session.receivedPackets,
+                    outboundPackets = session.sentPackets,
+                    broadcastPackets = 0,
+                    bytesCaptured = session.fileSizeBytes,
+                    startTime = startTime,
+                    durationSeconds = (session.endTime - session.startTime) / 1_000_000
+                ))
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to compute packet statistics from snoop log")
+                emit(PacketStatistics(0, 0, 0, 0, 0, null, 0))
+            }
         }
+    }
+
+    /**
+     * Maps a parsed SnoopRecord to a CapturedPacket for the monitoring flow.
+     */
+    private fun mapSnoopRecordToCapturedPacket(record: com.btsec.testtool.domain.model.SnoopRecord): CapturedPacket {
+        val direction = when (record.direction) {
+            SnoopDirection.RECEIVED -> PacketDirection.INBOUND
+            SnoopDirection.SENT -> PacketDirection.OUTBOUND
+        }
+        val packetType = when (record.packetType) {
+            HciPacketType.COMMAND -> PacketType.UNKNOWN
+            HciPacketType.ACL_DATA -> PacketType.ACL
+            HciPacketType.SCO_DATA -> PacketType.SCO
+            HciPacketType.EVENT -> PacketType.UNKNOWN
+            HciPacketType.UNKNOWN -> PacketType.UNKNOWN
+        }
+        val timestamp = Instant.ofEpochMilli(
+            SnoopCaptureUseCase.EPOCH_2000 + (record.timestampMicros / 1000)
+        )
+        return CapturedPacket(
+            timestamp = timestamp,
+            direction = direction,
+            packetType = packetType,
+            data = record.data,
+            channel = null,
+            rssi = null,
+            size = record.includedLength
+        )
     }
 
     // ========== Logging ==========
