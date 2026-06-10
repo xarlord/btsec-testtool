@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/xarlord/btsec-testtool/compare/v1.14.0...v1.14.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **#326,#330:** wire vulnerability and key extraction probes, delegate repo to engine ([#332](https://github.com/xarlord/btsec-testtool/issues/332)) ([2ba55ad](https://github.com/xarlord/btsec-testtool/commit/2ba55adf786bdead35e89635cf9903e923ee6196)), closes [#326](https://github.com/xarlord/btsec-testtool/issues/326) [#330](https://github.com/xarlord/btsec-testtool/issues/330) [#326](https://github.com/xarlord/btsec-testtool/issues/326) [#330](https://github.com/xarlord/btsec-testtool/issues/330) [#324](https://github.com/xarlord/btsec-testtool/issues/324) [#324](https://github.com/xarlord/btsec-testtool/issues/324) [#330](https://github.com/xarlord/btsec-testtool/issues/330) [#325](https://github.com/xarlord/btsec-testtool/issues/325) [#326](https://github.com/xarlord/btsec-testtool/issues/326) [#330](https://github.com/xarlord/btsec-testtool/issues/330) [#324](https://github.com/xarlord/btsec-testtool/issues/324) [#325](https://github.com/xarlord/btsec-testtool/issues/325) [#324](https://github.com/xarlord/btsec-testtool/issues/324) [#325](https://github.com/xarlord/btsec-testtool/issues/325) [#326](https://github.com/xarlord/btsec-testtool/issues/326) [#330](https://github.com/xarlord/btsec-testtool/issues/330)
+
 # [1.14.0](https://github.com/xarlord/btsec-testtool/compare/v1.13.1...v1.14.0) (2026-06-10)
 
 
