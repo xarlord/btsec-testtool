@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/xarlord/btsec-testtool/compare/v1.14.1...v1.14.2) (2026-06-10)
+
+
+### Bug Fixes
+
+* **#327:** implement real HCI snoop log packet monitoring ([#334](https://github.com/xarlord/btsec-testtool/issues/334)) ([ed293df](https://github.com/xarlord/btsec-testtool/commit/ed293df6b7d10b0b91afe2ae69424d3e9350e0cc)), closes [#327](https://github.com/xarlord/btsec-testtool/issues/327)
+
 ## [1.14.1](https://github.com/xarlord/btsec-testtool/compare/v1.14.0...v1.14.1) (2026-06-10)
 
 
