@@ -40,7 +40,7 @@ import com.btsec.testtool.domain.model.RiskSeverity
 @Composable
 fun AnalyticsScreen(
     authId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val viewModel: AnalyticsViewModel = hiltViewModel()
     val summary by viewModel.summary.collectAsState()
@@ -53,20 +53,21 @@ fun AnalyticsScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+            contentPadding = PaddingValues(vertical = 16.dp),
         ) {
             // Summary cards row
             item {
@@ -77,15 +78,17 @@ fun AnalyticsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ),
                 ) {
                     RiskTrendChart(
                         trendData = summary.trendData,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
                     )
                 }
             }
@@ -94,15 +97,17 @@ fun AnalyticsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ),
                 ) {
                     SeverityDonutChart(
                         distribution = summary.severityDistribution,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
                     )
                 }
             }
@@ -111,15 +116,17 @@ fun AnalyticsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ),
                 ) {
                     CategoryBarChart(
                         breakdown = summary.categoryBreakdown,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
                     )
                 }
             }
@@ -130,7 +137,7 @@ fun AnalyticsScreen(
                     text = "Top Vulnerable Devices",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
 
@@ -140,11 +147,15 @@ fun AnalyticsScreen(
                     Text(
                         text = "No devices scanned yet.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             } else {
-                items(summary.topVulnerableDevices) { device ->
+                items(
+                    items = summary.topVulnerableDevices,
+                    // ⚡ Bolt: Adding unique key to prevent unnecessary recompositions and improve list rendering performance
+                    key = { it.deviceAddress },
+                ) { device ->
                     DeviceRiskCard(device = device)
                 }
             }
@@ -164,31 +175,31 @@ fun AnalyticsScreen(
 private fun SummaryCardsRow(summary: AnalyticsSummary) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         SummaryCard(
             title = "Scans",
             value = summary.totalScans.toString(),
             icon = Icons.Default.Security,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         SummaryCard(
             title = "Devices",
             value = summary.totalDevices.toString(),
             icon = Icons.Default.Devices,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         SummaryCard(
             title = "Vulns",
             value = summary.totalVulnerabilities.toString(),
             icon = Icons.Default.Warning,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         SummaryCard(
             title = "Avg Risk",
             value = String.format("%.1f", summary.averageRiskScore),
             icon = Icons.Default.BugReport,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -201,37 +212,39 @@ private fun SummaryCard(
     title: String,
     value: String,
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
     }
@@ -244,31 +257,33 @@ private fun SummaryCard(
 private fun DeviceRiskCard(device: DeviceRiskEntry) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = device.deviceName,
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     text = device.deviceAddress,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     text = "${device.vulnerabilityCount} vulnerabilities",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
@@ -276,12 +291,12 @@ private fun DeviceRiskCard(device: DeviceRiskEntry) {
                     text = String.format("%.1f", device.riskScore),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = severityColor(device.severity)
+                    color = severityColor(device.severity),
                 )
                 Text(
                     text = device.severity.name,
                     style = MaterialTheme.typography.labelSmall,
-                    color = severityColor(device.severity)
+                    color = severityColor(device.severity),
                 )
             }
         }
@@ -291,10 +306,11 @@ private fun DeviceRiskCard(device: DeviceRiskEntry) {
 /**
  * Returns the color associated with a risk severity level.
  */
-private fun severityColor(severity: RiskSeverity): Color = when (severity) {
-    RiskSeverity.CRITICAL -> Color(0xFFE53935)
-    RiskSeverity.HIGH -> Color(0xFFFB8C00)
-    RiskSeverity.MEDIUM -> Color(0xFFF9A825)
-    RiskSeverity.LOW -> Color(0xFF43A047)
-    RiskSeverity.INFO -> Color(0xFF90A4AE)
-}
+private fun severityColor(severity: RiskSeverity): Color =
+    when (severity) {
+        RiskSeverity.CRITICAL -> Color(0xFFE53935)
+        RiskSeverity.HIGH -> Color(0xFFFB8C00)
+        RiskSeverity.MEDIUM -> Color(0xFFF9A825)
+        RiskSeverity.LOW -> Color(0xFF43A047)
+        RiskSeverity.INFO -> Color(0xFF90A4AE)
+    }
