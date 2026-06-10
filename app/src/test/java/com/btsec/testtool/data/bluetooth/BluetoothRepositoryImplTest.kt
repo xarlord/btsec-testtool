@@ -26,16 +26,21 @@ import com.btsec.testtool.domain.repository.BluetoothOperation
 import com.btsec.testtool.domain.repository.BluetoothState
 import com.btsec.testtool.domain.repository.ConnectionPriority
 import com.btsec.testtool.domain.repository.OperationType
+import com.btsec.testtool.domain.repository.PacketDirection
 import com.btsec.testtool.domain.repository.PacketStatistics
+import com.btsec.testtool.domain.repository.PacketType
 import com.btsec.testtool.domain.repository.WriteType
+import com.btsec.testtool.domain.usecase.SnoopCaptureUseCase
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -65,6 +70,7 @@ class BluetoothRepositoryImplTest {
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private lateinit var bluetoothDao: BluetoothDao
+    private lateinit var snoopCaptureUseCase: SnoopCaptureUseCase
     private lateinit var repository: BluetoothRepositoryImpl
 
     private val testDeviceAddress = "AA:BB:CC:DD:EE:FF"
@@ -94,13 +100,14 @@ class BluetoothRepositoryImplTest {
         bluetoothAdapter = mockk(relaxed = true)
         bluetoothLeScanner = mockk(relaxed = true)
         bluetoothDao = mockk(relaxed = true)
+        snoopCaptureUseCase = mockk(relaxed = true)
 
         every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns bluetoothManager
         every { bluetoothManager.adapter } returns bluetoothAdapter
         every { bluetoothAdapter.bluetoothLeScanner } returns bluetoothLeScanner
         every { bluetoothAdapter.isEnabled } returns true
 
-        repository = BluetoothRepositoryImpl(context, bluetoothDao)
+        repository = BluetoothRepositoryImpl(context, bluetoothDao, snoopCaptureUseCase)
     }
 
     // ========== Bluetooth State ==========
@@ -368,7 +375,7 @@ class BluetoothRepositoryImplTest {
             val nullAdapterManager = mockk<BluetoothManager>()
             every { nullAdapterManager.adapter } returns null
             every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns nullAdapterManager
-            val repo = BluetoothRepositoryImpl(context, bluetoothDao)
+            val repo = BluetoothRepositoryImpl(context, bluetoothDao, snoopCaptureUseCase)
             val result = repo.createBond(testDeviceAddress)
             assertFalse(result)
         }
@@ -379,7 +386,7 @@ class BluetoothRepositoryImplTest {
             val nullAdapterManager = mockk<BluetoothManager>()
             every { nullAdapterManager.adapter } returns null
             every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns nullAdapterManager
-            val repo = BluetoothRepositoryImpl(context, bluetoothDao)
+            val repo = BluetoothRepositoryImpl(context, bluetoothDao, snoopCaptureUseCase)
             val result = repo.removeBond(testDeviceAddress)
             assertFalse(result)
         }
@@ -392,15 +399,15 @@ class BluetoothRepositoryImplTest {
     inner class PacketMonitoringTests {
 
         @Test
-        @DisplayName("isPacketMonitoringAvailable returns false")
-        fun monitoringNotAvailable() = runTest {
+        @DisplayName("isPacketMonitoringAvailable returns false when snoop log absent")
+        fun monitoringNotAvailableWhenNoSnoopLog() = runTest {
             val available = repository.isPacketMonitoringAvailable()
             assertFalse(available)
         }
 
         @Test
-        @DisplayName("getPacketStatistics returns zeroed stats")
-        fun packetStatsZeroed() = runTest {
+        @DisplayName("getPacketStatistics returns zeroed stats when no snoop log")
+        fun packetStatsZeroedWhenNoSnoopLog() = runTest {
             val stats = repository.getPacketStatistics().first()
             assertEquals(0, stats.totalPackets)
             assertEquals(0, stats.inboundPackets)
@@ -411,10 +418,23 @@ class BluetoothRepositoryImplTest {
         }
 
         @Test
-        @DisplayName("stopPacketMonitoring does not crash")
+        @DisplayName("stopPacketMonitoring does not crash when no monitoring active")
         fun stopMonitoringDoesNotCrash() = runTest {
             repository.stopPacketMonitoring()
             // Should complete without exception
+        }
+
+        @Test
+        @DisplayName("startPacketMonitoring emits no packets when snoop log absent")
+        fun startMonitoringEmitsNothingWithoutSnoopLog() = runTest {
+            // The flow polls the file; without it, no packets emitted
+            val packets = mutableListOf<com.btsec.testtool.domain.repository.CapturedPacket>()
+            val job = launch {
+                repository.startPacketMonitoring().collect { packets.add(it) }
+            }
+            delay(200)
+            job.cancel()
+            assertTrue(packets.isEmpty(), "No packets should be emitted without a snoop log file")
         }
     }
 
