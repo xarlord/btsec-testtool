@@ -1,3 +1,16 @@
+# [1.14.0](https://github.com/xarlord/btsec-testtool/compare/v1.13.1...v1.14.0) (2026-06-10)
+
+
+### Features
+
+* **#144:** add GATT Server Emulator with device presets and session tracking ([#315](https://github.com/xarlord/btsec-testtool/issues/315)) ([bf8d86e](https://github.com/xarlord/btsec-testtool/commit/bf8d86e11fce036a5bfcf7cf2d6cc30d7a2ad316)), closes [#144](https://github.com/xarlord/btsec-testtool/issues/144)
+* **#145:** add Encrypted Local Storage with key derivation and audit logging ([#316](https://github.com/xarlord/btsec-testtool/issues/316)) ([662061c](https://github.com/xarlord/btsec-testtool/commit/662061c46f5aa36aca93a0f87bc769a11ee0f3c4)), closes [#145](https://github.com/xarlord/btsec-testtool/issues/145)
+* **#146:** add Multi-Device Parallel Scanning with connection pool management ([#317](https://github.com/xarlord/btsec-testtool/issues/317)) ([e7a960d](https://github.com/xarlord/btsec-testtool/commit/e7a960d039560e31be1026f19eb15f5b78f9cc5f)), closes [#146](https://github.com/xarlord/btsec-testtool/issues/146)
+* **#147:** add Custom Test Scripting DSL with validation and execution model ([#318](https://github.com/xarlord/btsec-testtool/issues/318)) ([231ad0e](https://github.com/xarlord/btsec-testtool/commit/231ad0e5a02497e8eed51ce43ddf889c6ea0d94d)), closes [#147](https://github.com/xarlord/btsec-testtool/issues/147)
+* **#148:** add Onboarding Tutorial with 8-step feature introduction ([#319](https://github.com/xarlord/btsec-testtool/issues/319)) ([0ffe95e](https://github.com/xarlord/btsec-testtool/commit/0ffe95e23e0732635f5e14ab2c57d362ecf14c28)), closes [#148](https://github.com/xarlord/btsec-testtool/issues/148)
+* **#149,#196:** add Dashboard Analytics with vulnerability trends and risk score distribution ([#320](https://github.com/xarlord/btsec-testtool/issues/320)) ([16ed3c0](https://github.com/xarlord/btsec-testtool/commit/16ed3c065df9113d70f929952f618a638b7c2881)), closes [#149](https://github.com/xarlord/btsec-testtool/issues/149) [#196](https://github.com/xarlord/btsec-testtool/issues/196)
+* **#197:** add YAML Test Scripting with parser and validation ([#321](https://github.com/xarlord/btsec-testtool/issues/321)) ([bf0d271](https://github.com/xarlord/btsec-testtool/commit/bf0d2711d9e926b9c12e1636df4813a000ef91c2)), closes [#197](https://github.com/xarlord/btsec-testtool/issues/197)
+
 ## [1.13.1](https://github.com/xarlord/btsec-testtool/compare/v1.13.0...v1.13.1) (2026-06-10)
 
 
