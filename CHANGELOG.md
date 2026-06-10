@@ -1,3 +1,10 @@
+## [1.14.4](https://github.com/xarlord/btsec-testtool/compare/v1.14.3...v1.14.4) (2026-06-10)
+
+
+### Bug Fixes
+
+* **#329:** enhance androidTest UI tests with interactions and state verification ([#336](https://github.com/xarlord/btsec-testtool/issues/336)) ([3f42540](https://github.com/xarlord/btsec-testtool/commit/3f42540b681237bb04a64452ed5410a15cd2f508)), closes [#329](https://github.com/xarlord/btsec-testtool/issues/329)
+
 ## [1.14.3](https://github.com/xarlord/btsec-testtool/compare/v1.14.2...v1.14.3) (2026-06-10)
 
 
