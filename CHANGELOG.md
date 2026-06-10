@@ -1,3 +1,10 @@
+## [1.14.5](https://github.com/xarlord/btsec-testtool/compare/v1.14.4...v1.14.5) (2026-06-10)
+
+
+### Bug Fixes
+
+* **#328:** add E2E instrumented tests for Bluetooth stack flows ([#337](https://github.com/xarlord/btsec-testtool/issues/337)) ([1f88f98](https://github.com/xarlord/btsec-testtool/commit/1f88f98b8943897fe8f95047cec73129bbadee8a)), closes [#328](https://github.com/xarlord/btsec-testtool/issues/328)
+
 ## [1.14.4](https://github.com/xarlord/btsec-testtool/compare/v1.14.3...v1.14.4) (2026-06-10)
 
 
