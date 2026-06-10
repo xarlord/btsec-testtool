@@ -129,4 +129,78 @@ class IspRepositoryInterfacesTest {
             FuzzingWriter::class.java.isAssignableFrom(FuzzingRepository::class.java)
         )
     }
+
+    // ========== BR/EDR Repository Interfaces (#331) ==========
+
+    @Test
+    fun sdpEnumerationRepository_exists() {
+        assertTrue(
+            "SdpEnumerationRepository should be an interface",
+            SdpEnumerationRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun rfcommFuzzingRepository_exists() {
+        assertTrue(
+            "RfcommFuzzingRepository should be an interface",
+            RfcommFuzzingRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun hfpSecurityRepository_exists() {
+        assertTrue(
+            "HfpSecurityRepository should be an interface",
+            HfpSecurityRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun avrcpSecurityRepository_exists() {
+        assertTrue(
+            "AvrcpSecurityRepository should be an interface",
+            AvrcpSecurityRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun pbapSecurityRepository_exists() {
+        assertTrue(
+            "PbapSecurityRepository should be an interface",
+            PbapSecurityRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun mapSecurityRepository_exists() {
+        assertTrue(
+            "MapSecurityRepository should be an interface",
+            MapSecurityRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun sapSecurityRepository_exists() {
+        assertTrue(
+            "SapSecurityRepository should be an interface",
+            SapSecurityRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun l2capSecurityRepository_exists() {
+        assertTrue(
+            "L2capSecurityRepository should be an interface",
+            L2capSecurityRepository::class.java.isInterface
+        )
+    }
+
+    @Test
+    fun snoopCaptureRepository_exists() {
+        assertTrue(
+            "SnoopCaptureRepository should be an interface",
+            SnoopCaptureRepository::class.java.isInterface
+        )
+    }
 }
