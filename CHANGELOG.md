@@ -1,3 +1,10 @@
+## [1.14.7](https://github.com/xarlord/btsec-testtool/compare/v1.14.6...v1.14.7) (2026-06-11)
+
+
+### Bug Fixes
+
+* **#341:** add contents:write permission to release-apks job ([#342](https://github.com/xarlord/btsec-testtool/issues/342)) ([7b0f430](https://github.com/xarlord/btsec-testtool/commit/7b0f43024096b97220902730ecaf87ff2cdb269a)), closes [#341](https://github.com/xarlord/btsec-testtool/issues/341)
+
 ## [1.14.6](https://github.com/xarlord/btsec-testtool/compare/v1.14.5...v1.14.6) (2026-06-11)
 
 
