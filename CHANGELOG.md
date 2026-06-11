@@ -1,3 +1,10 @@
+## [1.14.6](https://github.com/xarlord/btsec-testtool/compare/v1.14.5...v1.14.6) (2026-06-11)
+
+
+### Bug Fixes
+
+* **#338:** add tag_name to release upload step for APK assets ([#339](https://github.com/xarlord/btsec-testtool/issues/339)) ([bc10029](https://github.com/xarlord/btsec-testtool/commit/bc100290999d89813d2cf9cc4290f587c39dd5aa)), closes [#338](https://github.com/xarlord/btsec-testtool/issues/338)
+
 ## [1.14.5](https://github.com/xarlord/btsec-testtool/compare/v1.14.4...v1.14.5) (2026-06-10)
 
 
