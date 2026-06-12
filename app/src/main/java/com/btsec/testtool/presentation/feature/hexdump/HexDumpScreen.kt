@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
@@ -31,8 +33,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.btsec.testtool.domain.model.HexDumpEntry
@@ -52,7 +56,7 @@ fun HexDumpScreen(
     serviceUuid: String,
     characteristicData: ByteArray,
     onBack: () -> Unit,
-    viewModel: HexDumpViewModel = hiltViewModel()
+    viewModel: HexDumpViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val clipboardManager = LocalClipboardManager.current
@@ -61,7 +65,7 @@ fun HexDumpScreen(
         viewModel.loadCharacteristicData(
             data = characteristicData,
             characteristicUuid = characteristicUuid,
-            serviceUuid = serviceUuid
+            serviceUuid = serviceUuid,
         )
     }
 
@@ -71,14 +75,14 @@ fun HexDumpScreen(
                 title = {
                     Text(
                         text = "Hex Dump",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = "Navigate back",
                         )
                     }
                 },
@@ -88,38 +92,40 @@ fun HexDumpScreen(
                             val text = viewModel.getFullDumpForCopy()
                             clipboardManager.setText(AnnotatedString(text))
                             viewModel.onCopiedToClipboard()
-                        }
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copy to clipboard"
+                            contentDescription = "Copy to clipboard",
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         when (val state = uiState) {
             is HexDumpUiState.Loading -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
             }
             is HexDumpUiState.Error -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = state.message,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
             }
@@ -127,7 +133,7 @@ fun HexDumpScreen(
                 HexDumpContent(
                     state = state,
                     viewModel = viewModel,
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
                 )
             }
         }
@@ -138,14 +144,14 @@ fun HexDumpScreen(
 private fun HexDumpContent(
     state: HexDumpUiState.Success,
     viewModel: HexDumpViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         // UUID info
         CharacteristicInfo(
             characteristicUuid = state.result.characteristicUuid,
             serviceUuid = state.result.serviceUuid,
-            size = state.result.size
+            size = state.result.size,
         )
 
         Divider(modifier = Modifier.padding(vertical = 4.dp))
@@ -153,7 +159,7 @@ private fun HexDumpContent(
         // View mode toggle
         ViewModeToggle(
             currentMode = state.viewMode,
-            onModeChanged = { viewModel.setViewMode(it) }
+            onModeChanged = { viewModel.setViewMode(it) },
         )
 
         // Search bar
@@ -161,7 +167,7 @@ private fun HexDumpContent(
             query = state.searchQuery,
             onQueryChanged = { viewModel.search(it) },
             resultCount = state.displayEntries.size,
-            totalCount = state.result.entries.size
+            totalCount = state.result.entries.size,
         )
 
         // Content based on view mode
@@ -169,19 +175,19 @@ private fun HexDumpContent(
             HexDumpViewMode.HEX -> {
                 HexView(
                     entries = state.displayEntries,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
             HexDumpViewMode.TEXT -> {
                 TextView(
                     text = viewModel.getTextRepresentation(),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
             HexDumpViewMode.BINARY -> {
                 BinaryView(
                     binary = viewModel.getBinaryRepresentation(),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
@@ -194,7 +200,7 @@ private fun HexDumpContent(
                     TextButton(onClick = { viewModel.resetCopiedState() }) {
                         Text("Dismiss")
                     }
-                }
+                },
             ) {
                 Text("Copied to clipboard")
             }
@@ -206,40 +212,41 @@ private fun HexDumpContent(
 private fun CharacteristicInfo(
     characteristicUuid: String,
     serviceUuid: String,
-    size: Int
+    size: Int,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
                 text = "Characteristic",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = characteristicUuid,
                 style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Service",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = serviceUuid,
                 style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Size: $size bytes",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -248,19 +255,20 @@ private fun CharacteristicInfo(
 @Composable
 private fun ViewModeToggle(
     currentMode: HexDumpViewMode,
-    onModeChanged: (HexDumpViewMode) -> Unit
+    onModeChanged: (HexDumpViewMode) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         HexDumpViewMode.entries.forEach { mode ->
             FilterChip(
                 selected = currentMode == mode,
                 onClick = { onModeChanged(mode) },
-                label = { Text(mode.name) }
+                label = { Text(mode.name) },
             )
         }
     }
@@ -271,57 +279,65 @@ private fun SearchBar(
     query: String,
     onQueryChanged: (String) -> Unit,
     resultCount: Int,
-    totalCount: Int
+    totalCount: Int,
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChanged,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
         placeholder = { Text("Search in dump...") },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search"
+                contentDescription = "Search",
             )
         },
         singleLine = true,
-        supportingText = if (query.isNotBlank()) {
-            { Text("$resultCount / $totalCount lines") }
-        } else null
+        supportingText =
+            if (query.isNotBlank()) {
+                { Text("$resultCount / $totalCount lines") }
+            } else {
+                null
+            },
     )
 }
 
 @Composable
 private fun HexView(
     entries: List<HexDumpEntry>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (entries.isEmpty()) {
         Box(
             modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = "No data to display",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         return
     }
 
     LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         items(
             items = entries,
-            key = { it.offset }
+            key = { it.offset },
         ) { entry ->
             HexDumpLine(entry = entry)
         }
@@ -331,32 +347,33 @@ private fun HexView(
 @Composable
 private fun HexDumpLine(entry: HexDumpEntry) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp, vertical = 1.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp, vertical = 1.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         // Offset
         Text(
             text = String.format("%08X", entry.offset),
             style = MaterialTheme.typography.bodySmall,
             fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         // Hex bytes
         Text(
             text = entry.hexBytes,
             style = MaterialTheme.typography.bodySmall,
-            fontFamily = FontFamily.Monospace
+            fontFamily = FontFamily.Monospace,
         )
         // ASCII representation
         Text(
             text = "|${entry.asciiRepresentation}|",
             style = MaterialTheme.typography.bodySmall,
             fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }
@@ -364,18 +381,19 @@ private fun HexDumpLine(entry: HexDumpEntry) {
 @Composable
 private fun TextView(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(16.dp),
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
             fontFamily = FontFamily.Monospace,
-            modifier = Modifier.horizontalScroll(rememberScrollState())
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
         )
     }
 }
@@ -383,23 +401,25 @@ private fun TextView(
 @Composable
 private fun BinaryView(
     binary: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         item {
             Text(
                 text = binary,
                 style = MaterialTheme.typography.bodySmall,
                 fontFamily = FontFamily.Monospace,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .horizontalScroll(rememberScrollState())
+                modifier =
+                    Modifier
+                        .padding(horizontal = 8.dp)
+                        .horizontalScroll(rememberScrollState()),
             )
         }
     }

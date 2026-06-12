@@ -29,13 +29,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -44,24 +45,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,7 +78,7 @@ import com.btsec.testtool.domain.model.PacketType
 fun PacketTimelineScreen(
     authId: String,
     onBack: () -> Unit,
-    viewModel: PacketTimelineViewModel = hiltViewModel()
+    viewModel: PacketTimelineViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val clipboardManager = LocalClipboardManager.current
@@ -91,24 +89,25 @@ fun PacketTimelineScreen(
                 title = {
                     Text(
                         text = "Packet Timeline",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = "Navigate back",
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
         ) {
             // Stats row
             StatsRow(state = uiState)
@@ -119,27 +118,28 @@ fun PacketTimelineScreen(
             FilterRow(
                 currentFilter = uiState.filter,
                 onTypeFilterChanged = { viewModel.updateTypeFilter(it) },
-                onDirectionFilterChanged = { viewModel.updateDirectionFilter(it) }
+                onDirectionFilterChanged = { viewModel.updateDirectionFilter(it) },
             )
 
             // Search bar
             SearchBarRow(
                 query = uiState.filter.searchQuery ?: "",
-                onQueryChanged = { viewModel.updateSearchQuery(it.ifBlank { null }) }
+                onQueryChanged = { viewModel.updateSearchQuery(it.ifBlank { null }) },
             )
 
             // Packet list
             if (uiState.filteredPackets.isEmpty()) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = "No packets match the current filter",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             } else {
@@ -147,7 +147,7 @@ fun PacketTimelineScreen(
                     packets = uiState.filteredPackets,
                     selectedPacketId = uiState.selectedPacketId,
                     onPacketClick = { viewModel.selectPacket(it) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
@@ -157,33 +157,37 @@ fun PacketTimelineScreen(
 @Composable
 private fun StatsRow(state: PacketTimelineUiState) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         StatItem(label = "Total", value = "${state.stats.totalPackets}")
         StatItem(label = "Sent", value = "${state.stats.sentCount}")
         StatItem(label = "Received", value = "${state.stats.receivedCount}")
         StatItem(
             label = "Avg Size",
-            value = String.format("%.1f B", state.stats.averageSize)
+            value = String.format("%.1f B", state.stats.averageSize),
         )
     }
 }
 
 @Composable
-private fun StatItem(label: String, value: String) {
+private fun StatItem(
+    label: String,
+    value: String,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
             style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -193,28 +197,29 @@ private fun StatItem(label: String, value: String) {
 private fun FilterRow(
     currentFilter: com.btsec.testtool.domain.model.PacketFilter,
     onTypeFilterChanged: (PacketType?) -> Unit,
-    onDirectionFilterChanged: (PacketDirection?) -> Unit
+    onDirectionFilterChanged: (PacketDirection?) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
     ) {
         // Type filters
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             FilterChip(
                 selected = currentFilter.type == null,
                 onClick = { onTypeFilterChanged(null) },
-                label = { Text("All") }
+                label = { Text("All") },
             )
             PacketType.entries.filter { it != PacketType.UNKNOWN }.forEach { type ->
                 FilterChip(
                     selected = currentFilter.type == type,
                     onClick = { onTypeFilterChanged(type) },
-                    label = { Text(type.displayName) }
+                    label = { Text(type.displayName) },
                 )
             }
         }
@@ -224,12 +229,12 @@ private fun FilterRow(
         // Direction filters
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             FilterChip(
                 selected = currentFilter.direction == null,
                 onClick = { onDirectionFilterChanged(null) },
-                label = { Text("Both") }
+                label = { Text("Both") },
             )
             PacketDirection.entries.forEach { direction ->
                 FilterChip(
@@ -240,9 +245,9 @@ private fun FilterRow(
                             when (direction) {
                                 PacketDirection.SENT -> "↑ Sent"
                                 PacketDirection.RECEIVED -> "↓ Received"
-                            }
+                            },
                         )
-                    }
+                    },
                 )
             }
         }
@@ -252,22 +257,26 @@ private fun FilterRow(
 @Composable
 private fun SearchBarRow(
     query: String,
-    onQueryChanged: (String) -> Unit
+    onQueryChanged: (String) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChanged,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
         placeholder = { Text("Search packets...") },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search"
+                contentDescription = "Search",
             )
         },
-        singleLine = true
+        singleLine = true,
     )
 }
 
@@ -276,25 +285,25 @@ private fun PacketList(
     packets: List<CapturedPacket>,
     selectedPacketId: String?,
     onPacketClick: (String?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         items(
             items = packets,
-            key = { it.id }
+            key = { it.id },
         ) { packet ->
             PacketRow(
                 packet = packet,
                 isSelected = packet.id == selectedPacketId,
                 onClick = {
                     onPacketClick(
-                        if (packet.id == selectedPacketId) null else packet.id
+                        if (packet.id == selectedPacketId) null else packet.id,
                     )
-                }
+                },
             )
         }
     }
@@ -304,33 +313,37 @@ private fun PacketList(
 private fun PacketRow(
     packet: CapturedPacket,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val typeColor = Color(packet.type.colorHex)
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
-        )
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+            ),
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // Type badge
                 Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(typeColor)
+                    modifier =
+                        Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(typeColor),
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -339,22 +352,24 @@ private fun PacketRow(
                 Text(
                     text = packet.type.displayName,
                     style = MaterialTheme.typography.labelSmall,
-                    color = typeColor
+                    color = typeColor,
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
                 // Direction arrow
                 Text(
-                    text = when (packet.direction) {
-                        PacketDirection.SENT -> "↑"
-                        PacketDirection.RECEIVED -> "↓"
-                    },
+                    text =
+                        when (packet.direction) {
+                            PacketDirection.SENT -> "↑"
+                            PacketDirection.RECEIVED -> "↓"
+                        },
                     style = MaterialTheme.typography.bodySmall,
-                    color = when (packet.direction) {
-                        PacketDirection.SENT -> MaterialTheme.colorScheme.primary
-                        PacketDirection.RECEIVED -> MaterialTheme.colorScheme.tertiary
-                    }
+                    color =
+                        when (packet.direction) {
+                            PacketDirection.SENT -> MaterialTheme.colorScheme.primary
+                            PacketDirection.RECEIVED -> MaterialTheme.colorScheme.tertiary
+                        },
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -364,7 +379,7 @@ private fun PacketRow(
                     text = formatPacketTimestamp(packet.timestamp),
                     style = MaterialTheme.typography.bodySmall,
                     fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -373,20 +388,21 @@ private fun PacketRow(
                 Text(
                     text = "${packet.size} B",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
             // Hex preview (first 16 bytes)
             Text(
-                text = packet.data.take(16).joinToString(" ") {
-                    String.format("%02x", it)
-                },
+                text =
+                    packet.data.take(16).joinToString(" ") {
+                        String.format("%02x", it)
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 fontFamily = FontFamily.Monospace,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                modifier = Modifier.padding(start = 16.dp, top = 2.dp),
             )
 
             // Expanded details
@@ -405,21 +421,22 @@ private fun ExpandedPacketDetails(packet: CapturedPacket) {
 
     // Source / Destination
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
     ) {
         Text(
             text = "From: ${packet.source}",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         Text(
             text = "To: ${packet.destination}",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
     }
 
@@ -428,16 +445,17 @@ private fun ExpandedPacketDetails(packet: CapturedPacket) {
     // Full hex dump
     val hexRows = formatHexDump(packet.data)
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .horizontalScroll(rememberScrollState())
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .horizontalScroll(rememberScrollState()),
     ) {
         hexRows.forEach { row ->
             Text(
                 text = row,
                 style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
             )
         }
     }
@@ -447,20 +465,21 @@ private fun ExpandedPacketDetails(packet: CapturedPacket) {
     // Copy button
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End
+        horizontalArrangement = Arrangement.End,
     ) {
         IconButton(
             onClick = {
-                val hexText = packet.data.joinToString(" ") {
-                    String.format("%02x", it)
-                }
+                val hexText =
+                    packet.data.joinToString(" ") {
+                        String.format("%02x", it)
+                    }
                 clipboardManager.setText(AnnotatedString(hexText))
-            }
+            },
         ) {
             Icon(
                 imageVector = Icons.Default.ContentCopy,
                 contentDescription = "Copy hex to clipboard",
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
             )
         }
     }
@@ -468,19 +487,24 @@ private fun ExpandedPacketDetails(packet: CapturedPacket) {
 
 private fun formatPacketTimestamp(timestampMs: Long): String {
     val instant = java.time.Instant.ofEpochMilli(timestampMs)
-    val formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-        .withZone(java.time.ZoneId.systemDefault())
+    val formatter =
+        java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+            .withZone(java.time.ZoneId.systemDefault())
     return formatter.format(instant)
 }
 
-private fun formatHexDump(data: ByteArray, bytesPerRow: Int = 16): List<String> {
+private fun formatHexDump(
+    data: ByteArray,
+    bytesPerRow: Int = 16,
+): List<String> {
     if (data.isEmpty()) return emptyList()
     return data.toList().chunked(bytesPerRow).mapIndexed { index, chunk ->
         val offset = String.format("%04x: ", index * bytesPerRow)
         val hex = chunk.joinToString(" ") { String.format("%02x", it) }
-        val ascii = chunk.joinToString("") {
-            if (it in 0x20..0x7E) it.toChar().toString() else "."
-        }
+        val ascii =
+            chunk.joinToString("") {
+                if (it in 0x20..0x7E) it.toChar().toString() else "."
+            }
         "$offset${hex.padEnd(bytesPerRow * 3 - 1)}  $ascii"
     }
 }
