@@ -1,0 +1,4 @@
+💡 What: Added `keyboardOptions` with `ImeAction.Done` and `keyboardActions` with `LocalFocusManager.current.clearFocus()` to `OutlinedTextField` composables across `PacketTimelineScreen`, `HexDumpScreen`, and `ReportsScreen`.
+🎯 Why: Text inputs for searching packets, searching hex dumps, and entering report titles were not automatically dismissing the software keyboard upon pressing "Done", creating a frustrating user experience by leaving half the screen blocked.
+📸 Before/After: The software keyboard now correctly dismisses upon submitting input in these fields.
+♿ Accessibility: Improves accessibility for screen reader and keyboard users by managing focus correctly when text entry is completed.
