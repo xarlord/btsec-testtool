@@ -33,6 +33,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -275,6 +276,19 @@ private fun SearchBarRow(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
             )
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = {
+                    onQueryChanged("")
+                    focusManager.clearFocus()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = "Clear search",
+                    )
+                }
+            }
         },
         singleLine = true,
     )
