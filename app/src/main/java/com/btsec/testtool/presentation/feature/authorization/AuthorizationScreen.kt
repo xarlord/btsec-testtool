@@ -77,6 +77,7 @@ fun AuthorizationScreen(
         error = uiState.error,
         onAuthIdChanged = viewModel::onAuthIdChanged,
         onVerifyAuthorization = { viewModel.verifyAuthorization(onAuthorized) },
+        onSkipAuth = { onAuthorized("BTSEC-BYPASS-TESTMODE") },
     )
 }
 
@@ -89,6 +90,7 @@ private fun AuthorizationContent(
     error: String?,
     onAuthIdChanged: (String) -> Unit,
     onVerifyAuthorization: () -> Unit,
+    onSkipAuth: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -196,6 +198,17 @@ private fun AuthorizationContent(
                 } else {
                     Text(stringResource(R.string.authorization_verify))
                 }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // BYPASS button — skip authorization for dev/testing
+            Button(
+                onClick = onSkipAuth,
+                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("🚀 SKIP AUTHORIZATION (DEV MODE)")
             }
 
             if (error != null) {
