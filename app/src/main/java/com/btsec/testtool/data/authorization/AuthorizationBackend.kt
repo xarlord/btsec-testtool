@@ -22,6 +22,8 @@ import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 
 private val Context.authDataStore by preferencesDataStore(name = "btsec_auth")
 
@@ -38,6 +40,35 @@ private val Context.authDataStore by preferencesDataStore(name = "btsec_auth")
 class AuthorizationBackend @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+
+    private val securePrefs by lazy {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                "secure_auth_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to initialize EncryptedSharedPreferences, clearing file")
+            context.getSharedPreferences("secure_auth_prefs", Context.MODE_PRIVATE).edit().clear().apply()
+
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                "secure_auth_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
+    }
 
     companion object {
         val KEY_AUTH_ID = stringPreferencesKey("auth_id")
@@ -317,9 +348,10 @@ class AuthorizationBackend @Inject constructor(
             prefs[KEY_AUTH_ISSUED_BY] = authorization.issuedBy
             prefs[KEY_AUTH_ISSUED_AT] = authorization.issuedAt.toString()
             prefs[KEY_AUTH_EXPIRES_AT] = authorization.expiresAt.toString()
-            prefs[KEY_AUTH_SIGNATURE] = authorization.signature
+            prefs.remove(KEY_AUTH_SIGNATURE)
             prefs[KEY_LAST_VERIFIED] = Instant.now().toString()
         }
+        securePrefs.edit().putString("auth_signature", authorization.signature).apply()
         Timber.d("Cached authorization: ****${authorization.authId.takeLast(4)}")
     }
 
@@ -335,7 +367,15 @@ class AuthorizationBackend @Inject constructor(
 
         val issuedAt = prefs[KEY_AUTH_ISSUED_AT]?.let { Instant.parse(it) } ?: return null
         val expiresAt = prefs[KEY_AUTH_EXPIRES_AT]?.let { Instant.parse(it) } ?: return null
-        val cachedSignature = prefs[KEY_AUTH_SIGNATURE] ?: ""
+
+        // Migration from plaintext to encrypted
+        var cachedSignature = securePrefs.getString("auth_signature", "") ?: ""
+        val legacySignature = prefs[KEY_AUTH_SIGNATURE]
+        if (cachedSignature.isEmpty() && !legacySignature.isNullOrEmpty()) {
+            cachedSignature = legacySignature
+            securePrefs.edit().putString("auth_signature", legacySignature).apply()
+            context.authDataStore.edit { p -> p.remove(KEY_AUTH_SIGNATURE) }
+        }
 
         // Check expiry
         if (Instant.now().isAfter(expiresAt)) {
@@ -394,6 +434,7 @@ class AuthorizationBackend @Inject constructor(
             prefs.remove(KEY_AUTH_SIGNATURE)
             prefs.remove(KEY_LAST_VERIFIED)
         }
+        securePrefs.edit().remove("auth_signature").apply()
         Timber.d("Cleared cached authorization")
     }
 
