@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/xarlord/btsec-testtool/compare/v1.14.9...v1.15.0) (2026-06-14)
+
+
+### Features
+
+* bypass authorization for dev builds — skip login screen ([39c621e](https://github.com/xarlord/btsec-testtool/commit/39c621ea53a8b20cd5a48eda81e206052c31a18f))
+
 ## [1.14.7](https://github.com/xarlord/btsec-testtool/compare/v1.14.6...v1.14.7) (2026-06-11)
 
 
