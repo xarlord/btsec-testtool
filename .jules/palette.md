@@ -4,3 +4,6 @@
 ## 2026-02-07 - Add clear button to search inputs
 **Learning:** For long text search fields, such as those inside HexDump and PacketTimeline screens, adding a trailing `IconButton` to quickly clear the input drastically improves user experience by saving them from deleting characters manually.
 **Action:** When creating text fields meant for filtering or searching, include a trailing `IconButton` with `Icons.Default.Cancel` or `Icons.Default.Clear` that resets the search query and clears focus when the input is not empty.
+## 2026-02-07 - Add clear button to Authorization ID input
+**Learning:** For long text input fields where users might paste complex tokens (like Authorization IDs), adding a trailing `IconButton` to quickly clear the input drastically improves user experience by saving them from deleting characters manually.
+**Action:** When creating text fields meant for long tokens or IDs, include a trailing `IconButton` with `Icons.Default.Cancel` that resets the input and clears focus when the input is not empty.
