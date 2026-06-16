@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
+        <exclude domain="sharedpref" path="secure_auth_prefs.xml"/>
         <!-- Never include sensitive data in cloud backup -->
         <exclude domain="sharedpref" path="authorization.xml"/>
         <exclude domain="database" path="*.db"/>
@@ -10,6 +11,7 @@
     </cloud-backup>
 
     <device-transfer>
+        <exclude domain="sharedpref" path="secure_auth_prefs.xml"/>
         <!-- Exclude sensitive data from device transfer -->
         <exclude domain="sharedpref" path="authorization.xml"/>
         <exclude domain="database" path="*.db"/>
