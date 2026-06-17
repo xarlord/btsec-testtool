@@ -1,11 +1,12 @@
 💡 What
-Added a unique `key` parameter to the `items()` method for rendering the `topVulnerableDevices` list in the `AnalyticsScreen`.
+Added a "Clear" (`Cancel`) `IconButton` as a trailing icon to the Authorization ID text field on the `AuthorizationScreen`.
 
 🎯 Why
-Jetpack Compose's `LazyColumn` dynamically manages list items. Without a stable, explicit `key`, Compose relies on item positions. When the list changes, this can trigger excessive recompositions across multiple list items, leading to degraded scrolling and rendering performance, especially with dynamic data. Providing `key = { it.deviceAddress }` ensures stable identity tracking.
+To improve the user experience by allowing users to quickly clear the Authorization ID input field with a single tap, rather than having to manually delete a long string of characters (e.g., `BTSEC-20260207-A1B2C3D4`).
 
-📊 Impact
-Reduces unnecessary recompositions of `DeviceRiskCard` items when the underlying list of top vulnerable devices updates or when items are added/removed.
+📸 Before/After
+Before: The OutlinedTextField only contained the text input.
+After: The OutlinedTextField includes a trailing "X" icon when there is text present, which clears the input when tapped.
 
-🔬 Measurement
-Can be verified by monitoring the Compose Recomposition counts using the Android Studio Layout Inspector while the `AnalyticsScreen` dynamically updates its device list. The `DeviceRiskCard` components should show zero recompositions for items whose data has not actually changed.
+♿ Accessibility
+Included a descriptive `contentDescription = "Clear authorization ID"` to the `IconButton` to ensure screen reader users are informed of the button's action.
