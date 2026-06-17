@@ -1,12 +1,5 @@
-💡 What
-Added KeyboardOptions (ImeAction.Done) and KeyboardActions (onDone) to the OutlinedTextField in the AuthorizationScreen.
-
-🎯 Why
-Allows users to directly submit their Authorization ID from the software keyboard, creating a smoother interaction compared to manually dismissing the keyboard and pressing the verification button.
-
-📸 Before/After
-Before: The enter key on the soft keyboard just adds a newline or dismisses the keyboard, requiring the user to tap the "Verify" button explicitly.
-After: The soft keyboard displays a "Done" action button that dismisses the keyboard and automatically triggers the verification process (using the exact same validation logic as the button).
-
-♿ Accessibility
-Improves accessibility for users relying heavily on keyboard navigation or single-switch access by minimizing the steps required to submit the form.
+🚨 Severity: CRITICAL
+💡 Vulnerability: Application crashes on restore due to corrupted `EncryptedSharedPreferences`. `EncryptedSharedPreferences` uses a Keystore key permanently bound to a device. When the file is restored on a new device via Auto-Backup, the key doesn't transfer, and attempting to access the file throws a `GeneralSecurityException`.
+🎯 Impact: This crashes the application when a user restores their device from a backup, completely breaking the application for them.
+🔧 Fix: Added `secure_auth_prefs.xml` to `data_extraction_rules.xml` to exclude it from Android 12+ cloud backup and device transfer.
+✅ Verification: Ensure tests pass and the `secure_auth_prefs.xml` is listed in `<cloud-backup>` and `<device-transfer>` sections of `data_extraction_rules.xml`.
