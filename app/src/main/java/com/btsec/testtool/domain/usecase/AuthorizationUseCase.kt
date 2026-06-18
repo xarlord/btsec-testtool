@@ -33,34 +33,13 @@ class AuthorizationUseCase @Inject constructor(
      * @return Result of verification
      */
     suspend fun verifyAuthorization(authId: String): AuthorizationResult {
-        // BYPASS MODE: Always succeed for dev/testing builds
-        val now = Instant.now()
-        val scope = TestScope(
-            authId = authId,
-            authorizedTargets = listOf(
-                TargetDevice(identifier = "*", deviceType = DeviceType.UNKNOWN, owner = "Test User", location = null)
-            ),
-            allowedActions = TestAction.entries.toSet(),
-            validFrom = now,
-            validUntil = now.plusSeconds(86400 * 365),
-            maxPacketsPerSecond = 9999,
-            requiresReport = false,
-            disclosureDeadline = now.plusSeconds(86400 * 365),
-            locationConstraints = null,
-            requiresSupervision = false,
-            excludedTargets = emptyList()
-        )
-        val authorization = Authorization(
-            authId = authId,
-            issuedTo = "Test User (Bypass Mode)",
-            issuedBy = "BTSec TestTool (Dev Build)",
-            issuedAt = now,
-            expiresAt = now.plusSeconds(86400 * 365),
-            authorizedActions = TestAction.entries.toSet(),
-            scope = scope,
-            signature = "bypass:${authId.hashCode()}",
-            terms = listOf("DEV BUILD: Authorization bypassed for testing")
-        )
+        if (!isValidAuthIdFormat(authId)) {
+            return AuthorizationResult.Error("Invalid authorization ID format")
+        }
+
+        val authorization = authorizationRepository.verifyAuthorization(authId)
+            ?: return AuthorizationResult.Error("Authorization verification failed")
+
         authorizationRepository.storeAuthorization(authorization)
         return AuthorizationResult.Success(authorization)
     }
@@ -79,7 +58,7 @@ class AuthorizationUseCase @Inject constructor(
      * @return true if authorized
      */
     suspend fun isActionAuthorized(action: TestAction): Boolean {
-        return true // BYPASS MODE: all actions authorized
+        return authorizationRepository.isActionAuthorized(action)
     }
 
     /**
@@ -89,7 +68,7 @@ class AuthorizationUseCase @Inject constructor(
      * @return true if in scope
      */
     suspend fun isTargetInScope(deviceAddress: String): Boolean {
-        return true // BYPASS MODE: all targets in scope
+        return authorizationRepository.isTargetInScope(deviceAddress)
     }
 
     /**
