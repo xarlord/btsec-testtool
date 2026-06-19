@@ -1,4 +1,4 @@
-💡 What: Added `keyboardOptions` with `ImeAction.Done` and `keyboardActions` with `LocalFocusManager.current.clearFocus()` to `OutlinedTextField` composables across `PacketTimelineScreen`, `HexDumpScreen`, and `ReportsScreen`.
-🎯 Why: Text inputs for searching packets, searching hex dumps, and entering report titles were not automatically dismissing the software keyboard upon pressing "Done", creating a frustrating user experience by leaving half the screen blocked.
-📸 Before/After: The software keyboard now correctly dismisses upon submitting input in these fields.
-♿ Accessibility: Improves accessibility for screen reader and keyboard users by managing focus correctly when text entry is completed.
+💡 What: Added a 'Clear' trailing icon button (using `Icons.Default.Cancel`) to `OutlinedTextField` components across multiple screens (`AuthorizationScreen.kt`, `SettingsScreen.kt`, `ReportsScreen.kt`). The button only appears when the text field is not empty.
+🎯 Why: Enhances micro-UX by providing users an intuitive, single-tap interaction to clear inputs, which is a standard expectation on mobile interfaces.
+📸 Before/After: Before, users had to manually backspace or select all and delete to clear inputs. After, a clear icon allows immediate deletion of the entire input.
+♿ Accessibility: Included `contentDescription = "Clear text"` on the `Icon` so screen readers properly announce the button's purpose to assistive technology users.

@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -137,6 +139,16 @@ private fun AuthorizationContent(
                 placeholder = { Text("BTSEC-20260207-A1B2C3D4") },
                 isError = authIdError != null,
                 singleLine = true,
+                trailingIcon = {
+                    if (authId.isNotEmpty()) {
+                        IconButton(onClick = { onAuthIdChanged("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Cancel,
+                                contentDescription = "Clear text",
+                            )
+                        }
+                    }
+                },
                 keyboardOptions = KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
                 keyboardActions =
                     KeyboardActions(
