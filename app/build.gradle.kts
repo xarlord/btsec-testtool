@@ -54,6 +54,13 @@ android {
     }
 
     signingConfigs {
+        create("debugSigning") {
+            // Use default debug keystore from Android SDK
+            storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         create("release") {
             // Release signing configuration
             // For production, create a keystore and configure here
@@ -66,6 +73,7 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
 
+            signingConfig = signingConfigs.getByName("debugSigning")
             isDebuggable = true
             isMinifyEnabled = false
 
