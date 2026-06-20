@@ -71,7 +71,7 @@ class ScannerViewModelTest {
     fun testClearError() = runTest {
         // Trigger error via consent required
         coEvery { mockScanningUseCase.startScan() } returns ScanResult.ConsentRequired
-        viewModel.startScan("BTSEC-TEST")
+        viewModel.startScan()
 
         viewModel.uiState.test {
             val errorState = awaitItem()
@@ -86,7 +86,7 @@ class ScannerViewModelTest {
     @DisplayName("startScan with NotAuthorized result should set error state")
     fun testStartScanNotAuthorized() = runTest {
         coEvery { mockScanningUseCase.startScan() } returns ScanResult.NotAuthorized
-        viewModel.startScan("BTSEC-TEST")
+        viewModel.startScan()
 
         viewModel.uiState.test {
             val state = awaitItem()
@@ -98,7 +98,7 @@ class ScannerViewModelTest {
     @DisplayName("startScan with ConsentRequired result should set error state")
     fun testStartScanConsentRequired() = runTest {
         coEvery { mockScanningUseCase.startScan() } returns ScanResult.ConsentRequired
-        viewModel.startScan("BTSEC-TEST")
+        viewModel.startScan()
 
         viewModel.uiState.test {
             val state = awaitItem()
@@ -110,7 +110,7 @@ class ScannerViewModelTest {
     @DisplayName("startScan with Error result should set error message")
     fun testStartScanError() = runTest {
         coEvery { mockScanningUseCase.startScan() } returns ScanResult.Error("Bluetooth unavailable")
-        viewModel.startScan("BTSEC-TEST")
+        viewModel.startScan()
 
         viewModel.uiState.test {
             val state = awaitItem()
@@ -122,7 +122,7 @@ class ScannerViewModelTest {
     @DisplayName("startScan with Started result should not set error")
     fun testStartScanStarted() = runTest {
         coEvery { mockScanningUseCase.startScan() } returns ScanResult.Started
-        viewModel.startScan("BTSEC-TEST")
+        viewModel.startScan()
 
         viewModel.uiState.test {
             val state = awaitItem()

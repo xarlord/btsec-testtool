@@ -5,7 +5,6 @@
 package com.btsec.testtool.domain.usecase
 
 import com.btsec.testtool.domain.repository.BluetoothRepository
-import com.btsec.testtool.domain.repository.ConsentRepository
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
@@ -19,12 +18,10 @@ class BluetoothScanningUseCaseTest {
 
     private lateinit var useCase: BluetoothScanningUseCase
     private val btRepo: BluetoothRepository = mockk(relaxed = true)
-    private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
-    private val consentRepo: ConsentRepository = mockk(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        useCase = BluetoothScanningUseCase(btRepo, authUseCase, consentRepo)
+        useCase = BluetoothScanningUseCase(btRepo)
     }
 
     @Test
