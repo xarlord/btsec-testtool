@@ -1,3 +1,10 @@
+## [1.15.2](https://github.com/xarlord/btsec-testtool/compare/v1.15.1...v1.15.2) (2026-06-20)
+
+
+### Bug Fixes
+
+* **#359:** scanning finds no devices - scan never actually started ([73e8205](https://github.com/xarlord/btsec-testtool/commit/73e8205b6ab713ae015ea1bd90a56b36efbf0b74)), closes [#359](https://github.com/xarlord/btsec-testtool/issues/359) [#358](https://github.com/xarlord/btsec-testtool/issues/358)
+
 ## [1.15.1](https://github.com/xarlord/btsec-testtool/compare/v1.15.0...v1.15.1) (2026-06-20)
 
 
