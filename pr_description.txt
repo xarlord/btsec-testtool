@@ -1,4 +1,5 @@
-💡 What: Added `keyboardOptions` with `ImeAction.Done` and `keyboardActions` with `LocalFocusManager.current.clearFocus()` to `OutlinedTextField` composables across `PacketTimelineScreen`, `HexDumpScreen`, and `ReportsScreen`.
-🎯 Why: Text inputs for searching packets, searching hex dumps, and entering report titles were not automatically dismissing the software keyboard upon pressing "Done", creating a frustrating user experience by leaving half the screen blocked.
-📸 Before/After: The software keyboard now correctly dismisses upon submitting input in these fields.
-♿ Accessibility: Improves accessibility for screen reader and keyboard users by managing focus correctly when text entry is completed.
+🚨 Severity: CRITICAL
+💡 Vulnerability: The `secure_auth_prefs.xml` file, which is an `EncryptedSharedPreferences` file, was missing from the `data_extraction_rules.xml` exclusion list for Android 12+ devices.
+🎯 Impact: If a user backups their app data via Google Cloud or a device-to-device transfer and restores it to a new physical device, the application will crash. This happens because the Master Key used to decrypt the file is stored in the Android Keystore and is bound to the original hardware. Restoring the encrypted file without the original hardware key results in a persistent Denial of Service (DoS) until the user clears the application data.
+🔧 Fix: Explicitly excluded `secure_auth_prefs.xml` from `<cloud-backup>` and `<device-transfer>` rules within `app/src/main/res/xml/data_extraction_rules.xml`, aligning it with the existing Android 11- `backup_rules.xml`.
+✅ Verification: Ensure the unit tests pass and that `secure_auth_prefs.xml` is explicitly excluded in both backup configuration files.
