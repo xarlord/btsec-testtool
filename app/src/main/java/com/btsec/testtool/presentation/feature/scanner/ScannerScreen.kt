@@ -3,24 +3,34 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for AUTHORIZED security testing
+ * - This application may ONLY be used for authorized security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.feature.scanner
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.BluetoothSearching
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.R
@@ -35,7 +45,25 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
+ * Get required BT permissions for current Android version.
+ */
+fun getRequiredBtPermissions(): List<String> {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        listOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
+        )
+    } else {
+        listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    }
+}
+
+/**
  * Scanner Screen - Bluetooth device scanning (BLE + Classic).
+ *
+ * Requests runtime permissions before scanning starts.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +72,47 @@ fun ScannerScreen(
 ) {
     val viewModel: ScannerViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Track permission state
+    var hasPermissions by remember { mutableStateOf(checkBtPermissions(context)) }
+    var showPermissionRationale by remember { mutableStateOf(false) }
+
+    // Permission launcher — re-checks after system dialog
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        hasPermissions = results.values.all { it }
+        if (hasPermissions) {
+            viewModel.startScan()
+        } else {
+            showPermissionRationale = true
+        }
+    }
+
+    // Permission rationale dialog
+    if (showPermissionRationale) {
+        AlertDialog(
+            onDismissRequest = { showPermissionRationale = false },
+            title = { Text("Bluetooth Permissions Required") },
+            text = {
+                Text(
+                    "This app needs Bluetooth Scan and Connect permissions to discover " +
+                    "nearby Bluetooth devices. Without these permissions, scanning " +
+                    "cannot work.\n\nPlease grant the permissions in Settings."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionRationale = false
+                    permissionLauncher.launch(getRequiredBtPermissions().toTypedArray())
+                }) { Text("Request Again") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionRationale = false }) { Text("Cancel") }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -61,13 +130,58 @@ fun ScannerScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
+            // Permission status banner
+            if (!hasPermissions) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Bluetooth permissions not granted",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Scanning requires BLUETOOTH_SCAN and BLUETOOTH_CONNECT permissions. Tap below to grant.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(onClick = {
+                            permissionLauncher.launch(getRequiredBtPermissions().toTypedArray())
+                        }) {
+                            Icon(Icons.Default.Security, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Grant Permissions")
+                        }
+                    }
+                }
+            }
+
+            // Scan controls
             ScanControls(
                 isScanning = uiState.isScanning,
                 deviceCount = uiState.devices.size,
-                onStartScan = { viewModel.startScan() },
+                canScan = hasPermissions,
+                onStartScan = {
+                    if (hasPermissions) {
+                        viewModel.startScan()
+                    } else {
+                        permissionLauncher.launch(getRequiredBtPermissions().toTypedArray())
+                    }
+                },
                 onStopScan = { viewModel.stopScan() }
             )
+
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Content
             when {
                 uiState.error != null -> {
                     ErrorView(
@@ -87,7 +201,7 @@ fun ScannerScreen(
                             CircularProgressIndicator()
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = stringResource(R.string.scanner_scanning_bt),
+                                text = "Scanning for Bluetooth devices…",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -95,7 +209,7 @@ fun ScannerScreen(
                 }
                 uiState.devices.isEmpty() -> {
                     EmptyView(
-                        message = stringResource(R.string.scanner_no_devices_hint),
+                        message = "No devices found. Tap Start Scan to discover Bluetooth devices.",
                         icon = Icons.Default.BluetoothSearching
                     )
                 }
@@ -113,39 +227,62 @@ fun ScannerScreen(
     }
 }
 
+/**
+ * Check if all required BT permissions are granted.
+ */
+fun checkBtPermissions(context: android.content.Context): Boolean {
+    return getRequiredBtPermissions().all { perm ->
+        ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
+    }
+}
+
 @Composable
 private fun ScanControls(
     isScanning: Boolean,
     deviceCount: Int,
+    canScan: Boolean,
     onStartScan: () -> Unit,
     onStopScan: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = if (deviceCount > 0) {
-                stringResource(R.string.scanner_devices_found, deviceCount)
+                "$deviceCount device${if (deviceCount != 1) "s" else ""} found"
             } else {
-                stringResource(R.string.scanner_no_devices)
+                "No devices found"
             },
             style = MaterialTheme.typography.titleMedium
         )
         Row {
             if (isScanning) {
-                Button(onClick = onStopScan, colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )) { Text(stringResource(R.string.scanner_stop)) }
+                Button(
+                    onClick = onStopScan,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) { Text("Stop") }
             } else {
-                Button(onClick = onStartScan) { Text(stringResource(R.string.scanner_start)) }
+                Button(
+                    onClick = onStartScan,
+                    enabled = true // Always enabled — taps trigger permission request if needed
+                ) { Text("Start Scan") }
             }
         }
     }
 }
 
 @Composable
-private fun DeviceList(devices: List<BluetoothDevice>, isScanning: Boolean, onDeviceSelected: (BluetoothDevice) -> Unit) {
+private fun DeviceList(
+    devices: List<BluetoothDevice>,
+    isScanning: Boolean,
+    onDeviceSelected: (BluetoothDevice) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -223,8 +360,8 @@ fun ErrorView(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = stringResource(R.string.cd_error),
+                imageVector = Icons.Default.BluetoothDisabled,
+                contentDescription = "Error",
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -278,23 +415,15 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(error = null)
             when (val result = scanningUseCase.startScan()) {
-                is ScanResult.Started -> {
-                    // Scan started successfully
-                }
+                is ScanResult.Started -> { /* scan started */ }
                 is ScanResult.ConsentRequired -> {
-                    _uiState.value = _uiState.value.copy(
-                        error = "Consent required for scanning"
-                    )
+                    _uiState.value = _uiState.value.copy(error = "Consent required for scanning")
                 }
                 is ScanResult.NotAuthorized -> {
-                    _uiState.value = _uiState.value.copy(
-                        error = "Not authorized for scanning"
-                    )
+                    _uiState.value = _uiState.value.copy(error = "Not authorized for scanning")
                 }
                 is ScanResult.Error -> {
-                    _uiState.value = _uiState.value.copy(
-                        error = result.message
-                    )
+                    _uiState.value = _uiState.value.copy(error = result.message)
                 }
                 else -> {}
             }
