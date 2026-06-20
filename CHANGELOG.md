@@ -1,3 +1,10 @@
+## [1.15.4](https://github.com/xarlord/btsec-testtool/compare/v1.15.3...v1.15.4) (2026-06-20)
+
+
+### Bug Fixes
+
+* **#362:** aggressive permission request on launch + resume ([dda474c](https://github.com/xarlord/btsec-testtool/commit/dda474ccc0090374f146f7bc0a8963424fcad405)), closes [#362](https://github.com/xarlord/btsec-testtool/issues/362)
+
 ## [1.15.3](https://github.com/xarlord/btsec-testtool/compare/v1.15.2...v1.15.3) (2026-06-20)
 
 
