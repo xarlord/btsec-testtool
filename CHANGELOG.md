@@ -1,3 +1,11 @@
+## [1.15.1](https://github.com/xarlord/btsec-testtool/compare/v1.15.0...v1.15.1) (2026-06-20)
+
+
+### Bug Fixes
+
+* **#357, #358:** fix blank screen + remove authorization window ([e39d507](https://github.com/xarlord/btsec-testtool/commit/e39d5075462bb2862d66fa5acde42e3203d5f1d9)), closes [#358](https://github.com/xarlord/btsec-testtool/issues/358)
+* sign debug APKs with debug keystore (was unsigned, couldn't install) ([864536a](https://github.com/xarlord/btsec-testtool/commit/864536ab0a8f1d6d40bbd566c1653ca57b446084))
+
 # [1.15.0](https://github.com/xarlord/btsec-testtool/compare/v1.14.9...v1.15.0) (2026-06-14)
 
 
