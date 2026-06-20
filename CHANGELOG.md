@@ -1,3 +1,10 @@
+## [1.15.3](https://github.com/xarlord/btsec-testtool/compare/v1.15.2...v1.15.3) (2026-06-20)
+
+
+### Bug Fixes
+
+* **#362:** BT scan permission not requested/granted at runtime ([d665636](https://github.com/xarlord/btsec-testtool/commit/d665636703c7f2cdfa9946d8e37745d90ecb2dd5)), closes [#362](https://github.com/xarlord/btsec-testtool/issues/362)
+
 ## [1.15.2](https://github.com/xarlord/btsec-testtool/compare/v1.15.1...v1.15.2) (2026-06-20)
 
 
