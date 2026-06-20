@@ -3,6 +3,7 @@
     <cloud-backup>
         <!-- Never include sensitive data in cloud backup -->
         <exclude domain="sharedpref" path="authorization.xml"/>
+        <exclude domain="sharedpref" path="secure_auth_prefs.xml"/>
         <exclude domain="database" path="*.db"/>
         <exclude domain="file" path="consent_logs/"/>
         <exclude domain="file" path="audit_logs/"/>
@@ -12,6 +13,7 @@
     <device-transfer>
         <!-- Exclude sensitive data from device transfer -->
         <exclude domain="sharedpref" path="authorization.xml"/>
+        <exclude domain="sharedpref" path="secure_auth_prefs.xml"/>
         <exclude domain="database" path="*.db"/>
         <exclude domain="file" path="consent_logs/"/>
         <exclude domain="file" path="audit_logs/"/>
