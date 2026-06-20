@@ -3,7 +3,7 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for AUTHORIZED security testing
+ * - This application may ONLY be used for authorized security testing
  * - See LICENSE for full terms
  */
 package com.btsec.testtool.presentation.navigation
@@ -14,7 +14,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.btsec.testtool.presentation.feature.authorization.AuthorizationScreen
 import com.btsec.testtool.presentation.feature.dashboard.DashboardScreen
 import com.btsec.testtool.presentation.feature.fuzzer.FuzzerScreen
 import com.btsec.testtool.presentation.feature.hexdump.HexDumpScreen
@@ -29,7 +28,6 @@ import com.btsec.testtool.presentation.feature.vulns.VulnScannerScreen
  * Navigation routes for the application.
  */
 object Routes {
-    const val AUTHORIZATION = "authorization"
     const val DASHBOARD = "dashboard"
     const val SCANNER = "scanner"
     const val FUZZER = "fuzzer"
@@ -45,111 +43,62 @@ object Routes {
  * Main navigation graph for BTSec Test Tool.
  *
  * This implements the single-activity navigation pattern with all screens
- * as Composable destinations.
+ * as Composable destinations. Dashboard is the entry point.
  */
 @Composable
 fun BTSecNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Routes.AUTHORIZATION
+    startDestination: String = Routes.DASHBOARD
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
-        // Authorization screen - Entry point
-        composable(route = Routes.AUTHORIZATION) {
-            AuthorizationScreen(
-                onAuthorized = { authId ->
-                    // Navigate to dashboard with auth ID
-                    navController.navigate("${Routes.DASHBOARD}/$authId") {
-                        // Pop authorization from back stack
-                        popUpTo(Routes.AUTHORIZATION) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // Dashboard screen - Main hub
-        composable(route = "${Routes.DASHBOARD}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
+        // Dashboard screen - Entry point (main hub)
+        composable(route = Routes.DASHBOARD) {
             DashboardScreen(
-                authId = authId,
-                onNavigateToScanner = {
-                    navController.navigate("${Routes.SCANNER}/$authId")
-                },
-                onNavigateToFuzzer = {
-                    navController.navigate("${Routes.FUZZER}/$authId")
-                },
-                onNavigateToKeys = {
-                    navController.navigate("${Routes.KEYS}/$authId")
-                },
-                onNavigateToVulns = {
-                    navController.navigate("${Routes.VULNS}/$authId")
-                },
-                onNavigateToReports = {
-                    navController.navigate("${Routes.REPORTS}/$authId")
-                },
-                onNavigateToSettings = {
-                    navController.navigate(Routes.SETTINGS)
-                },
-                onBack = {
-                    // Navigate back to authorization
-                    navController.navigate(Routes.AUTHORIZATION) {
-                        popUpTo(Routes.AUTHORIZATION) { inclusive = true }
-                    }
-                }
+                onNavigateToScanner = { navController.navigate(Routes.SCANNER) },
+                onNavigateToFuzzer = { navController.navigate(Routes.FUZZER) },
+                onNavigateToKeys = { navController.navigate(Routes.KEYS) },
+                onNavigateToVulns = { navController.navigate(Routes.VULNS) },
+                onNavigateToReports = { navController.navigate(Routes.REPORTS) },
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
             )
         }
 
         // Scanner screen
-        composable(route = "${Routes.SCANNER}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
+        composable(route = Routes.SCANNER) {
             ScannerScreen(
-                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
 
         // Fuzzer screen
-        composable(route = "${Routes.FUZZER}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
+        composable(route = Routes.FUZZER) {
             FuzzerScreen(
-                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
 
         // Key Extraction screen
-        composable(route = "${Routes.KEYS}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
+        composable(route = Routes.KEYS) {
             KeyExtractionScreen(
-                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
 
         // Vulnerability Scanner screen
-        composable(route = "${Routes.VULNS}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
+        composable(route = Routes.VULNS) {
             VulnScannerScreen(
-                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
 
         // Reports screen
-        composable(route = "${Routes.REPORTS}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
+        composable(route = Routes.REPORTS) {
             ReportsScreen(
-                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -162,11 +111,8 @@ fun BTSecNavGraph(
         }
 
         // Scan Diff screen
-        composable(route = "${Routes.SCAN_DIFF}/{authId}") { backStackEntry ->
-            val authId = backStackEntry.arguments?.getString("authId") ?: return@composable
-
+        composable(route = Routes.SCAN_DIFF) {
             ScanDiffScreen(
-                authId = authId,
                 onBack = { navController.popBackStack() }
             )
         }

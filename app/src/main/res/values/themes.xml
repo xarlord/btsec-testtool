@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material3 Theme using AppCompat parent for XML compatibility -->
-    <style name="Theme.BTSecTestTool" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/btsec_primary</item>
-        <item name="colorPrimaryDark">@color/btsec_primary_dark</item>
-        <item name="colorAccent">@color/btsec_secondary</item>
+    <!--
+        Compose-compatible base theme.
+        Uses Android platform Material theme (not AppCompat) to avoid conflicts
+        with Compose Material3 rendering. Compose draws its own UI via Surface.
+    -->
+    <style name="Theme.BTSecTestTool" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="android:colorPrimary">@color/btsec_primary</item>
+        <item name="android:colorPrimaryDark">@color/btsec_primary_dark</item>
+        <item name="android:colorAccent">@color/btsec_secondary</item>
 
-        <!-- Status bar color -->
+        <!-- Status bar -->
         <item name="android:statusBarColor">@color/btsec_primary_dark</item>
         <item name="android:windowLightStatusBar">true</item>
 
-        <!-- Background color -->
+        <!-- Background -->
         <item name="android:colorBackground">@color/btsec_background</item>
+        <item name="android:windowBackground">@color/btsec_background</item>
+
+        <!-- Text colors -->
         <item name="android:textColorPrimary">@color/btsec_on_background</item>
         <item name="android:textColorSecondary">@color/btsec_on_surface</item>
 
-        <!-- Error color -->
-        <item name="android:textColorPrimary">@color/btsec_critical</item>
+        <!-- No action bar / window features -->
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Splash theme for cold start -->
+    <style name="Theme.BTSecTestTool.Splash" parent="Theme.BTSecTestTool">
+        <item name="android:windowBackground">@color/btsec_primary</item>
     </style>
 </resources>

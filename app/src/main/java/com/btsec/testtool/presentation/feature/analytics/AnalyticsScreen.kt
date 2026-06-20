@@ -33,13 +33,11 @@ import com.btsec.testtool.domain.model.RiskSeverity
 /**
  * Analytics Dashboard screen displaying scan summary, charts, and device risk list.
  *
- * @param authId Authentication identifier for the current user session
  * @param onBack Callback to navigate back
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyticsScreen(
-    authId: String,
     onBack: () -> Unit,
 ) {
     val viewModel: AnalyticsViewModel = hiltViewModel()

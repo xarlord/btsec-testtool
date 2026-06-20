@@ -77,7 +77,6 @@ import com.btsec.testtool.domain.model.PacketType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PacketTimelineScreen(
-    authId: String,
     onBack: () -> Unit,
     viewModel: PacketTimelineViewModel = hiltViewModel(),
 ) {

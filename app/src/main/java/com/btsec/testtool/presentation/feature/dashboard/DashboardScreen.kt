@@ -10,8 +10,6 @@ package com.btsec.testtool.presentation.feature.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Scanner
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Science
@@ -20,52 +18,29 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.btsec.testtool.R
-import com.btsec.testtool.domain.usecase.AuthorizationUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
- * Dashboard Screen - Main hub for the application.
+ * Dashboard Screen - Main hub for the application (entry point).
  *
- * This screen displays:
- * - Current authorization status
- * - Quick access to all features
- * - Navigation to feature screens
+ * Quick access to all features via a feature grid.
  */
 @Composable
 fun DashboardScreen(
-    authId: String,
     onNavigateToScanner: () -> Unit,
     onNavigateToFuzzer: () -> Unit,
     onNavigateToKeys: () -> Unit,
     onNavigateToVulns: () -> Unit,
     onNavigateToReports: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
-    onBack: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.dashboard_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
-                    }
-                },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
@@ -84,7 +59,6 @@ fun DashboardScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AuthorizationInfoCard(authId = authId)
             FeatureGrid(
                 onNavigateToScanner = onNavigateToScanner,
                 onNavigateToFuzzer = onNavigateToFuzzer,
@@ -92,40 +66,6 @@ fun DashboardScreen(
                 onNavigateToVulns = onNavigateToVulns,
                 onNavigateToReports = onNavigateToReports
             )
-        }
-    }
-}
-
-@Composable
-private fun AuthorizationInfoCard(authId: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Security,
-                contentDescription = "Authorization status",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = "Authorized",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = "Authorization ID: $authId",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
         }
     }
 }
@@ -230,52 +170,3 @@ private fun FeatureCard(
         }
     }
 }
-
-/**
- * ViewModel for the Dashboard screen.
- */
-@HiltViewModel
-class DashboardViewModel @Inject constructor(
-    private val authorizationUseCase: AuthorizationUseCase
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(DashboardUiState())
-    val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
-
-    init {
-        loadAuthorizationDetails()
-    }
-
-    private fun loadAuthorizationDetails() {
-        viewModelScope.launch {
-            authorizationUseCase.getCurrentAuthorization().collect { auth ->
-                auth?.let {
-                    _uiState.value = _uiState.value.copy(
-                        authId = it.authId,
-                        isValid = true,
-                        details = authorizationUseCase.getAuthorizationDetails()
-                    )
-                } ?: run {
-                    _uiState.value = _uiState.value.copy(
-                        authId = null,
-                        isValid = false,
-                        details = null
-                    )
-                }
-            }
-        }
-    }
-
-    fun refreshAuthorization() {
-        loadAuthorizationDetails()
-    }
-}
-
-/**
- * UI state for the Dashboard screen.
- */
-data class DashboardUiState(
-    val authId: String? = null,
-    val isValid: Boolean = false,
-    val details: com.btsec.testtool.domain.usecase.AuthorizationDetails? = null
-)

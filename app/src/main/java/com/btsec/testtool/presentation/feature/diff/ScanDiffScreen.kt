@@ -40,7 +40,6 @@ import com.btsec.testtool.presentation.feature.scanner.EmptyView
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanDiffScreen(
-    authId: String,
     onBack: () -> Unit,
     viewModel: ScanDiffViewModel = hiltViewModel()
 ) {

@@ -39,7 +39,6 @@ import javax.inject.Inject
  */
 @Composable
 fun ScannerScreen(
-    authId: String,
     onBack: () -> Unit
 ) {
     val viewModel: ScannerViewModel = androidx.hilt.navigation.compose.hiltViewModel()
@@ -270,7 +269,7 @@ class ScannerViewModel @Inject constructor(
         }
     }
 
-    fun startScan(authId: String) {
+    fun startScan() {
         viewModelScope.launch {
             when (val result = scanningUseCase.startScan()) {
                 is ScanResult.Started -> {
