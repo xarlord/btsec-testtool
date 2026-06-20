@@ -43,6 +43,11 @@ interface BluetoothOperationsWriter {
     suspend fun stopScan()
 
     /**
+     * Clear all scan results.
+     */
+    suspend fun clearScanResults()
+
+    /**
      * Connect to a Bluetooth device.
      *
      * @param address Device MAC address

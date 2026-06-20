@@ -35,16 +35,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Scanner Screen - Bluetooth device scanning.
+ * Scanner Screen - Bluetooth device scanning (BLE + Classic).
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScannerScreen(
     onBack: () -> Unit
 ) {
     val viewModel: ScannerViewModel = androidx.hilt.navigation.compose.hiltViewModel()
-    val isScanning = remember { mutableStateOf(false) }
-    val devices = remember { mutableStateOf(emptyList<BluetoothDevice>()) }
-    val error = remember { mutableStateOf<String?>(null) }
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -63,26 +62,23 @@ fun ScannerScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             ScanControls(
-                isScanning = isScanning.value,
-                deviceCount = devices.value.size,
-                onStartScan = {
-                    isScanning.value = true
-                    error.value = null
-                },
-                onStopScan = { isScanning.value = false }
+                isScanning = uiState.isScanning,
+                deviceCount = uiState.devices.size,
+                onStartScan = { viewModel.startScan() },
+                onStopScan = { viewModel.stopScan() }
             )
             Spacer(modifier = Modifier.height(16.dp))
             when {
-                error.value != null -> {
+                uiState.error != null -> {
                     ErrorView(
-                        error = error.value!!,
+                        error = uiState.error!!,
                         onRetry = {
-                            error.value = null
-                            isScanning.value = true
+                            viewModel.clearError()
+                            viewModel.startScan()
                         }
                     )
                 }
-                isScanning.value -> {
+                uiState.isScanning && uiState.devices.isEmpty() -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -97,7 +93,7 @@ fun ScannerScreen(
                         }
                     }
                 }
-                devices.value.isEmpty() -> {
+                uiState.devices.isEmpty() -> {
                     EmptyView(
                         message = stringResource(R.string.scanner_no_devices_hint),
                         icon = Icons.Default.BluetoothSearching
@@ -105,8 +101,8 @@ fun ScannerScreen(
                 }
                 else -> {
                     DeviceList(
-                        devices = devices.value,
-                        isScanning = isScanning.value,
+                        devices = uiState.devices,
+                        isScanning = uiState.isScanning,
                         onDeviceSelected = { device ->
                             viewModel.selectDevice(device.address)
                         }
@@ -170,6 +166,15 @@ private fun DeviceCard(device: BluetoothDevice, onClick: () -> Unit = {}) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = device.name ?: "Unknown", style = MaterialTheme.typography.titleMedium)
             Text(text = device.address, style = MaterialTheme.typography.bodySmall)
+            Row(
+                modifier = Modifier.padding(top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AssistChip(onClick = {}, label = { Text(device.type.name) })
+                if (device.rssi != null) {
+                    AssistChip(onClick = {}, label = { Text("${device.rssi} dBm") })
+                }
+            }
         }
     }
 }
@@ -271,13 +276,14 @@ class ScannerViewModel @Inject constructor(
 
     fun startScan() {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(error = null)
             when (val result = scanningUseCase.startScan()) {
                 is ScanResult.Started -> {
                     // Scan started successfully
                 }
                 is ScanResult.ConsentRequired -> {
                     _uiState.value = _uiState.value.copy(
-                    error = "Consent required for scanning"
+                        error = "Consent required for scanning"
                     )
                 }
                 is ScanResult.NotAuthorized -> {
@@ -314,7 +320,7 @@ class ScannerViewModel @Inject constructor(
  * UI state for the Scanner screen.
  */
 data class ScannerUiState(
-    val devices: List<com.btsec.testtool.domain.model.BluetoothDevice> = emptyList(),
+    val devices: List<BluetoothDevice> = emptyList(),
     val deviceCount: Int = 0,
     val isScanning: Boolean = false,
     val error: String? = null

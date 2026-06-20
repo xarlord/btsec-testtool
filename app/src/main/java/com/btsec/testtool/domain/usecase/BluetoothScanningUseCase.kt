@@ -10,53 +10,44 @@ package com.btsec.testtool.domain.usecase
 
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
  * Use case for Bluetooth device scanning.
- *
- * All scanning operations require valid authorization and consent.
  */
 class BluetoothScanningUseCase @Inject constructor(
-    private val bluetoothRepository: BluetoothRepository,
-    private val authorizationUseCase: AuthorizationUseCase,
-    private val consentRepository: ConsentRepository
+    private val bluetoothRepository: BluetoothRepository
 ) {
 
+    private val scope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO
+    )
+    private var scanJob: Job? = null
+
     /**
-     * Start scanning for Bluetooth devices.
-     *
-     * @param filter Optional device address filter
-     * @return Result of scan start
+     * Start scanning for Bluetooth devices (both BLE and Classic).
+     * Collects the scan flow so that device callbacks actually fire.
      */
     suspend fun startScan(filter: String? = null): ScanResult {
-        // Check authorization
-        val authResult = authorizationUseCase.requestActionAuthorization(
-            TestAction.SCAN_DEVICES,
-            getDeviceInfo()
-        )
-
-        when (authResult) {
-            is ActionAuthorizationResult.Authorized -> {
-                // Authorization granted, start scan
-                bluetoothRepository.startScan(filter)
-                return ScanResult.Started
+        return try {
+            // Cancel any previous scan
+            scanJob?.cancel()
+            // Clear previous results
+            bluetoothRepository.clearScanResults()
+            // Start collecting the cold flow — this triggers scanner.startScan()
+            scanJob = scope.launch {
+                bluetoothRepository.startScan(filter).collect { /* results stored via callback */ }
             }
-            is ActionAuthorizationResult.ConsentDenied -> {
-                return ScanResult.ConsentRequired
-            }
-            is ActionAuthorizationResult.NoAuthorization -> {
-                return ScanResult.NotAuthorized
-            }
-            is ActionAuthorizationResult.ActionNotAllowed -> {
-                return ScanResult.ActionNotAllowed
-            }
-            is ActionAuthorizationResult.OutsideValidWindow -> {
-                return ScanResult.OutsideValidWindow
-            }
+            ScanResult.Started
+        } catch (e: Exception) {
+            ScanResult.Error(e.message ?: "Scan start failed")
         }
     }
 
@@ -64,6 +55,8 @@ class BluetoothScanningUseCase @Inject constructor(
      * Stop scanning for devices.
      */
     suspend fun stopScan() {
+        scanJob?.cancel()
+        scanJob = null
         bluetoothRepository.stopScan()
     }
 
@@ -169,37 +162,10 @@ class BluetoothScanningUseCase @Inject constructor(
         val devices = bluetoothRepository.getScanResults().first()
         return ScanStatistics(
             totalDevices = devices.size,
-            bleDevices = devices.count { it.isBle() },
             classicDevices = devices.count { it.isClassic() },
+            bleDevices = devices.count { it.isBle() },
             bondedDevices = devices.count { it.isBonded() },
             deviceTypes = devices.groupBy { it.deviceClass }.mapValues { it.value.size }
-        )
-    }
-
-    /**
-     * Check if device is in authorized scope.
-     */
-    suspend fun isDeviceInScope(address: String): Boolean {
-        return authorizationUseCase.isTargetInScope(address)
-    }
-
-    /**
-     * Filter devices to only those in scope.
-     */
-    fun getInScopeDevices(): Flow<List<BluetoothDevice>> {
-        return bluetoothRepository.getScanResults()
-            .map { devices -> devices.filter { device ->
-                authorizationUseCase.isTargetInScope(device.address)
-            } }
-    }
-
-    private fun getDeviceInfo(): DeviceInfo {
-        return DeviceInfo(
-            platform = android.os.Build.MANUFACTURER,
-            model = android.os.Build.MODEL,
-            androidVersion = android.os.Build.VERSION.RELEASE,
-            appVersion = "1.0.0",
-            bluetoothAddress = "TESTING"  // Would get actual address in production
         )
     }
 }
@@ -221,8 +187,8 @@ sealed class ScanResult {
  */
 data class ScanStatistics(
     val totalDevices: Int,
-    val bleDevices: Int,
     val classicDevices: Int,
+    val bleDevices: Int,
     val bondedDevices: Int,
     val deviceTypes: Map<DeviceClass?, Int>
 )

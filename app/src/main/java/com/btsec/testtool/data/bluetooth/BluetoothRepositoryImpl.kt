@@ -20,6 +20,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.ParcelUuid
@@ -154,13 +155,71 @@ class BluetoothRepositoryImpl @Inject constructor(
     override fun startScan(filter: String?): Flow<BluetoothDevice> {
         return callbackFlow {
             val scanner = bluetoothAdapter?.bluetoothLeScanner
-            if (scanner == null) {
+
+            // ---- Check adapter ----
+            if (bluetoothAdapter == null || scanner == null) {
+                trySend(com.btsec.testtool.domain.model.BluetoothDevice(
+                    address = "00:00:00:00:00:00",
+                    name = "ERROR: Bluetooth adapter unavailable",
+                    type = BluetoothType.UNKNOWN,
+                    rssi = null,
+                    lastSeen = Instant.now()
+                ))
                 close()
                 return@callbackFlow
             }
 
             isScanning.value = true
 
+            // ---- 1. Immediately add bonded (paired) devices ----
+            try {
+                bluetoothAdapter.bondedDevices?.forEach { device ->
+                    val btDevice = mapBluetoothDevice(device, isBonded = true)
+                    if (filter == null || device.address == filter) {
+                        trySend(btDevice)
+                        updateScanResults(btDevice)
+                    }
+                }
+            } catch (e: SecurityException) {
+                Timber.w(e, "Cannot access bonded devices")
+            }
+
+            // ---- 2. Classic BT discovery (BR/EDR) via BroadcastReceiver ----
+            val classicReceiver = object : android.content.BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    when (intent?.action) {
+                        AndroidBluetoothDevice.ACTION_FOUND -> {
+                            @Suppress("DEPRECATION")
+                            val device = intent.getParcelableExtra<AndroidBluetoothDevice>(AndroidBluetoothDevice.EXTRA_DEVICE)
+                            val rssi = intent.getShortExtra(AndroidBluetoothDevice.EXTRA_RSSI, java.lang.Short.MIN_VALUE).toInt()
+                            if (device != null) {
+                                val btDevice = mapBluetoothDevice(device, rssi = rssi)
+                                if (filter == null || device.address == filter) {
+                                    trySend(btDevice)
+                                    updateScanResults(btDevice)
+                                }
+                            }
+                        }
+                        BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                            Timber.d("Classic BT discovery finished")
+                        }
+                    }
+                }
+            }
+
+            val classicFilter = android.content.IntentFilter().apply {
+                addAction(AndroidBluetoothDevice.ACTION_FOUND)
+                addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            }
+            try {
+                context.registerReceiver(classicReceiver, classicFilter)
+                bluetoothAdapter.startDiscovery()
+                Timber.i("Classic BT discovery started")
+            } catch (e: SecurityException) {
+                Timber.w(e, "Cannot start classic BT discovery")
+            }
+
+            // ---- 3. BLE scanning ----
             val scanCallback = object : ScanCallback() {
                 override fun onScanResult(callbackType: Int, result: ScanResult) {
                     result.device?.let { device ->
@@ -185,7 +244,7 @@ class BluetoothRepositoryImpl @Inject constructor(
                 }
 
                 override fun onScanFailed(errorCode: Int) {
-                    // Handle scan failure
+                    Timber.e("BLE scan failed with error code: $errorCode")
                     isScanning.value = false
                 }
             }
@@ -201,6 +260,16 @@ class BluetoothRepositoryImpl @Inject constructor(
             awaitClose {
                 scanner.stopScan(scanCallback)
                 activeScanCallback = null
+                try {
+                    context.unregisterReceiver(classicReceiver)
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to unregister classic receiver")
+                }
+                try {
+                    bluetoothAdapter?.cancelDiscovery()
+                } catch (e: SecurityException) {
+                    Timber.w(e, "Cannot cancel classic discovery")
+                }
                 isScanning.value = false
             }
         }
@@ -211,7 +280,17 @@ class BluetoothRepositoryImpl @Inject constructor(
             bluetoothAdapter?.bluetoothLeScanner?.stopScan(callback)
         }
         activeScanCallback = null
+        // Also cancel classic BT discovery if running
+        try {
+            bluetoothAdapter?.cancelDiscovery()
+        } catch (e: SecurityException) {
+            Timber.w(e, "Cannot cancel classic discovery")
+        }
         isScanning.value = false
+    }
+
+    override suspend fun clearScanResults() {
+        scanResults.value = emptyList()
     }
 
     override fun isScanning(): Flow<Boolean> {
@@ -1045,17 +1124,31 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     @SuppressLint("MissingPermission")
     private fun mapBluetoothDevice(device: android.bluetooth.BluetoothDevice): BluetoothDevice {
+        return mapBluetoothDevice(device, rssi = null, isBonded = null)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun mapBluetoothDevice(
+        device: android.bluetooth.BluetoothDevice,
+        rssi: Int? = null,
+        isBonded: Boolean? = null
+    ): BluetoothDevice {
         return BluetoothDevice(
             address = device.address,
-            name = device.name,
-            type = BluetoothType.BLE,
-            deviceClass = null,
-            bondState = when (device.bondState) {
+            name = try { device.name } catch (e: SecurityException) { null },
+            type = when (device.type) {
+                AndroidBluetoothDevice.DEVICE_TYPE_LE -> BluetoothType.BLE
+                AndroidBluetoothDevice.DEVICE_TYPE_CLASSIC -> BluetoothType.CLASSIC
+                AndroidBluetoothDevice.DEVICE_TYPE_DUAL -> BluetoothType.DUAL_MODE
+                else -> BluetoothType.UNKNOWN
+            },
+            deviceClass = mapDeviceClass(device.bluetoothClass?.deviceClass),
+            bondState = if (isBonded == true) BondState.BONDED else when (device.bondState) {
                 AndroidBluetoothDevice.BOND_BONDED -> BondState.BONDED
                 AndroidBluetoothDevice.BOND_BONDING -> BondState.BONDING
                 else -> BondState.NONE
             },
-            rssi = null,
+            rssi = rssi,
             txPower = null,
             firstSeen = Instant.now(),
             lastSeen = Instant.now(),
