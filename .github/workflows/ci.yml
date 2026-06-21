@@ -487,7 +487,11 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
-          arch: x86_64
+          # macos-latest runners are Apple Silicon (aarch64). QEMU2 cannot emulate
+          # x86_64 on an ARM host, so the emulator aborts at launch and the job
+          # reports a misleading "Timeout waiting for emulator to boot". Use arm64-v8a
+          # so the system image matches the host. See issue #366.
+          arch: arm64-v8a
           profile: pixel_5
           disable-animations: true
           script: ./gradlew app:connectedDevDebugAndroidTest --stacktrace

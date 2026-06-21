@@ -75,4 +75,28 @@ class BuildGradleConfigTest {
             "debugSigning must fall back to a project-local debug.keystore. See issue #365."
         }
     }
+
+    // ------------------------------------------------------------------
+    // Issue #366: E2E emulator arch must match the macOS aarch64 host.
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `e2e emulator arch must match macos aarch64 host`() {
+        val ciFile = resolveWorkflowFile("../.github/workflows/ci.yml", ".github/workflows/ci.yml")
+        val content = ciFile.readText()
+        // The e2e-tests job runs on macos-latest (Apple Silicon / aarch64). Using
+        // arch: x86_64 makes QEMU2 abort at launch. It must use arm64-v8a.
+        assertTrue(content.contains("arch: arm64-v8a")) {
+            "The E2E instrumented test job must use arch: arm64-v8a to match the " +
+                "macos-latest (aarch64) host. See issue #366."
+        }
+        // Guard against reintroducing the broken x86_64 arch for the e2e job.
+        assertFalse(Regex("""arch:\s*x86_64""").containsMatchIn(content)) {
+            "The E2E job must not use arch: x86_64 on the aarch64 macOS host " +
+                "(QEMU2 cannot emulate it). See issue #366."
+        }
+    }
+
+    private fun resolveWorkflowFile(vararg candidates: String): File =
+        candidates.map { File(it) }.first { it.exists() }
 }
