@@ -50,7 +50,7 @@ jobs:
       - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew app:assembleDevDebug --continue || true
+          ./gradlew app:assembleDevDebug --continue
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -80,7 +80,6 @@ jobs:
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.0.1/ktlint
           chmod +x ktlint
           ./ktlint --reporter=checkstyle,output=build/ktlint-report.xml "**/*.kt" "**/*.kts"
-        continue-on-error: true
 
       - name: Upload ktlint results
         uses: actions/upload-artifact@v4
@@ -119,7 +118,7 @@ jobs:
         run: ./gradlew testDevDebugUnitTest --stacktrace
 
       - name: Generate test coverage report
-        run: ./gradlew jacocoTestReport || true  # Continue even if Jacoco fails
+        run: ./gradlew jacocoTestReport
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -389,7 +388,6 @@ jobs:
 
       - name: Run dependency check
         run: ./gradlew dependencyCheckAnalyze || echo "::warning::Dependency check plugin not configured"
-        continue-on-error: true
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
