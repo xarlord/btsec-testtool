@@ -55,8 +55,17 @@ android {
 
     signingConfigs {
         create("debugSigning") {
-            // Use default debug keystore from Android SDK
-            storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+            // Use default debug keystore from Android SDK if present; otherwise fall
+            // back to the project-local committed debug keystore. Fresh CI runners
+            // (GitHub Actions) do not have ~/.android/debug.keystore, which would
+            // otherwise fail validateSigningDevDebug. See issue #365.
+            val homeKeystore = file("${System.getProperty("user.home")}/.android/debug.keystore")
+            val projectKeystore = rootProject.file("debug.keystore")
+            storeFile = when {
+                homeKeystore.exists() -> homeKeystore
+                projectKeystore.exists() -> projectKeystore
+                else -> homeKeystore // let AGP emit a clear error if truly absent
+            }
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
@@ -228,7 +237,11 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/di/**"
     )
 
-    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+    // This project uses product flavors (dev/prod), so the Kotlin compiler emits
+    // classes to flavor-specific directories (e.g. tmp/kotlin-classes/devDebug),
+    // NOT tmp/kotlin-classes/debug. The unit tests run against the devDebug variant
+    // (testDevDebugUnitTest), so we must point JaCoCo at devDebug's class output.
+    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/devDebug") {
         exclude(fileFilter)
     }
 
