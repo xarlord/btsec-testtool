@@ -1,3 +1,10 @@
+## [1.15.5](https://github.com/xarlord/btsec-testtool/compare/v1.15.4...v1.15.5) (2026-06-21)
+
+
+### Bug Fixes
+
+* **ci:** remove || true soft-fails — all gates are now hard gates ([c5d70c6](https://github.com/xarlord/btsec-testtool/commit/c5d70c6b60008bc6d03cb094a1879f21f72ec8dd))
+
 ## [1.15.4](https://github.com/xarlord/btsec-testtool/compare/v1.15.3...v1.15.4) (2026-06-20)
 
 
