@@ -22,6 +22,10 @@ import org.junit.runner.RunWith
  *
  * This test verifies all feature cards are displayed correctly
  * and can be used for visual regression testing.
+ *
+ * Updated for the 1.15.x screen refactor: the DashboardScreen composable no
+ * longer takes `authId` or `onBack` parameters (the authorization card was
+ * moved out of the dashboard). See issue #367.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -34,28 +38,17 @@ class DashboardScreenshotTest {
     fun testDashboardScreen_allFeatureCardsVisible() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
         // Verify header
         composeTestRule
             .onNodeWithText("BTSec Dashboard")
-            .assertExists()
-
-        // Verify authorization card
-        composeTestRule
-            .onNodeWithText("Authorized")
-            .assertExists()
-
-        composeTestRule
-            .onNodeWithText("Authorization ID: BTSEC-20260208-A1B2C3D4")
             .assertExists()
 
         // Verify feature cards are displayed
@@ -105,39 +98,14 @@ class DashboardScreenshotTest {
     }
 
     @Test
-    fun testDashboardScreen_authorizationCardContent() {
-        val testAuthId = "BTSEC-20260208-TEST1234"
-        composeTestRule.setContent {
-            DashboardScreen(
-                authId = testAuthId,
-                onNavigateToScanner = { },
-                onNavigateToFuzzer = { },
-                onNavigateToKeys = { },
-                onNavigateToVulns = { },
-                onNavigateToReports = { },
-                onBack = { }
-            )
-        }
-
-        // Verify authorization card displays the correct ID
-        composeTestRule
-            .onNodeWithText("Authorization ID: $testAuthId")
-            .assertExists()
-
-        // Capture screenshot of authorization card for visual testing
-    }
-
-    @Test
     fun testDashboardScreen_featureGridLayout() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
