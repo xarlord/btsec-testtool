@@ -77,23 +77,37 @@ class BuildGradleConfigTest {
     }
 
     // ------------------------------------------------------------------
-    // Issue #366: E2E emulator arch must match the macOS aarch64 host.
+    // Issue #366: E2E instrumented tests must run on an Ubuntu runner with KVM
+    // (GitHub-hosted macOS runners can't host the Android emulator).
     // ------------------------------------------------------------------
 
     @Test
-    fun `e2e emulator arch must match macos aarch64 host`() {
+    fun `e2e instrumented tests must run on ubuntu with kvm and x86_64 arch`() {
         val ciFile = resolveWorkflowFile("../.github/workflows/ci.yml", ".github/workflows/ci.yml")
         val content = ciFile.readText()
-        // The e2e-tests job runs on macos-latest (Apple Silicon / aarch64). Using
-        // arch: x86_64 makes QEMU2 abort at launch. It must use arm64-v8a.
-        assertTrue(content.contains("arch: arm64-v8a")) {
-            "The E2E instrumented test job must use arch: arm64-v8a to match the " +
-                "macos-latest (aarch64) host. See issue #366."
+        // GitHub-hosted macOS runners lack HVF/hypervisor support, so the Android
+        // emulator never boots there (regardless of arch). Ubuntu runners support
+        // KVM hardware acceleration, which reliably boots x86_64 emulators.
+        assertTrue(content.contains("e2e-tests")) {
+            "ci.yml must define the e2e-tests job. See issue #366."
         }
-        // Guard against reintroducing the broken x86_64 arch for the e2e job.
-        assertFalse(Regex("""arch:\s*x86_64""").containsMatchIn(content)) {
-            "The E2E job must not use arch: x86_64 on the aarch64 macOS host " +
-                "(QEMU2 cannot emulate it). See issue #366."
+        // The e2e job section must run on ubuntu-latest (not macos-latest).
+        val e2eSection = content.substringAfter("e2e-tests:")
+        assertTrue(e2eSection.contains("ubuntu-latest")) {
+            "The E2E instrumented test job must run on ubuntu-latest (macOS runners " +
+                "cannot host the Android emulator due to missing HVF). See issue #366."
+        }
+        assertFalse(e2eSection.contains("runs-on: macos-latest")) {
+            "The E2E job must NOT run on macos-latest (no hypervisor support). See issue #366."
+        }
+        assertTrue(e2eSection.contains("arch: x86_64")) {
+            "The E2E job must use arch: x86_64 on the Ubuntu/KVM runner. See issue #366."
+        }
+        assertTrue(e2eSection.contains("disable-linux-hw-accel: false")) {
+            "The E2E job must enable Linux hardware acceleration (KVM). See issue #366."
+        }
+        assertTrue(e2eSection.contains("99-kvm4all.rules")) {
+            "The E2E job must enable KVM group permissions for the emulator. See issue #366."
         }
     }
 

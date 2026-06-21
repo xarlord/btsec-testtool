@@ -463,7 +463,12 @@ jobs:
   # ============================================
   e2e-tests:
     name: E2E Instrumented Tests
-    runs-on: macos-latest
+    # Run on ubuntu-latest: GitHub-hosted macOS runners cannot host the Android
+    # emulator (no HVF/hypervisor support -> emulator never boots), and Apple
+    # Silicon (aarch64) can't run x86_64 images. Ubuntu runners support KVM
+    # hardware acceleration for x86_64 emulators, which boots reliably.
+    # See issue #366.
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     needs: [unit-tests]
 
@@ -483,17 +488,20 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Enable KVM group perms (required for hardware-accelerated emulator on Ubuntu)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Run instrumented tests (API 30)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
-          # macos-latest runners are Apple Silicon (aarch64). QEMU2 cannot emulate
-          # x86_64 on an ARM host, so the emulator aborts at launch and the job
-          # reports a misleading "Timeout waiting for emulator to boot". Use arm64-v8a
-          # so the system image matches the host. See issue #366.
-          arch: arm64-v8a
+          arch: x86_64
           profile: pixel_5
           disable-animations: true
+          disable-linux-hw-accel: false
           script: ./gradlew app:connectedDevDebugAndroidTest --stacktrace
 
       - name: Upload E2E test results
