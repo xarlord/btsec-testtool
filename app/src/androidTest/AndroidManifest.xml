@@ -7,24 +7,9 @@
   - This application may ONLY be used for AUTHORIZED security testing
   - See LICENSE for full terms
 
-  androidTest manifest.
-
-  Overrides `android:name` so the instrumentation runner instantiates
-  dagger.hilt.android.testing.HiltTestApplication (the Hilt-provided test
-  Application) instead of the production BtSecTestToolApplication. This is
-  required for every @HiltAndroidTest class to inject its component graph at
-  runtime; without it Hilt throws:
-    IllegalStateException: Hilt test, <TestClass>, cannot use a
-    @HiltAndroidApp application but found <ProdApplication>
+  androidTest manifest. Minimal — the test Application is configured via the
+  custom instrumentation runner (HiltTestRunner) which overrides
+  newApplication() to load HiltTestApplication through the test classloader.
   See issue #368.
-
-  A custom @HiltAndroidApp Application in the test source set is NOT usable
-  here because Hilt forbids app roots and test roots in the same compilation
-  unit. The framework HiltTestApplication is the documented solution.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <application
-        android:name="dagger.hilt.android.testing.HiltTestApplication" />
-
-</manifest>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

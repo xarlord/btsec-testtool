@@ -32,7 +32,10 @@ android {
         versionName = Versions.versionName
 
         // Test instrumentation
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Custom runner loads HiltTestApplication via newApplication() so
+        // @HiltAndroidTest classes get a valid test component graph at runtime.
+        // See issue #368.
+        testInstrumentationRunner = "com.btsec.testtool.HiltTestRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
 
         // Vector drawable support
