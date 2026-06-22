@@ -50,27 +50,27 @@ import javax.inject.Inject
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class ReportFlowE2ETest {
-
     @get:Rule
     val hiltRule = HiltAndroidRule(this)
 
     @Inject
     lateinit var reportRepository: ReportRepository
 
-    private val targetDevice = BluetoothDevice(
-        address = "22:33:44:55:66:77",
-        name = "E2E-Report-Target",
-        type = BluetoothType.BLE,
-        deviceClass = null,
-        bondState = BondState.NONE,
-        rssi = -50,
-        txPower = null,
-        firstSeen = Instant.now(),
-        lastSeen = Instant.now(),
-        scanCount = 1,
-        services = emptyList(),
-        manufacturerData = emptyMap()
-    )
+    private val targetDevice =
+        BluetoothDevice(
+            address = "22:33:44:55:66:77",
+            name = "E2E-Report-Target",
+            type = BluetoothType.BLE,
+            deviceClass = null,
+            bondState = BondState.NONE,
+            rssi = -50,
+            txPower = null,
+            firstSeen = Instant.now(),
+            lastSeen = Instant.now(),
+            scanCount = 1,
+            services = emptyList(),
+            manufacturerData = emptyMap(),
+        )
 
     @Before
     fun setUp() {
@@ -80,87 +80,98 @@ class ReportFlowE2ETest {
     // ── Report State Observation ──────────────────────────────────────
 
     @Test
-    fun reportFlow_reportsObservable() = runBlocking {
-        val reports = reportRepository.getAllReports().first()
-        assertNotNull("Reports flow should be observable", reports)
-    }
+    fun reportFlow_reportsObservable() =
+        runBlocking {
+            val reports = reportRepository.getAllReports().first()
+            assertNotNull("Reports flow should be observable", reports)
+        }
 
     @Test
-    fun reportFlow_reportTemplatesObservable() = runBlocking {
-        val templates = reportRepository.getAvailableTemplates().first()
-        assertNotNull("Report templates flow should be observable", templates)
-    }
+    fun reportFlow_reportTemplatesObservable() =
+        runBlocking {
+            val templates = reportRepository.getAvailableTemplates().first()
+            assertNotNull("Report templates flow should be observable", templates)
+        }
 
     @Test
-    fun reportFlow_reportStatisticsObservable() = runBlocking {
-        val stats = reportRepository.getReportStatistics().first()
-        assertNotNull("Report statistics should be observable", stats)
-    }
+    fun reportFlow_reportStatisticsObservable() =
+        runBlocking {
+            val stats = reportRepository.getReportStatistics().first()
+            assertNotNull("Report statistics should be observable", stats)
+        }
 
     @Test
-    fun reportFlow_reportsSummaryObservable() = runBlocking {
-        val summary = reportRepository.getReportsSummary().first()
-        assertNotNull("Reports summary should be observable", summary)
-    }
+    fun reportFlow_reportsSummaryObservable() =
+        runBlocking {
+            val summary = reportRepository.getReportsSummary().first()
+            assertNotNull("Reports summary should be observable", summary)
+        }
 
     // ── Report Operations Log ────────────────────────────────────────
 
     @Test
-    fun reportFlow_operationsLogInitiallyObservable() = runBlocking {
-        val ops = reportRepository.getReportLogs().first()
-        assertNotNull("Report logs flow should be observable", ops)
-    }
+    fun reportFlow_operationsLogInitiallyObservable() =
+        runBlocking {
+            val ops = reportRepository.getReportLogs().first()
+            assertNotNull("Report logs flow should be observable", ops)
+        }
 
     // ── Report Model Construction ────────────────────────────────────
 
     @Test
     fun reportFlow_securityReportConstruction() {
         val now = Instant.now()
-        val report = SecurityReport(
-            id = "report-001",
-            authId = "BTSEC-20260610-TEST1234",
-            title = "E2E Test Security Assessment",
-            generatedAt = now,
-            testPeriod = ReportPeriod(
-                start = now.minusSeconds(3600),
-                end = now
-            ),
-            targetDevices = listOf(targetDevice),
-            vulnerabilities = emptyList(),
-            fuzzingResults = emptyList(),
-            keyExtractionResults = emptyList(),
-            executiveSummary = "Test summary for E2E validation",
-            findings = listOf(
-                ReportFinding(
-                    category = com.btsec.testtool.domain.model.FindingCategory.UNEXPECTED_RESPONSE,
-                    severity = VulnerabilitySeverity.HIGH,
-                    count = 3,
-                    description = "Unexpected responses during fuzzing",
-                    affectedDevices = listOf(targetDevice.address)
-                )
-            ),
-            recommendations = listOf(
-                Recommendation(
-                    priority = RecommendationPriority.HIGH,
-                    title = "Disable legacy pairing",
-                    description = "Legacy pairing is vulnerable to KNOB attack",
-                    affectedDevices = listOf(targetDevice.address),
-                    implementation = "Disable BR/EDR Secure Connections fallback",
-                    verification = "Re-scan after configuration change"
-                )
-            ),
-            appendix = ReportAppendix(
-                toolsUsed = listOf("BTSec TestTool v1.0"),
-                testMethodology = "OWASP IoT Testing Guide",
-                limitations = listOf("Test conducted in controlled lab environment"),
-                glossary = mapOf(
-                    "BLE" to "Bluetooth Low Energy",
-                    "GATT" to "Generic Attribute Profile"
-                ),
-                references = listOf("https://owasp.org/www-project-internet-of-things/")
-            ),
-            status = ReportStatus.DRAFT
-        )
+        val report =
+            SecurityReport(
+                id = "report-001",
+                authId = "BTSEC-20260610-TEST1234",
+                title = "E2E Test Security Assessment",
+                generatedAt = now,
+                testPeriod =
+                    ReportPeriod(
+                        start = now.minusSeconds(3600),
+                        end = now,
+                    ),
+                targetDevices = listOf(targetDevice),
+                vulnerabilities = emptyList(),
+                fuzzingResults = emptyList(),
+                keyExtractionResults = emptyList(),
+                executiveSummary = "Test summary for E2E validation",
+                findings =
+                    listOf(
+                        ReportFinding(
+                            category = com.btsec.testtool.domain.model.FindingCategory.UNEXPECTED_RESPONSE,
+                            severity = VulnerabilitySeverity.HIGH,
+                            count = 3,
+                            description = "Unexpected responses during fuzzing",
+                            affectedDevices = listOf(targetDevice.address),
+                        ),
+                    ),
+                recommendations =
+                    listOf(
+                        Recommendation(
+                            priority = RecommendationPriority.HIGH,
+                            title = "Disable legacy pairing",
+                            description = "Legacy pairing is vulnerable to KNOB attack",
+                            affectedDevices = listOf(targetDevice.address),
+                            implementation = "Disable BR/EDR Secure Connections fallback",
+                            verification = "Re-scan after configuration change",
+                        ),
+                    ),
+                appendix =
+                    ReportAppendix(
+                        toolsUsed = listOf("BTSec TestTool v1.0"),
+                        testMethodology = "OWASP IoT Testing Guide",
+                        limitations = listOf("Test conducted in controlled lab environment"),
+                        glossary =
+                            mapOf(
+                                "BLE" to "Bluetooth Low Energy",
+                                "GATT" to "Generic Attribute Profile",
+                            ),
+                        references = listOf("https://owasp.org/www-project-internet-of-things/"),
+                    ),
+                status = ReportStatus.DRAFT,
+            )
 
         assertEquals("report-001", report.id)
         assertEquals("BTSEC-20260610-TEST1234", report.authId)
@@ -231,10 +242,11 @@ class ReportFlowE2ETest {
 
     @Test
     fun reportFlow_exportConfigWithoutEncryption() {
-        val config = ExportConfig(
-            encrypt = false,
-            autoGeneratePassword = false
-        )
+        val config =
+            ExportConfig(
+                encrypt = false,
+                autoGeneratePassword = false,
+            )
         assertTrue(!config.encrypt)
     }
 }

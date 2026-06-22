@@ -12,7 +12,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.btsec.testtool.presentation.feature.dashboard.DashboardScreen
-import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,10 +26,8 @@ import org.junit.runner.RunWith
  * longer takes `authId` or `onBack` parameters (the authorization card was
  * moved out of the dashboard). See issue #367.
  */
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class DashboardScreenshotTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -110,13 +107,14 @@ class DashboardScreenshotTest {
         }
 
         // Verify the feature grid structure by checking all features
-        val expectedFeatures = listOf(
-            "Scanner" to "Scan for Bluetooth devices",
-            "Vulnerabilities" to "Scan for vulnerabilities",
-            "Fuzzer" to "Fuzz Bluetooth protocols",
-            "Key Extraction" to "Extract Bluetooth keys",
-            "Reports" to "View and generate reports"
-        )
+        val expectedFeatures =
+            listOf(
+                "Scanner" to "Scan for Bluetooth devices",
+                "Vulnerabilities" to "Scan for vulnerabilities",
+                "Fuzzer" to "Fuzz Bluetooth protocols",
+                "Key Extraction" to "Extract Bluetooth keys",
+                "Reports" to "View and generate reports",
+            )
 
         expectedFeatures.forEach { (title, description) ->
             composeTestRule

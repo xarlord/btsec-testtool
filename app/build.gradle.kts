@@ -52,7 +52,7 @@ android {
         // ProGuard rules
         proguardFiles(
             getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
+            "proguard-rules.pro",
         )
     }
 
@@ -64,11 +64,12 @@ android {
             // otherwise fail validateSigningDevDebug. See issue #365.
             val homeKeystore = file("${System.getProperty("user.home")}/.android/debug.keystore")
             val projectKeystore = rootProject.file("debug.keystore")
-            storeFile = when {
-                homeKeystore.exists() -> homeKeystore
-                projectKeystore.exists() -> projectKeystore
-                else -> homeKeystore // let AGP emit a clear error if truly absent
-            }
+            storeFile =
+                when {
+                    homeKeystore.exists() -> homeKeystore
+                    projectKeystore.exists() -> projectKeystore
+                    else -> homeKeystore // let AGP emit a clear error if truly absent
+                }
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
@@ -99,7 +100,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
 
             // BuildConfig fields for release builds
@@ -129,12 +130,13 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
-        freeCompilerArgs += listOf(
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=kotlinx.coroutines.FlowPreview"
-        )
+        freeCompilerArgs +=
+            listOf(
+                "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+                "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+            )
     }
 
     buildFeatures {
@@ -201,13 +203,14 @@ android {
         checkReleaseBuilds = true
         checkAllWarnings = true
         warningsAsErrors = false
-        disable += setOf(
-            "GradleDependency",
-            "OldTargetApi",
-            "IconDuplicates",
-            "IconLocation",
-            "GoogleAppIndexingWarning"
-        )
+        disable +=
+            setOf(
+                "GradleDependency",
+                "OldTargetApi",
+                "IconDuplicates",
+                "IconLocation",
+                "GoogleAppIndexingWarning",
+            )
         baseline = file("lint-baseline.xml")
     }
 }
@@ -222,40 +225,44 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         csv.required.set(false)
     }
 
-    val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/databinding/**",
-        "**/android/databinding/**",
-        "**/androidx/databinding/**",
-        "**/*_Factory.class",
-        "**/*_MembersInjector.class",
-        "**/Dagger*Component*.*",
-        "**/*Hilt*.*",
-        "**/*DI*.*",
-        "**/di/**"
-    )
+    val fileFilter =
+        listOf(
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*Test*.*",
+            "android/**/*.*",
+            "**/databinding/**",
+            "**/android/databinding/**",
+            "**/androidx/databinding/**",
+            "**/*_Factory.class",
+            "**/*_MembersInjector.class",
+            "**/Dagger*Component*.*",
+            "**/*Hilt*.*",
+            "**/*DI*.*",
+            "**/di/**",
+        )
 
     // This project uses product flavors (dev/prod), so the Kotlin compiler emits
     // classes to flavor-specific directories (e.g. tmp/kotlin-classes/devDebug),
     // NOT tmp/kotlin-classes/debug. The unit tests run against the devDebug variant
     // (testDevDebugUnitTest), so we must point JaCoCo at devDebug's class output.
-    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/devDebug") {
-        exclude(fileFilter)
-    }
+    val debugTree =
+        fileTree("$buildDir/tmp/kotlin-classes/devDebug") {
+            exclude(fileFilter)
+        }
 
     val mainSrc = "${project.projectDir}/src/main/java"
     val mainKotlinSrc = "${project.projectDir}/src/main/kotlin"
 
     sourceDirectories.setFrom(files(listOf(mainSrc, mainKotlinSrc)))
     classDirectories.setFrom(files(listOf(debugTree)))
-    executionData.setFrom(fileTree(buildDir) {
-        include(listOf("**/*.exec", "**/*.ec"))
-    })
+    executionData.setFrom(
+        fileTree(buildDir) {
+            include(listOf("**/*.exec", "**/*.ec"))
+        },
+    )
 }
 
 dependencies {

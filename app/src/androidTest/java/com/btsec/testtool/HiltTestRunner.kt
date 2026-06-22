@@ -36,11 +36,10 @@ import dagger.hilt.android.testing.HiltTestApplication
  *   testInstrumentationRunner = "com.btsec.testtool.HiltTestRunner"
  */
 class HiltTestRunner : AndroidJUnitRunner() {
-
     override fun newApplication(
         cl: ClassLoader?,
         className: String?,
-        context: Context?
+        context: Context?,
     ): Application {
         // Always use HiltTestApplication regardless of the className the
         // framework requests, so the production BtSecTestToolApplication is

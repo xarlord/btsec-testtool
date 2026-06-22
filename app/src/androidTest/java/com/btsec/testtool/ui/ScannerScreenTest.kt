@@ -15,7 +15,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
-import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,10 +27,8 @@ import org.junit.runner.RunWith
  * Updated for the 1.15.x screen refactor: the ScannerScreen composable no
  * longer takes an `authId` parameter. See issue #367.
  */
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class ScannerScreenTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -41,7 +38,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysTitle() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -54,7 +51,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysStartButton() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -67,7 +64,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysNoDevicesMessage() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -80,7 +77,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysBackButton() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -93,7 +90,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysEmptyHintMessage() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -108,7 +105,7 @@ class ScannerScreenTest {
     fun testScannerScreen_clickStartScan_showsScanningState() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -137,7 +134,7 @@ class ScannerScreenTest {
     fun testScannerScreen_clickStopScan_returnsToIdleState() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -171,7 +168,7 @@ class ScannerScreenTest {
     fun testScannerScreen_scanStateToggleIsReversible() {
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -203,7 +200,7 @@ class ScannerScreenTest {
 
         composeTestRule.setContent {
             ScannerScreen(
-                onBack = { backClicked = true }
+                onBack = { backClicked = true },
             )
         }
 
