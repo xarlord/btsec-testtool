@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface L2capSecurityRepository {
-
     /**
      * Enumerate fixed L2CAP channels supported by the device.
      *
@@ -43,7 +42,7 @@ interface L2capSecurityRepository {
         deviceAddress: String,
         channelId: Int,
         payload: ByteArray,
-        timeoutMs: Long = 5000
+        timeoutMs: Long = 5000,
     ): ByteArray?
 
     /**
@@ -53,7 +52,10 @@ interface L2capSecurityRepository {
      * @param infoType The information type to query.
      * @return The information response, or null on failure.
      */
-    suspend fun queryInformation(deviceAddress: String, infoType: Int): ByteArray?
+    suspend fun queryInformation(
+        deviceAddress: String,
+        infoType: Int,
+    ): ByteArray?
 
     /**
      * Check whether an L2CAP connection is active.

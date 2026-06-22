@@ -167,11 +167,66 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage
-        run: ./gradlew app:testDevDebugUnitTest app:jacocoTestReport || true
+        run: ./gradlew app:testDevDebugUnitTest app:jacocoTestReport
 
       - name: Check coverage threshold
+        env:
+          COVERAGE_THRESHOLD: "40"
         run: |
-          echo "Skipping coverage check due to compilation failure in base codebase."
+          # Hard gate: enforce minimum line coverage.
+          # Threshold is set to the level the codebase currently meets (~41%) so the
+          # gate is a real regression-prevention check rather than a perpetually-red
+          # aspirational target. Raise COVERAGE_THRESHOLD as coverage improves.
+          # See issue #364 for the JaCoCo path fix that makes this report accurate.
+          python3 - <<'EOF'
+          import xml.etree.ElementTree as ET
+          import sys
+          import os
+
+          xml_path = "app/build/reports/jacoco/testDevDebugUnitTestCoverage/testDevDebugUnitTestCoverage.xml"
+          if not os.path.exists(xml_path):
+              # Try alternate path
+              for root, dirs, files in os.walk("app/build/reports/jacoco"):
+                  for f in files:
+                      if f.endswith(".xml"):
+                          xml_path = os.path.join(root, f)
+                          break
+
+          if not os.path.exists(xml_path):
+              print("❌ ERROR: JaCoCo XML report not found")
+              sys.exit(1)
+
+          tree = ET.parse(xml_path)
+          root = tree.getroot()
+
+          # Parse overall coverage from counter elements
+          counters = {}
+          for counter in root.findall('.//counter'):
+              ctype = counter.get('type')
+              missed = int(counter.get('missed', 0))
+              covered = int(counter.get('covered', 0))
+              if ctype not in counters:
+                  counters[ctype] = {'missed': 0, 'covered': 0}
+              counters[ctype]['missed'] += missed
+              counters[ctype]['covered'] += covered
+
+          threshold = int(os.environ.get("COVERAGE_THRESHOLD", "40"))
+          print("📊 Coverage Report:")
+          for ctype, vals in counters.items():
+              total = vals['missed'] + vals['covered']
+              pct = (vals['covered'] / total * 100) if total > 0 else 0
+              status = "✅" if pct >= threshold else "❌"
+              print(f"  {status} {ctype}: {pct:.1f}% ({vals['covered']}/{total})")
+
+          line_data = counters.get('LINE', {'missed': 0, 'covered': 0})
+          line_total = line_data['missed'] + line_data['covered']
+          line_pct = (line_data['covered'] / line_total * 100) if line_total > 0 else 0
+
+          if line_pct < threshold:
+              print(f"\n❌ COVERAGE GATE FAILED: Line coverage {line_pct:.1f}% < {threshold}% threshold")
+              sys.exit(1)
+          print(f"\n✅ Coverage gate passed: {line_pct:.1f}% ≥ {threshold}%")
+          EOF
 
   # ============================================
   # Breaking Change Detection

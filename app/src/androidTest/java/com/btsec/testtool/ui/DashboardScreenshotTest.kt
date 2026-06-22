@@ -12,7 +12,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.btsec.testtool.presentation.feature.dashboard.DashboardScreen
-import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,11 +21,13 @@ import org.junit.runner.RunWith
  *
  * This test verifies all feature cards are displayed correctly
  * and can be used for visual regression testing.
+ *
+ * Updated for the 1.15.x screen refactor: the DashboardScreen composable no
+ * longer takes `authId` or `onBack` parameters (the authorization card was
+ * moved out of the dashboard). See issue #367.
  */
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class DashboardScreenshotTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -34,28 +35,17 @@ class DashboardScreenshotTest {
     fun testDashboardScreen_allFeatureCardsVisible() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
         // Verify header
         composeTestRule
             .onNodeWithText("BTSec Dashboard")
-            .assertExists()
-
-        // Verify authorization card
-        composeTestRule
-            .onNodeWithText("Authorized")
-            .assertExists()
-
-        composeTestRule
-            .onNodeWithText("Authorization ID: BTSEC-20260208-A1B2C3D4")
             .assertExists()
 
         // Verify feature cards are displayed
@@ -105,50 +95,26 @@ class DashboardScreenshotTest {
     }
 
     @Test
-    fun testDashboardScreen_authorizationCardContent() {
-        val testAuthId = "BTSEC-20260208-TEST1234"
-        composeTestRule.setContent {
-            DashboardScreen(
-                authId = testAuthId,
-                onNavigateToScanner = { },
-                onNavigateToFuzzer = { },
-                onNavigateToKeys = { },
-                onNavigateToVulns = { },
-                onNavigateToReports = { },
-                onBack = { }
-            )
-        }
-
-        // Verify authorization card displays the correct ID
-        composeTestRule
-            .onNodeWithText("Authorization ID: $testAuthId")
-            .assertExists()
-
-        // Capture screenshot of authorization card for visual testing
-    }
-
-    @Test
     fun testDashboardScreen_featureGridLayout() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
         // Verify the feature grid structure by checking all features
-        val expectedFeatures = listOf(
-            "Scanner" to "Scan for Bluetooth devices",
-            "Vulnerabilities" to "Scan for vulnerabilities",
-            "Fuzzer" to "Fuzz Bluetooth protocols",
-            "Key Extraction" to "Extract Bluetooth keys",
-            "Reports" to "View and generate reports"
-        )
+        val expectedFeatures =
+            listOf(
+                "Scanner" to "Scan for Bluetooth devices",
+                "Vulnerabilities" to "Scan for vulnerabilities",
+                "Fuzzer" to "Fuzz Bluetooth protocols",
+                "Key Extraction" to "Extract Bluetooth keys",
+                "Reports" to "View and generate reports",
+            )
 
         expectedFeatures.forEach { (title, description) ->
             composeTestRule

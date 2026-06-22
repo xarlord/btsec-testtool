@@ -9,7 +9,6 @@
 package com.btsec.testtool.domain.repository
 
 import com.btsec.testtool.domain.model.*
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Composite repository for Bluetooth key extraction operations.
@@ -47,7 +46,7 @@ data class ExtractionProgress(
     val progressPercentage: Int,
     val currentStep: ExtractionStep,
     val estimatedCompletionTime: java.time.Instant?,
-    val error: String? = null
+    val error: String? = null,
 )
 
 /**
@@ -58,7 +57,7 @@ enum class ExtractionStatus {
     RUNNING,
     COMPLETED,
     FAILED,
-    CANCELLED
+    CANCELLED,
 }
 
 /**
@@ -72,7 +71,7 @@ enum class ExtractionStep {
     ANALYZING,
     EXTRACTING,
     VERIFYING,
-    COMPLETED
+    COMPLETED,
 }
 
 /**
@@ -86,7 +85,7 @@ data class KeySecurityAnalysis(
     val findings: List<KeySecurityFinding>,
     val extractedKeys: List<KeyType>,
     val encryptionStrength: EncryptionStrength,
-    val recommendations: List<String>
+    val recommendations: List<String>,
 )
 
 /**
@@ -97,18 +96,18 @@ enum class SecurityScore {
     GOOD,
     FAIR,
     POOR,
-    CRITICAL
+    CRITICAL,
 }
 
 /**
  * Encryption strength levels.
  */
 enum class EncryptionStrength {
-    NONE,           // No encryption
-    WEAK,           // Weak encryption (e.g., short keys)
-    STANDARD,       // Standard encryption (128-bit)
-    STRONG,         // Strong encryption (with additional security)
-    UNKNOWN         // Could not determine
+    NONE, // No encryption
+    WEAK, // Weak encryption (e.g., short keys)
+    STANDARD, // Standard encryption (128-bit)
+    STRONG, // Strong encryption (with additional security)
+    UNKNOWN, // Could not determine
 }
 
 /**
@@ -119,7 +118,7 @@ data class KeySecurityFinding(
     val category: KeyFindingCategory,
     val description: String,
     val affectedKey: KeyType?,
-    val recommendation: String
+    val recommendation: String,
 )
 
 /**
@@ -133,7 +132,7 @@ enum class KeyFindingCategory {
     PROTOCOL_WEAKNESS,
     IMPLEMENTATION_FLAW,
     MISSING_SECURE_CONNECTIONS,
-    SHORT_KEY_LENGTH
+    SHORT_KEY_LENGTH,
 }
 
 /**
@@ -143,7 +142,7 @@ data class WeakKeyFinding(
     val keyType: KeyType,
     val weaknessType: WeaknessType,
     val description: String,
-    val severity: VulnerabilitySeverity
+    val severity: VulnerabilitySeverity,
 )
 
 /**
@@ -156,7 +155,7 @@ enum class WeaknessType {
     PREDICTABLE_PATTERN,
     REUSED_ACROSS_DEVICES,
     KNOWN_COMPROMISED,
-    IMPLEMENTATION_BUG
+    IMPLEMENTATION_BUG,
 }
 
 /**
@@ -167,7 +166,7 @@ data class DefaultKeyInfo(
     val vendor: String,
     val deviceModel: String,
     val description: String,
-    val reference: String?
+    val reference: String?,
 )
 
 /**
@@ -180,19 +179,19 @@ data class PairingCapture(
     val pairingMethod: PairingMethod,
     val capturedKeyMaterial: List<CapturedKeyMaterial>,
     val secureConnection: Boolean,
-    val encryptionKeySize: Int?
+    val encryptionKeySize: Int?,
 )
 
 /**
  * Pairing methods.
  */
 enum class PairingMethod {
-    LEGACY_PAIRING,      // Legacy pairing (vulnerable)
-    SECURE_CONNECTIONS,  // LE Secure Connections (secure)
-    JUST_WORKS,          // Just Works (no authentication)
-    PASSKEY_ENTRY,       // Passkey entry
-    OOB,                 // Out of Band
-    NUMERIC_COMPARISON   // Numeric comparison
+    LEGACY_PAIRING, // Legacy pairing (vulnerable)
+    SECURE_CONNECTIONS, // LE Secure Connections (secure)
+    JUST_WORKS, // Just Works (no authentication)
+    PASSKEY_ENTRY, // Passkey entry
+    OOB, // Out of Band
+    NUMERIC_COMPARISON, // Numeric comparison
 }
 
 /**
@@ -203,7 +202,7 @@ data class CapturedKeyMaterial(
     val captured: Boolean,
     val confidence: ExtractionConfidence,
     val data: ByteArray?,
-    val notes: String? = null
+    val notes: String? = null,
 )
 
 /**
@@ -217,7 +216,7 @@ data class EncryptionAnalysis(
     val usingSecureConnections: Boolean,
     val pairingMethod: PairingMethod?,
     val encryptionMode: EncryptionMode?,
-    val findings: List<String>
+    val findings: List<String>,
 )
 
 /**
@@ -227,7 +226,7 @@ enum class EncryptionMode {
     NONE,
     LEGACY,
     SECURE_CONNECTIONS,
-    UNKNOWN
+    UNKNOWN,
 }
 
 /**
@@ -241,7 +240,7 @@ data class KeyExtractionStatistics(
     val extractionsByType: Map<KeyType, Int>,
     val extractionsByMethod: Map<ExtractionMethod, Int>,
     val mostExtractedDevice: String?,
-    val dateRange: DateRange
+    val dateRange: DateRange,
 )
 
 /**
@@ -253,7 +252,7 @@ data class DeviceKeyStatistics(
     val totalExtractions: Int,
     val successfulExtractions: Int,
     val extractedKeyTypes: List<KeyType>,
-    val lastExtractionDate: java.time.Instant
+    val lastExtractionDate: java.time.Instant,
 )
 
 /**
@@ -269,7 +268,7 @@ data class KeyExtractionOperation(
     val success: Boolean,
     val errorMessage: String?,
     val durationMs: Long?,
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -283,5 +282,5 @@ enum class ExtractionOperationType {
     PAIRING_CAPTURE,
     KEY_FOUND,
     SAVE_RESULT,
-    VERIFY_KEY
+    VERIFY_KEY,
 }

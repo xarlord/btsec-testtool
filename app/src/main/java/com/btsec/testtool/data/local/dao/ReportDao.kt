@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface ReportDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReport(report: SecurityReportEntity)
 
@@ -54,10 +53,16 @@ interface ReportDao {
     fun getReportsByStatus(status: String): Flow<List<SecurityReportEntity>>
 
     @Query("SELECT * FROM security_reports WHERE generated_at >= :fromEpochMs AND generated_at <= :toEpochMs ORDER BY generated_at DESC")
-    fun getReportsInRange(fromEpochMs: Long, toEpochMs: Long): Flow<List<SecurityReportEntity>>
+    fun getReportsInRange(
+        fromEpochMs: Long,
+        toEpochMs: Long,
+    ): Flow<List<SecurityReportEntity>>
 
     @Query("UPDATE security_reports SET status = :status WHERE id = :id")
-    suspend fun updateReportStatus(id: String, status: String)
+    suspend fun updateReportStatus(
+        id: String,
+        status: String,
+    )
 
     @Query("SELECT COUNT(*) FROM security_reports")
     suspend fun getReportCount(): Int

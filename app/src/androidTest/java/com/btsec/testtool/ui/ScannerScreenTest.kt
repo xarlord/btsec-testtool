@@ -15,7 +15,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
-import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,12 +23,12 @@ import org.junit.runner.RunWith
  * UI tests for ScannerScreen.
  *
  * Tests scan controls, device list, user interactions, and state transitions.
- * Enhanced from label-only checks to include interaction and state verification.
+ *
+ * Updated for the 1.15.x screen refactor: the ScannerScreen composable no
+ * longer takes an `authId` parameter. See issue #367.
  */
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class ScannerScreenTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -39,8 +38,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysTitle() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -53,8 +51,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysStartButton() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -67,8 +64,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysNoDevicesMessage() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -81,8 +77,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysBackButton() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -95,8 +90,7 @@ class ScannerScreenTest {
     fun testScannerScreen_displaysEmptyHintMessage() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -111,8 +105,7 @@ class ScannerScreenTest {
     fun testScannerScreen_clickStartScan_showsScanningState() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -141,8 +134,7 @@ class ScannerScreenTest {
     fun testScannerScreen_clickStopScan_returnsToIdleState() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -176,8 +168,7 @@ class ScannerScreenTest {
     fun testScannerScreen_scanStateToggleIsReversible() {
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { }
+                onBack = { },
             )
         }
 
@@ -209,8 +200,7 @@ class ScannerScreenTest {
 
         composeTestRule.setContent {
             ScannerScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onBack = { backClicked = true }
+                onBack = { backClicked = true },
             )
         }
 
@@ -219,27 +209,5 @@ class ScannerScreenTest {
             .performClick()
 
         assert(backClicked) { "Back callback should have been invoked" }
-    }
-
-    // ── Auth ID rendering ───────────────────────────────────────────
-
-    @Test
-    fun testScannerScreen_acceptsDifferentAuthIds() {
-        val customAuthId = "BTSEC-20260101-Z9Y8X7W6"
-        composeTestRule.setContent {
-            ScannerScreen(
-                authId = customAuthId,
-                onBack = { }
-            )
-        }
-
-        // Screen renders successfully with different auth ID
-        composeTestRule
-            .onNodeWithText("Device Scanner")
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithText("Start Scan")
-            .assertIsDisplayed()
     }
 }

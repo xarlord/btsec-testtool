@@ -27,31 +27,40 @@ import java.time.Instant
 // ---------- AuthorizationEntity <-> Authorization ----------
 
 fun AuthorizationEntity.toDomain(): Authorization {
-    val actions = authorizedActions.split(",")
-        .filter { it.isNotBlank() }
-        .mapNotNull { try { TestAction.valueOf(it.trim()) } catch (_: Exception) { null } }
-        .toSet()
+    val actions =
+        authorizedActions.split(",")
+            .filter { it.isNotBlank() }
+            .mapNotNull {
+                try {
+                    TestAction.valueOf(it.trim())
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            .toSet()
 
-    val scope: TestScope = try {
-        mapperJson.decodeFromString<TestScope>(scope)
-    } catch (e: Exception) {
-        Timber.w(e, "Failed to parse TestScope for auth $authId, using fallback")
-        // Fallback: create minimal scope
-        TestScope(
-            authId = authId,
-            authorizedTargets = emptyList(),
-            allowedActions = actions,
-            validFrom = Instant.ofEpochMilli(issuedAt),
-            validUntil = Instant.ofEpochMilli(expiresAt),
-            disclosureDeadline = Instant.ofEpochMilli(expiresAt)
-        )
-    }
+    val scope: TestScope =
+        try {
+            mapperJson.decodeFromString<TestScope>(scope)
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to parse TestScope for auth $authId, using fallback")
+            // Fallback: create minimal scope
+            TestScope(
+                authId = authId,
+                authorizedTargets = emptyList(),
+                allowedActions = actions,
+                validFrom = Instant.ofEpochMilli(issuedAt),
+                validUntil = Instant.ofEpochMilli(expiresAt),
+                disclosureDeadline = Instant.ofEpochMilli(expiresAt),
+            )
+        }
 
-    val termsList: List<String> = try {
-        mapperJson.decodeFromString<List<String>>(terms)
-    } catch (_: Exception) {
-        emptyList()
-    }
+    val termsList: List<String> =
+        try {
+            mapperJson.decodeFromString<List<String>>(terms)
+        } catch (_: Exception) {
+            emptyList()
+        }
 
     return Authorization(
         authId = authId,
@@ -62,7 +71,7 @@ fun AuthorizationEntity.toDomain(): Authorization {
         authorizedActions = actions,
         scope = scope,
         signature = signature,
-        terms = termsList
+        terms = termsList,
     )
 }
 
@@ -79,18 +88,19 @@ fun Authorization.toEntity(): AuthorizationEntity {
         authorizedActions = actionsStr,
         scope = scopeJson,
         signature = signature,
-        terms = termsJson
+        terms = termsJson,
     )
 }
 
 // ---------- ConsentRecordEntity <-> ConsentRecord ----------
 
 fun ConsentRecordEntity.toDomain(): ConsentRecord {
-    val deviceInfo: DeviceInfo = try {
-        mapperJson.decodeFromString<DeviceInfo>(deviceInfo)
-    } catch (_: Exception) {
-        DeviceInfo("", "", "", "", "")
-    }
+    val deviceInfo: DeviceInfo =
+        try {
+            mapperJson.decodeFromString<DeviceInfo>(deviceInfo)
+        } catch (_: Exception) {
+            DeviceInfo("", "", "", "", "")
+        }
     return ConsentRecord(
         id = id,
         authId = authId,
@@ -98,7 +108,7 @@ fun ConsentRecordEntity.toDomain(): ConsentRecord {
         timestamp = Instant.ofEpochMilli(timestamp),
         authorized = authorized,
         deviceInfo = deviceInfo,
-        userSignature = userSignature
+        userSignature = userSignature,
     )
 }
 
@@ -110,23 +120,25 @@ fun ConsentRecord.toEntity(): ConsentRecordEntity {
         timestamp = timestamp.toEpochMilli(),
         authorized = authorized,
         deviceInfo = mapperJson.encodeToString(deviceInfo),
-        userSignature = userSignature
+        userSignature = userSignature,
     )
 }
 
 // ---------- AuditLogEntity <-> AuditLogEntry ----------
 
 fun AuditLogEntity.toDomain(): AuditLogEntry {
-    val deviceInfo: DeviceInfo = try {
-        mapperJson.decodeFromString<DeviceInfo>(deviceInfo)
-    } catch (_: Exception) {
-        DeviceInfo("", "", "", "", "")
-    }
-    val metadataMap: Map<String, String> = try {
-        mapperJson.decodeFromString<Map<String, String>>(metadata)
-    } catch (_: Exception) {
-        emptyMap()
-    }
+    val deviceInfo: DeviceInfo =
+        try {
+            mapperJson.decodeFromString<DeviceInfo>(deviceInfo)
+        } catch (_: Exception) {
+            DeviceInfo("", "", "", "", "")
+        }
+    val metadataMap: Map<String, String> =
+        try {
+            mapperJson.decodeFromString<Map<String, String>>(metadata)
+        } catch (_: Exception) {
+            emptyMap()
+        }
     return AuditLogEntry(
         id = id,
         authId = authId,
@@ -136,7 +148,7 @@ fun AuditLogEntity.toDomain(): AuditLogEntry {
         errorMessage = errorMessage,
         deviceInfo = deviceInfo,
         durationMs = durationMs,
-        metadata = metadataMap
+        metadata = metadataMap,
     )
 }
 
@@ -150,27 +162,33 @@ fun AuditLogEntry.toEntity(): AuditLogEntity {
         errorMessage = errorMessage,
         deviceInfo = mapperJson.encodeToString(deviceInfo),
         durationMs = durationMs,
-        metadata = mapperJson.encodeToString(metadata)
+        metadata = mapperJson.encodeToString(metadata),
     )
 }
 
 // ---------- BtOperationEntity <-> BluetoothOperation ----------
 
 fun BtOperationEntity.toDomain(): BluetoothOperation {
-    val metadataMap: Map<String, String> = try {
-        mapperJson.decodeFromString<Map<String, String>>(metadata)
-    } catch (_: Exception) {
-        emptyMap()
-    }
+    val metadataMap: Map<String, String> =
+        try {
+            mapperJson.decodeFromString<Map<String, String>>(metadata)
+        } catch (_: Exception) {
+            emptyMap()
+        }
     return BluetoothOperation(
         id = id,
         timestamp = Instant.ofEpochMilli(timestamp),
-        operationType = try { OperationType.valueOf(operationType) } catch (_: Exception) { OperationType.SCAN_START },
+        operationType =
+            try {
+                OperationType.valueOf(operationType)
+            } catch (_: Exception) {
+                OperationType.SCAN_START
+            },
         deviceAddress = deviceAddress,
         success = success,
         errorMessage = errorMessage,
         durationMs = durationMs,
-        metadata = metadataMap
+        metadata = metadataMap,
     )
 }
 
@@ -183,20 +201,16 @@ fun BluetoothOperation.toEntity(): BtOperationEntity {
         success = success,
         errorMessage = errorMessage,
         durationMs = durationMs,
-        metadata = mapperJson.encodeToString(metadata)
+        metadata = mapperJson.encodeToString(metadata),
     )
 }
 
 // ---------- Collection mappers ----------
 
-fun List<AuthorizationEntity>.toDomainAuthorizations(): List<Authorization> =
-    map { it.toDomain() }
+fun List<AuthorizationEntity>.toDomainAuthorizations(): List<Authorization> = map { it.toDomain() }
 
-fun List<ConsentRecordEntity>.toDomainConsentRecords(): List<ConsentRecord> =
-    map { it.toDomain() }
+fun List<ConsentRecordEntity>.toDomainConsentRecords(): List<ConsentRecord> = map { it.toDomain() }
 
-fun List<AuditLogEntity>.toDomainAuditLogEntries(): List<AuditLogEntry> =
-    map { it.toDomain() }
+fun List<AuditLogEntity>.toDomainAuditLogEntries(): List<AuditLogEntry> = map { it.toDomain() }
 
-fun List<BtOperationEntity>.toDomainOperations(): List<BluetoothOperation> =
-    map { it.toDomain() }
+fun List<BtOperationEntity>.toDomainOperations(): List<BluetoothOperation> = map { it.toDomain() }

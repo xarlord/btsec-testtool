@@ -33,81 +33,83 @@ import javax.inject.Singleton
  * PBAP uses the OBEX protocol over RFCOMM to access phonebook data.
  */
 @Singleton
-class PbapSecurityRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
-) : PbapSecurityRepository {
+class PbapSecurityRepositoryImpl
+    @Inject
+    constructor(
+        @ApplicationContext private val context: Context,
+    ) : PbapSecurityRepository {
+        private val bluetoothManager: BluetoothManager =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
 
-    private val bluetoothManager: BluetoothManager =
-        context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        private val connected = MutableStateFlow(false)
+        private var socket: BluetoothSocket? = null
+        private val savedReports = MutableStateFlow<Map<String, List<PbmapTestReport>>>(emptyMap())
 
-    private val connected = MutableStateFlow(false)
-    private var socket: BluetoothSocket? = null
-    private val savedReports = MutableStateFlow<Map<String, List<PbmapTestReport>>>(emptyMap())
+        @SuppressLint("MissingPermission")
+        override suspend fun connect(deviceAddress: String): Result<Unit> {
+            return try {
+                disconnect()
+                val device =
+                    bluetoothManager.adapter?.getRemoteDevice(deviceAddress)
+                        ?: return Result.failure(Exception("Device not found: $deviceAddress"))
 
-    @SuppressLint("MissingPermission")
-    override suspend fun connect(deviceAddress: String): Result<Unit> {
-        return try {
-            disconnect()
-            val device = bluetoothManager.adapter?.getRemoteDevice(deviceAddress)
-                ?: return Result.failure(Exception("Device not found: $deviceAddress"))
+                val pbapSocket = device.createRfcommSocketToServiceRecord(PBAP_UUID)
+                pbapSocket.connect()
 
-            val pbapSocket = device.createRfcommSocketToServiceRecord(PBAP_UUID)
-            pbapSocket.connect()
+                socket = pbapSocket
+                connected.value = true
+                Timber.i("PBAP connected to $deviceAddress")
+                Result.success(Unit)
+            } catch (e: SecurityException) {
+                Timber.e(e, "Missing Bluetooth permissions")
+                Result.failure(e)
+            } catch (e: IOException) {
+                Timber.e(e, "PBAP connection failed")
+                Result.failure(e)
+            }
+        }
 
-            socket = pbapSocket
-            connected.value = true
-            Timber.i("PBAP connected to $deviceAddress")
-            Result.success(Unit)
-        } catch (e: SecurityException) {
-            Timber.e(e, "Missing Bluetooth permissions")
-            Result.failure(e)
-        } catch (e: IOException) {
-            Timber.e(e, "PBAP connection failed")
-            Result.failure(e)
+        override suspend fun disconnect() {
+            try {
+                socket?.close()
+            } catch (e: IOException) {
+                Timber.w(e, "Error closing PBAP socket")
+            }
+            socket = null
+            connected.value = false
+        }
+
+        override suspend fun accessPhonebook(phonebookType: PhonebookType): PbapAccessResult {
+            // PBAP access requires OBEX protocol framing.
+            // Full implementation needs OBEX CONNECT + PULL operations.
+            val startTime = System.currentTimeMillis()
+            Timber.d("accessPhonebook: $phonebookType (OBEX framing required)")
+
+            return PbapAccessResult(
+                phonebookType = phonebookType,
+                accessible = false,
+                entryCount = 0,
+                entries = emptyList(),
+                requiredAuth = true,
+                testDurationMs = System.currentTimeMillis() - startTime,
+            )
+        }
+
+        override fun isPbapConnected(): Flow<Boolean> = connected
+
+        override suspend fun saveTestReport(report: PbmapTestReport) {
+            val updated = savedReports.value.toMutableMap()
+            val list = (updated[report.targetDevice] ?: emptyList()).toMutableList()
+            list.add(report)
+            updated[report.targetDevice] = list
+            savedReports.value = updated
+        }
+
+        override fun getTestReports(deviceAddress: String): Flow<List<PbmapTestReport>> {
+            return savedReports.map { it[deviceAddress] ?: emptyList() }
+        }
+
+        companion object {
+            private val PBAP_UUID: UUID = UUID.fromString("0000112F-0000-1000-8000-00805F9B34FB")
         }
     }
-
-    override suspend fun disconnect() {
-        try {
-            socket?.close()
-        } catch (e: IOException) {
-            Timber.w(e, "Error closing PBAP socket")
-        }
-        socket = null
-        connected.value = false
-    }
-
-    override suspend fun accessPhonebook(phonebookType: PhonebookType): PbapAccessResult {
-        // PBAP access requires OBEX protocol framing.
-        // Full implementation needs OBEX CONNECT + PULL operations.
-        val startTime = System.currentTimeMillis()
-        Timber.d("accessPhonebook: $phonebookType (OBEX framing required)")
-
-        return PbapAccessResult(
-            phonebookType = phonebookType,
-            accessible = false,
-            entryCount = 0,
-            entries = emptyList(),
-            requiredAuth = true,
-            testDurationMs = System.currentTimeMillis() - startTime
-        )
-    }
-
-    override fun isPbapConnected(): Flow<Boolean> = connected
-
-    override suspend fun saveTestReport(report: PbmapTestReport) {
-        val updated = savedReports.value.toMutableMap()
-        val list = (updated[report.targetDevice] ?: emptyList()).toMutableList()
-        list.add(report)
-        updated[report.targetDevice] = list
-        savedReports.value = updated
-    }
-
-    override fun getTestReports(deviceAddress: String): Flow<List<PbmapTestReport>> {
-        return savedReports.map { it[deviceAddress] ?: emptyList() }
-    }
-
-    companion object {
-        private val PBAP_UUID: UUID = UUID.fromString("0000112F-0000-1000-8000-00805F9B34FB")
-    }
-}

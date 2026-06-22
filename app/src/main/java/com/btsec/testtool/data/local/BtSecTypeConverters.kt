@@ -15,7 +15,11 @@ import java.time.Instant
 /**
  * JSON instance used by mapper extension functions.
  */
-internal val mapperJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+internal val mapperJson =
+    Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
 
 /**
  * Room TypeConverters for complex types.
@@ -25,8 +29,11 @@ internal val mapperJson = Json { ignoreUnknownKeys = true; encodeDefaults = true
  * and Base64 for ByteArrays.
  */
 class BtSecTypeConverters {
-
-    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val json =
+        Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
 
     // ========== Instant ==========
 
@@ -34,6 +41,5 @@ class BtSecTypeConverters {
     fun fromInstant(instant: Instant?): Long? = instant?.toEpochMilli()
 
     @TypeConverter
-    fun toInstant(epochMillis: Long?): Instant? =
-        epochMillis?.let { Instant.ofEpochMilli(it) }
+    fun toInstant(epochMillis: Long?): Instant? = epochMillis?.let { Instant.ofEpochMilli(it) }
 }

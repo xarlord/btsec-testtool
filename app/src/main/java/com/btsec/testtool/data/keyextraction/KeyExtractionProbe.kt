@@ -17,7 +17,6 @@ package com.btsec.testtool.data.keyextraction
  * This interface is for AUTHORIZED security testing only.
  */
 interface KeyExtractionProbe {
-
     /**
      * Attempt to negotiate encryption with the specified key size (bytes).
      * Returns the negotiation result indicating acceptance, rejection, or error.
@@ -28,7 +27,10 @@ interface KeyExtractionProbe {
      * Read a GATT characteristic value.
      * Returns the characteristic bytes on success, or null on failure.
      */
-    suspend fun readCharacteristic(serviceUuid: String, charUuid: String): ByteArray?
+    suspend fun readCharacteristic(
+        serviceUuid: String,
+        charUuid: String,
+    ): ByteArray?
 
     /**
      * Get the current connection encryption info, or null if not connected.
@@ -50,7 +52,6 @@ interface KeyExtractionProbe {
  * Result of a key size negotiation attempt.
  */
 sealed class KeyNegotiationResult {
-
     /** The device accepted the proposed key size. */
     data class Accepted(val acceptedKeySize: Int) : KeyNegotiationResult()
 
@@ -69,6 +70,7 @@ sealed class KeyNegotiationResult {
  */
 data class EncryptionInfo(
     val keySize: Int,
-    val encryptionType: String,       // "AES-CCM", "E0", etc.
-    val isSecureConnection: Boolean
+    // "AES-CCM", "E0", etc.
+    val encryptionType: String,
+    val isSecureConnection: Boolean,
 )

@@ -18,7 +18,7 @@ enum class VehicleVendor(val displayName: String) {
     TESLA("Tesla"),
     BOSCH_ALPS("Bosch/Alps Alpine"),
     GENERIC("Generic"),
-    UNKNOWN("Unknown")
+    UNKNOWN("Unknown"),
 }
 
 /**
@@ -30,7 +30,7 @@ enum class InfotainmentUnit(val vendor: VehicleVendor, val displayName: String) 
     VW_MIB3(VehicleVendor.VW_GROUP, "MIB3 (VW/Audi/Skoda/SEAT)"),
     TESLA_MCUMCU2(VehicleVendor.TESLA, "MCU/MCU2 (Tesla Model S/3/X/Y)"),
     BOSCH_MIB(VehicleVendor.BOSCH_ALPS, "Bosch/Alps Alpine Infotainment ECU"),
-    GENERIC_UNIT(VehicleVendor.GENERIC, "Generic Infotainment")
+    GENERIC_UNIT(VehicleVendor.GENERIC, "Generic Infotainment"),
 }
 
 /**
@@ -44,7 +44,7 @@ data class InfotainmentCve(
     val affectedProfiles: List<String>,
     val cvssScore: Double,
     val testMethod: String,
-    val reference: String
+    val reference: String,
 )
 
 /**
@@ -56,7 +56,7 @@ data class CveTestResult(
     val vulnerable: Boolean,
     val confidence: Double,
     val evidence: String,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )
 
 /**
@@ -71,5 +71,5 @@ data class InfotainmentTestReport(
     val highCount: Int,
     val mediumCount: Int,
     val testedCveCount: Int,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )

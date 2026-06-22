@@ -33,7 +33,7 @@ data class ExportConfig(
     val encrypt: Boolean = true,
     val password: String? = null,
     val autoGeneratePassword: Boolean = true,
-    val algorithm: EncryptionAlgorithm = EncryptionAlgorithm.AES_256
+    val algorithm: EncryptionAlgorithm = EncryptionAlgorithm.AES_256,
 )
 
 /**
@@ -48,5 +48,5 @@ data class ExportResult(
     val file: java.io.File,
     val password: String?,
     val encrypted: Boolean,
-    val fileSizeBytes: Long
+    val fileSizeBytes: Long,
 )

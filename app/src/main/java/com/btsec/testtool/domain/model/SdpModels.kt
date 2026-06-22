@@ -60,7 +60,8 @@ enum class BtProfile(val uuid: String, val displayName: String, val category: St
     GENERIC_ATTRIBUTE("1801", "Generic Attribute", "system"),
 
     // Unknown
-    UNKNOWN("0000", "Unknown", "unknown");
+    UNKNOWN("0000", "Unknown", "unknown"),
+    ;
 
     companion object {
         /**
@@ -91,7 +92,7 @@ data class SdpService(
     val providerName: String? = null,
     val serviceName: String? = null,
     val isHidden: Boolean = false,
-    val securityRisk: SecurityRisk = SecurityRisk.UNKNOWN
+    val securityRisk: SecurityRisk = SecurityRisk.UNKNOWN,
 )
 
 /**
@@ -100,7 +101,7 @@ data class SdpService(
 data class ProtocolDescriptor(
     val protocolUuid: String,
     val protocolName: String,
-    val parameters: Map<String, Int> = emptyMap()
+    val parameters: Map<String, Int> = emptyMap(),
 )
 
 /**
@@ -112,7 +113,7 @@ data class SdpScanResult(
     val services: List<SdpService>,
     val hiddenServices: List<SdpService>,
     val securityIssues: List<SdpSecurityFinding>,
-    val scanDurationMs: Long
+    val scanDurationMs: Long,
 )
 
 /**
@@ -122,5 +123,5 @@ data class SdpSecurityFinding(
     val severity: SecurityRisk,
     val service: String,
     val issue: String,
-    val recommendation: String
+    val recommendation: String,
 )

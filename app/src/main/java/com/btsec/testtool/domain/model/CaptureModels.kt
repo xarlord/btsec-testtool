@@ -24,8 +24,9 @@ data class PacketCapture(
     val fileType: CaptureFileType = CaptureFileType.CUSTOM,
     val filePath: String = "",
     val fileSizeBytes: Long = 0L,
-    val protocols: List<String> = emptyList(),  // Protocols seen
-    val notes: String? = null
+    // Protocols seen
+    val protocols: List<String> = emptyList(),
+    val notes: String? = null,
 )
 
 /**
@@ -33,9 +34,9 @@ data class PacketCapture(
  */
 @Serializable
 enum class CaptureFileType {
-    PCAP,          // Wireshark PCAP
-    PCAPNG,        // Wireshark PCAPNG
-    JSON,          // JSON format
-    CSV,           // CSV format
-    CUSTOM         // Custom format
+    PCAP, // Wireshark PCAP
+    PCAPNG, // Wireshark PCAPNG
+    JSON, // JSON format
+    CSV, // CSV format
+    CUSTOM, // Custom format
 }

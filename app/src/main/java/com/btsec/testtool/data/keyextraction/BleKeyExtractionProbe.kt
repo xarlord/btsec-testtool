@@ -11,13 +11,11 @@ package com.btsec.testtool.data.keyextraction
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.os.Build
-import android.os.ParcelUuid
-import java.util.UUID
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.UUID
 import kotlin.coroutines.resume
 
 /**
@@ -37,9 +35,8 @@ import kotlin.coroutines.resume
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class BleKeyExtractionProbe(
     private val context: Context,
-    private val deviceAddress: String
+    private val deviceAddress: String,
 ) : KeyExtractionProbe {
-
     private var gatt: BluetoothGatt? = null
     private var cachedEncryptionInfo: EncryptionInfo? = null
 
@@ -58,17 +55,22 @@ class BleKeyExtractionProbe(
         return KeyNegotiationResult.Unavailable
     }
 
-    override suspend fun readCharacteristic(serviceUuid: String, charUuid: String): ByteArray? {
+    override suspend fun readCharacteristic(
+        serviceUuid: String,
+        charUuid: String,
+    ): ByteArray? {
         val gattConnection = ensureConnected() ?: return null
         return suspendCancellableCoroutine { cont ->
-            val service = gattConnection.getService(UUID.fromString(serviceUuid)) ?: run {
-                cont.resume(null)
-                return@suspendCancellableCoroutine
-            }
-            val characteristic = service.getCharacteristic(UUID.fromString(charUuid)) ?: run {
-                cont.resume(null)
-                return@suspendCancellableCoroutine
-            }
+            val service =
+                gattConnection.getService(UUID.fromString(serviceUuid)) ?: run {
+                    cont.resume(null)
+                    return@suspendCancellableCoroutine
+                }
+            val characteristic =
+                service.getCharacteristic(UUID.fromString(charUuid)) ?: run {
+                    cont.resume(null)
+                    return@suspendCancellableCoroutine
+                }
             val readResult = gattConnection.readCharacteristic(characteristic)
             if (!readResult) {
                 cont.resume(null)
@@ -85,8 +87,11 @@ class BleKeyExtractionProbe(
 
     override fun isBonded(): Boolean {
         return try {
-            val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE)
-                as? android.bluetooth.BluetoothManager?)?.adapter
+            val adapter =
+                (
+                    context.getSystemService(Context.BLUETOOTH_SERVICE)
+                        as? android.bluetooth.BluetoothManager?
+                )?.adapter
             val device = adapter?.getRemoteDevice(deviceAddress)
             device?.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED
         } catch (_: SecurityException) {
@@ -106,26 +111,30 @@ class BleKeyExtractionProbe(
     private suspend fun ensureConnected(): BluetoothGatt? {
         gatt?.let { return it }
 
-        val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE)
-            as? android.bluetooth.BluetoothManager?)?.adapter ?: return null
+        val adapter =
+            (
+                context.getSystemService(Context.BLUETOOTH_SERVICE)
+                    as? android.bluetooth.BluetoothManager?
+            )?.adapter ?: return null
         val device = adapter.getRemoteDevice(deviceAddress) ?: return null
 
         return suspendCancellableCoroutine { cont ->
-            val callback = object : BluetoothGattCallback() {
-                override fun onConnectionStateChange(
-                    gatt: BluetoothGatt,
-                    status: Int,
-                    newState: Int
-                ) {
-                    if (newState == BluetoothProfile.STATE_CONNECTED) {
-                        this@BleKeyExtractionProbe.gatt = gatt
-                        cont.resume(gatt)
-                    } else {
-                        gatt.close()
-                        cont.resume(null)
+            val callback =
+                object : BluetoothGattCallback() {
+                    override fun onConnectionStateChange(
+                        gatt: BluetoothGatt,
+                        status: Int,
+                        newState: Int,
+                    ) {
+                        if (newState == BluetoothProfile.STATE_CONNECTED) {
+                            this@BleKeyExtractionProbe.gatt = gatt
+                            cont.resume(gatt)
+                        } else {
+                            gatt.close()
+                            cont.resume(null)
+                        }
                     }
                 }
-            }
             val connected = device.connectGatt(context, false, callback)
             if (connected == null) {
                 cont.resume(null)

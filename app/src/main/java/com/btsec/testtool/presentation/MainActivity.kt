@@ -1,3 +1,11 @@
+/*
+ * Bluetooth Security Testing Tool
+ * Copyright (c) 2026 Security Research Team
+ *
+ * Licensed under MIT with additional restrictions:
+ * - This application may ONLY be used for AUTHORIZED security testing
+ * - See LICENSE for full terms
+ */
 package com.btsec.testtool.presentation
 
 import android.Manifest
@@ -25,17 +33,17 @@ import timber.log.Timber
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     private val viewModel: MainViewModel by viewModels()
 
-    private val bluetoothPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        val denied = permissions.filterValues { !it }.keys
-        Timber.i("Permission result: allGranted=$allGranted, denied=$denied")
-        viewModel.onPermissionResult(allGranted)
-    }
+    private val bluetoothPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
+            val allGranted = permissions.values.all { it }
+            val denied = permissions.filterValues { !it }.keys
+            Timber.i("Permission result: allGranted=$allGranted, denied=$denied")
+            viewModel.onPermissionResult(allGranted)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +55,7 @@ class MainActivity : ComponentActivity() {
             BTSecTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     BTSecNavGraph()
                 }

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
  * All testing operations must be backed by valid authorization.
  */
 interface AuthorizationRepository {
-
     /**
      * Verify an authorization ID with the backend server.
      *
@@ -89,7 +88,10 @@ interface AuthorizationRepository {
     /**
      * Update authorization status (e.g., mark as revoked).
      */
-    suspend fun updateAuthorizationStatus(authId: String, status: AuthorizationStatus)
+    suspend fun updateAuthorizationStatus(
+        authId: String,
+        status: AuthorizationStatus,
+    )
 }
 
 /**
@@ -99,5 +101,5 @@ enum class AuthorizationStatus {
     ACTIVE,
     EXPIRED,
     REVOKED,
-    PENDING
+    PENDING,
 }

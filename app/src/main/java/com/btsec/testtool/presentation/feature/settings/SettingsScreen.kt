@@ -115,7 +115,8 @@ fun SettingsScreen(onBack: () -> Unit) {
                                 "Bluetooth Scan" to uiState.hasBtScan,
                                 "Bluetooth Connect" to uiState.hasBtConnect,
                                 "Location Access" to uiState.hasLocation,
-                                "Notifications" to true, // Assume granted for settings
+                                // Assume granted for settings
+                                "Notifications" to true,
                             )
                         perms.forEach { (name, granted) ->
                             Row(

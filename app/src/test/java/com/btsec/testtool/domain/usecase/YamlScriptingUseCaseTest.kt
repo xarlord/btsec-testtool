@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class YamlScriptingUseCaseTest {
-
     private lateinit var useCase: YamlScriptingUseCase
 
     @BeforeEach
@@ -31,11 +30,11 @@ class YamlScriptingUseCaseTest {
     @Nested
     @DisplayName("parseYaml")
     inner class ParseYaml {
-
         @Test
         @DisplayName("should parse a valid complete YAML script")
         fun testParseYaml_validScript() {
-            val yaml = """
+            val yaml =
+                """
                 name: "Heart Rate Monitor Test"
                 description: "Tests BLE heart rate service"
                 author: "Security Researcher"
@@ -54,7 +53,7 @@ class YamlScriptingUseCaseTest {
                       characteristic: "2A37"
                     label: "Read heart rate"
                   - action: disconnect
-            """.trimIndent()
+                """.trimIndent()
 
             val result = useCase.parseYaml(yaml)
 
@@ -92,11 +91,12 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should return warning when name is missing")
         fun testParseYaml_missingName_warning() {
-            val yaml = """
+            val yaml =
+                """
                 description: "No name script"
                 steps:
                   - action: scan
-            """.trimIndent()
+                """.trimIndent()
 
             val result = useCase.parseYaml(yaml)
 
@@ -107,10 +107,11 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should return error when no steps are defined")
         fun testParseYaml_noSteps_error() {
-            val yaml = """
+            val yaml =
+                """
                 name: "No Steps Script"
                 description: "Missing steps"
-            """.trimIndent()
+                """.trimIndent()
 
             val result = useCase.parseYaml(yaml)
 
@@ -122,7 +123,8 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should parse variables block correctly")
         fun testParseYaml_withVariables() {
-            val yaml = """
+            val yaml =
+                """
                 name: "Variable Test"
                 description: "Test with variables"
                 variables:
@@ -131,7 +133,7 @@ class YamlScriptingUseCaseTest {
                   test_value: "0x01"
                 steps:
                   - action: scan
-            """.trimIndent()
+                """.trimIndent()
 
             val result = useCase.parseYaml(yaml)
 
@@ -146,13 +148,14 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should parse tags in flow style")
         fun testParseYaml_withTags() {
-            val yaml = """
+            val yaml =
+                """
                 name: "Tagged Test"
                 description: "Test with tags"
                 tags: [ble, security, heart_rate]
                 steps:
                   - action: scan
-            """.trimIndent()
+                """.trimIndent()
 
             val result = useCase.parseYaml(yaml)
 
@@ -164,7 +167,8 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should parse nested params in steps")
         fun testParseYaml_nestedParams() {
-            val yaml = """
+            val yaml =
+                """
                 name: "Nested Params Test"
                 description: "Test nested params"
                 steps:
@@ -178,7 +182,7 @@ class YamlScriptingUseCaseTest {
                     repeat: 3
                     continue: retry
                   - action: disconnect
-            """.trimIndent()
+                """.trimIndent()
 
             val result = useCase.parseYaml(yaml)
 
@@ -200,7 +204,6 @@ class YamlScriptingUseCaseTest {
     @Nested
     @DisplayName("validateYamlScript")
     inner class ValidateYamlScript {
-
         @Test
         @DisplayName("should return no errors for a valid script")
         fun testValidateYamlScript_valid_noErrors() {
@@ -214,12 +217,14 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should return error for invalid action")
         fun testValidateYamlScript_invalidAction_error() {
-            val script = createValidScript().copy(
-                steps = listOf(
-                    com.btsec.testtool.domain.model.YamlStep(action = "scan"),
-                    com.btsec.testtool.domain.model.YamlStep(action = "invalid_action")
+            val script =
+                createValidScript().copy(
+                    steps =
+                        listOf(
+                            com.btsec.testtool.domain.model.YamlStep(action = "scan"),
+                            com.btsec.testtool.domain.model.YamlStep(action = "invalid_action"),
+                        ),
                 )
-            )
 
             val errors = useCase.validateYamlScript(script)
 
@@ -239,17 +244,19 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should allow read after connect")
         fun testValidateYamlScript_connectBeforeRead_ok() {
-            val script = createValidScript().copy(
-                steps = listOf(
-                    com.btsec.testtool.domain.model.YamlStep(action = "scan"),
-                    com.btsec.testtool.domain.model.YamlStep(action = "connect"),
-                    com.btsec.testtool.domain.model.YamlStep(
-                        action = "read",
-                        params = mapOf("service" to "180D")
-                    ),
-                    com.btsec.testtool.domain.model.YamlStep(action = "disconnect")
+            val script =
+                createValidScript().copy(
+                    steps =
+                        listOf(
+                            com.btsec.testtool.domain.model.YamlStep(action = "scan"),
+                            com.btsec.testtool.domain.model.YamlStep(action = "connect"),
+                            com.btsec.testtool.domain.model.YamlStep(
+                                action = "read",
+                                params = mapOf("service" to "180D"),
+                            ),
+                            com.btsec.testtool.domain.model.YamlStep(action = "disconnect"),
+                        ),
                 )
-            )
 
             val errors = useCase.validateYamlScript(script)
 
@@ -259,15 +266,17 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should return error for read without prior connect")
         fun testValidateYamlScript_readWithoutConnect_error() {
-            val script = createValidScript().copy(
-                steps = listOf(
-                    com.btsec.testtool.domain.model.YamlStep(action = "scan"),
-                    com.btsec.testtool.domain.model.YamlStep(
-                        action = "read",
-                        params = mapOf("service" to "180D")
-                    )
+            val script =
+                createValidScript().copy(
+                    steps =
+                        listOf(
+                            com.btsec.testtool.domain.model.YamlStep(action = "scan"),
+                            com.btsec.testtool.domain.model.YamlStep(
+                                action = "read",
+                                params = mapOf("service" to "180D"),
+                            ),
+                        ),
                 )
-            )
 
             val errors = useCase.validateYamlScript(script)
 
@@ -277,19 +286,22 @@ class YamlScriptingUseCaseTest {
         @Test
         @DisplayName("should return error for undefined variable references")
         fun testValidateYamlScript_undefinedVariable_error() {
-            val script = createValidScript().copy(
-                variables = mapOf("service_uuid" to "180D"),
-                steps = listOf(
-                    com.btsec.testtool.domain.model.YamlStep(action = "connect"),
-                    com.btsec.testtool.domain.model.YamlStep(
-                        action = "read",
-                        params = mapOf(
-                            "service" to "\${service_uuid}",
-                            "characteristic" to "\${undefined_var}"
-                        )
-                    )
+            val script =
+                createValidScript().copy(
+                    variables = mapOf("service_uuid" to "180D"),
+                    steps =
+                        listOf(
+                            com.btsec.testtool.domain.model.YamlStep(action = "connect"),
+                            com.btsec.testtool.domain.model.YamlStep(
+                                action = "read",
+                                params =
+                                    mapOf(
+                                        "service" to "\${service_uuid}",
+                                        "characteristic" to "\${undefined_var}",
+                                    ),
+                            ),
+                        ),
                 )
-            )
 
             val errors = useCase.validateYamlScript(script)
 
@@ -300,14 +312,14 @@ class YamlScriptingUseCaseTest {
     @Nested
     @DisplayName("resolveVariables")
     inner class ResolveVariables {
-
         @Test
         @DisplayName("should replace existing variable references")
         fun testResolveVariables_existing() {
-            val variables = mapOf(
-                "service_uuid" to "180D",
-                "char_uuid" to "2A37"
-            )
+            val variables =
+                mapOf(
+                    "service_uuid" to "180D",
+                    "char_uuid" to "2A37",
+                )
 
             val result = useCase.resolveVariables("\${service_uuid}/\${char_uuid}", variables)
 
@@ -328,7 +340,6 @@ class YamlScriptingUseCaseTest {
     @Nested
     @DisplayName("getYamlTemplate")
     inner class GetYamlTemplate {
-
         @Test
         @DisplayName("should return a non-empty template string")
         fun testGetYamlTemplate_notEmpty() {
@@ -344,7 +355,6 @@ class YamlScriptingUseCaseTest {
     @Nested
     @DisplayName("getYamlActionReference")
     inner class GetYamlActionReference {
-
         @Test
         @DisplayName("should contain all valid actions with descriptions")
         fun testGetYamlActionReference_hasAllActions() {
@@ -375,15 +385,16 @@ class YamlScriptingUseCaseTest {
         return com.btsec.testtool.domain.model.YamlTestScript(
             name = "Valid Test Script",
             description = "A valid test for AUTHORIZED security testing",
-            steps = listOf(
-                com.btsec.testtool.domain.model.YamlStep(action = "scan"),
-                com.btsec.testtool.domain.model.YamlStep(action = "connect"),
-                com.btsec.testtool.domain.model.YamlStep(
-                    action = "read",
-                    params = mapOf("service" to "180D")
+            steps =
+                listOf(
+                    com.btsec.testtool.domain.model.YamlStep(action = "scan"),
+                    com.btsec.testtool.domain.model.YamlStep(action = "connect"),
+                    com.btsec.testtool.domain.model.YamlStep(
+                        action = "read",
+                        params = mapOf("service" to "180D"),
+                    ),
+                    com.btsec.testtool.domain.model.YamlStep(action = "disconnect"),
                 ),
-                com.btsec.testtool.domain.model.YamlStep(action = "disconnect")
-            )
         )
     }
 }

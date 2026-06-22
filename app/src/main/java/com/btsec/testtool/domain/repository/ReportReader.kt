@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
  * analytics components to depend on a narrow, query-only contract.
  */
 interface ReportReader {
-
     /**
      * Get a report by ID.
      */
@@ -46,7 +45,10 @@ interface ReportReader {
     /**
      * Get reports within a date range.
      */
-    fun getReportsInRange(start: java.time.Instant, end: java.time.Instant): Flow<List<SecurityReport>>
+    fun getReportsInRange(
+        start: java.time.Instant,
+        end: java.time.Instant,
+    ): Flow<List<SecurityReport>>
 
     /**
      * Get available export formats.

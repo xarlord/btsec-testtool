@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("OnboardingUseCase")
 class OnboardingUseCaseTest {
-
     private lateinit var useCase: OnboardingUseCase
 
     @BeforeEach
@@ -29,7 +28,6 @@ class OnboardingUseCaseTest {
     @Nested
     @DisplayName("getOnboardingSteps")
     inner class GetOnboardingSteps {
-
         @Test
         @DisplayName("should return 8 steps")
         fun testGetOnboardingSteps_has8Steps() {
@@ -58,7 +56,6 @@ class OnboardingUseCaseTest {
     @Nested
     @DisplayName("createInitialState")
     inner class CreateInitialState {
-
         @Test
         @DisplayName("initial state should not be completed")
         fun testCreateInitialState_notCompleted() {
@@ -75,7 +72,6 @@ class OnboardingUseCaseTest {
     @Nested
     @DisplayName("handleAction")
     inner class HandleAction {
-
         @Test
         @DisplayName("NEXT should advance currentStepIndex and mark step completed")
         fun testHandleAction_next_advances() {
@@ -152,7 +148,6 @@ class OnboardingUseCaseTest {
     @Nested
     @DisplayName("isStepCompleted")
     inner class IsStepCompleted {
-
         @Test
         @DisplayName("should return true for a completed step")
         fun testIsStepCompleted_true() {
@@ -172,7 +167,6 @@ class OnboardingUseCaseTest {
     @Nested
     @DisplayName("isLastStep")
     inner class IsLastStep {
-
         @Test
         @DisplayName("should return true when at last step")
         fun testIsLastStep_true() {
@@ -189,7 +183,6 @@ class OnboardingUseCaseTest {
     @Nested
     @DisplayName("isFirstStep")
     inner class IsFirstStep {
-
         @Test
         @DisplayName("should return true when at first step")
         fun testIsFirstStep_true() {
@@ -206,7 +199,6 @@ class OnboardingUseCaseTest {
     @Nested
     @DisplayName("getStepByIndex")
     inner class GetStepByIndex {
-
         @Test
         @DisplayName("should return step for valid index")
         fun testGetStepByIndex_valid() {

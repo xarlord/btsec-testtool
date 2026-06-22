@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface MapSecurityRepository {
-
     /**
      * Connect to a device's MAP profile.
      *

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bluetooth Security Testing Tool
+  Copyright (c) 2026 Security Research Team
+
+  Licensed under MIT with additional restrictions:
+  - This application may ONLY be used for authorized security testing
+  - See LICENSE for full terms
+
+  androidTest manifest.
+
+  Overrides android:name to HiltTestApplication so that @HiltAndroidTest
+  classes run against a valid Hilt test component graph instead of the
+  production BtSecTestToolApplication. The HiltTestRunner also overrides
+  newApplication() as a belt-and-suspenders fallback. See issue #368.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:name="dagger.hilt.android.testing.HiltTestApplication" />
+
+</manifest>

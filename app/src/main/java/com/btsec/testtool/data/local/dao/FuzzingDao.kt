@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface FuzzingDao {
-
     // ========== FuzzResult CRUD ==========
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -52,7 +51,10 @@ interface FuzzingDao {
     fun getFuzzResultsByStatus(status: String): Flow<List<FuzzResultEntity>>
 
     @Query("SELECT * FROM fuzz_results WHERE start_time >= :fromEpochMs AND start_time <= :toEpochMs ORDER BY start_time DESC")
-    fun getFuzzResultsInRange(fromEpochMs: Long, toEpochMs: Long): Flow<List<FuzzResultEntity>>
+    fun getFuzzResultsInRange(
+        fromEpochMs: Long,
+        toEpochMs: Long,
+    ): Flow<List<FuzzResultEntity>>
 
     @Query("SELECT * FROM fuzz_results WHERE findings != '[]' ORDER BY start_time DESC")
     fun getFuzzResultsWithFindings(): Flow<List<FuzzResultEntity>>

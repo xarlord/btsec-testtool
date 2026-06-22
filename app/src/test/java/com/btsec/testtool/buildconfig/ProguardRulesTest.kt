@@ -19,14 +19,14 @@ import java.io.File
  * Related to: Issue #300 (R8 minification failure with missing SLF4J StaticLoggerBinder)
  */
 class ProguardRulesTest {
-
     private val proguardFile: File by lazy {
         // The test working directory in Gradle is the module root (app/)
         // In CI, it may be the project root, so check both
-        val candidates = listOf(
-            File("proguard-rules.pro"),
-            File("app/proguard-rules.pro"),
-        )
+        val candidates =
+            listOf(
+                File("proguard-rules.pro"),
+                File("app/proguard-rules.pro"),
+            )
         candidates.first { it.exists() }
     }
 

@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface AuthorizationDao {
-
     // ========== Authorization CRUD ==========
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -67,7 +66,10 @@ interface AuthorizationDao {
     fun getAuthorizationsWithAction(action: String): Flow<List<AuthorizationEntity>>
 
     @Query("UPDATE authorizations SET status = :status WHERE auth_id = :authId")
-    suspend fun updateAuthorizationStatus(authId: String, status: String)
+    suspend fun updateAuthorizationStatus(
+        authId: String,
+        status: String,
+    )
 
     @Query("SELECT COUNT(*) FROM authorizations")
     suspend fun getAuthorizationCount(): Int

@@ -23,7 +23,6 @@ import java.io.File
  * need to create or modify reports to depend on a narrow contract.
  */
 interface ReportWriter {
-
     /**
      * Generate a comprehensive security assessment report.
      *
@@ -33,7 +32,7 @@ interface ReportWriter {
      */
     fun generateReport(
         authId: String,
-        config: ReportConfig
+        config: ReportConfig,
     ): Flow<ReportGenerationProgress>
 
     /**
@@ -45,7 +44,7 @@ interface ReportWriter {
      */
     suspend fun generateSummaryReport(
         authId: String,
-        deviceAddress: String? = null
+        deviceAddress: String? = null,
     ): Result<SecurityReport>
 
     /**
@@ -57,7 +56,7 @@ interface ReportWriter {
      */
     suspend fun generateVulnerabilityReport(
         authId: String,
-        vulnerabilities: List<Vulnerability>
+        vulnerabilities: List<Vulnerability>,
     ): Result<SecurityReport>
 
     /**
@@ -69,7 +68,7 @@ interface ReportWriter {
      */
     suspend fun generateFuzzingReport(
         authId: String,
-        fuzzingResults: List<FuzzResult>
+        fuzzingResults: List<FuzzResult>,
     ): Result<SecurityReport>
 
     /**
@@ -81,7 +80,7 @@ interface ReportWriter {
      */
     suspend fun generateKeyExtractionReport(
         authId: String,
-        extractionResults: List<KeyExtractionResult>
+        extractionResults: List<KeyExtractionResult>,
     ): Result<SecurityReport>
 
     /**
@@ -106,7 +105,10 @@ interface ReportWriter {
      * @param outputPath Output file path
      * @return Exported file
      */
-    suspend fun exportToPdf(reportId: String, outputPath: String): Result<File>
+    suspend fun exportToPdf(
+        reportId: String,
+        outputPath: String,
+    ): Result<File>
 
     /**
      * Export a report to HTML format.
@@ -115,7 +117,10 @@ interface ReportWriter {
      * @param outputPath Output file path
      * @return Exported file
      */
-    suspend fun exportToHtml(reportId: String, outputPath: String): Result<File>
+    suspend fun exportToHtml(
+        reportId: String,
+        outputPath: String,
+    ): Result<File>
 
     /**
      * Export a report to JSON format.
@@ -124,7 +129,10 @@ interface ReportWriter {
      * @param outputPath Output file path
      * @return Exported file
      */
-    suspend fun exportToJson(reportId: String, outputPath: String): Result<File>
+    suspend fun exportToJson(
+        reportId: String,
+        outputPath: String,
+    ): Result<File>
 
     /**
      * Export a report to CSV format (findings only).
@@ -133,7 +141,10 @@ interface ReportWriter {
      * @param outputPath Output file path
      * @return Exported file
      */
-    suspend fun exportToCsv(reportId: String, outputPath: String): Result<File>
+    suspend fun exportToCsv(
+        reportId: String,
+        outputPath: String,
+    ): Result<File>
 
     /**
      * Export to multiple formats at once.
@@ -146,7 +157,7 @@ interface ReportWriter {
     suspend fun exportToMultipleFormats(
         reportId: String,
         outputDirectory: String,
-        formats: List<ExportFormat>
+        formats: List<ExportFormat>,
     ): Result<List<File>>
 
     /**
@@ -180,7 +191,10 @@ interface ReportWriter {
      * @param reportId Report to share
      * @param format Export format
      */
-    suspend fun shareReport(reportId: String, format: ExportFormat): Result<Unit>
+    suspend fun shareReport(
+        reportId: String,
+        format: ExportFormat,
+    ): Result<Unit>
 
     /**
      * Upload a report to a remote server.
@@ -192,7 +206,7 @@ interface ReportWriter {
     suspend fun uploadReport(
         reportId: String,
         serverUrl: String,
-        apiKey: String
+        apiKey: String,
     ): Result<String>
 
     /**

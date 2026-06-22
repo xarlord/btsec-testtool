@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require explicit authorization.
  */
 interface KeyExtractionWriter {
-
     /**
      * Attempt to extract a specific key type from a device.
      *
@@ -38,7 +37,7 @@ interface KeyExtractionWriter {
     fun extractKey(
         device: BluetoothDevice,
         keyType: KeyType,
-        method: ExtractionMethod
+        method: ExtractionMethod,
     ): Flow<ExtractionProgress>
 
     /**
@@ -83,7 +82,11 @@ interface KeyExtractionWriter {
     /**
      * Add a key to the extracted key database.
      */
-    suspend fun addToKeyDatabase(deviceAddress: String, keyType: KeyType, keyValue: ByteArray): Result<Unit>
+    suspend fun addToKeyDatabase(
+        deviceAddress: String,
+        keyType: KeyType,
+        keyValue: ByteArray,
+    ): Result<Unit>
 
     /**
      * Log a key extraction operation for audit purposes.

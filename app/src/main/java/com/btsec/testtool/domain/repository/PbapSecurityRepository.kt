@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface PbapSecurityRepository {
-
     /**
      * Connect to a device's PBAP profile.
      *

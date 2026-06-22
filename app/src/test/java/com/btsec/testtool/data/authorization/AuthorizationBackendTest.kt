@@ -28,7 +28,6 @@ import kotlin.test.assertTrue
  */
 @DisplayName("AuthorizationBackend")
 class AuthorizationBackendTest {
-
     // We test static/internal methods via a helper that exposes them
     // The companion object constants are directly accessible
     private val serverSigPrefix = AuthorizationBackend.SERVER_SIG_PREFIX
@@ -43,7 +42,6 @@ class AuthorizationBackendTest {
     @Nested
     @DisplayName("Auth ID Format Validation")
     inner class FormatValidation {
-
         private val pattern = Regex("^BTSEC-(\\d{8}|DEMO)-[A-Z0-9]{8}$")
 
         @Test
@@ -112,7 +110,6 @@ class AuthorizationBackendTest {
     @Nested
     @DisplayName("Server Signature Validation")
     inner class SignatureValidation {
-
         @Test
         @DisplayName("Accept sv1: prefix with valid 64-char hex")
         fun acceptValidServerSignature() {
@@ -213,19 +210,21 @@ class AuthorizationBackendTest {
     @Nested
     @DisplayName("Server Response Parsing")
     inner class ResponseParsing {
-
         @Test
         @DisplayName("Parse valid server response with all fields")
         fun parseValidResponse() {
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "John Doe",
-                "issuedBy": "Security Team",
-                "expiresAt": "2099-01-01T00:00:00Z",
-                "actions": "all",
-                "maxPacketsPerSecond": 50
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "John Doe",
+                    "issuedBy": "Security Team",
+                    "expiresAt": "2099-01-01T00:00:00Z",
+                    "actions": "all",
+                    "maxPacketsPerSecond": 50
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -292,12 +291,15 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Parse specific actions list")
         fun parseSpecificActions() {
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "User",
-                "actions": "SCAN_DEVICES,CONNECT_DEVICE"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "User",
+                    "actions": "SCAN_DEVICES,CONNECT_DEVICE"
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -307,11 +309,14 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Accept JWT signature from server response")
         fun acceptJwtSignature() {
-            val json = """{
-                "authorized": true,
-                "signature": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.abc123",
-                "issuedTo": "User"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.abc123",
+                    "issuedTo": "User"
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -321,11 +326,14 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Reject mock_signature from server response")
         fun rejectMockSigFromServer() {
-            val json = """{
-                "authorized": true,
-                "signature": "mock_signature",
-                "issuedTo": "User"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "mock_signature",
+                    "issuedTo": "User"
+                }
+                """.trimIndent()
 
             assertNull(testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json))
         }
@@ -333,12 +341,15 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Parse maxPacketsPerSecond from response")
         fun parseMaxPackets() {
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "User",
-                "maxPacketsPerSecond": 25
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "User",
+                    "maxPacketsPerSecond": 25
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -348,12 +359,15 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Parse requiresSupervision flag")
         fun parseRequiresSupervision() {
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "User",
-                "requiresSupervision": true
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "User",
+                    "requiresSupervision": true
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -363,11 +377,14 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Default maxPacketsPerSecond is 100 when not specified")
         fun defaultMaxPackets() {
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "User"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "User"
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -377,11 +394,14 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Reject response with empty issuedTo")
         fun rejectEmptyIssuedTo() {
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": ""
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": ""
+                }
+                """.trimIndent()
 
             assertNull(testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json))
         }
@@ -392,11 +412,14 @@ class AuthorizationBackendTest {
             val before = java.time.Instant.now().plusSeconds(86400 * 29)
             val after = java.time.Instant.now().plusSeconds(86400 * 31)
 
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "User"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "User"
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -407,12 +430,15 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("Parse target scope from response")
         fun parseTargetScope() {
-            val json = """{
-                "authorized": true,
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "User",
-                "targetScope": "AA:BB:CC:DD:EE:FF"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "User",
+                    "targetScope": "AA:BB:CC:DD:EE:FF"
+                }
+                """.trimIndent()
 
             val auth = testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json)
             assertNotNull(auth)
@@ -425,31 +451,38 @@ class AuthorizationBackendTest {
     @Nested
     @DisplayName("Attack Vector Regression Tests")
     inner class AttackVectors {
-
         @Test
         @DisplayName("ATTACK: Random ID with valid format should NOT bypass signature check")
         fun attackRandomIdBypass() {
             // An attacker crafts BTSEC-20260101-ABCDEFGH but no server responds
             // parseServerResponse won't be called — verifyServerAuthorization returns null
             // This test verifies the response parser rejects weak sigs
-            val json = """{
-                "authorized": true,
-                "signature": "server_verified_${java.util.UUID.randomUUID()}",
-                "issuedTo": "Attacker"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "server_verified_${java.util.UUID.randomUUID()}",
+                    "issuedTo": "Attacker"
+                }
+                """.trimIndent()
 
-            assertNull(testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json),
-                "Old 'server_verified_' prefix must be rejected")
+            assertNull(
+                testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json),
+                "Old 'server_verified_' prefix must be rejected",
+            )
         }
 
         @Test
         @DisplayName("ATTACK: Response with 'mock_signature' must be rejected")
         fun attackMockSignature() {
-            val json = """{
-                "authorized": true,
-                "signature": "mock_signature",
-                "issuedTo": "Attacker"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "authorized": true,
+                    "signature": "mock_signature",
+                    "issuedTo": "Attacker"
+                }
+                """.trimIndent()
 
             assertNull(testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json))
         }
@@ -457,10 +490,13 @@ class AuthorizationBackendTest {
         @Test
         @DisplayName("ATTACK: Response with empty authorized field defaults to false")
         fun attackMissingAuthorized() {
-            val json = """{
-                "signature": "${serverSigPrefix}${"a".repeat(64)}",
-                "issuedTo": "Attacker"
-            }""".trimIndent()
+            val json =
+                """
+                {
+                    "signature": "${serverSigPrefix}${"a".repeat(64)}",
+                    "issuedTo": "Attacker"
+                }
+                """.trimIndent()
 
             assertNull(testHelper.parseServerResponse("BTSEC-20260101-ABCDEFGH", json))
         }
@@ -494,7 +530,10 @@ class SignatureTestHelper {
         return false
     }
 
-    fun parseServerResponse(authId: String, json: String): Authorization? {
+    fun parseServerResponse(
+        authId: String,
+        json: String,
+    ): Authorization? {
         // Mirror the exact logic from AuthorizationBackend.parseServerResponse
         try {
             val root = org.json.JSONObject(json)
@@ -509,34 +548,41 @@ class SignatureTestHelper {
 
             val now = java.time.Instant.now()
             val expiresAtStr = root.optString("expiresAt", "")
-            val expiresAt = if (expiresAtStr.isNotBlank()) {
-                try { java.time.Instant.parse(expiresAtStr) } catch (_: Exception) { now.plusSeconds(86400 * 30) }
-            } else {
-                now.plusSeconds(86400 * 30)
-            }
+            val expiresAt =
+                if (expiresAtStr.isNotBlank()) {
+                    try {
+                        java.time.Instant.parse(expiresAtStr)
+                    } catch (_: Exception) {
+                        now.plusSeconds(86400 * 30)
+                    }
+                } else {
+                    now.plusSeconds(86400 * 30)
+                }
 
             if (now.isAfter(expiresAt)) return null
 
-            val scope = TestScope(
-                authId = authId,
-                authorizedTargets = listOf(
-                    TargetDevice(
-                        identifier = root.optString("targetScope", "*"),
-                        deviceType = DeviceType.UNKNOWN,
-                        owner = null,
-                        location = null
-                    )
-                ),
-                allowedActions = parseServerActions(root.optString("actions", "all")),
-                validFrom = now,
-                validUntil = expiresAt,
-                maxPacketsPerSecond = root.optInt("maxPacketsPerSecond", 100),
-                requiresReport = root.optBoolean("requiresReport", true),
-                disclosureDeadline = now.plusSeconds(86400 * 90),
-                locationConstraints = null,
-                requiresSupervision = root.optBoolean("requiresSupervision", false),
-                excludedTargets = emptyList()
-            )
+            val scope =
+                TestScope(
+                    authId = authId,
+                    authorizedTargets =
+                        listOf(
+                            TargetDevice(
+                                identifier = root.optString("targetScope", "*"),
+                                deviceType = DeviceType.UNKNOWN,
+                                owner = null,
+                                location = null,
+                            ),
+                        ),
+                    allowedActions = parseServerActions(root.optString("actions", "all")),
+                    validFrom = now,
+                    validUntil = expiresAt,
+                    maxPacketsPerSecond = root.optInt("maxPacketsPerSecond", 100),
+                    requiresReport = root.optBoolean("requiresReport", true),
+                    disclosureDeadline = now.plusSeconds(86400 * 90),
+                    locationConstraints = null,
+                    requiresSupervision = root.optBoolean("requiresSupervision", false),
+                    excludedTargets = emptyList(),
+                )
 
             return Authorization(
                 authId = authId,
@@ -547,11 +593,12 @@ class SignatureTestHelper {
                 authorizedActions = scope.allowedActions,
                 scope = scope,
                 signature = signature,
-                terms = listOf(
-                    "Testing must be conducted within authorized scope",
-                    "All findings must be reported within 90 days",
-                    "Data must be retained for 7 years"
-                )
+                terms =
+                    listOf(
+                        "Testing must be conducted within authorized scope",
+                        "All findings must be reported within 90 days",
+                        "Data must be retained for 7 years",
+                    ),
             )
         } catch (e: Exception) {
             return null

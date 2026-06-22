@@ -17,9 +17,8 @@ package com.btsec.testtool.domain
 sealed class BtSecError(
     val code: String,
     val userMessage: String,
-    val cause: Throwable? = null
+    val cause: Throwable? = null,
 ) {
-
     // ── Bluetooth Errors ──
 
     data class BluetoothUnavailable(val msg: String = "Bluetooth is not available on this device") :
@@ -136,20 +135,24 @@ sealed class BtSecError(
      * Whether this error is recoverable (user can retry).
      */
     val isRecoverable: Boolean
-        get() = when (this) {
-            is BluetoothDisabled, is ConnectionTimeout, is ConnectionLost,
-            is NetworkError, is ServerVerificationFailed -> true
-            else -> false
-        }
+        get() =
+            when (this) {
+                is BluetoothDisabled, is ConnectionTimeout, is ConnectionLost,
+                is NetworkError, is ServerVerificationFailed,
+                -> true
+                else -> false
+            }
 
     /**
      * Whether this error requires user action.
      */
     val requiresUserAction: Boolean
-        get() = when (this) {
-            is BluetoothDisabled, is BluetoothPermissionDenied,
-            is LocationPermissionDenied, is NotAuthorized,
-            is AuthorizationExpired -> true
-            else -> false
-        }
+        get() =
+            when (this) {
+                is BluetoothDisabled, is BluetoothPermissionDenied,
+                is LocationPermissionDenied, is NotAuthorized,
+                is AuthorizationExpired,
+                -> true
+                else -> false
+            }
 }

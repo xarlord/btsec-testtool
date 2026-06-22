@@ -28,30 +28,35 @@ import com.btsec.testtool.data.vulnerability.VulnerabilityProbe
 import com.btsec.testtool.data.vulnerability.VulnerabilityRepositoryImpl
 import com.btsec.testtool.domain.repository.AuthorizationRepository
 import com.btsec.testtool.domain.repository.AvrcpSecurityRepository
+import com.btsec.testtool.domain.repository.BluetoothOperationsWriter
 import com.btsec.testtool.domain.repository.BluetoothRepository
+import com.btsec.testtool.domain.repository.BluetoothStateReader
+import com.btsec.testtool.domain.repository.ConsentReader
 import com.btsec.testtool.domain.repository.ConsentRepository
+import com.btsec.testtool.domain.repository.ConsentWriter
+import com.btsec.testtool.domain.repository.FuzzingReader
 import com.btsec.testtool.domain.repository.FuzzingRepository
+import com.btsec.testtool.domain.repository.FuzzingWriter
 import com.btsec.testtool.domain.repository.HfpSecurityRepository
+import com.btsec.testtool.domain.repository.KeyExtractionReader
 import com.btsec.testtool.domain.repository.KeyExtractionRepository
+import com.btsec.testtool.domain.repository.KeyExtractionWriter
 import com.btsec.testtool.domain.repository.L2capSecurityRepository
 import com.btsec.testtool.domain.repository.MapSecurityRepository
 import com.btsec.testtool.domain.repository.PbapSecurityRepository
+import com.btsec.testtool.domain.repository.ReportReader
 import com.btsec.testtool.domain.repository.ReportRepository
+import com.btsec.testtool.domain.repository.ReportWriter
 import com.btsec.testtool.domain.repository.RfcommFuzzingRepository
 import com.btsec.testtool.domain.repository.SapSecurityRepository
 import com.btsec.testtool.domain.repository.SdpEnumerationRepository
 import com.btsec.testtool.domain.repository.SnoopCaptureRepository
+import com.btsec.testtool.domain.repository.VulnerabilityReader
 import com.btsec.testtool.domain.repository.VulnerabilityRepository
-import com.btsec.testtool.domain.usecase.AuthorizationUseCase
-import com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
-import com.btsec.testtool.domain.usecase.FuzzingUseCase
-import com.btsec.testtool.domain.usecase.KeyExtractionUseCase
-import com.btsec.testtool.domain.usecase.ReportGenerationUseCase
-import com.btsec.testtool.domain.usecase.VulnerabilityScanningUseCase
+import com.btsec.testtool.domain.repository.VulnerabilityWriter
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -61,110 +66,126 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindAuthorizationRepository(impl: AuthorizationRepositoryImpl): AuthorizationRepository
 
     @Binds
     @Singleton
-    abstract fun bindAuthorizationRepository(
-        impl: AuthorizationRepositoryImpl
-    ): AuthorizationRepository
+    abstract fun bindBluetoothRepository(impl: BluetoothRepositoryImpl): BluetoothRepository
+
+    // Segregated sub-interfaces (ISP) — bound to the same impl so narrow
+    // read/write contracts can be injected without depending on the full
+    // repository. See issue #368 (Hilt MissingBinding for ConsentReader).
+    @Binds
+    @Singleton
+    abstract fun bindBluetoothStateReader(impl: BluetoothRepositoryImpl): BluetoothStateReader
 
     @Binds
     @Singleton
-    abstract fun bindBluetoothRepository(
-        impl: BluetoothRepositoryImpl
-    ): BluetoothRepository
+    abstract fun bindBluetoothOperationsWriter(impl: BluetoothRepositoryImpl): BluetoothOperationsWriter
 
     @Binds
     @Singleton
-    abstract fun bindConsentRepository(
-        impl: ConsentRepositoryImpl
-    ): ConsentRepository
+    abstract fun bindConsentRepository(impl: ConsentRepositoryImpl): ConsentRepository
 
     @Binds
     @Singleton
-    abstract fun bindFuzzingRepository(
-        impl: FuzzingRepositoryImpl
-    ): FuzzingRepository
+    abstract fun bindConsentReader(impl: ConsentRepositoryImpl): ConsentReader
 
     @Binds
     @Singleton
-    abstract fun bindKeyExtractionRepository(
-        impl: KeyExtractionRepositoryImpl
-    ): KeyExtractionRepository
+    abstract fun bindConsentWriter(impl: ConsentRepositoryImpl): ConsentWriter
 
     @Binds
     @Singleton
-    abstract fun bindReportRepository(
-        impl: ReportRepositoryImpl
-    ): ReportRepository
+    abstract fun bindFuzzingRepository(impl: FuzzingRepositoryImpl): FuzzingRepository
 
     @Binds
     @Singleton
-    abstract fun bindVulnerabilityRepository(
-        impl: VulnerabilityRepositoryImpl
-    ): VulnerabilityRepository
+    abstract fun bindFuzzingReader(impl: FuzzingRepositoryImpl): FuzzingReader
 
     @Binds
     @Singleton
-    abstract fun bindVulnerabilityProbe(
-        impl: ProductionBtProbe
-    ): VulnerabilityProbe
+    abstract fun bindFuzzingWriter(impl: FuzzingRepositoryImpl): FuzzingWriter
+
+    @Binds
+    @Singleton
+    abstract fun bindKeyExtractionRepository(impl: KeyExtractionRepositoryImpl): KeyExtractionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindKeyExtractionReader(impl: KeyExtractionRepositoryImpl): KeyExtractionReader
+
+    @Binds
+    @Singleton
+    abstract fun bindKeyExtractionWriter(impl: KeyExtractionRepositoryImpl): KeyExtractionWriter
+
+    @Binds
+    @Singleton
+    abstract fun bindReportRepository(impl: ReportRepositoryImpl): ReportRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReportReader(impl: ReportRepositoryImpl): ReportReader
+
+    @Binds
+    @Singleton
+    abstract fun bindReportWriter(impl: ReportRepositoryImpl): ReportWriter
+
+    @Binds
+    @Singleton
+    abstract fun bindVulnerabilityRepository(impl: VulnerabilityRepositoryImpl): VulnerabilityRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindVulnerabilityReader(impl: VulnerabilityRepositoryImpl): VulnerabilityReader
+
+    @Binds
+    @Singleton
+    abstract fun bindVulnerabilityWriter(impl: VulnerabilityRepositoryImpl): VulnerabilityWriter
+
+    @Binds
+    @Singleton
+    abstract fun bindVulnerabilityProbe(impl: ProductionBtProbe): VulnerabilityProbe
 
     // ========== BR/EDR Profile Repositories (#331) ==========
 
     @Binds
     @Singleton
-    abstract fun bindSdpEnumerationRepository(
-        impl: SdpEnumerationRepositoryImpl
-    ): SdpEnumerationRepository
+    abstract fun bindSdpEnumerationRepository(impl: SdpEnumerationRepositoryImpl): SdpEnumerationRepository
 
     @Binds
     @Singleton
-    abstract fun bindRfcommFuzzingRepository(
-        impl: RfcommFuzzingRepositoryImpl
-    ): RfcommFuzzingRepository
+    abstract fun bindRfcommFuzzingRepository(impl: RfcommFuzzingRepositoryImpl): RfcommFuzzingRepository
 
     @Binds
     @Singleton
-    abstract fun bindHfpSecurityRepository(
-        impl: HfpSecurityRepositoryImpl
-    ): HfpSecurityRepository
+    abstract fun bindHfpSecurityRepository(impl: HfpSecurityRepositoryImpl): HfpSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindAvrcpSecurityRepository(
-        impl: AvrcpSecurityRepositoryImpl
-    ): AvrcpSecurityRepository
+    abstract fun bindAvrcpSecurityRepository(impl: AvrcpSecurityRepositoryImpl): AvrcpSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindPbapSecurityRepository(
-        impl: PbapSecurityRepositoryImpl
-    ): PbapSecurityRepository
+    abstract fun bindPbapSecurityRepository(impl: PbapSecurityRepositoryImpl): PbapSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindMapSecurityRepository(
-        impl: MapSecurityRepositoryImpl
-    ): MapSecurityRepository
+    abstract fun bindMapSecurityRepository(impl: MapSecurityRepositoryImpl): MapSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindSapSecurityRepository(
-        impl: SapSecurityRepositoryImpl
-    ): SapSecurityRepository
+    abstract fun bindSapSecurityRepository(impl: SapSecurityRepositoryImpl): SapSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindL2capSecurityRepository(
-        impl: L2capSecurityRepositoryImpl
-    ): L2capSecurityRepository
+    abstract fun bindL2capSecurityRepository(impl: L2capSecurityRepositoryImpl): L2capSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindSnoopCaptureRepository(
-        impl: SnoopCaptureRepositoryImpl
-    ): SnoopCaptureRepository
+    abstract fun bindSnoopCaptureRepository(impl: SnoopCaptureRepositoryImpl): SnoopCaptureRepository
 }
 
 /**

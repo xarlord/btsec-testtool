@@ -41,7 +41,7 @@ import com.btsec.testtool.presentation.feature.scanner.EmptyView
 @Composable
 fun ScanDiffScreen(
     onBack: () -> Unit,
-    viewModel: ScanDiffViewModel = hiltViewModel()
+    viewModel: ScanDiffViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -59,19 +59,20 @@ fun ScanDiffScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = "Navigate back",
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // Session selectors
             SessionSelector(
@@ -83,7 +84,7 @@ fun ScanDiffScreen(
                     baselineSnapshot = devices
                     baselineExpanded = false
                 },
-                availableDevices = uiState.availableDevices
+                availableDevices = uiState.availableDevices,
             )
 
             SessionSelector(
@@ -95,7 +96,7 @@ fun ScanDiffScreen(
                     comparisonSnapshot = devices
                     comparisonExpanded = false
                 },
-                availableDevices = uiState.availableDevices
+                availableDevices = uiState.availableDevices,
             )
 
             // Compare button
@@ -108,12 +109,12 @@ fun ScanDiffScreen(
                     }
                 },
                 enabled = baselineSnapshot != null && comparisonSnapshot != null,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(
                     imageVector = Icons.Default.Compare,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Compare Scans")
@@ -127,13 +128,13 @@ fun ScanDiffScreen(
                 FilterChips(
                     selectedFilter = uiState.selectedFilter,
                     onFilterSelected = { viewModel.setFilter(it) },
-                    summary = result.summary
+                    summary = result.summary,
                 )
 
                 if (uiState.filteredDevices.isEmpty()) {
                     EmptyView(
                         message = "No devices match the selected filter.",
-                        icon = Icons.Default.Compare
+                        icon = Icons.Default.Compare,
                     )
                 } else {
                     DiffDeviceList(deviceDiffs = uiState.filteredDevices)
@@ -141,7 +142,7 @@ fun ScanDiffScreen(
             } else if (baselineSnapshot == null && comparisonSnapshot == null) {
                 EmptyView(
                     message = "Select two scan sessions to compare.",
-                    icon = Icons.Default.Compare
+                    icon = Icons.Default.Compare,
                 )
             }
         }
@@ -158,25 +159,25 @@ private fun SessionSelector(
     onExpandedChange: (Boolean) -> Unit,
     selectedLabel: String,
     onSelect: (List<BluetoothDevice>) -> Unit,
-    availableDevices: List<BluetoothDevice>
+    availableDevices: List<BluetoothDevice>,
 ) {
     Column {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Box {
             OutlinedButton(
                 onClick = { onExpandedChange(!expanded) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(selectedLabel)
             }
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { onExpandedChange(false) }
+                onDismissRequest = { onExpandedChange(false) },
             ) {
                 // Offer simulated snapshot sizes for demo / testing
                 listOf(5, 10, 15, 20).forEach { count ->
@@ -184,13 +185,13 @@ private fun SessionSelector(
                         text = { Text("Session ($count devices)") },
                         onClick = {
                             onSelect(availableDevices.take(count))
-                        }
+                        },
                     )
                 }
                 if (availableDevices.isNotEmpty()) {
                     DropdownMenuItem(
                         text = { Text("Current scan (${availableDevices.size} devices)") },
-                        onClick = { onSelect(availableDevices) }
+                        onClick = { onSelect(availableDevices) },
                     )
                 }
             }
@@ -205,15 +206,17 @@ private fun SessionSelector(
 private fun SummaryCard(summary: com.btsec.testtool.domain.model.ScanDiffSummary) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
     ) {
         Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier =
+                Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             SummaryStat("Baseline", summary.totalBaseline, Color.Unspecified)
             SummaryStat("Added", summary.addedCount, Color(0xFF4CAF50))
@@ -225,18 +228,22 @@ private fun SummaryCard(summary: com.btsec.testtool.domain.model.ScanDiffSummary
 }
 
 @Composable
-private fun SummaryStat(label: String, count: Int, color: Color) {
+private fun SummaryStat(
+    label: String,
+    count: Int,
+    color: Color,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = count.toString(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = if (color == Color.Unspecified) MaterialTheme.colorScheme.onSecondaryContainer else color
+            color = if (color == Color.Unspecified) MaterialTheme.colorScheme.onSecondaryContainer else color,
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
 }
@@ -248,24 +255,25 @@ private fun SummaryStat(label: String, count: Int, color: Color) {
 private fun FilterChips(
     selectedFilter: DiffTypeFilter,
     onFilterSelected: (DiffTypeFilter) -> Unit,
-    summary: com.btsec.testtool.domain.model.ScanDiffSummary
+    summary: com.btsec.testtool.domain.model.ScanDiffSummary,
 ) {
     ScrollableTabRow(
         selectedTabIndex = selectedFilter.ordinal,
         edgePadding = 0.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        val tabs = listOf(
-            DiffTypeFilter.ALL to "All",
-            DiffTypeFilter.ADDED to "Added (${summary.addedCount})",
-            DiffTypeFilter.REMOVED to "Removed (${summary.removedCount})",
-            DiffTypeFilter.MODIFIED to "Modified (${summary.modifiedCount})"
-        )
+        val tabs =
+            listOf(
+                DiffTypeFilter.ALL to "All",
+                DiffTypeFilter.ADDED to "Added (${summary.addedCount})",
+                DiffTypeFilter.REMOVED to "Removed (${summary.removedCount})",
+                DiffTypeFilter.MODIFIED to "Modified (${summary.modifiedCount})",
+            )
         tabs.forEachIndexed { index, (filter, label) ->
             Tab(
                 selected = selectedFilter == filter,
                 onClick = { onFilterSelected(filter) },
-                text = { Text(label) }
+                text = { Text(label) },
             )
         }
     }
@@ -279,7 +287,7 @@ private fun DiffDeviceList(deviceDiffs: List<DeviceDiff>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         items(deviceDiffs, key = { "${it.device.address}-${it.diffType}" }) { diff ->
             DiffDeviceCard(diff)
@@ -292,45 +300,49 @@ private fun DiffDeviceList(deviceDiffs: List<DeviceDiff>) {
  */
 @Composable
 private fun DiffDeviceCard(diff: DeviceDiff) {
-    val bgColor = when (diff.diffType) {
-        DiffType.ADDED -> Color(0xFFE8F5E9)      // green tint
-        DiffType.REMOVED -> Color(0xFFFFEBEE)     // red tint
-        DiffType.MODIFIED -> Color(0xFFFFF3E0)    // orange tint
-        DiffType.UNCHANGED -> Color(0xFFF5F5F5)   // grey tint
-    }
+    val bgColor =
+        when (diff.diffType) {
+            DiffType.ADDED -> Color(0xFFE8F5E9) // green tint
+            DiffType.REMOVED -> Color(0xFFFFEBEE) // red tint
+            DiffType.MODIFIED -> Color(0xFFFFF3E0) // orange tint
+            DiffType.UNCHANGED -> Color(0xFFF5F5F5) // grey tint
+        }
 
-    val indicatorColor = when (diff.diffType) {
-        DiffType.ADDED -> Color(0xFF4CAF50)
-        DiffType.REMOVED -> Color(0xFFF44336)
-        DiffType.MODIFIED -> Color(0xFFFF9800)
-        DiffType.UNCHANGED -> Color.Gray
-    }
+    val indicatorColor =
+        when (diff.diffType) {
+            DiffType.ADDED -> Color(0xFF4CAF50)
+            DiffType.REMOVED -> Color(0xFFF44336)
+            DiffType.MODIFIED -> Color(0xFFFF9800)
+            DiffType.UNCHANGED -> Color.Gray
+        }
 
-    val typeLabel = when (diff.diffType) {
-        DiffType.ADDED -> "+ ADDED"
-        DiffType.REMOVED -> "- REMOVED"
-        DiffType.MODIFIED -> "~ MODIFIED"
-        DiffType.UNCHANGED -> "= UNCHANGED"
-    }
+    val typeLabel =
+        when (diff.diffType) {
+            DiffType.ADDED -> "+ ADDED"
+            DiffType.REMOVED -> "- REMOVED"
+            DiffType.MODIFIED -> "~ MODIFIED"
+            DiffType.UNCHANGED -> "= UNCHANGED"
+        }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = bgColor)
+        colors = CardDefaults.cardColors(containerColor = bgColor),
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
             // Colour indicator
             Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(48.dp)
-                    .background(indicatorColor, MaterialTheme.shapes.small)
+                modifier =
+                    Modifier
+                        .width(4.dp)
+                        .height(48.dp)
+                        .background(indicatorColor, MaterialTheme.shapes.small),
             )
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
                         text = diff.device.name ?: "Unknown",
@@ -338,33 +350,40 @@ private fun DiffDeviceCard(diff: DeviceDiff) {
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     Text(
                         text = typeLabel,
                         style = MaterialTheme.typography.labelSmall,
                         color = indicatorColor,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = diff.device.address,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 // RSSI change arrow
                 if (diff.previousRssi != null && diff.currentRssi != null) {
-                    val arrow = if (diff.currentRssi > diff.previousRssi) "↑" else if (diff.currentRssi < diff.previousRssi) "↓" else "→"
+                    val arrow =
+                        if (diff.currentRssi > diff.previousRssi) {
+                            "↑"
+                        } else if (diff.currentRssi < diff.previousRssi) {
+                            "↓"
+                        } else {
+                            "→"
+                        }
                     Text(
                         text = "RSSI: ${diff.previousRssi} $arrow ${diff.currentRssi} dBm",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 } else if (diff.currentRssi != null) {
                     Text(
                         text = "RSSI: ${diff.currentRssi} dBm",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
 
@@ -374,7 +393,7 @@ private fun DiffDeviceCard(diff: DeviceDiff) {
                     Text(
                         text = "Changed: ${diff.changedFields.joinToString(", ")}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }

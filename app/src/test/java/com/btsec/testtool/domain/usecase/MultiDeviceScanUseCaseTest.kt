@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("MultiDeviceScanUseCase")
 class MultiDeviceScanUseCaseTest {
-
     private lateinit var useCase: MultiDeviceScanUseCase
 
     @BeforeEach
@@ -35,30 +34,32 @@ class MultiDeviceScanUseCaseTest {
         name: String? = "TestDevice",
         priority: ScanPriority = ScanPriority.NORMAL,
         state: DeviceScanState = DeviceScanState.QUEUED,
-        slot: Int = -1
-    ): ParallelScanTarget = ParallelScanTarget(
-        deviceAddress = address,
-        deviceName = name,
-        priority = priority,
-        state = state,
-        assignedSlot = slot
-    )
+        slot: Int = -1,
+    ): ParallelScanTarget =
+        ParallelScanTarget(
+            deviceAddress = address,
+            deviceName = name,
+            priority = priority,
+            state = state,
+            assignedSlot = slot,
+        )
 
-    private val defaultConfig = ParallelScanConfig(
-        maxConcurrentConnections = 4,
-        stopOnFirstCritical = false
-    )
+    private val defaultConfig =
+        ParallelScanConfig(
+            maxConcurrentConnections = 4,
+            stopOnFirstCritical = false,
+        )
 
     @Nested
     @DisplayName("createSession")
     inner class CreateSession {
-
         @Test
         @DisplayName("assigns slots to targets up to max connections")
         fun testCreateSession_assignsSlots() {
-            val targets = (0..5).map { i ->
-                createTarget(address = "AA:BB:CC:DD:EE:0$i")
-            }
+            val targets =
+                (0..5).map { i ->
+                    createTarget(address = "AA:BB:CC:DD:EE:0$i")
+                }
             val session = useCase.createSession(targets, defaultConfig)
 
             assertThat(session.id).isNotEmpty()
@@ -87,13 +88,13 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("assignSlots")
     inner class AssignSlots {
-
         @Test
         @DisplayName("assigns slots to max 4 devices, rest remain QUEUED")
         fun testAssignSlots_max4Devices() {
-            val targets = (0..6).map { i ->
-                createTarget(address = "AA:BB:CC:DD:EE:0$i")
-            }
+            val targets =
+                (0..6).map { i ->
+                    createTarget(address = "AA:BB:CC:DD:EE:0$i")
+                }
             val assigned = useCase.assignSlots(targets, 4)
 
             assertThat(assigned).hasSize(7)
@@ -106,13 +107,14 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("respects priority ordering when sorted first")
         fun testAssignSlots_respectsPriority() {
-            val targets = listOf(
-                createTarget(address = "LOW_1", priority = ScanPriority.LOW),
-                createTarget(address = "CRIT_1", priority = ScanPriority.CRITICAL),
-                createTarget(address = "NORM_1", priority = ScanPriority.NORMAL),
-                createTarget(address = "HIGH_1", priority = ScanPriority.HIGH),
-                createTarget(address = "CRIT_2", priority = ScanPriority.CRITICAL)
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "LOW_1", priority = ScanPriority.LOW),
+                    createTarget(address = "CRIT_1", priority = ScanPriority.CRITICAL),
+                    createTarget(address = "NORM_1", priority = ScanPriority.NORMAL),
+                    createTarget(address = "HIGH_1", priority = ScanPriority.HIGH),
+                    createTarget(address = "CRIT_2", priority = ScanPriority.CRITICAL),
+                )
 
             val sorted = useCase.sortTargetsByPriority(targets)
             val assigned = useCase.assignSlots(sorted, 4)
@@ -131,26 +133,27 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("getNextTarget")
     inner class GetNextTarget {
-
         @Test
         @DisplayName("returns next queued device and assigns to freed slot")
         fun testGetNextTarget_queuedDevice() {
-            val targets = listOf(
-                createTarget(address = "DEV_1", slot = 0, state = DeviceScanState.COMPLETED),
-                createTarget(address = "DEV_2", slot = 1, state = DeviceScanState.TESTING),
-                createTarget(address = "DEV_3", state = DeviceScanState.QUEUED, slot = -1)
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = targets,
-                results = emptyList(),
-                activeSlots = listOf("DEV_2"),
-                totalDurationMs = 0L,
-                completedCount = 1,
-                failedCount = 0,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "DEV_1", slot = 0, state = DeviceScanState.COMPLETED),
+                    createTarget(address = "DEV_2", slot = 1, state = DeviceScanState.TESTING),
+                    createTarget(address = "DEV_3", state = DeviceScanState.QUEUED, slot = -1),
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = emptyList(),
+                    activeSlots = listOf("DEV_2"),
+                    totalDurationMs = 0L,
+                    completedCount = 1,
+                    failedCount = 0,
+                    cancelledCount = 0,
+                )
 
             val next = useCase.getNextTarget(session, freedSlot = 0)
 
@@ -162,21 +165,23 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("returns null when no queued devices remain")
         fun testGetNextTarget_noQueued_null() {
-            val targets = listOf(
-                createTarget(address = "DEV_1", state = DeviceScanState.COMPLETED, slot = 0),
-                createTarget(address = "DEV_2", state = DeviceScanState.FAILED, slot = 1)
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = targets,
-                results = emptyList(),
-                activeSlots = emptyList(),
-                totalDurationMs = 0L,
-                completedCount = 1,
-                failedCount = 1,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "DEV_1", state = DeviceScanState.COMPLETED, slot = 0),
+                    createTarget(address = "DEV_2", state = DeviceScanState.FAILED, slot = 1),
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = emptyList(),
+                    activeSlots = emptyList(),
+                    totalDurationMs = 0L,
+                    completedCount = 1,
+                    failedCount = 1,
+                    cancelledCount = 0,
+                )
 
             val next = useCase.getNextTarget(session, freedSlot = 0)
 
@@ -187,7 +192,6 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("updateTargetState")
     inner class UpdateTargetState {
-
         @Test
         @DisplayName("returns copy with updated state to CONNECTED")
         fun testUpdateTargetState_connected() {
@@ -203,13 +207,14 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("preserves all other fields when updating state")
         fun testUpdateTargetState_preservesFields() {
-            val target = createTarget(
-                address = "11:22:33:44:55:66",
-                name = "MyDevice",
-                priority = ScanPriority.HIGH,
-                slot = 2,
-                state = DeviceScanState.QUEUED
-            )
+            val target =
+                createTarget(
+                    address = "11:22:33:44:55:66",
+                    name = "MyDevice",
+                    priority = ScanPriority.HIGH,
+                    slot = 2,
+                    state = DeviceScanState.QUEUED,
+                )
 
             val updated = useCase.updateTargetState(target, DeviceScanState.SCANNING)
 
@@ -224,25 +229,26 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("computeProgress")
     inner class ComputeProgress {
-
         @Test
         @DisplayName("returns 0.5 when half the targets are complete")
         fun testComputeProgress_halfComplete() {
-            val targets = listOf(
-                createTarget(address = "D1", state = DeviceScanState.COMPLETED),
-                createTarget(address = "D2", state = DeviceScanState.TESTING)
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = targets,
-                results = emptyList(),
-                activeSlots = listOf("D2"),
-                totalDurationMs = 0L,
-                completedCount = 1,
-                failedCount = 0,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", state = DeviceScanState.COMPLETED),
+                    createTarget(address = "D2", state = DeviceScanState.TESTING),
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = emptyList(),
+                    activeSlots = listOf("D2"),
+                    totalDurationMs = 0L,
+                    completedCount = 1,
+                    failedCount = 0,
+                    cancelledCount = 0,
+                )
 
             val progress = useCase.computeProgress(session)
 
@@ -252,22 +258,24 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("returns 1.0 when all targets are complete")
         fun testComputeProgress_allComplete() {
-            val targets = listOf(
-                createTarget(address = "D1", state = DeviceScanState.COMPLETED),
-                createTarget(address = "D2", state = DeviceScanState.FAILED),
-                createTarget(address = "D3", state = DeviceScanState.CANCELLED)
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = targets,
-                results = emptyList(),
-                activeSlots = emptyList(),
-                totalDurationMs = 5000L,
-                completedCount = 1,
-                failedCount = 1,
-                cancelledCount = 1
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", state = DeviceScanState.COMPLETED),
+                    createTarget(address = "D2", state = DeviceScanState.FAILED),
+                    createTarget(address = "D3", state = DeviceScanState.CANCELLED),
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = emptyList(),
+                    activeSlots = emptyList(),
+                    totalDurationMs = 5000L,
+                    completedCount = 1,
+                    failedCount = 1,
+                    cancelledCount = 1,
+                )
 
             val progress = useCase.computeProgress(session)
 
@@ -277,17 +285,18 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("returns 0.0 for empty targets")
         fun testComputeProgress_emptyTargets() {
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = emptyList(),
-                results = emptyList(),
-                activeSlots = emptyList(),
-                totalDurationMs = 0L,
-                completedCount = 0,
-                failedCount = 0,
-                cancelledCount = 0
-            )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = emptyList(),
+                    results = emptyList(),
+                    activeSlots = emptyList(),
+                    totalDurationMs = 0L,
+                    completedCount = 0,
+                    failedCount = 0,
+                    cancelledCount = 0,
+                )
 
             val progress = useCase.computeProgress(session)
 
@@ -298,26 +307,27 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("computePoolStatus")
     inner class ComputePoolStatus {
-
         @Test
         @DisplayName("returns correct slot count and details")
         fun testComputePoolStatus_correctSlotCount() {
-            val targets = listOf(
-                createTarget(address = "D1", slot = 0, state = DeviceScanState.CONNECTED),
-                createTarget(address = "D2", slot = 1, state = DeviceScanState.TESTING),
-                createTarget(address = "D3", state = DeviceScanState.QUEUED)
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = targets,
-                results = emptyList(),
-                activeSlots = listOf("D1", "D2"),
-                totalDurationMs = 0L,
-                completedCount = 0,
-                failedCount = 0,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", slot = 0, state = DeviceScanState.CONNECTED),
+                    createTarget(address = "D2", slot = 1, state = DeviceScanState.TESTING),
+                    createTarget(address = "D3", state = DeviceScanState.QUEUED),
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = emptyList(),
+                    activeSlots = listOf("D1", "D2"),
+                    totalDurationMs = 0L,
+                    completedCount = 0,
+                    failedCount = 0,
+                    cancelledCount = 0,
+                )
 
             val status = useCase.computePoolStatus(session)
 
@@ -333,25 +343,26 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("shouldStopSession")
     inner class ShouldStopSession {
-
         @Test
         @DisplayName("returns true when all targets are in terminal states")
         fun testShouldStopSession_allComplete() {
-            val targets = listOf(
-                createTarget(address = "D1", state = DeviceScanState.COMPLETED),
-                createTarget(address = "D2", state = DeviceScanState.FAILED)
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = targets,
-                results = emptyList(),
-                activeSlots = emptyList(),
-                totalDurationMs = 0L,
-                completedCount = 1,
-                failedCount = 1,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", state = DeviceScanState.COMPLETED),
+                    createTarget(address = "D2", state = DeviceScanState.FAILED),
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = emptyList(),
+                    activeSlots = emptyList(),
+                    totalDurationMs = 0L,
+                    completedCount = 1,
+                    failedCount = 1,
+                    cancelledCount = 0,
+                )
 
             assertThat(useCase.shouldStopSession(session, defaultConfig)).isTrue()
         }
@@ -359,30 +370,33 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("stops when critical finding and stopOnFirstCritical enabled")
         fun testShouldStopSession_criticalFound_stopEnabled() {
-            val targets = listOf(
-                createTarget(address = "D1", state = DeviceScanState.COMPLETED),
-                createTarget(address = "D2", state = DeviceScanState.TESTING)
-            )
-            val result = ParallelScanResult(
-                target = targets[0],
-                scanDurationMs = 1000L,
-                servicesFound = 5,
-                vulnerabilitiesFound = 2,
-                criticalFindings = 1,
-                highFindings = 1,
-                testData = null
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig.copy(stopOnFirstCritical = true),
-                targets = targets,
-                results = listOf(result),
-                activeSlots = listOf("D2"),
-                totalDurationMs = 0L,
-                completedCount = 1,
-                failedCount = 0,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", state = DeviceScanState.COMPLETED),
+                    createTarget(address = "D2", state = DeviceScanState.TESTING),
+                )
+            val result =
+                ParallelScanResult(
+                    target = targets[0],
+                    scanDurationMs = 1000L,
+                    servicesFound = 5,
+                    vulnerabilitiesFound = 2,
+                    criticalFindings = 1,
+                    highFindings = 1,
+                    testData = null,
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig.copy(stopOnFirstCritical = true),
+                    targets = targets,
+                    results = listOf(result),
+                    activeSlots = listOf("D2"),
+                    totalDurationMs = 0L,
+                    completedCount = 1,
+                    failedCount = 0,
+                    cancelledCount = 0,
+                )
 
             assertThat(useCase.shouldStopSession(session, session.config)).isTrue()
         }
@@ -390,30 +404,33 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("does not stop on critical finding when stopOnFirstCritical disabled")
         fun testShouldStopSession_criticalFound_stopDisabled() {
-            val targets = listOf(
-                createTarget(address = "D1", state = DeviceScanState.COMPLETED),
-                createTarget(address = "D2", state = DeviceScanState.TESTING)
-            )
-            val result = ParallelScanResult(
-                target = targets[0],
-                scanDurationMs = 1000L,
-                servicesFound = 5,
-                vulnerabilitiesFound = 2,
-                criticalFindings = 1,
-                highFindings = 1,
-                testData = null
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig.copy(stopOnFirstCritical = false),
-                targets = targets,
-                results = listOf(result),
-                activeSlots = listOf("D2"),
-                totalDurationMs = 0L,
-                completedCount = 1,
-                failedCount = 0,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", state = DeviceScanState.COMPLETED),
+                    createTarget(address = "D2", state = DeviceScanState.TESTING),
+                )
+            val result =
+                ParallelScanResult(
+                    target = targets[0],
+                    scanDurationMs = 1000L,
+                    servicesFound = 5,
+                    vulnerabilitiesFound = 2,
+                    criticalFindings = 1,
+                    highFindings = 1,
+                    testData = null,
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig.copy(stopOnFirstCritical = false),
+                    targets = targets,
+                    results = listOf(result),
+                    activeSlots = listOf("D2"),
+                    totalDurationMs = 0L,
+                    completedCount = 1,
+                    failedCount = 0,
+                    cancelledCount = 0,
+                )
 
             assertThat(useCase.shouldStopSession(session, session.config)).isFalse()
         }
@@ -421,21 +438,23 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("returns false when targets still active and no critical")
         fun testShouldStopSession_activeTargets() {
-            val targets = listOf(
-                createTarget(address = "D1", state = DeviceScanState.TESTING),
-                createTarget(address = "D2", state = DeviceScanState.QUEUED)
-            )
-            val session = ParallelScanSession(
-                id = "test-session",
-                config = defaultConfig,
-                targets = targets,
-                results = emptyList(),
-                activeSlots = listOf("D1"),
-                totalDurationMs = 0L,
-                completedCount = 0,
-                failedCount = 0,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", state = DeviceScanState.TESTING),
+                    createTarget(address = "D2", state = DeviceScanState.QUEUED),
+                )
+            val session =
+                ParallelScanSession(
+                    id = "test-session",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = emptyList(),
+                    activeSlots = listOf("D1"),
+                    totalDurationMs = 0L,
+                    completedCount = 0,
+                    failedCount = 0,
+                    cancelledCount = 0,
+                )
 
             assertThat(useCase.shouldStopSession(session, defaultConfig)).isFalse()
         }
@@ -444,34 +463,36 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("generateSessionReport")
     inner class GenerateSessionReport {
-
         @Test
         @DisplayName("returns non-empty report with session details")
         fun testGenerateSessionReport_notEmpty() {
-            val targets = listOf(
-                createTarget(address = "D1", state = DeviceScanState.COMPLETED),
-                createTarget(address = "D2", state = DeviceScanState.FAILED)
-            )
-            val result = ParallelScanResult(
-                target = targets[0],
-                scanDurationMs = 5000L,
-                servicesFound = 8,
-                vulnerabilitiesFound = 3,
-                criticalFindings = 1,
-                highFindings = 2,
-                testData = null
-            )
-            val session = ParallelScanSession(
-                id = "report-session-123",
-                config = defaultConfig,
-                targets = targets,
-                results = listOf(result),
-                activeSlots = emptyList(),
-                totalDurationMs = 10000L,
-                completedCount = 1,
-                failedCount = 1,
-                cancelledCount = 0
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "D1", state = DeviceScanState.COMPLETED),
+                    createTarget(address = "D2", state = DeviceScanState.FAILED),
+                )
+            val result =
+                ParallelScanResult(
+                    target = targets[0],
+                    scanDurationMs = 5000L,
+                    servicesFound = 8,
+                    vulnerabilitiesFound = 3,
+                    criticalFindings = 1,
+                    highFindings = 2,
+                    testData = null,
+                )
+            val session =
+                ParallelScanSession(
+                    id = "report-session-123",
+                    config = defaultConfig,
+                    targets = targets,
+                    results = listOf(result),
+                    activeSlots = emptyList(),
+                    totalDurationMs = 10000L,
+                    completedCount = 1,
+                    failedCount = 1,
+                    cancelledCount = 0,
+                )
 
             val report = useCase.generateSessionReport(session)
 
@@ -489,16 +510,16 @@ class MultiDeviceScanUseCaseTest {
     @Nested
     @DisplayName("sortTargetsByPriority")
     inner class SortTargetsByPriority {
-
         @Test
         @DisplayName("sorts CRITICAL targets first")
         fun testSortTargetsByPriority_criticalFirst() {
-            val targets = listOf(
-                createTarget(address = "LOW", priority = ScanPriority.LOW),
-                createTarget(address = "CRIT", priority = ScanPriority.CRITICAL),
-                createTarget(address = "HIGH", priority = ScanPriority.HIGH),
-                createTarget(address = "NORM", priority = ScanPriority.NORMAL)
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "LOW", priority = ScanPriority.LOW),
+                    createTarget(address = "CRIT", priority = ScanPriority.CRITICAL),
+                    createTarget(address = "HIGH", priority = ScanPriority.HIGH),
+                    createTarget(address = "NORM", priority = ScanPriority.NORMAL),
+                )
 
             val sorted = useCase.sortTargetsByPriority(targets)
 
@@ -512,13 +533,14 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("preserves relative order of targets with same priority")
         fun testSortTargetsByPriority_preservesOrder() {
-            val targets = listOf(
-                createTarget(address = "NORM_1", priority = ScanPriority.NORMAL),
-                createTarget(address = "CRIT_1", priority = ScanPriority.CRITICAL),
-                createTarget(address = "NORM_2", priority = ScanPriority.NORMAL),
-                createTarget(address = "CRIT_2", priority = ScanPriority.CRITICAL),
-                createTarget(address = "NORM_3", priority = ScanPriority.NORMAL)
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "NORM_1", priority = ScanPriority.NORMAL),
+                    createTarget(address = "CRIT_1", priority = ScanPriority.CRITICAL),
+                    createTarget(address = "NORM_2", priority = ScanPriority.NORMAL),
+                    createTarget(address = "CRIT_2", priority = ScanPriority.CRITICAL),
+                    createTarget(address = "NORM_3", priority = ScanPriority.NORMAL),
+                )
 
             val sorted = useCase.sortTargetsByPriority(targets)
 
@@ -541,9 +563,10 @@ class MultiDeviceScanUseCaseTest {
         @Test
         @DisplayName("handles single target")
         fun testSortTargetsByPriority_single() {
-            val targets = listOf(
-                createTarget(address = "ONLY", priority = ScanPriority.HIGH)
-            )
+            val targets =
+                listOf(
+                    createTarget(address = "ONLY", priority = ScanPriority.HIGH),
+                )
             val sorted = useCase.sortTargetsByPriority(targets)
 
             assertThat(sorted).hasSize(1)

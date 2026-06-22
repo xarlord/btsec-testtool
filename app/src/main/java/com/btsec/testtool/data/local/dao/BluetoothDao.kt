@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface BluetoothDao {
-
     // ========== Device CRUD ==========
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -89,7 +88,10 @@ interface BluetoothDao {
     fun getOperationsByType(operationType: String): Flow<List<BtOperationEntity>>
 
     @Query("SELECT * FROM bluetooth_operations WHERE timestamp >= :fromEpochMs AND timestamp <= :toEpochMs ORDER BY timestamp DESC")
-    fun getOperationsInRange(fromEpochMs: Long, toEpochMs: Long): Flow<List<BtOperationEntity>>
+    fun getOperationsInRange(
+        fromEpochMs: Long,
+        toEpochMs: Long,
+    ): Flow<List<BtOperationEntity>>
 
     @Query("SELECT * FROM bluetooth_operations WHERE success = 0 ORDER BY timestamp DESC")
     fun getFailedOperations(): Flow<List<BtOperationEntity>>

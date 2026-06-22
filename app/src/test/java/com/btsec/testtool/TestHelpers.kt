@@ -15,14 +15,13 @@ import java.time.Instant
  * Test helper utilities for unit tests.
  */
 object TestHelpers {
-
     /**
      * Create a test authorization with default values.
      */
     fun createTestAuthorization(
         authId: String = "BTSEC-20260207-A1B2C3D4",
         issuedTo: String = "Security Tester",
-        issuedBy: String = "Security Research Team"
+        issuedBy: String = "Security Research Team",
     ): Authorization {
         val now = Instant.now()
         return Authorization(
@@ -31,17 +30,18 @@ object TestHelpers {
             issuedBy = issuedBy,
             issuedAt = now,
             expiresAt = now.plusSeconds(86400 * 365),
-            authorizedActions = setOf(
-                TestAction.SCAN_DEVICES,
-                TestAction.CONNECT_DEVICE,
-                TestAction.START_FUZZING,
-                TestAction.EXTRACT_KEYS,
-                TestAction.SCAN_VULNERABILITIES,
-                TestAction.GENERATE_REPORT
-            ),
+            authorizedActions =
+                setOf(
+                    TestAction.SCAN_DEVICES,
+                    TestAction.CONNECT_DEVICE,
+                    TestAction.START_FUZZING,
+                    TestAction.EXTRACT_KEYS,
+                    TestAction.SCAN_VULNERABILITIES,
+                    TestAction.GENERATE_REPORT,
+                ),
             scope = createTestScope(authId),
             signature = "test_signature",
-            terms = emptyList()
+            terms = emptyList(),
         )
     }
 
@@ -52,20 +52,21 @@ object TestHelpers {
         val now = Instant.now()
         return TestScope(
             authId = authId,
-            authorizedTargets = listOf(
-                TargetDevice(
-                    identifier = "*",
-                    deviceType = DeviceType.UNKNOWN,
-                    owner = null,
-                    location = null
-                )
-            ),
+            authorizedTargets =
+                listOf(
+                    TargetDevice(
+                        identifier = "*",
+                        deviceType = DeviceType.UNKNOWN,
+                        owner = null,
+                        location = null,
+                    ),
+                ),
             allowedActions = TestAction.entries.toSet(),
             validFrom = now.minusSeconds(3600),
             validUntil = now.plusSeconds(86400 * 30),
             maxPacketsPerSecond = 100,
             requiresReport = true,
-            disclosureDeadline = now.plusSeconds(86400 * 90)
+            disclosureDeadline = now.plusSeconds(86400 * 90),
         )
     }
 
@@ -75,7 +76,7 @@ object TestHelpers {
     fun createTestBluetoothDevice(
         address: String = "AA:BB:CC:DD:EE:FF",
         name: String = "Test Device",
-        type: BluetoothType = BluetoothType.BLE
+        type: BluetoothType = BluetoothType.BLE,
     ): BluetoothDevice {
         return BluetoothDevice(
             address = address,
@@ -89,7 +90,7 @@ object TestHelpers {
             lastSeen = Instant.now(),
             scanCount = 1,
             services = emptyList(),
-            manufacturerData = emptyMap()
+            manufacturerData = emptyMap(),
         )
     }
 
@@ -99,7 +100,7 @@ object TestHelpers {
     fun createTestVulnerabilityDefinition(
         cveId: String = "CVE-2024-0001",
         name: String = "Test Vulnerability",
-        severity: VulnerabilitySeverity = VulnerabilitySeverity.HIGH
+        severity: VulnerabilitySeverity = VulnerabilitySeverity.HIGH,
     ): VulnerabilityDefinition {
         return VulnerabilityDefinition(
             cveId = cveId,
@@ -113,16 +114,14 @@ object TestHelpers {
             yearDiscovered = 2024,
             references = emptyList(),
             mitigation = "Update firmware",
-            testMethodology = "Test description"
+            testMethodology = "Test description",
         )
     }
 
     /**
      * Create a test fuzzing configuration.
      */
-    fun createTestFuzzConfig(
-        targetDevice: BluetoothDevice = createTestBluetoothDevice()
-    ): FuzzConfig {
+    fun createTestFuzzConfig(targetDevice: BluetoothDevice = createTestBluetoothDevice()): FuzzConfig {
         return FuzzConfig(
             targetDevice = targetDevice,
             targetService = null,
@@ -136,7 +135,7 @@ object TestHelpers {
             stopOnError = true,
             stopOnDisconnect = true,
             capturePackets = true,
-            captureNotifications = true
+            captureNotifications = true,
         )
     }
 
@@ -149,7 +148,7 @@ object TestHelpers {
             model = "Test Device",
             androidVersion = "14",
             appVersion = "1.0.0",
-            bluetoothAddress = "AA:BB:CC:DD:EE:FF"
+            bluetoothAddress = "AA:BB:CC:DD:EE:FF",
         )
     }
 
@@ -158,7 +157,7 @@ object TestHelpers {
      */
     fun createTestConsentRecord(
         authId: String = "BTSEC-TEST",
-        authorized: Boolean = true
+        authorized: Boolean = true,
     ): ConsentRecord {
         return ConsentRecord(
             id = "consent-1",
@@ -167,16 +166,14 @@ object TestHelpers {
             timestamp = Instant.now(),
             authorized = authorized,
             deviceInfo = createTestDeviceInfo(),
-            userSignature = if (authorized) "signature" else null
+            userSignature = if (authorized) "signature" else null,
         )
     }
 
     /**
      * Create a test key extraction result.
      */
-    fun createTestKeyExtractionResult(
-        extracted: Boolean = false
-    ): KeyExtractionResult {
+    fun createTestKeyExtractionResult(extracted: Boolean = false): KeyExtractionResult {
         return KeyExtractionResult(
             id = "key-1",
             targetDevice = createTestBluetoothDevice(),
@@ -185,16 +182,14 @@ object TestHelpers {
             keyValue = if (extracted) byteArrayOf(0x01, 0x02, 0x03, 0x04) else null,
             method = ExtractionMethod.PASSIVE_MONITORING,
             confidence = ExtractionConfidence.HIGH,
-            timestamp = Instant.now()
+            timestamp = Instant.now(),
         )
     }
 
     /**
      * Create a test vulnerability.
      */
-    fun createTestVulnerability(
-        severity: VulnerabilitySeverity = VulnerabilitySeverity.HIGH
-    ): Vulnerability {
+    fun createTestVulnerability(severity: VulnerabilitySeverity = VulnerabilitySeverity.HIGH): Vulnerability {
         return Vulnerability(
             id = "vuln-1",
             cveId = "CVE-2024-0001",
@@ -208,7 +203,7 @@ object TestHelpers {
             affectedBluetoothVersions = emptyList(),
             references = emptyList(),
             mitigation = "Update firmware",
-            verified = false
+            verified = false,
         )
     }
 }

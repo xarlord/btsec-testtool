@@ -34,11 +34,11 @@ enum class L2capSignalCommand(val code: Int) {
     MOVE_CHANNEL_REQUEST(0x0E),
     MOVE_CHANNEL_RESPONSE(0x0F),
     MOVE_CHANNEL_CONFIRM(0x10),
-    MOVE_CHANNEL_CONFIRM_RESPONSE(0x11);
+    MOVE_CHANNEL_CONFIRM_RESPONSE(0x11),
+    ;
 
     companion object {
-        fun fromCode(code: Int): L2capSignalCommand? =
-            entries.find { it.code == code }
+        fun fromCode(code: Int): L2capSignalCommand? = entries.find { it.code == code }
     }
 }
 
@@ -52,18 +52,18 @@ enum class L2capFixedChannel(val cid: Int, val channelName: String) {
     SMP(0x0006, "Security Manager (LE)"),
     SMP_BREDR(0x0007, "Security Manager (BR/EDR)"),
     DATA_LE(0x0014, "LE Data"),
-    BR_EDR_SECURE(0x0019, "BR/EDR Secure");
+    BR_EDR_SECURE(0x0019, "BR/EDR Secure"),
+    ;
 
     companion object {
-        fun fromCid(cid: Int): L2capFixedChannel? =
-            entries.find { it.cid == cid }
+        fun fromCid(cid: Int): L2capFixedChannel? = entries.find { it.cid == cid }
     }
 }
 
 enum class InfoRequestType(val code: Int) {
     CONNECTIONLESS_MTU(0x0001),
     EXTENDED_FEATURES(0x0002),
-    FIXED_CHANNELS(0x0003)
+    FIXED_CHANNELS(0x0003),
 }
 
 data class L2capPacket(
@@ -71,21 +71,22 @@ data class L2capPacket(
     val channelId: Int,
     val payload: ByteArray,
     val signalingCommand: L2capSignalCommand? = null,
-    val identifier: Int = 0
+    val identifier: Int = 0,
 ) {
     override fun equals(other: Any?): Boolean =
-        this === other || (other is L2capPacket &&
-            length == other.length &&
-            channelId == other.channelId &&
-            payload.contentEquals(other.payload))
+        this === other || (
+            other is L2capPacket &&
+                length == other.length &&
+                channelId == other.channelId &&
+                payload.contentEquals(other.payload)
+        )
 
-    override fun hashCode(): Int =
-        31 * (31 * length + channelId) + payload.contentHashCode()
+    override fun hashCode(): Int = 31 * (31 * length + channelId) + payload.contentHashCode()
 }
 
 data class L2capConnectionReq(
     val psm: Int,
-    val sourceCid: Int
+    val sourceCid: Int,
 )
 
 data class L2capConfigReq(
@@ -93,7 +94,7 @@ data class L2capConfigReq(
     val flags: Int,
     val mtu: Int? = null,
     val flushTimeout: Int? = null,
-    val qos: L2capQoS? = null
+    val qos: L2capQoS? = null,
 )
 
 data class L2capQoS(
@@ -101,7 +102,7 @@ data class L2capQoS(
     val tokenRate: Int,
     val peakBandwidth: Int,
     val latency: Int,
-    val delayVariation: Int
+    val delayVariation: Int,
 )
 
 enum class L2capTestCategory {
@@ -112,7 +113,7 @@ enum class L2capTestCategory {
     SIGNALING_FLOOD,
     CHANNEL_ENUMERATION,
     CONFIGURATION_FUZZ,
-    SEGMENTATION_ATTACK
+    SEGMENTATION_ATTACK,
 }
 
 data class L2capTestResult(
@@ -125,7 +126,7 @@ data class L2capTestResult(
     val confidence: Double,
     val evidence: String,
     val severity: L2capSeverity,
-    val recommendation: String
+    val recommendation: String,
 )
 
 enum class L2capSeverity { CRITICAL, HIGH, MEDIUM, LOW, INFO }
@@ -137,7 +138,7 @@ data class L2capTestReport(
     val supportedFeatures: List<String>,
     val criticalCount: Int,
     val highCount: Int,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )
 
 data class L2capTestCase(
@@ -148,5 +149,5 @@ data class L2capTestCase(
     val expectedBehavior: String,
     val vulnerabilityIndicator: String,
     val severity: L2capSeverity,
-    val recommendation: String
+    val recommendation: String,
 )

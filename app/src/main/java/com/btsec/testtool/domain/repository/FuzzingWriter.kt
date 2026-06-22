@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
  * need to trigger or control fuzzing tests to depend on a narrow contract.
  */
 interface FuzzingWriter {
-
     /**
      * Start a fuzzing test with the given configuration.
      *

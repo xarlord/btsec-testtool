@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test
  */
 @DisplayName("GattServerUseCase Tests")
 class GattServerUseCaseTest {
-
     private lateinit var useCase: GattServerUseCase
 
     @BeforeEach
@@ -43,7 +42,6 @@ class GattServerUseCaseTest {
     @Nested
     @DisplayName("Preset Generation")
     inner class PresetTests {
-
         @Test
         @DisplayName("getPresets returns at least 4 presets")
         fun testGetPresets_hasMinimum4() {
@@ -61,8 +59,8 @@ class GattServerUseCaseTest {
                     GattServerPresetCategory.HEART_RATE,
                     GattServerPresetCategory.THERMOMETER,
                     GattServerPresetCategory.VULNERABLE,
-                    GattServerPresetCategory.CUSTOM
-                )
+                    GattServerPresetCategory.CUSTOM,
+                ),
             )
         }
 
@@ -84,7 +82,7 @@ class GattServerUseCaseTest {
             assertThat(hrChars.map { it.uuid }).containsExactly(
                 GattServerUseCase.UUID_HR_MEASUREMENT,
                 GattServerUseCase.UUID_BODY_SENSOR_LOCATION,
-                GattServerUseCase.UUID_HR_CONTROL_POINT
+                GattServerUseCase.UUID_HR_CONTROL_POINT,
             )
 
             // Verify HR measurement has NOTIFY + READ
@@ -108,7 +106,7 @@ class GattServerUseCaseTest {
             assertThat(chars).hasSize(2)
             assertThat(chars.map { it.uuid }).containsExactly(
                 GattServerUseCase.UUID_TEMP_MEASUREMENT,
-                GattServerUseCase.UUID_TEMP_TYPE
+                GattServerUseCase.UUID_TEMP_TYPE,
             )
         }
 
@@ -142,31 +140,33 @@ class GattServerUseCaseTest {
     @Nested
     @DisplayName("Serialization")
     inner class SerializationTests {
-
         @Test
         @DisplayName("Service configs round-trip preserves data")
         fun testBuildServiceConfigs_roundTrip() {
-            val configs = listOf(
-                GattServiceConfig(
-                    uuid = "0000180d-0000-1000-8000-00805f9b34fb",
-                    serviceType = 0,
-                    characteristics = listOf(
-                        GattCharacteristicConfig(
-                            uuid = "00002a37-0000-1000-8000-00805f9b34fb",
-                            properties = 0x12,
-                            permissions = 0x01,
-                            initialValue = byteArrayOf(0x00, 0x48),
-                            descriptors = listOf(
-                                GattDescriptorConfig(
-                                    uuid = "00002902-0000-1000-8000-00805f9b34fb",
-                                    permissions = 0x11,
-                                    initialValue = byteArrayOf(0x00, 0x00)
-                                )
-                            )
-                        )
-                    )
+            val configs =
+                listOf(
+                    GattServiceConfig(
+                        uuid = "0000180d-0000-1000-8000-00805f9b34fb",
+                        serviceType = 0,
+                        characteristics =
+                            listOf(
+                                GattCharacteristicConfig(
+                                    uuid = "00002a37-0000-1000-8000-00805f9b34fb",
+                                    properties = 0x12,
+                                    permissions = 0x01,
+                                    initialValue = byteArrayOf(0x00, 0x48),
+                                    descriptors =
+                                        listOf(
+                                            GattDescriptorConfig(
+                                                uuid = "00002902-0000-1000-8000-00805f9b34fb",
+                                                permissions = 0x11,
+                                                initialValue = byteArrayOf(0x00, 0x00),
+                                            ),
+                                        ),
+                                ),
+                            ),
+                    ),
                 )
-            )
 
             val data = useCase.buildServiceConfigs(configs)
             val restored = useCase.parseServiceConfigs(data)
@@ -210,19 +210,19 @@ class GattServerUseCaseTest {
     @Nested
     @DisplayName("Event Analysis")
     inner class EventAnalysisTests {
-
         @Test
         @DisplayName("Analyze read request event")
         fun testAnalyzeEvent_readRequest() {
-            val event = GattServerEvent(
-                eventType = GattServerEventType.CHARACTERISTIC_READ_REQUEST,
-                timestamp = System.currentTimeMillis(),
-                deviceAddress = "AA:BB:CC:DD:EE:FF",
-                characteristicUuid = GattServerUseCase.UUID_HR_MEASUREMENT,
-                value = null,
-                offset = 0,
-                response = GattServerResponse(status = GattServerUseCase.GATT_SUCCESS, value = byteArrayOf(0x00, 0x48))
-            )
+            val event =
+                GattServerEvent(
+                    eventType = GattServerEventType.CHARACTERISTIC_READ_REQUEST,
+                    timestamp = System.currentTimeMillis(),
+                    deviceAddress = "AA:BB:CC:DD:EE:FF",
+                    characteristicUuid = GattServerUseCase.UUID_HR_MEASUREMENT,
+                    value = null,
+                    offset = 0,
+                    response = GattServerResponse(status = GattServerUseCase.GATT_SUCCESS, value = byteArrayOf(0x00, 0x48)),
+                )
             val analysis = useCase.analyzeEvent(event)
 
             assertThat(analysis).contains("CHARACTERISTIC_READ_REQUEST")
@@ -234,15 +234,16 @@ class GattServerUseCaseTest {
         @Test
         @DisplayName("Analyze write request event")
         fun testAnalyzeEvent_writeRequest() {
-            val event = GattServerEvent(
-                eventType = GattServerEventType.CHARACTERISTIC_WRITE_REQUEST,
-                timestamp = System.currentTimeMillis(),
-                deviceAddress = "11:22:33:44:55:66",
-                characteristicUuid = GattServerUseCase.UUID_HR_CONTROL_POINT,
-                value = byteArrayOf(0x01),
-                offset = 0,
-                response = GattServerResponse(status = GattServerUseCase.GATT_SUCCESS)
-            )
+            val event =
+                GattServerEvent(
+                    eventType = GattServerEventType.CHARACTERISTIC_WRITE_REQUEST,
+                    timestamp = System.currentTimeMillis(),
+                    deviceAddress = "11:22:33:44:55:66",
+                    characteristicUuid = GattServerUseCase.UUID_HR_CONTROL_POINT,
+                    value = byteArrayOf(0x01),
+                    offset = 0,
+                    response = GattServerResponse(status = GattServerUseCase.GATT_SUCCESS),
+                )
             val analysis = useCase.analyzeEvent(event)
 
             assertThat(analysis).contains("CHARACTERISTIC_WRITE_REQUEST")
@@ -254,14 +255,15 @@ class GattServerUseCaseTest {
         @Test
         @DisplayName("Analyze connection state changed event")
         fun testAnalyzeEvent_connectionState() {
-            val event = GattServerEvent(
-                eventType = GattServerEventType.CONNECTION_STATE_CHANGED,
-                timestamp = System.currentTimeMillis(),
-                deviceAddress = "AA:BB:CC:DD:EE:FF",
-                characteristicUuid = null,
-                value = "CONNECTED".toByteArray(),
-                offset = 0
-            )
+            val event =
+                GattServerEvent(
+                    eventType = GattServerEventType.CONNECTION_STATE_CHANGED,
+                    timestamp = System.currentTimeMillis(),
+                    deviceAddress = "AA:BB:CC:DD:EE:FF",
+                    characteristicUuid = null,
+                    value = "CONNECTED".toByteArray(),
+                    offset = 0,
+                )
             val analysis = useCase.analyzeEvent(event)
 
             assertThat(analysis).contains("CONNECTION_STATE_CHANGED")
@@ -272,14 +274,16 @@ class GattServerUseCaseTest {
         @Test
         @DisplayName("Analyze MTU changed event")
         fun testAnalyzeEvent_mtuChanged() {
-            val event = GattServerEvent(
-                eventType = GattServerEventType.MTU_CHANGED,
-                timestamp = System.currentTimeMillis(),
-                deviceAddress = "AA:BB:CC:DD:EE:FF",
-                characteristicUuid = null,
-                value = ByteArray(517), // MTU 517
-                offset = 0
-            )
+            val event =
+                GattServerEvent(
+                    eventType = GattServerEventType.MTU_CHANGED,
+                    timestamp = System.currentTimeMillis(),
+                    deviceAddress = "AA:BB:CC:DD:EE:FF",
+                    characteristicUuid = null,
+                    // MTU 517
+                    value = ByteArray(517),
+                    offset = 0,
+                )
             val analysis = useCase.analyzeEvent(event)
             assertThat(analysis).contains("MTU_CHANGED")
         }
@@ -290,21 +294,21 @@ class GattServerUseCaseTest {
     @Nested
     @DisplayName("Session Report")
     inner class SessionReportTests {
-
         @Test
         @DisplayName("Session report is not empty")
         fun testGenerateSessionReport_notEmpty() {
-            val session = GattServerSession(
-                id = "test-session-001",
-                startTime = 1700000000000L,
-                endTime = 1700000060000L,
-                preset = useCase.buildHeartRatePreset(),
-                connectedDevices = listOf("AA:BB:CC:DD:EE:FF"),
-                events = emptyList(),
-                totalReadRequests = 5,
-                totalWriteRequests = 2,
-                totalConnections = 1
-            )
+            val session =
+                GattServerSession(
+                    id = "test-session-001",
+                    startTime = 1700000000000L,
+                    endTime = 1700000060000L,
+                    preset = useCase.buildHeartRatePreset(),
+                    connectedDevices = listOf("AA:BB:CC:DD:EE:FF"),
+                    events = emptyList(),
+                    totalReadRequests = 5,
+                    totalWriteRequests = 2,
+                    totalConnections = 1,
+                )
             val report = useCase.generateSessionReport(session)
 
             assertThat(report).isNotEmpty()
@@ -315,17 +319,18 @@ class GattServerUseCaseTest {
         @Test
         @DisplayName("Session report includes request counts")
         fun testGenerateSessionReport_includesCounts() {
-            val session = GattServerSession(
-                id = "test-session-002",
-                startTime = 1700000000000L,
-                endTime = 1700000060000L,
-                preset = null,
-                connectedDevices = listOf("11:22:33:44:55:66", "AA:BB:CC:DD:EE:FF"),
-                events = emptyList(),
-                totalReadRequests = 42,
-                totalWriteRequests = 13,
-                totalConnections = 3
-            )
+            val session =
+                GattServerSession(
+                    id = "test-session-002",
+                    startTime = 1700000000000L,
+                    endTime = 1700000060000L,
+                    preset = null,
+                    connectedDevices = listOf("11:22:33:44:55:66", "AA:BB:CC:DD:EE:FF"),
+                    events = emptyList(),
+                    totalReadRequests = 42,
+                    totalWriteRequests = 13,
+                    totalConnections = 3,
+                )
             val report = useCase.generateSessionReport(session)
 
             assertThat(report).contains("42")
@@ -337,25 +342,27 @@ class GattServerUseCaseTest {
         @Test
         @DisplayName("Session report with active session (no end time)")
         fun testGenerateSessionReport_activeSession() {
-            val session = GattServerSession(
-                id = "active-session",
-                startTime = System.currentTimeMillis(),
-                endTime = null,
-                preset = useCase.buildVulnerablePreset(),
-                connectedDevices = listOf("AA:BB:CC:DD:EE:FF"),
-                events = listOf(
-                    GattServerEvent(
-                        eventType = GattServerEventType.CONNECTION_STATE_CHANGED,
-                        timestamp = System.currentTimeMillis(),
-                        deviceAddress = "AA:BB:CC:DD:EE:FF",
-                        characteristicUuid = null,
-                        value = "CONNECTED".toByteArray()
-                    )
-                ),
-                totalReadRequests = 1,
-                totalWriteRequests = 0,
-                totalConnections = 1
-            )
+            val session =
+                GattServerSession(
+                    id = "active-session",
+                    startTime = System.currentTimeMillis(),
+                    endTime = null,
+                    preset = useCase.buildVulnerablePreset(),
+                    connectedDevices = listOf("AA:BB:CC:DD:EE:FF"),
+                    events =
+                        listOf(
+                            GattServerEvent(
+                                eventType = GattServerEventType.CONNECTION_STATE_CHANGED,
+                                timestamp = System.currentTimeMillis(),
+                                deviceAddress = "AA:BB:CC:DD:EE:FF",
+                                characteristicUuid = null,
+                                value = "CONNECTED".toByteArray(),
+                            ),
+                        ),
+                    totalReadRequests = 1,
+                    totalWriteRequests = 0,
+                    totalConnections = 1,
+                )
             val report = useCase.generateSessionReport(session)
 
             assertThat(report).contains("active")
@@ -369,15 +376,16 @@ class GattServerUseCaseTest {
     @DisplayName("All GattServerEventType values are covered in analyzeEvent")
     fun testGattServerEventType_coverage() {
         for (eventType in GattServerEventType.entries) {
-            val event = GattServerEvent(
-                eventType = eventType,
-                timestamp = System.currentTimeMillis(),
-                deviceAddress = "AA:BB:CC:DD:EE:FF",
-                characteristicUuid = "test-uuid",
-                value = byteArrayOf(0x01),
-                offset = 0,
-                response = GattServerResponse(status = GattServerUseCase.GATT_SUCCESS)
-            )
+            val event =
+                GattServerEvent(
+                    eventType = eventType,
+                    timestamp = System.currentTimeMillis(),
+                    deviceAddress = "AA:BB:CC:DD:EE:FF",
+                    characteristicUuid = "test-uuid",
+                    value = byteArrayOf(0x01),
+                    offset = 0,
+                    response = GattServerResponse(status = GattServerUseCase.GATT_SUCCESS),
+                )
             val analysis = useCase.analyzeEvent(event)
             assertThat(analysis).contains(eventType.name)
         }

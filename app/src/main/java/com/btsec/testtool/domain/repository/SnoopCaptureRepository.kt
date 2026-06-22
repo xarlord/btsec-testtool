@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface SnoopCaptureRepository {
-
     /**
      * Start monitoring the HCI snoop log for new packets.
      *

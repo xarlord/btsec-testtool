@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface AvrcpSecurityRepository {
-
     /**
      * Connect to a device's AVRCP profile.
      *
@@ -42,7 +41,10 @@ interface AvrcpSecurityRepository {
      * @param depth Maximum browsing depth.
      * @return List of media items found.
      */
-    suspend fun browseMedia(path: String, depth: Int = 1): List<AvrcpMediaItem>
+    suspend fun browseMedia(
+        path: String,
+        depth: Int = 1,
+    ): List<AvrcpMediaItem>
 
     /**
      * Send a media control command (play, pause, next, previous, etc.).

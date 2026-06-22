@@ -1,0 +1,65 @@
+# EditorConfig — https://editorconfig.org
+# Root editorconfig for BTSec TestTool.
+# Aligns ktlint (1.0.1, used in CI) with the project's Kotlin/Compose
+# conventions. Without this file ktlint flags 7000+ stylistic violations,
+# most of which are false positives for an Android Jetpack Compose codebase
+# (e.g. PascalCase @Composable functions, camelCase Gradle Versions).
+# See issue #369.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = off
+
+[*.{kt,kts}]
+# ---- ktlint standard rules ----
+# The following standard rules are DISABLED because they conflict with
+# established Android/Compose conventions or are purely stylistic:
+
+# Compose @Composable functions are PascalCase by convention (e.g.
+# ScannerScreen(), DashboardScreen()). The function-naming rule wrongly
+# flags them as "should start with lowercase".
+ktlint_standard_function-naming = disabled
+
+# The Gradle Versions object (buildSrc/Dependencies.kt) uses camelCase for
+# version constants (compileSdk, minSdk, versionCode) — the de-facto standard
+# for Gradle version catalogs. SCREAMING_SNAKE_CASE would be unusual here.
+ktlint_standard_property-naming = disabled
+
+# Wildcard imports are widely used and accepted in Kotlin, especially in
+# test sources and for large Compose screen files importing many UI symbols.
+ktlint_standard_no-wildcard-imports = disabled
+
+# NOTE: discouraged-comment-location is kept ENABLED — it is a required
+# dependency of the if-else-wrapping rule and cannot be disabled.
+
+# Kotlin qualified names (fully-qualified Android/Hilt symbols) frequently
+# exceed 120 columns; forcing wraps hurts readability more than it helps.
+ktlint_standard_max-line-length = disabled
+
+# Consecutive comment lines (grouped documentation blocks) are a legitimate
+# formatting pattern.
+ktlint_standard_no-consecutive-comments = disabled
+
+# Keep filename rule relaxed: some files intentionally don't match their
+# single top-level declaration (e.g. grouped test helpers).
+ktlint_standard_filename = disabled
+
+# All other standard rules remain ENABLED (trailing commas, wrapping,
+# indentation, import ordering, etc.) and are enforced by CI.
+
+[*.{yaml,yml}]
+indent_size = 2
+
+[*.{xml,html}]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off

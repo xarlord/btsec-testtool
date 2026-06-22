@@ -20,31 +20,29 @@ data class KeyExtractionResultEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
     val id: String,
-
+    // targetDevice.address
     @ColumnInfo(name = "target_device_address")
-    val targetDeviceAddress: String, // targetDevice.address
-
+    val targetDeviceAddress: String,
+    // JSON of BluetoothDevice
     @ColumnInfo(name = "target_device")
-    val targetDevice: String, // JSON of BluetoothDevice
-
+    val targetDevice: String,
+    // KeyType enum name
     @ColumnInfo(name = "key_type")
-    val keyType: String, // KeyType enum name
-
+    val keyType: String,
     @ColumnInfo(name = "extracted")
     val extracted: Boolean,
-
+    // Base64 encoded ByteArray
     @ColumnInfo(name = "key_value")
-    val keyValue: String?, // Base64 encoded ByteArray
-
+    val keyValue: String?,
+    // ExtractionMethod enum name
     @ColumnInfo(name = "method")
-    val method: String, // ExtractionMethod enum name
-
+    val method: String,
+    // ExtractionConfidence enum name
     @ColumnInfo(name = "confidence")
-    val confidence: String, // ExtractionConfidence enum name
-
+    val confidence: String,
+    // epoch millis
     @ColumnInfo(name = "timestamp")
-    val timestamp: Long, // epoch millis
-
+    val timestamp: Long,
     @ColumnInfo(name = "notes")
-    val notes: String?
+    val notes: String?,
 )

@@ -17,7 +17,7 @@ data class OnboardingStep(
     val description: String,
     val feature: OnboardingFeature,
     val icon: String,
-    val order: Int
+    val order: Int,
 )
 
 /**
@@ -31,7 +31,7 @@ enum class OnboardingFeature {
     FUZZING,
     REPORT_GENERATION,
     SETTINGS,
-    BR_EDR_PROFILES
+    BR_EDR_PROFILES,
 }
 
 /**
@@ -44,7 +44,7 @@ data class OnboardingState(
     val currentStepIndex: Int,
     val skipped: Boolean,
     val completedAt: Long?,
-    val totalSteps: Int
+    val totalSteps: Int,
 ) {
     val progress: Float get() = if (totalSteps == 0) 0f else completedSteps.size.toFloat() / totalSteps
 }
@@ -53,5 +53,9 @@ data class OnboardingState(
  * Actions the user can take during onboarding.
  */
 enum class OnboardingAction {
-    NEXT, PREVIOUS, SKIP, COMPLETE, RESTART
+    NEXT,
+    PREVIOUS,
+    SKIP,
+    COMPLETE,
+    RESTART,
 }

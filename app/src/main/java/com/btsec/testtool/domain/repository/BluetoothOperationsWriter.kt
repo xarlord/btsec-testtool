@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.Flow
  * need to trigger Bluetooth actions to depend on a narrow contract.
  */
 interface BluetoothOperationsWriter {
-
     /**
      * Request Bluetooth to be enabled.
      */
@@ -54,7 +53,10 @@ interface BluetoothOperationsWriter {
      * @param timeoutMs Connection timeout in milliseconds
      * @return Flow of connection state updates
      */
-    fun connect(address: String, timeoutMs: Int = 30000): Flow<ConnectionState>
+    fun connect(
+        address: String,
+        timeoutMs: Int = 30000,
+    ): Flow<ConnectionState>
 
     /**
      * Disconnect from current device.
@@ -87,7 +89,7 @@ interface BluetoothOperationsWriter {
      */
     suspend fun readCharacteristic(
         serviceUuid: String,
-        characteristicUuid: String
+        characteristicUuid: String,
     ): Result<ByteArray>
 
     /**
@@ -102,7 +104,7 @@ interface BluetoothOperationsWriter {
         serviceUuid: String,
         characteristicUuid: String,
         value: ByteArray,
-        writeType: WriteType = WriteType.DEFAULT
+        writeType: WriteType = WriteType.DEFAULT,
     ): Result<Unit>
 
     /**
@@ -114,7 +116,7 @@ interface BluetoothOperationsWriter {
      */
     fun subscribeToCharacteristic(
         serviceUuid: String,
-        characteristicUuid: String
+        characteristicUuid: String,
     ): Flow<ByteArray>
 
     /**
@@ -122,7 +124,7 @@ interface BluetoothOperationsWriter {
      */
     suspend fun unsubscribeFromCharacteristic(
         serviceUuid: String,
-        characteristicUuid: String
+        characteristicUuid: String,
     ): Result<Unit>
 
     /**
@@ -131,7 +133,7 @@ interface BluetoothOperationsWriter {
     suspend fun readDescriptor(
         serviceUuid: String,
         characteristicUuid: String,
-        descriptorUuid: String
+        descriptorUuid: String,
     ): Result<ByteArray>
 
     /**
@@ -141,7 +143,7 @@ interface BluetoothOperationsWriter {
         serviceUuid: String,
         characteristicUuid: String,
         descriptorUuid: String,
-        value: ByteArray
+        value: ByteArray,
     ): Result<Unit>
 
     /**

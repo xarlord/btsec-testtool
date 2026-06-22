@@ -20,42 +20,62 @@ import java.time.Instant
 // ---------- BluetoothDeviceEntity <-> BluetoothDevice ----------
 
 fun BluetoothDeviceEntity.toDomain(): BluetoothDevice {
-    val servicesList: List<String> = try {
-        mapperJson.decodeFromString<List<String>>(services)
-    } catch (_: Exception) {
-        emptyList()
-    }
+    val servicesList: List<String> =
+        try {
+            mapperJson.decodeFromString<List<String>>(services)
+        } catch (_: Exception) {
+            emptyList()
+        }
 
-    val manufacturerDataMap: Map<Int, ByteArray> = try {
-        val raw: Map<String, String> = mapperJson.decodeFromString<Map<String, String>>(manufacturerData)
-        raw.mapKeys { it.key.toIntOrNull() ?: 0 }
-            .mapValues { Base64.decode(it.value, Base64.DEFAULT) }
-    } catch (_: Exception) {
-        emptyMap()
-    }
+    val manufacturerDataMap: Map<Int, ByteArray> =
+        try {
+            val raw: Map<String, String> = mapperJson.decodeFromString<Map<String, String>>(manufacturerData)
+            raw.mapKeys { it.key.toIntOrNull() ?: 0 }
+                .mapValues { Base64.decode(it.value, Base64.DEFAULT) }
+        } catch (_: Exception) {
+            emptyMap()
+        }
 
     return BluetoothDevice(
         address = address,
         name = name,
-        type = try { BluetoothType.valueOf(type) } catch (_: Exception) { BluetoothType.UNKNOWN },
-        deviceClass = deviceClass?.let { try { DeviceClass.valueOf(it) } catch (_: Exception) { null } },
-        bondState = try { BondState.valueOf(bondState) } catch (_: Exception) { BondState.NONE },
+        type =
+            try {
+                BluetoothType.valueOf(type)
+            } catch (_: Exception) {
+                BluetoothType.UNKNOWN
+            },
+        deviceClass =
+            deviceClass?.let {
+                try {
+                    DeviceClass.valueOf(it)
+                } catch (_: Exception) {
+                    null
+                }
+            },
+        bondState =
+            try {
+                BondState.valueOf(bondState)
+            } catch (_: Exception) {
+                BondState.NONE
+            },
         rssi = rssi,
         txPower = txPower,
         firstSeen = Instant.ofEpochMilli(firstSeen),
         lastSeen = Instant.ofEpochMilli(lastSeen),
         scanCount = scanCount,
         services = servicesList,
-        manufacturerData = manufacturerDataMap
+        manufacturerData = manufacturerDataMap,
     )
 }
 
 fun BluetoothDevice.toEntity(): BluetoothDeviceEntity {
     val servicesJson = mapperJson.encodeToString(services)
-    val manufacturerDataJson = mapperJson.encodeToString(
-        manufacturerData.mapKeys { it.key.toString() }
-            .mapValues { Base64.encodeToString(it.value, Base64.DEFAULT) }
-    )
+    val manufacturerDataJson =
+        mapperJson.encodeToString(
+            manufacturerData.mapKeys { it.key.toString() }
+                .mapValues { Base64.encodeToString(it.value, Base64.DEFAULT) },
+        )
     return BluetoothDeviceEntity(
         address = address,
         name = name,
@@ -68,14 +88,12 @@ fun BluetoothDevice.toEntity(): BluetoothDeviceEntity {
         lastSeen = lastSeen.toEpochMilli(),
         scanCount = scanCount,
         services = servicesJson,
-        manufacturerData = manufacturerDataJson
+        manufacturerData = manufacturerDataJson,
     )
 }
 
 // ---------- Collection mappers ----------
 
-fun List<BluetoothDeviceEntity>.toDomainDevices(): List<BluetoothDevice> =
-    map { it.toDomain() }
+fun List<BluetoothDeviceEntity>.toDomainDevices(): List<BluetoothDevice> = map { it.toDomain() }
 
-fun List<BluetoothDevice>.toEntities(): List<BluetoothDeviceEntity> =
-    map { it.toEntity() }
+fun List<BluetoothDevice>.toEntities(): List<BluetoothDeviceEntity> = map { it.toEntity() }

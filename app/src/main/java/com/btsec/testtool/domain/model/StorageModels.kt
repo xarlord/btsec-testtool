@@ -16,19 +16,20 @@ package com.btsec.testtool.domain.model
 
 /** Encryption strength for the SQLCipher-protected Room database. */
 enum class StorageEncryptionLevel {
-    NONE,           // No encryption (for debug builds)
-    STANDARD,       // SQLCipher with user-derived key
-    MILITARY_GRADE  // SQLCipher with hardware-backed keystore
+    NONE, // No encryption (for debug builds)
+    STANDARD, // SQLCipher with user-derived key
+    MILITARY_GRADE, // SQLCipher with hardware-backed keystore
 }
 
 /** Configuration for encrypted local storage. */
 data class StorageConfig(
     val encryptionLevel: StorageEncryptionLevel,
     val keyDerivationIterations: Int = 10000,
-    val autoLockTimeoutMs: Long = 300000, // 5 minutes
+    // 5 minutes
+    val autoLockTimeoutMs: Long = 300000,
     val biometricUnlockEnabled: Boolean = false,
     val databaseSizeBytes: Long = 0,
-    val lastBackupTime: Long? = null
+    val lastBackupTime: Long? = null,
 )
 
 /** An immutable record of a storage-layer action for audit logging. */
@@ -38,12 +39,20 @@ data class StorageAuditEntry(
     val action: StorageAction,
     val dataType: String,
     val recordCount: Int,
-    val success: Boolean
+    val success: Boolean,
 )
 
 /** Actions that can be recorded in the storage audit log. */
 enum class StorageAction {
-    READ, WRITE, DELETE, EXPORT, BACKUP, RESTORE, KEY_ROTATION, LOCK, UNLOCK
+    READ,
+    WRITE,
+    DELETE,
+    EXPORT,
+    BACKUP,
+    RESTORE,
+    KEY_ROTATION,
+    LOCK,
+    UNLOCK,
 }
 
 /** Aggregate statistics about the encrypted storage. */
@@ -53,5 +62,5 @@ data class StorageStats(
     val totalFuzzingSessions: Int,
     val databaseSizeBytes: Long,
     val encryptionLevel: StorageEncryptionLevel,
-    val lastModified: Long?
+    val lastModified: Long?,
 )

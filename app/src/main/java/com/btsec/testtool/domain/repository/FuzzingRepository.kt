@@ -9,7 +9,6 @@
 package com.btsec.testtool.domain.repository
 
 import com.btsec.testtool.domain.model.*
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Composite repository for fuzzing operations.
@@ -42,7 +41,7 @@ data class FuzzProgress(
     val estimatedCompletionTime: java.time.Instant?,
     val currentPacketNumber: Int,
     val totalPackets: Int,
-    val currentError: String? = null
+    val currentError: String? = null,
 ) {
     /**
      * Calculate progress percentage.
@@ -50,7 +49,9 @@ data class FuzzProgress(
     fun getProgressPercentage(): Double {
         return if (totalPackets > 0) {
             (currentPacketNumber.toDouble() / totalPackets.toDouble()) * 100.0
-        } else 0.0
+        } else {
+            0.0
+        }
     }
 
     /**
@@ -59,7 +60,9 @@ data class FuzzProgress(
     fun getSuccessRate(): Double {
         return if (packetsSent > 0) {
             (packetsReceived.toDouble() / packetsSent.toDouble()) * 100.0
-        } else 0.0
+        } else {
+            0.0
+        }
     }
 
     /**
@@ -86,7 +89,7 @@ data class FuzzingStatistics(
     val averageSuccessRate: Double,
     val mostTestedDevice: String?,
     val mostVulnerableDevice: String?,
-    val dateRange: DateRange
+    val dateRange: DateRange,
 )
 
 /**
@@ -94,7 +97,7 @@ data class FuzzingStatistics(
  */
 data class DateRange(
     val start: java.time.Instant,
-    val end: java.time.Instant
+    val end: java.time.Instant,
 )
 
 /**
@@ -108,7 +111,7 @@ data class DeviceFuzzingStatistics(
     val packetsReceived: Long,
     val findings: Int,
     val lastTestDate: java.time.Instant,
-    val vulnerabilitiesDiscovered: List<String>
+    val vulnerabilitiesDiscovered: List<String>,
 )
 
 /**
@@ -123,7 +126,7 @@ data class FuzzingOperation(
     val success: Boolean,
     val errorMessage: String?,
     val durationMs: Long?,
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -137,5 +140,5 @@ enum class FuzzingOperationType {
     COMPLETE,
     ERROR,
     FINDING_DISCOVERED,
-    SAVE_RESULT
+    SAVE_RESULT,
 }

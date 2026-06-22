@@ -9,8 +9,6 @@
 package com.btsec.testtool.domain.repository
 
 import com.btsec.testtool.domain.model.*
-import kotlinx.coroutines.flow.Flow
-import java.io.File
 
 /**
  * Composite repository for security assessment report generation and management.
@@ -42,7 +40,7 @@ data class ReportConfig(
     val includeAppendix: Boolean = true,
     val templateId: String? = null,
     val customSections: List<CustomReportSection> = emptyList(),
-    val minSeverity: VulnerabilitySeverity = VulnerabilitySeverity.LOW
+    val minSeverity: VulnerabilitySeverity = VulnerabilitySeverity.LOW,
 )
 
 /**
@@ -51,7 +49,7 @@ data class ReportConfig(
 data class CustomReportSection(
     val title: String,
     val content: String,
-    val order: Int
+    val order: Int,
 )
 
 /**
@@ -63,7 +61,7 @@ data class ReportGenerationProgress(
     val currentStep: GenerationStep,
     val progressPercentage: Int,
     val estimatedCompletionTime: java.time.Instant?,
-    val error: String? = null
+    val error: String? = null,
 )
 
 /**
@@ -74,7 +72,7 @@ enum class ReportGenerationStatus {
     GENERATING,
     COMPLETED,
     FAILED,
-    CANCELLED
+    CANCELLED,
 }
 
 /**
@@ -88,7 +86,7 @@ enum class GenerationStep {
     CREATING_RECOMMENDATIONS,
     FORMATTING_REPORT,
     SAVING_REPORT,
-    COMPLETED
+    COMPLETED,
 }
 
 /**
@@ -100,7 +98,7 @@ enum class ExportFormat {
     JSON,
     CSV,
     XML,
-    MARKDOWN
+    MARKDOWN,
 }
 
 /**
@@ -119,7 +117,7 @@ data class ReportTemplate(
     val includeAppendix: Boolean,
     val customCss: String? = null,
     val logoPath: String? = null,
-    val isDefault: Boolean = false
+    val isDefault: Boolean = false,
 )
 
 /**
@@ -131,7 +129,7 @@ data class ReportStatistics(
     val reportsByMonth: Map<String, Int>,
     val averageVulnerabilitiesPerReport: Double,
     val mostCommonSeverity: VulnerabilitySeverity,
-    val dateRange: DateRange
+    val dateRange: DateRange,
 )
 
 /**
@@ -144,7 +142,7 @@ data class ReportsSummary(
     val recentReports: List<SecurityReport>,
     val criticalVulnerabilitiesTotal: Int,
     val highVulnerabilitiesTotal: Int,
-    val pendingActions: Int
+    val pendingActions: Int,
 )
 
 /**
@@ -158,7 +156,7 @@ data class ReportOperation(
     val success: Boolean,
     val errorMessage: String?,
     val durationMs: Long?,
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -174,5 +172,5 @@ enum class ReportOperationType {
     UPLOAD,
     TEMPLATE_CREATE,
     TEMPLATE_UPDATE,
-    TEMPLATE_DELETE
+    TEMPLATE_DELETE,
 }

@@ -16,11 +16,11 @@ import java.time.Instant
  */
 @Serializable
 enum class KeyType {
-    IRK,           // Identity Resolving Key
-    LTK,           // Long Term Key
-    CSRK,          // Connection Signature Resolving Key
-    LINK_KEY,      // Classic Bluetooth Link Key
-    PRIVATE_KEY    // Device private key (rare)
+    IRK, // Identity Resolving Key
+    LTK, // Long Term Key
+    CSRK, // Connection Signature Resolving Key
+    LINK_KEY, // Classic Bluetooth Link Key
+    PRIVATE_KEY, // Device private key (rare)
 }
 
 /**
@@ -32,11 +32,12 @@ data class KeyExtractionResult(
     val targetDevice: BluetoothDevice,
     val keyType: KeyType,
     val extracted: Boolean = false,
-    val keyValue: ByteArray? = null,          // Extracted key (encrypted storage)
+    // Extracted key (encrypted storage)
+    val keyValue: ByteArray? = null,
     val method: ExtractionMethod = ExtractionMethod.OTHER,
     val confidence: ExtractionConfidence = ExtractionConfidence.UNKNOWN,
     @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant,
-    val notes: String? = null
+    val notes: String? = null,
 ) {
     /**
      * Check if key extraction was successful.
@@ -49,15 +50,15 @@ data class KeyExtractionResult(
  */
 @Serializable
 enum class ExtractionMethod {
-    PASSIVE_MONITORING,     // Monitor pairing traffic
-    ACTIVE_PROMPT,          // Prompt device during pairing
-    KNOWN_PLAINTEXT,        // Known plaintext attack
-    BRUTE_FORCE,            // Brute force (very slow)
-    DATABASE_LOOKUP,        // Lookup in known databases
-    MEMORY_DUMP,            // Dump from device memory
-    LOG_ANALYSIS,           // Analyze device logs
-    CONFIGURATION,          // Extract from config
-    OTHER
+    PASSIVE_MONITORING, // Monitor pairing traffic
+    ACTIVE_PROMPT, // Prompt device during pairing
+    KNOWN_PLAINTEXT, // Known plaintext attack
+    BRUTE_FORCE, // Brute force (very slow)
+    DATABASE_LOOKUP, // Lookup in known databases
+    MEMORY_DUMP, // Dump from device memory
+    LOG_ANALYSIS, // Analyze device logs
+    CONFIGURATION, // Extract from config
+    OTHER,
 }
 
 /**
@@ -65,9 +66,9 @@ enum class ExtractionMethod {
  */
 @Serializable
 enum class ExtractionConfidence {
-    CERTAIN,         // Definitely correct
-    HIGH,            // Very likely correct
-    MEDIUM,          // Possibly correct
-    LOW,             // Unlikely to be correct
-    UNKNOWN          // Cannot determine
+    CERTAIN, // Definitely correct
+    HIGH, // Very likely correct
+    MEDIUM, // Possibly correct
+    LOW, // Unlikely to be correct
+    UNKNOWN, // Cannot determine
 }

@@ -19,105 +19,109 @@ import javax.inject.Singleton
  * with or without authentication, producing data-exfiltration findings.
  */
 @Singleton
-class MapSecurityUseCase @Inject constructor() {
+class MapSecurityUseCase
+    @Inject
+    constructor() {
+        /**
+         * Returns all MAP folders that should be tested.
+         */
+        fun getMapFolders(): List<MapFolder> = MapFolder.entries
 
-    /**
-     * Returns all MAP folders that should be tested.
-     */
-    fun getMapFolders(): List<MapFolder> = MapFolder.entries
+        /**
+         * Analyse a single MAP folder access result and produce a finding.
+         *
+         * Severity rules:
+         *  - Accessible without auth → CRITICAL for inbox/sent/draft, HIGH for others
+         *  - Accessible with auth    → LOW
+         *  - Not accessible          → INFO
+         */
+        fun analyzeAccessResult(
+            folder: MapFolder,
+            messageCount: Int,
+            requiredAuth: Boolean,
+        ): DataExfiltrationFinding {
+            val dataType = "sms"
+            val volume = "$messageCount messages"
 
-    /**
-     * Analyse a single MAP folder access result and produce a finding.
-     *
-     * Severity rules:
-     *  - Accessible without auth → CRITICAL for inbox/sent/draft, HIGH for others
-     *  - Accessible with auth    → LOW
-     *  - Not accessible          → INFO
-     */
-    fun analyzeAccessResult(
-        folder: MapFolder,
-        messageCount: Int,
-        requiredAuth: Boolean
-    ): DataExfiltrationFinding {
-        val dataType = "sms"
-        val volume = "$messageCount messages"
-
-        val (accessible, severity, recommendation) = when {
-            messageCount > 0 && !requiredAuth -> {
-                val sev = if (folder in CRITICAL_FOLDERS) {
-                    PbmapSeverity.CRITICAL
-                } else {
-                    PbmapSeverity.HIGH
+            val (accessible, severity, recommendation) =
+                when {
+                    messageCount > 0 && !requiredAuth -> {
+                        val sev =
+                            if (folder in CRITICAL_FOLDERS) {
+                                PbmapSeverity.CRITICAL
+                            } else {
+                                PbmapSeverity.HIGH
+                            }
+                        Triple(
+                            true,
+                            sev,
+                            "Require authentication for MAP access to $folder folder. " +
+                                "Messages are currently exposed without any authorisation.",
+                        )
+                    }
+                    messageCount > 0 && requiredAuth -> {
+                        Triple(
+                            true,
+                            PbmapSeverity.LOW,
+                            "MAP access to $folder folder requires authentication — " +
+                                "ensure only trusted devices are bonded.",
+                        )
+                    }
+                    else -> {
+                        Triple(
+                            false,
+                            PbmapSeverity.INFO,
+                            "MAP access to $folder folder is not available or returned no data.",
+                        )
+                    }
                 }
-                Triple(
-                    true,
-                    sev,
-                    "Require authentication for MAP access to $folder folder. " +
-                        "Messages are currently exposed without any authorisation."
-                )
-            }
-            messageCount > 0 && requiredAuth -> {
-                Triple(
-                    true,
-                    PbmapSeverity.LOW,
-                    "MAP access to $folder folder requires authentication — " +
-                        "ensure only trusted devices are bonded."
-                )
-            }
-            else -> {
-                Triple(
-                    false,
-                    PbmapSeverity.INFO,
-                    "MAP access to $folder folder is not available or returned no data."
-                )
-            }
-        }
 
-        return DataExfiltrationFinding(
-            profile = "MAP",
-            dataType = dataType,
-            accessible = accessible,
-            authRequired = requiredAuth,
-            dataVolume = volume,
-            severity = severity,
-            recommendation = recommendation
-        )
-    }
-
-    /**
-     * Analyse a list of MAP access results and return findings.
-     */
-    fun generateMapReport(results: List<MapAccessResult>): List<DataExfiltrationFinding> {
-        return results.map { result ->
-            analyzeAccessResult(
-                folder = result.folder,
-                messageCount = result.messageCount,
-                requiredAuth = result.requiredAuth
+            return DataExfiltrationFinding(
+                profile = "MAP",
+                dataType = dataType,
+                accessible = accessible,
+                authRequired = requiredAuth,
+                dataVolume = volume,
+                severity = severity,
+                recommendation = recommendation,
             )
         }
-    }
 
-    /**
-     * Compute the total number of exposed data entries from findings.
-     */
-    fun computeTotalExposure(findings: List<DataExfiltrationFinding>): Int {
-        return findings
-            .filter { it.accessible }
-            .sumOf { parseCountFromVolume(it.dataVolume) }
-    }
+        /**
+         * Analyse a list of MAP access results and return findings.
+         */
+        fun generateMapReport(results: List<MapAccessResult>): List<DataExfiltrationFinding> {
+            return results.map { result ->
+                analyzeAccessResult(
+                    folder = result.folder,
+                    messageCount = result.messageCount,
+                    requiredAuth = result.requiredAuth,
+                )
+            }
+        }
 
-    // ── Internal helpers ──
+        /**
+         * Compute the total number of exposed data entries from findings.
+         */
+        fun computeTotalExposure(findings: List<DataExfiltrationFinding>): Int {
+            return findings
+                .filter { it.accessible }
+                .sumOf { parseCountFromVolume(it.dataVolume) }
+        }
 
-    private fun parseCountFromVolume(volume: String): Int {
-        return volume.substringBefore(' ').toIntOrNull() ?: 0
-    }
+        // ── Internal helpers ──
 
-    companion object {
-        /** Folders that contain the most sensitive messages. */
-        private val CRITICAL_FOLDERS = setOf(
-            MapFolder.INBOX,
-            MapFolder.SENT,
-            MapFolder.DRAFT
-        )
+        private fun parseCountFromVolume(volume: String): Int {
+            return volume.substringBefore(' ').toIntOrNull() ?: 0
+        }
+
+        companion object {
+            /** Folders that contain the most sensitive messages. */
+            private val CRITICAL_FOLDERS =
+                setOf(
+                    MapFolder.INBOX,
+                    MapFolder.SENT,
+                    MapFolder.DRAFT,
+                )
+        }
     }
-}

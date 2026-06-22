@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface KeyExtractionDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertKeyExtractionResult(result: KeyExtractionResultEntity)
 

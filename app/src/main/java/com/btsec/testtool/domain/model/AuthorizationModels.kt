@@ -20,7 +20,12 @@ import java.time.Instant
 /** Serializer for java.time.Instant as epoch milliseconds (Long). */
 object InstantAsEpochMillisSerializer : KSerializer<Instant> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.LONG)
-    override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeLong(value.toEpochMilli())
+
+    override fun serialize(
+        encoder: Encoder,
+        value: Instant,
+    ) = encoder.encodeLong(value.toEpochMilli())
+
     override fun deserialize(decoder: Decoder): Instant = Instant.ofEpochMilli(decoder.decodeLong())
 }
 
@@ -49,7 +54,7 @@ data class Authorization(
     val authorizedActions: Set<TestAction> = emptySet(),
     val scope: TestScope,
     val signature: String,
-    val terms: List<String> = emptyList()
+    val terms: List<String> = emptyList(),
 )
 
 /**
@@ -64,7 +69,7 @@ enum class TestAction {
     SCAN_VULNERABILITIES,
     GENERATE_REPORT,
     EXPORT_DATA,
-    PACKET_CAPTURE
+    PACKET_CAPTURE,
 }
 
 /**
@@ -85,7 +90,7 @@ data class TestScope(
     @Serializable(with = InstantAsEpochMillisSerializer::class) val disclosureDeadline: Instant,
     val locationConstraints: String? = null,
     val requiresSupervision: Boolean = false,
-    val excludedTargets: List<String> = emptyList()
+    val excludedTargets: List<String> = emptyList(),
 ) {
     /**
      * Check if a target device is within scope.
@@ -111,7 +116,10 @@ data class TestScope(
         return now in validFrom..validUntil
     }
 
-    private fun matchesPattern(pattern: String, target: String): Boolean {
+    private fun matchesPattern(
+        pattern: String,
+        target: String,
+    ): Boolean {
         // Support wildcard patterns
         return when {
             pattern.endsWith("*") -> {
@@ -133,11 +141,12 @@ data class TestScope(
  */
 @Serializable
 data class TargetDevice(
-    val identifier: String,      // MAC address or pattern
+    // MAC address or pattern
+    val identifier: String,
     val deviceType: DeviceType = DeviceType.UNKNOWN,
     val owner: String? = null,
     val location: String? = null,
-    val notes: String? = null
+    val notes: String? = null,
 )
 
 /**
@@ -152,7 +161,7 @@ enum class DeviceType {
     WEARABLE,
     VEHICLE,
     IOT_DEVICE,
-    UNKNOWN
+    UNKNOWN,
 }
 
 /**
@@ -166,7 +175,7 @@ data class ConsentRecord(
     @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant,
     val authorized: Boolean,
     val deviceInfo: DeviceInfo,
-    val userSignature: String? = null
+    val userSignature: String? = null,
 )
 
 /**
@@ -178,5 +187,5 @@ data class DeviceInfo(
     val model: String,
     val androidVersion: String,
     val appVersion: String,
-    val bluetoothAddress: String
+    val bluetoothAddress: String,
 )

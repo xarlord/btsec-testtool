@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class RfcommFuzzingUseCaseTest {
-
     private lateinit var useCase: RfcommFuzzingUseCase
     private lateinit var dictionary: AtCommandDictionary
 
@@ -36,7 +35,6 @@ class RfcommFuzzingUseCaseTest {
     @Nested
     @DisplayName("generatePayload")
     inner class GeneratePayload {
-
         @Test
         @DisplayName("OVERSIZED_PAYLOAD produces correct size range")
         fun oversizedPayload_correctSize() {
@@ -89,11 +87,12 @@ class RfcommFuzzingUseCaseTest {
         fun utf8Malformed_containsInvalidSequence() {
             val payload = useCase.generatePayload(RfcommFuzzMethod.UTF8_MALFORMED, 0)
             // Should contain at least one byte from the malformed set
-            val malformedBytes = setOf(
-                0xFE.toByte(), 0xFF.toByte(), 0xC0.toByte(), 0x80.toByte(),
-                0xED.toByte(), 0xF4.toByte(), 0xBF.toByte(), 0xC2.toByte(),
-                0xE0.toByte(), 0xF0.toByte(), 0xA0.toByte(), 0x90.toByte()
-            )
+            val malformedBytes =
+                setOf(
+                    0xFE.toByte(), 0xFF.toByte(), 0xC0.toByte(), 0x80.toByte(),
+                    0xED.toByte(), 0xF4.toByte(), 0xBF.toByte(), 0xC2.toByte(),
+                    0xE0.toByte(), 0xF0.toByte(), 0xA0.toByte(), 0x90.toByte(),
+                )
             assertThat(payload.any { it in malformedBytes }).isTrue()
         }
 
@@ -118,7 +117,6 @@ class RfcommFuzzingUseCaseTest {
     @Nested
     @DisplayName("generateAtCommandPayloads")
     inner class GenerateAtCommandPayloads {
-
         @Test
         @DisplayName("HFP profile returns commands")
         fun hfp_hasCommands() {
@@ -150,7 +148,6 @@ class RfcommFuzzingUseCaseTest {
     @Nested
     @DisplayName("analyzeResponse")
     inner class AnalyzeResponse {
-
         @Test
         @DisplayName("ERROR response is detected")
         fun errorResponse() {
@@ -214,22 +211,24 @@ class RfcommFuzzingUseCaseTest {
     @Nested
     @DisplayName("computeFuzzStatistics")
     inner class ComputeFuzzStatistics {
-
         @Test
         @DisplayName("statistics contains key metrics")
         fun containsStats() {
-            val result = RfcommFuzzResult(
-                totalSent = 100,
-                responses = List(80) {
-                    RfcommResponse(System.currentTimeMillis(), byteArrayOf(0x41), 1, it)
-                },
-                errors = List(5) {
-                    RfcommError(System.currentTimeMillis(), it, "IO", "timeout", "00")
-                },
-                disconnected = false,
-                crashDetected = false,
-                durationMs = 5000
-            )
+            val result =
+                RfcommFuzzResult(
+                    totalSent = 100,
+                    responses =
+                        List(80) {
+                            RfcommResponse(System.currentTimeMillis(), byteArrayOf(0x41), 1, it)
+                        },
+                    errors =
+                        List(5) {
+                            RfcommError(System.currentTimeMillis(), it, "IO", "timeout", "00")
+                        },
+                    disconnected = false,
+                    crashDetected = false,
+                    durationMs = 5000,
+                )
             val stats = useCase.computeFuzzStatistics(result)
             assertThat(stats).contains("Total sent: 100")
             assertThat(stats).contains("Responses: 80")
@@ -245,7 +244,6 @@ class RfcommFuzzingUseCaseTest {
     @Nested
     @DisplayName("AtCommandDictionary")
     inner class AtCommandDictionaryTests {
-
         @Test
         @DisplayName("HFP commands are present")
         fun hfpCommands() {
@@ -276,7 +274,7 @@ class RfcommFuzzingUseCaseTest {
                 AtCommandCategory.NETWORK,
                 AtCommandCategory.DEVICE_INFO,
                 AtCommandCategory.PHONEBOOK,
-                AtCommandCategory.SMS
+                AtCommandCategory.SMS,
             )
         }
 

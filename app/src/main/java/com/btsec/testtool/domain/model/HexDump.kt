@@ -20,7 +20,7 @@ data class HexDumpEntry(
     val offset: Int,
     val hexBytes: String,
     val asciiRepresentation: String,
-    val rawBytes: ByteArray
+    val rawBytes: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -54,7 +54,7 @@ data class HexDumpResult(
     val value: ByteArray,
     val entries: List<HexDumpEntry>,
     val timestamp: Instant,
-    val size: Int
+    val size: Int,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -86,5 +86,5 @@ data class HexDumpResult(
 enum class HexDumpViewMode {
     HEX,
     TEXT,
-    BINARY
+    BINARY,
 }

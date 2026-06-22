@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test
  * All testing is conducted under AUTHORIZED security testing conditions.
  */
 class HexDumpViewModelTest {
-
     private lateinit var viewModel: HexDumpViewModel
     private lateinit var useCase: HexDumpUseCase
 
@@ -48,66 +47,68 @@ class HexDumpViewModelTest {
     @Nested
     @DisplayName("loadCharacteristicData")
     inner class LoadCharacteristicData {
-
         @Test
         @DisplayName("should transition from Loading to Success")
-        fun loadingToSuccess() = runTest {
-            val data = "Hello".toByteArray()
+        fun loadingToSuccess() =
+            runTest {
+                val data = "Hello".toByteArray()
 
-            viewModel.loadCharacteristicData(
-                data = data,
-                characteristicUuid = "test-uuid",
-                serviceUuid = "svc-uuid"
-            )
+                viewModel.loadCharacteristicData(
+                    data = data,
+                    characteristicUuid = "test-uuid",
+                    serviceUuid = "svc-uuid",
+                )
 
-            val state = viewModel.uiState.value
-            assertThat(state).isInstanceOf(HexDumpUiState.Success::class.java)
-        }
+                val state = viewModel.uiState.value
+                assertThat(state).isInstanceOf(HexDumpUiState.Success::class.java)
+            }
 
         @Test
         @DisplayName("should populate entries in success state")
-        fun populatesEntries() = runTest {
-            val data = "Hello World!".toByteArray()
+        fun populatesEntries() =
+            runTest {
+                val data = "Hello World!".toByteArray()
 
-            viewModel.loadCharacteristicData(
-                data = data,
-                characteristicUuid = "char-uuid",
-                serviceUuid = "svc-uuid"
-            )
+                viewModel.loadCharacteristicData(
+                    data = data,
+                    characteristicUuid = "char-uuid",
+                    serviceUuid = "svc-uuid",
+                )
 
-            val state = viewModel.uiState.value as HexDumpUiState.Success
-            assertThat(state.result.entries).isNotEmpty()
-            assertThat(state.result.size).isEqualTo(12)
-            assertThat(state.displayEntries).isEqualTo(state.result.entries)
-        }
+                val state = viewModel.uiState.value as HexDumpUiState.Success
+                assertThat(state.result.entries).isNotEmpty()
+                assertThat(state.result.size).isEqualTo(12)
+                assertThat(state.displayEntries).isEqualTo(state.result.entries)
+            }
 
         @Test
         @DisplayName("should handle empty data")
-        fun emptyData() = runTest {
-            viewModel.loadCharacteristicData(
-                data = byteArrayOf(),
-                characteristicUuid = "char-uuid",
-                serviceUuid = "svc-uuid"
-            )
+        fun emptyData() =
+            runTest {
+                viewModel.loadCharacteristicData(
+                    data = byteArrayOf(),
+                    characteristicUuid = "char-uuid",
+                    serviceUuid = "svc-uuid",
+                )
 
-            val state = viewModel.uiState.value as HexDumpUiState.Success
-            assertThat(state.result.entries).isEmpty()
-            assertThat(state.result.size).isEqualTo(0)
-        }
+                val state = viewModel.uiState.value as HexDumpUiState.Success
+                assertThat(state.result.entries).isEmpty()
+                assertThat(state.result.size).isEqualTo(0)
+            }
     }
 
     @Nested
     @DisplayName("setViewMode")
     inner class SetViewMode {
-
         @BeforeEach
-        fun loadData() = runTest {
-            viewModel.loadCharacteristicData(
-                data = "test".toByteArray(),
-                characteristicUuid = "uuid",
-                serviceUuid = "svc"
-            )
-        }
+        fun loadData() =
+            runTest {
+                viewModel.loadCharacteristicData(
+                    data = "test".toByteArray(),
+                    characteristicUuid = "uuid",
+                    serviceUuid = "svc",
+                )
+            }
 
         @Test
         @DisplayName("should default to HEX view mode")
@@ -148,17 +149,17 @@ class HexDumpViewModelTest {
     @Nested
     @DisplayName("search")
     inner class Search {
-
         @BeforeEach
-        fun loadData() = runTest {
-            // 32 bytes = 2 lines of 16
-            val data = ByteArray(32) { (it + 0x41).toByte() }
-            viewModel.loadCharacteristicData(
-                data = data,
-                characteristicUuid = "uuid",
-                serviceUuid = "svc"
-            )
-        }
+        fun loadData() =
+            runTest {
+                // 32 bytes = 2 lines of 16
+                val data = ByteArray(32) { (it + 0x41).toByte() }
+                viewModel.loadCharacteristicData(
+                    data = data,
+                    characteristicUuid = "uuid",
+                    serviceUuid = "svc",
+                )
+            }
 
         @Test
         @DisplayName("should filter entries by search query")
@@ -193,15 +194,15 @@ class HexDumpViewModelTest {
     @Nested
     @DisplayName("clipboard operations")
     inner class ClipboardOperations {
-
         @BeforeEach
-        fun loadData() = runTest {
-            viewModel.loadCharacteristicData(
-                data = "Hello".toByteArray(),
-                characteristicUuid = "uuid",
-                serviceUuid = "svc"
-            )
-        }
+        fun loadData() =
+            runTest {
+                viewModel.loadCharacteristicData(
+                    data = "Hello".toByteArray(),
+                    characteristicUuid = "uuid",
+                    serviceUuid = "svc",
+                )
+            }
 
         @Test
         @DisplayName("should generate full dump for copy")
@@ -238,15 +239,15 @@ class HexDumpViewModelTest {
     @Nested
     @DisplayName("format helpers")
     inner class FormatHelpers {
-
         @BeforeEach
-        fun loadData() = runTest {
-            viewModel.loadCharacteristicData(
-                data = byteArrayOf(0x0F, 0xFF.toByte()),
-                characteristicUuid = "uuid",
-                serviceUuid = "svc"
-            )
-        }
+        fun loadData() =
+            runTest {
+                viewModel.loadCharacteristicData(
+                    data = byteArrayOf(0x0F, 0xFF.toByte()),
+                    characteristicUuid = "uuid",
+                    serviceUuid = "svc",
+                )
+            }
 
         @Test
         @DisplayName("should generate binary representation")
@@ -258,16 +259,17 @@ class HexDumpViewModelTest {
 
         @Test
         @DisplayName("should generate text representation")
-        fun textRepresentation() = runTest {
-            viewModel.loadCharacteristicData(
-                data = "AB".toByteArray(),
-                characteristicUuid = "uuid",
-                serviceUuid = "svc"
-            )
+        fun textRepresentation() =
+            runTest {
+                viewModel.loadCharacteristicData(
+                    data = "AB".toByteArray(),
+                    characteristicUuid = "uuid",
+                    serviceUuid = "svc",
+                )
 
-            val text = viewModel.getTextRepresentation()
+                val text = viewModel.getTextRepresentation()
 
-            assertThat(text).isEqualTo("AB")
-        }
+                assertThat(text).isEqualTo("AB")
+            }
     }
 }

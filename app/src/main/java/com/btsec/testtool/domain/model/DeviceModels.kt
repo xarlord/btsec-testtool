@@ -16,18 +16,30 @@ import java.time.Instant
  */
 @Serializable
 data class BluetoothDevice(
-    val address: String,              // MAC address
-    val name: String? = null,         // Device name (nullable)
-    val type: BluetoothType = BluetoothType.UNKNOWN,  // BLE, Classic, Dual Mode
-    val deviceClass: DeviceClass? = null,     // Bluetooth device class
-    val bondState: BondState = BondState.NONE,          // Pairing state
-    val rssi: Int? = null,                    // Signal strength (dBm)
-    val txPower: Int? = null,                 // TX Power (dBm)
-    @Serializable(with = InstantAsEpochMillisSerializer::class) val firstSeen: Instant = Instant.now(),            // First discovery timestamp
-    @Serializable(with = InstantAsEpochMillisSerializer::class) val lastSeen: Instant = Instant.now(),             // Last seen timestamp
-    val scanCount: Int = 1,            // Number of times discovered
-    val services: List<String> = emptyList(),  // UUIDs of discovered services
-    val manufacturerData: Map<Int, ByteArray> = emptyMap()  // Company ID -> data
+    // MAC address
+    val address: String,
+    // Device name (nullable)
+    val name: String? = null,
+    // BLE, Classic, Dual Mode
+    val type: BluetoothType = BluetoothType.UNKNOWN,
+    // Bluetooth device class
+    val deviceClass: DeviceClass? = null,
+    // Pairing state
+    val bondState: BondState = BondState.NONE,
+    // Signal strength (dBm)
+    val rssi: Int? = null,
+    // TX Power (dBm)
+    val txPower: Int? = null,
+    // First discovery timestamp
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val firstSeen: Instant = Instant.now(),
+    // Last seen timestamp
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val lastSeen: Instant = Instant.now(),
+    // Number of times discovered
+    val scanCount: Int = 1,
+    // UUIDs of discovered services
+    val services: List<String> = emptyList(),
+    // Company ID -> data
+    val manufacturerData: Map<Int, ByteArray> = emptyMap(),
 ) {
     /**
      * Check if this is a BLE device.
@@ -50,10 +62,10 @@ data class BluetoothDevice(
  */
 @Serializable
 enum class BluetoothType {
-    BLE,           // Bluetooth Low Energy only
-    CLASSIC,       // Classic Bluetooth only
-    DUAL_MODE,     // Both BLE and Classic
-    UNKNOWN        // Could not determine type
+    BLE, // Bluetooth Low Energy only
+    CLASSIC, // Classic Bluetooth only
+    DUAL_MODE, // Both BLE and Classic
+    UNKNOWN, // Could not determine type
 }
 
 /**
@@ -71,7 +83,7 @@ enum class DeviceClass {
     VEHICLE,
     IOT_DEVICE,
     UNCATEGORIZED,
-    UNKNOWN
+    UNKNOWN,
 }
 
 /**
@@ -79,9 +91,9 @@ enum class DeviceClass {
  */
 @Serializable
 enum class BondState {
-    NONE,      // Not paired
-    BONDING,   // Pairing in progress
-    BONDED     // Successfully paired
+    NONE, // Not paired
+    BONDING, // Pairing in progress
+    BONDED, // Successfully paired
 }
 
 /**
@@ -90,8 +102,12 @@ enum class BondState {
 @Serializable
 sealed class ConnectionState {
     @Serializable data object Disconnected : ConnectionState()
+
     @Serializable data object Connecting : ConnectionState()
+
     @Serializable data object Connected : ConnectionState()
+
     @Serializable data object Disconnecting : ConnectionState()
+
     @Serializable data class Error(val message: String) : ConnectionState()
 }

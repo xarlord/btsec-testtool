@@ -15,7 +15,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.btsec.testtool.presentation.feature.dashboard.DashboardScreen
-import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,14 +22,14 @@ import org.junit.runner.RunWith
 /**
  * UI tests for DashboardScreen.
  *
- * Tests navigation elements, authorization info, feature grid,
- * and user interactions. Enhanced to include click interactions
- * and callback verification.
+ * Tests navigation elements, feature grid, and user interactions.
+ *
+ * Updated for the 1.15.x screen refactor: the DashboardScreen composable no
+ * longer takes `authId` or `onBack` parameters (the authorization card and
+ * back navigation were moved out of the dashboard). See issue #367.
  */
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class DashboardScreenTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -40,13 +39,11 @@ class DashboardScreenTest {
     fun testDashboardScreen_displaysTitle() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -56,55 +53,14 @@ class DashboardScreenTest {
     }
 
     @Test
-    fun testDashboardScreen_displaysAuthorizationId() {
-        val testAuthId = "BTSEC-20260208-A1B2C3D4"
-        composeTestRule.setContent {
-            DashboardScreen(
-                authId = testAuthId,
-                onNavigateToScanner = { },
-                onNavigateToFuzzer = { },
-                onNavigateToKeys = { },
-                onNavigateToVulns = { },
-                onNavigateToReports = { },
-                onBack = { }
-            )
-        }
-
-        composeTestRule
-            .onNodeWithText(testAuthId)
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun testDashboardScreen_displaysAuthorizationStatus() {
-        composeTestRule.setContent {
-            DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onNavigateToScanner = { },
-                onNavigateToFuzzer = { },
-                onNavigateToKeys = { },
-                onNavigateToVulns = { },
-                onNavigateToReports = { },
-                onBack = { }
-            )
-        }
-
-        composeTestRule
-            .onNodeWithText("Authorized")
-            .assertIsDisplayed()
-    }
-
-    @Test
     fun testDashboardScreen_displaysFeaturesHeader() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -119,13 +75,11 @@ class DashboardScreenTest {
     fun testDashboardScreen_displaysScannerCard() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -138,13 +92,11 @@ class DashboardScreenTest {
     fun testDashboardScreen_displaysVulnerabilitiesCard() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -157,13 +109,11 @@ class DashboardScreenTest {
     fun testDashboardScreen_displaysFuzzerCard() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -176,13 +126,11 @@ class DashboardScreenTest {
     fun testDashboardScreen_displaysKeyExtractionCard() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -195,13 +143,11 @@ class DashboardScreenTest {
     fun testDashboardScreen_displaysReportsCard() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -217,13 +163,11 @@ class DashboardScreenTest {
         var scannerClicked = false
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { scannerClicked = true },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -239,13 +183,11 @@ class DashboardScreenTest {
         var vulnsClicked = false
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { vulnsClicked = true },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -261,13 +203,11 @@ class DashboardScreenTest {
         var fuzzerClicked = false
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { fuzzerClicked = true },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -283,13 +223,11 @@ class DashboardScreenTest {
         var keysClicked = false
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { keysClicked = true },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -305,13 +243,11 @@ class DashboardScreenTest {
         var reportsClicked = false
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { reportsClicked = true },
-                onBack = { }
             )
         }
 
@@ -322,65 +258,17 @@ class DashboardScreenTest {
         assert(reportsClicked) { "Reports navigation callback should have been invoked" }
     }
 
-    // ── Back navigation ─────────────────────────────────────────────
-
-    @Test
-    fun testDashboardScreen_backButton_invokesCallback() {
-        var backClicked = false
-        composeTestRule.setContent {
-            DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
-                onNavigateToScanner = { },
-                onNavigateToFuzzer = { },
-                onNavigateToKeys = { },
-                onNavigateToVulns = { },
-                onNavigateToReports = { },
-                onBack = { backClicked = true }
-            )
-        }
-
-        composeTestRule
-            .onNodeWithContentDescription("Navigate back")
-            .performClick()
-
-        assert(backClicked) { "Back callback should have been invoked" }
-    }
-
-    // ── Auth ID variation ───────────────────────────────────────────
-
-    @Test
-    fun testDashboardScreen_differentAuthId_reflectsInCard() {
-        val customAuthId = "BTSEC-20260315-CUSTOM987"
-        composeTestRule.setContent {
-            DashboardScreen(
-                authId = customAuthId,
-                onNavigateToScanner = { },
-                onNavigateToFuzzer = { },
-                onNavigateToKeys = { },
-                onNavigateToVulns = { },
-                onNavigateToReports = { },
-                onBack = { }
-            )
-        }
-
-        composeTestRule
-            .onNodeWithText("Authorization ID: $customAuthId")
-            .assertExists()
-    }
-
     // ── Settings icon ───────────────────────────────────────────────
 
     @Test
     fun testDashboardScreen_displaysSettingsIcon() {
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
-                onBack = { }
             )
         }
 
@@ -394,14 +282,12 @@ class DashboardScreenTest {
         var settingsClicked = false
         composeTestRule.setContent {
             DashboardScreen(
-                authId = "BTSEC-20260208-A1B2C3D4",
                 onNavigateToScanner = { },
                 onNavigateToFuzzer = { },
                 onNavigateToKeys = { },
                 onNavigateToVulns = { },
                 onNavigateToReports = { },
                 onNavigateToSettings = { settingsClicked = true },
-                onBack = { }
             )
         }
 

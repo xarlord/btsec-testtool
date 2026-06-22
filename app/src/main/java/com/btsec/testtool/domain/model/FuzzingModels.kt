@@ -17,18 +17,30 @@ import java.time.Instant
 @Serializable
 data class FuzzConfig(
     val targetDevice: BluetoothDevice,
-    val targetService: BleService? = null,    // Service to fuzz (null = all)
-    val targetCharacteristic: BleCharacteristic? = null,  // Characteristic to fuzz
-    val fuzzMethod: FuzzMethod = FuzzMethod.RANDOM,        // Fuzzing strategy
-    val packetCount: Int = 100,              // Number of packets to send
-    val packetsPerSecond: Int = 10,         // Rate limiting
-    val randomSeed: Long? = null,             // Seed for reproducibility
-    val dataPatterns: List<FuzzDataPattern> = emptyList(),  // Data patterns to use
-    val durationSeconds: Int? = null,         // Max duration (null = count-based)
-    val stopOnError: Boolean = true,   // Stop on device error
-    val stopOnDisconnect: Boolean = true,  // Stop on disconnect
-    val capturePackets: Boolean = true,  // Capture packets
-    val captureNotifications: Boolean = true  // Capture notifications
+    // Service to fuzz (null = all)
+    val targetService: BleService? = null,
+    // Characteristic to fuzz
+    val targetCharacteristic: BleCharacteristic? = null,
+    // Fuzzing strategy
+    val fuzzMethod: FuzzMethod = FuzzMethod.RANDOM,
+    // Number of packets to send
+    val packetCount: Int = 100,
+    // Rate limiting
+    val packetsPerSecond: Int = 10,
+    // Seed for reproducibility
+    val randomSeed: Long? = null,
+    // Data patterns to use
+    val dataPatterns: List<FuzzDataPattern> = emptyList(),
+    // Max duration (null = count-based)
+    val durationSeconds: Int? = null,
+    // Stop on device error
+    val stopOnError: Boolean = true,
+    // Stop on disconnect
+    val stopOnDisconnect: Boolean = true,
+    // Capture packets
+    val capturePackets: Boolean = true,
+    // Capture notifications
+    val captureNotifications: Boolean = true,
 )
 
 /**
@@ -36,18 +48,18 @@ data class FuzzConfig(
  */
 @Serializable
 enum class FuzzMethod {
-    BIT_FLIP,              // Flip individual bits
-    BYTE_FLIP,             // Flip entire bytes
-    RANDOM,                // Random bytes
-    SEQUENTIAL,            // Sequential patterns
-    LENGTH_FUZZING,        // Vary length (buffer overflow)
-    BOUNDARY_CASE,         // Boundary values
-    FORMAT_STRING,         // Format string patterns
-    INJECTION,             // Injection patterns
-    MUTATION,              // Mutate valid packets
-    PROTOCOL_STATE,        // State machine abuse
-    REPLAY,                // Replay captured packets
-    DELAY                  // Timing-based fuzzing
+    BIT_FLIP, // Flip individual bits
+    BYTE_FLIP, // Flip entire bytes
+    RANDOM, // Random bytes
+    SEQUENTIAL, // Sequential patterns
+    LENGTH_FUZZING, // Vary length (buffer overflow)
+    BOUNDARY_CASE, // Boundary values
+    FORMAT_STRING, // Format string patterns
+    INJECTION, // Injection patterns
+    MUTATION, // Mutate valid packets
+    PROTOCOL_STATE, // State machine abuse
+    REPLAY, // Replay captured packets
+    DELAY, // Timing-based fuzzing
 }
 
 /**
@@ -59,7 +71,7 @@ data class FuzzDataPattern(
     val description: String,
     val patternType: PatternType = PatternType.RANDOM,
     val data: ByteArray = byteArrayOf(),
-    val length: Int = data.size
+    val length: Int = data.size,
 )
 
 /**
@@ -67,15 +79,15 @@ data class FuzzDataPattern(
  */
 @Serializable
 enum class PatternType {
-    MALFORMED,         // Malformed data
-    OVERLONG,          // Excessively long data
-    UNDERSIZED,        // Too short data
-    NULL_BYTES,        // Contains null bytes
-    SPECIAL_CHARS,     // Special characters
-    EDGE_CASE,         // Boundary values
-    RANDOM,            // Random data
-    VALID_MUTATED,     // Valid data with mutations
-    KNOWN_EXPLOIT      // Known exploit patterns
+    MALFORMED, // Malformed data
+    OVERLONG, // Excessively long data
+    UNDERSIZED, // Too short data
+    NULL_BYTES, // Contains null bytes
+    SPECIAL_CHARS, // Special characters
+    EDGE_CASE, // Boundary values
+    RANDOM, // Random data
+    VALID_MUTATED, // Valid data with mutations
+    KNOWN_EXPLOIT, // Known exploit patterns
 }
 
 /**
@@ -92,8 +104,9 @@ data class FuzzResult(
     val packetsReceived: Int = 0,
     val errors: List<FuzzError> = emptyList(),
     val findings: List<FuzzFinding> = emptyList(),
-    val captureFile: String? = null,          // Path to packet capture
-    val reportGenerated: Boolean = false
+    // Path to packet capture
+    val captureFile: String? = null,
+    val reportGenerated: Boolean = false,
 ) {
     /**
      * Get duration of fuzzing test.
@@ -101,7 +114,9 @@ data class FuzzResult(
     fun getDuration(): java.time.Duration? {
         return if (endTime != null) {
             java.time.Duration.between(startTime, endTime)
-        } else null
+        } else {
+            null
+        }
     }
 
     /**
@@ -110,7 +125,9 @@ data class FuzzResult(
     fun getSuccessRate(): Double {
         return if (packetsSent > 0) {
             (packetsReceived.toDouble() / packetsSent.toDouble()) * 100.0
-        } else 0.0
+        } else {
+            0.0
+        }
     }
 }
 
@@ -123,7 +140,7 @@ enum class FuzzStatus {
     RUNNING,
     COMPLETED,
     STOPPED,
-    ERROR
+    ERROR,
 }
 
 /**
@@ -133,10 +150,12 @@ enum class FuzzStatus {
 data class FuzzError(
     @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant,
     val packetNumber: Int = 0,
-    val errorCode: Int? = null,              // Android/error code
+    // Android/error code
+    val errorCode: Int? = null,
     val errorMessage: String = "",
     val severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-    val packetData: ByteArray? = null  // Problematic packet
+    // Problematic packet
+    val packetData: ByteArray? = null,
 )
 
 /**
@@ -144,11 +163,11 @@ data class FuzzError(
  */
 @Serializable
 enum class ErrorSeverity {
-    CRITICAL,     // Device crashed/rebooted
-    HIGH,         // Device disconnected/error state
-    MEDIUM,       // Operation failed
-    LOW,          // Non-fatal error
-    INFO          // Informational
+    CRITICAL, // Device crashed/rebooted
+    HIGH, // Device disconnected/error state
+    MEDIUM, // Operation failed
+    LOW, // Non-fatal error
+    INFO, // Informational
 }
 
 /**
@@ -164,7 +183,7 @@ data class FuzzFinding(
     val response: ByteArray? = null,
     val category: FindingCategory = FindingCategory.UNEXPECTED_RESPONSE,
     val reproducible: Boolean = false,
-    val additionalNotes: String? = null
+    val additionalNotes: String? = null,
 )
 
 /**
@@ -172,14 +191,14 @@ data class FuzzFinding(
  */
 @Serializable
 enum class FindingCategory {
-    CRASH,              // Device/service crash
-    HANG,               // Device/service hang
-    MEMORY_CORRUPTION,  // Memory corruption detected
-    UNEXPECTED_RESPONSE,  // Unexpected response
-    NO_RESPONSE,        // No response (DoS)
-    DELAYED_RESPONSE,   // Abnormally delayed response
-    STATE_ERROR,        // State machine error
-    BUFFER_OVERFLOW,    // Potential buffer overflow
-    INFORMATION_LEAK,   // Information disclosure
-    BYPASS              // Security bypass
+    CRASH, // Device/service crash
+    HANG, // Device/service hang
+    MEMORY_CORRUPTION, // Memory corruption detected
+    UNEXPECTED_RESPONSE, // Unexpected response
+    NO_RESPONSE, // No response (DoS)
+    DELAYED_RESPONSE, // Abnormally delayed response
+    STATE_ERROR, // State machine error
+    BUFFER_OVERFLOW, // Potential buffer overflow
+    INFORMATION_LEAK, // Information disclosure
+    BYPASS, // Security bypass
 }

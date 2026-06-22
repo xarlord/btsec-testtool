@@ -23,7 +23,6 @@ import java.nio.ByteOrder
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class L2capSecurityUseCaseTest {
-
     private lateinit var useCase: L2capSecurityUseCase
 
     @BeforeEach
@@ -34,7 +33,6 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("getTestSuite")
     inner class GetTestSuite {
-
         @Test
         @DisplayName("should have at least 14 predefined tests")
         fun testGetTestSuite_hasMinimum14Tests() {
@@ -49,7 +47,7 @@ class L2capSecurityUseCaseTest {
             val suite = useCase.getTestSuite()
             val categories = suite.map { it.category }.toSet()
             assertThat(categories).containsAtLeastElementsIn(
-                L2capTestCategory.entries
+                L2capTestCategory.entries,
             )
         }
     }
@@ -57,7 +55,6 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("buildL2capPacket")
     inner class BuildL2capPacket {
-
         @Test
         @DisplayName("should produce correct L2CAP packet format")
         fun testBuildL2capPacket_correctFormat() {
@@ -90,16 +87,16 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("buildSignalPacket")
     inner class BuildSignalPacket {
-
         @Test
         @DisplayName("should produce correct signaling header")
         fun testBuildSignalPacket_correctHeader() {
             val payload = byteArrayOf(0x01, 0x00)
-            val result = useCase.buildSignalPacket(
-                L2capSignalCommand.INFORMATION_REQUEST,
-                0x42,
-                payload
-            )
+            val result =
+                useCase.buildSignalPacket(
+                    L2capSignalCommand.INFORMATION_REQUEST,
+                    0x42,
+                    payload,
+                )
 
             assertThat(result).hasLength(4 + payload.size)
 
@@ -115,11 +112,12 @@ class L2capSecurityUseCaseTest {
         @DisplayName("should match command code in first byte")
         fun testBuildSignalPacket_commandCodeMatches() {
             val payload = byteArrayOf()
-            val result = useCase.buildSignalPacket(
-                L2capSignalCommand.ECHO_REQUEST,
-                0x01,
-                payload
-            )
+            val result =
+                useCase.buildSignalPacket(
+                    L2capSignalCommand.ECHO_REQUEST,
+                    0x01,
+                    payload,
+                )
 
             assertThat(result[0].toInt() and 0xFF).isEqualTo(0x08)
         }
@@ -128,7 +126,6 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("parseL2capResponse")
     inner class ParseL2capResponse {
-
         @Test
         @DisplayName("should parse valid L2CAP packet")
         fun testParseL2capResponse_validPacket() {
@@ -155,9 +152,9 @@ class L2capSecurityUseCaseTest {
         fun testParseL2capResponse_lengthMismatch() {
             // Declare length=100 but only provide 4-byte header + 2 bytes
             val buffer = ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN)
-            buffer.putShort(100)  // length=100
+            buffer.putShort(100) // length=100
             buffer.putShort(0x0001) // CID
-            buffer.put(0x0A)       // partial payload
+            buffer.put(0x0A) // partial payload
             buffer.put(0x01)
 
             val result = useCase.parseL2capResponse(buffer.array())
@@ -168,7 +165,6 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("identifyChannel")
     inner class IdentifyChannel {
-
         @Test
         @DisplayName("should identify L2CAP Signaling channel")
         fun testIdentifyChannel_signaling() {
@@ -193,20 +189,20 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("analyzeResult")
     inner class AnalyzeResult {
-
         @Test
         @DisplayName("should detect vulnerability when null response on high-severity test")
         fun testAnalyzeResult_vulnerableResponse() {
-            val testCase = L2capTestCase(
-                name = "Config Request: MTU=0",
-                category = L2capTestCategory.MTU_NEGOTIATION,
-                signalCommand = L2capSignalCommand.CONFIGURATION_REQUEST,
-                requestPayload = "test",
-                expectedBehavior = "Should reject",
-                vulnerabilityIndicator = "Accepts zero MTU",
-                severity = L2capSeverity.HIGH,
-                recommendation = "Patch firmware"
-            )
+            val testCase =
+                L2capTestCase(
+                    name = "Config Request: MTU=0",
+                    category = L2capTestCategory.MTU_NEGOTIATION,
+                    signalCommand = L2capSignalCommand.CONFIGURATION_REQUEST,
+                    requestPayload = "test",
+                    expectedBehavior = "Should reject",
+                    vulnerabilityIndicator = "Accepts zero MTU",
+                    severity = L2capSeverity.HIGH,
+                    recommendation = "Patch firmware",
+                )
 
             val result = useCase.analyzeResult(testCase, null)
 
@@ -218,16 +214,17 @@ class L2capSecurityUseCaseTest {
         @Test
         @DisplayName("should not mark as vulnerable when command is properly rejected")
         fun testAnalyzeResult_errorResponse() {
-            val testCase = L2capTestCase(
-                name = "Info Request: MTU",
-                category = L2capTestCategory.INFORMATION_QUERY,
-                signalCommand = L2capSignalCommand.INFORMATION_REQUEST,
-                requestPayload = "0100",
-                expectedBehavior = "Respond with MTU",
-                vulnerabilityIndicator = "No response",
-                severity = L2capSeverity.INFO,
-                recommendation = "Document"
-            )
+            val testCase =
+                L2capTestCase(
+                    name = "Info Request: MTU",
+                    category = L2capTestCategory.INFORMATION_QUERY,
+                    signalCommand = L2capSignalCommand.INFORMATION_REQUEST,
+                    requestPayload = "0100",
+                    expectedBehavior = "Respond with MTU",
+                    vulnerabilityIndicator = "No response",
+                    severity = L2capSeverity.INFO,
+                    recommendation = "Document",
+                )
 
             // Build a COMMAND_REJECT response
             val rejectPayload = byteArrayOf(0x01, 0x01, 0x02, 0x00)
@@ -243,36 +240,36 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("computeOverallRisk")
     inner class ComputeOverallRisk {
-
         @Test
         @DisplayName("should return CRITICAL when any result is critical and vulnerable")
         fun testComputeOverallRisk_critical() {
-            val results = listOf(
-                L2capTestResult(
-                    category = L2capTestCategory.MTU_NEGOTIATION,
-                    testName = "MTU=0",
-                    signalCommand = L2capSignalCommand.CONFIGURATION_REQUEST,
-                    requestPayload = "",
-                    responsePayload = null,
-                    vulnerable = true,
-                    confidence = 0.9,
-                    evidence = "Device crashed",
-                    severity = L2capSeverity.CRITICAL,
-                    recommendation = "Patch"
-                ),
-                L2capTestResult(
-                    category = L2capTestCategory.ECHO_TESTING,
-                    testName = "Echo",
-                    signalCommand = L2capSignalCommand.ECHO_REQUEST,
-                    requestPayload = "",
-                    responsePayload = "ok",
-                    vulnerable = false,
-                    confidence = 0.8,
-                    evidence = "Normal",
-                    severity = L2capSeverity.INFO,
-                    recommendation = "None"
+            val results =
+                listOf(
+                    L2capTestResult(
+                        category = L2capTestCategory.MTU_NEGOTIATION,
+                        testName = "MTU=0",
+                        signalCommand = L2capSignalCommand.CONFIGURATION_REQUEST,
+                        requestPayload = "",
+                        responsePayload = null,
+                        vulnerable = true,
+                        confidence = 0.9,
+                        evidence = "Device crashed",
+                        severity = L2capSeverity.CRITICAL,
+                        recommendation = "Patch",
+                    ),
+                    L2capTestResult(
+                        category = L2capTestCategory.ECHO_TESTING,
+                        testName = "Echo",
+                        signalCommand = L2capSignalCommand.ECHO_REQUEST,
+                        requestPayload = "",
+                        responsePayload = "ok",
+                        vulnerable = false,
+                        confidence = 0.8,
+                        evidence = "Normal",
+                        severity = L2capSeverity.INFO,
+                        recommendation = "None",
+                    ),
                 )
-            )
 
             val risk = useCase.computeOverallRisk(results)
 
@@ -284,23 +281,24 @@ class L2capSecurityUseCaseTest {
     @Nested
     @DisplayName("generateReport")
     inner class GenerateReport {
-
         @Test
         @DisplayName("should include discovered channels in output")
         fun testGenerateReport_includesChannels() {
-            val report = L2capTestReport(
-                targetDevice = "AA:BB:CC:DD:EE:FF",
-                results = emptyList(),
-                discoveredChannels = listOf(
-                    L2capFixedChannel.SIGNALING,
-                    L2capFixedChannel.ATT,
-                    L2capFixedChannel.SMP
-                ),
-                supportedFeatures = listOf("Flow Control", "Retransmission"),
-                criticalCount = 0,
-                highCount = 0,
-                testDurationMs = 5000
-            )
+            val report =
+                L2capTestReport(
+                    targetDevice = "AA:BB:CC:DD:EE:FF",
+                    results = emptyList(),
+                    discoveredChannels =
+                        listOf(
+                            L2capFixedChannel.SIGNALING,
+                            L2capFixedChannel.ATT,
+                            L2capFixedChannel.SMP,
+                        ),
+                    supportedFeatures = listOf("Flow Control", "Retransmission"),
+                    criticalCount = 0,
+                    highCount = 0,
+                    testDurationMs = 5000,
+                )
 
             val output = useCase.generateReport(report)
 
@@ -314,28 +312,30 @@ class L2capSecurityUseCaseTest {
         @Test
         @DisplayName("should include test results with severity and evidence")
         fun testGenerateReport_includesResults() {
-            val report = L2capTestReport(
-                targetDevice = "11:22:33:44:55:66",
-                results = listOf(
-                    L2capTestResult(
-                        category = L2capTestCategory.MTU_NEGOTIATION,
-                        testName = "Config Request: MTU=0",
-                        signalCommand = L2capSignalCommand.CONFIGURATION_REQUEST,
-                        requestPayload = "payload",
-                        responsePayload = "resp",
-                        vulnerable = true,
-                        confidence = 0.95,
-                        evidence = "Device accepted zero MTU",
-                        severity = L2capSeverity.HIGH,
-                        recommendation = "Reject zero MTU"
-                    )
-                ),
-                discoveredChannels = emptyList(),
-                supportedFeatures = emptyList(),
-                criticalCount = 0,
-                highCount = 1,
-                testDurationMs = 1200
-            )
+            val report =
+                L2capTestReport(
+                    targetDevice = "11:22:33:44:55:66",
+                    results =
+                        listOf(
+                            L2capTestResult(
+                                category = L2capTestCategory.MTU_NEGOTIATION,
+                                testName = "Config Request: MTU=0",
+                                signalCommand = L2capSignalCommand.CONFIGURATION_REQUEST,
+                                requestPayload = "payload",
+                                responsePayload = "resp",
+                                vulnerable = true,
+                                confidence = 0.95,
+                                evidence = "Device accepted zero MTU",
+                                severity = L2capSeverity.HIGH,
+                                recommendation = "Reject zero MTU",
+                            ),
+                        ),
+                    discoveredChannels = emptyList(),
+                    supportedFeatures = emptyList(),
+                    criticalCount = 0,
+                    highCount = 1,
+                    testDurationMs = 1200,
+                )
 
             val output = useCase.generateReport(report)
 

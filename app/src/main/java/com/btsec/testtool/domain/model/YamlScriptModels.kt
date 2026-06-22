@@ -24,7 +24,7 @@ data class YamlTestScript(
     val timeout: Long = 60000,
     val tags: List<String> = emptyList(),
     val variables: Map<String, String> = emptyMap(),
-    val steps: List<YamlStep>
+    val steps: List<YamlStep>,
 )
 
 /**
@@ -34,14 +34,19 @@ data class YamlTestScript(
  * Steps can be nested via substeps for loops and conditional execution.
  */
 data class YamlStep(
-    val action: String,     // "scan", "connect", "read", "write", etc.
+    // "scan", "connect", "read", "write", etc.
+    val action: String,
     val params: Map<String, String> = emptyMap(),
     val label: String? = null,
-    val `continue`: String = "stop",  // "stop", "skip", "retry", "continue"
+    // "stop", "skip", "retry", "continue"
+    val `continue`: String = "stop",
     val timeout: Long = 10000,
-    val repeat: Int = 1,    // Number of times to repeat this step
-    val `if`: String? = null,   // Condition expression
-    val substeps: List<YamlStep> = emptyList()  // For loops/conditions
+    // Number of times to repeat this step
+    val repeat: Int = 1,
+    // Condition expression
+    val `if`: String? = null,
+    // For loops/conditions
+    val substeps: List<YamlStep> = emptyList(),
 )
 
 /**
@@ -51,7 +56,7 @@ data class YamlParseError(
     val line: Int,
     val column: Int,
     val message: String,
-    val severity: YamlErrorSeverity
+    val severity: YamlErrorSeverity,
 )
 
 /**
@@ -68,5 +73,5 @@ enum class YamlErrorSeverity { ERROR, WARNING }
 data class YamlParseResult(
     val script: YamlTestScript?,
     val errors: List<YamlParseError>,
-    val warnings: List<YamlParseError>
+    val warnings: List<YamlParseError>,
 )

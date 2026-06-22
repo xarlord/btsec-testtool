@@ -29,7 +29,6 @@ import com.btsec.testtool.domain.model.*
  * 5. Tamper-evident
  */
 interface ConsentWriter {
-
     /**
      * Request user consent for a specific action.
      *
@@ -41,7 +40,7 @@ interface ConsentWriter {
     suspend fun requestConsent(
         authId: String,
         action: TestAction,
-        deviceInfo: DeviceInfo
+        deviceInfo: DeviceInfo,
     ): ConsentRecord?
 
     /**
@@ -57,7 +56,7 @@ interface ConsentWriter {
         authId: String,
         action: TestAction,
         context: String,
-        deviceInfo: DeviceInfo
+        deviceInfo: DeviceInfo,
     ): ConsentRecord?
 
     /**
@@ -71,7 +70,10 @@ interface ConsentWriter {
      * @param authId Authorization ID
      * @param action Action to revoke
      */
-    suspend fun revokeConsent(authId: String, action: TestAction): Result<Unit>
+    suspend fun revokeConsent(
+        authId: String,
+        action: TestAction,
+    ): Result<Unit>
 
     /**
      * Revoke all consent for an authorization.
@@ -101,7 +103,7 @@ interface ConsentWriter {
         operation: String,
         deviceInfo: DeviceInfo,
         success: Boolean,
-        metadata: Map<String, String> = emptyMap()
+        metadata: Map<String, String> = emptyMap(),
     ): Result<Unit>
 
     /**
@@ -113,7 +115,7 @@ interface ConsentWriter {
      */
     suspend fun generateComplianceReport(
         startDate: java.time.Instant,
-        endDate: java.time.Instant
+        endDate: java.time.Instant,
     ): ComplianceReport
 
     /**
@@ -124,6 +126,6 @@ interface ConsentWriter {
      */
     suspend fun exportAuditLog(
         outputPath: String,
-        format: AuditExportFormat
+        format: AuditExportFormat,
     ): Result<java.io.File>
 }
