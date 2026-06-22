@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class AuthorizationUseCaseTest {
-
     private lateinit var useCase: AuthorizationUseCase
     private val authRepo: AuthorizationRepository = mockk(relaxed = true)
     private val consentRepo: ConsentRepository = mockk(relaxed = true)

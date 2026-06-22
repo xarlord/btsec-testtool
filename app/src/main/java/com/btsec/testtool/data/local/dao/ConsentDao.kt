@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface ConsentDao {
-
     // ========== Consent CRUD ==========
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -62,13 +61,22 @@ interface ConsentDao {
     fun getConsentsByAction(action: String): Flow<List<ConsentRecordEntity>>
 
     @Query("SELECT * FROM consent_records WHERE auth_id = :authId AND action = :action ORDER BY timestamp DESC LIMIT 1")
-    suspend fun getLatestConsentForAction(authId: String, action: String): ConsentRecordEntity?
+    suspend fun getLatestConsentForAction(
+        authId: String,
+        action: String,
+    ): ConsentRecordEntity?
 
     @Query("SELECT * FROM consent_records WHERE timestamp >= :fromEpochMs AND timestamp <= :toEpochMs ORDER BY timestamp DESC")
-    fun getConsentRecordsInRange(fromEpochMs: Long, toEpochMs: Long): Flow<List<ConsentRecordEntity>>
+    fun getConsentRecordsInRange(
+        fromEpochMs: Long,
+        toEpochMs: Long,
+    ): Flow<List<ConsentRecordEntity>>
 
     @Query("SELECT EXISTS(SELECT 1 FROM consent_records WHERE auth_id = :authId AND action = :action AND authorized = 1)")
-    suspend fun hasConsent(authId: String, action: String): Boolean
+    suspend fun hasConsent(
+        authId: String,
+        action: String,
+    ): Boolean
 
     @Query("SELECT COUNT(*) FROM consent_records")
     suspend fun getConsentCount(): Int
@@ -100,7 +108,10 @@ interface ConsentDao {
     fun getAuditLogsByOperation(operation: String): Flow<List<AuditLogEntity>>
 
     @Query("SELECT * FROM audit_log WHERE timestamp >= :fromEpochMs AND timestamp <= :toEpochMs ORDER BY timestamp DESC")
-    fun getAuditLogsInRange(fromEpochMs: Long, toEpochMs: Long): Flow<List<AuditLogEntity>>
+    fun getAuditLogsInRange(
+        fromEpochMs: Long,
+        toEpochMs: Long,
+    ): Flow<List<AuditLogEntity>>
 
     @Query("SELECT * FROM audit_log WHERE success = 0 ORDER BY timestamp DESC")
     fun getFailedAuditLogs(): Flow<List<AuditLogEntity>>

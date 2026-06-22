@@ -29,7 +29,7 @@ data class ScanSummary(
     val infoCount: Int,
     val averageRiskScore: Double,
     val mostTestedDevice: String?,
-    val lastScanDate: Long?
+    val lastScanDate: Long?,
 )
 
 /**
@@ -40,18 +40,23 @@ data class VulnerabilityTrend(
     val critical: Int,
     val high: Int,
     val medium: Int,
-    val low: Int
+    val low: Int,
 )
 
 /**
  * Count of devices in each risk-score bucket.
  */
 data class RiskScoreDistribution(
-    val range_0_20: Int,   // Minimal
-    val range_21_40: Int,  // Low
-    val range_41_60: Int,  // Medium
-    val range_61_80: Int,  // High
-    val range_81_100: Int  // Critical
+    // Minimal
+    val range_0_20: Int,
+    // Low
+    val range_21_40: Int,
+    // Medium
+    val range_41_60: Int,
+    // High
+    val range_61_80: Int,
+    // Critical
+    val range_81_100: Int,
 )
 
 /**
@@ -62,7 +67,7 @@ data class DeviceRiskRanking(
     val deviceName: String?,
     val riskScore: Double,
     val vulnerabilityCount: Int,
-    val lastTested: Long
+    val lastTested: Long,
 )
 
 /**
@@ -72,7 +77,7 @@ data class ProfileTestCoverage(
     val profileName: String,
     val testsRun: Int,
     val vulnerabilitiesFound: Int,
-    val coveragePercent: Float
+    val coveragePercent: Float,
 )
 
 /**
@@ -84,7 +89,7 @@ data class DashboardData(
     val riskDistribution: RiskScoreDistribution,
     val topDevices: List<DeviceRiskRanking>,
     val profileCoverage: List<ProfileTestCoverage>,
-    val generatedAt: Long
+    val generatedAt: Long,
 )
 
 /**
@@ -98,5 +103,5 @@ enum class TimeRange { LAST_7_DAYS, LAST_30_DAYS, LAST_90_DAYS, ALL_TIME }
 data class ChartDataPoint(
     val x: Float,
     val y: Float,
-    val label: String
+    val label: String,
 )

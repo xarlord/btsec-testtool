@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class BluetoothScanningUseCaseTest {
-
     private lateinit var useCase: BluetoothScanningUseCase
     private val btRepo: BluetoothRepository = mockk(relaxed = true)
 
@@ -29,11 +28,12 @@ class BluetoothScanningUseCaseTest {
     }
 
     @Test
-    fun `getSelectedDeviceAddress returns flow`() = runTest {
-        every { btRepo.getSelectedDeviceAddress() } returns flowOf("AA:BB:CC:DD:EE:FF")
-        val result = useCase.getSelectedDeviceAddress().first()
-        assertEquals("AA:BB:CC:DD:EE:FF", result)
-    }
+    fun `getSelectedDeviceAddress returns flow`() =
+        runTest {
+            every { btRepo.getSelectedDeviceAddress() } returns flowOf("AA:BB:CC:DD:EE:FF")
+            val result = useCase.getSelectedDeviceAddress().first()
+            assertEquals("AA:BB:CC:DD:EE:FF", result)
+        }
 
     @Test
     fun `selectDevice does not throw`() {

@@ -25,14 +25,14 @@ import java.io.File
  * caused CI gates to fail or silently report 0% coverage.
  */
 class BuildGradleConfigTest {
-
     private val buildGradleFile: File by lazy {
         // The test working directory in Gradle is the module root (app/);
         // in some CI setups it is the project root, so check both.
-        val candidates = listOf(
-            File("build.gradle.kts"),
-            File("app/build.gradle.kts"),
-        )
+        val candidates =
+            listOf(
+                File("build.gradle.kts"),
+                File("app/build.gradle.kts"),
+            )
         candidates.first { it.exists() }
     }
 
@@ -111,6 +111,5 @@ class BuildGradleConfigTest {
         }
     }
 
-    private fun resolveWorkflowFile(vararg candidates: String): File =
-        candidates.map { File(it) }.first { it.exists() }
+    private fun resolveWorkflowFile(vararg candidates: String): File = candidates.map { File(it) }.first { it.exists() }
 }

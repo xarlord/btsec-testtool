@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,8 +28,6 @@ import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.ScanProgress
 import com.btsec.testtool.domain.repository.ScanStatus
 import com.btsec.testtool.domain.repository.VulnerabilityStatistics
-import com.btsec.testtool.domain.repository.VulnerabilityTestResult
-import com.btsec.testtool.domain.usecase.ScanStartResult
 import com.btsec.testtool.domain.usecase.VulnerabilityScanningUseCase
 import com.btsec.testtool.presentation.feature.scanner.EmptyView
 import com.btsec.testtool.presentation.feature.scanner.ErrorView
@@ -41,9 +38,7 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VulnScannerScreen(
-    onBack: () -> Unit
-) {
+fun VulnScannerScreen(onBack: () -> Unit) {
     val viewModel: VulnScannerViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
@@ -55,22 +50,22 @@ fun VulnScannerScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_navigate_up))
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         when {
             uiState.isLoading -> {
                 Box(
                     modifier = Modifier.fillMaxSize().padding(padding),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = stringResource(R.string.vuln_loading),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
                 }
@@ -79,7 +74,7 @@ fun VulnScannerScreen(
                 Column(modifier = Modifier.padding(padding)) {
                     ErrorView(
                         error = uiState.error!!,
-                        onRetry = { viewModel.retry() }
+                        onRetry = { viewModel.retry() },
                     )
                 }
             }
@@ -89,7 +84,7 @@ fun VulnScannerScreen(
                     uiState = uiState,
                     onStartScan = { viewModel.startScan() },
                     onStopScan = { viewModel.stopScan() },
-                    onVerify = { viewModel.verifyVulnerability(it) }
+                    onVerify = { viewModel.verifyVulnerability(it) },
                 )
             }
         }
@@ -102,14 +97,15 @@ private fun VulnScannerContent(
     uiState: VulnScannerUiState,
     onStartScan: () -> Unit,
     onStopScan: () -> Unit,
-    onVerify: (String) -> Unit
+    onVerify: (String) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Scan Controls
         item {
@@ -120,18 +116,18 @@ private fun VulnScannerContent(
 
                     Text(
                         stringResource(R.string.vuln_scan_description),
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                     Spacer(Modifier.height(12.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         if (uiState.scanStatus != ScanStatus.RUNNING) {
                             FilledTonalButton(
                                 onClick = onStartScan,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             ) {
                                 Icon(Icons.Default.PlayArrow, contentDescription = "Start vulnerability scan")
                                 Spacer(Modifier.width(4.dp))
@@ -141,7 +137,7 @@ private fun VulnScannerContent(
                             OutlinedButton(
                                 onClick = onStopScan,
                                 modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                             ) {
                                 Icon(Icons.Default.Stop, contentDescription = "Stop vulnerability scan")
                                 Spacer(Modifier.width(4.dp))
@@ -167,14 +163,19 @@ private fun VulnScannerContent(
 
                         uiState.scanProgress?.let { progress ->
                             Text(
-                                stringResource(R.string.vuln_checking_progress, progress.vulnerabilitiesChecked, progress.totalVulnerabilities, progress.vulnerabilitiesFound),
-                                style = MaterialTheme.typography.bodySmall
+                                stringResource(
+                                    R.string.vuln_checking_progress,
+                                    progress.vulnerabilitiesChecked,
+                                    progress.totalVulnerabilities,
+                                    progress.vulnerabilitiesFound,
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
                             )
                             progress.currentVulnerability?.let { vuln ->
                                 Text(
                                     stringResource(R.string.vuln_current, vuln.name),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                             }
                         }
@@ -188,7 +189,7 @@ private fun VulnScannerContent(
             item {
                 EmptyView(
                     message = stringResource(R.string.vuln_no_definitions),
-                    icon = Icons.Default.BugReport
+                    icon = Icons.Default.BugReport,
                 )
             }
         } else {
@@ -205,7 +206,7 @@ private fun VulnScannerContent(
                             Text(
                                 def.cveId,
                                 style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
                             )
                         }
                         Spacer(Modifier.height(4.dp))
@@ -213,14 +214,17 @@ private fun VulnScannerContent(
                         Text(
                             def.description,
                             style = MaterialTheme.typography.bodySmall,
-                            maxLines = 3
+                            maxLines = 3,
                         )
                         Spacer(Modifier.height(4.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text(stringResource(R.string.vuln_cvss_label, def.cvssScore.toString()), style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                stringResource(R.string.vuln_cvss_label, def.cvssScore.toString()),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
                             Text(stringResource(R.string.vuln_year_label, def.yearDiscovered), style = MaterialTheme.typography.bodySmall)
                         }
                     }
@@ -233,20 +237,22 @@ private fun VulnScannerContent(
             item {
                 Text(
                     stringResource(R.string.vuln_discovered_title, uiState.discoveredVulns.size),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
             }
             items(uiState.discoveredVulns, key = { it.id }) { vuln ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = when (vuln.severity) {
-                            VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
-                            VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
-                            VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
-                            else -> MaterialTheme.colorScheme.surfaceVariant
-                        }
-                    )
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor =
+                                when (vuln.severity) {
+                                    VulnerabilitySeverity.CRITICAL -> Color(0xFFFFEBEE)
+                                    VulnerabilitySeverity.HIGH -> Color(0xFFFFF3E0)
+                                    VulnerabilitySeverity.MEDIUM -> Color(0xFFFFF8E1)
+                                    else -> MaterialTheme.colorScheme.surfaceVariant
+                                },
+                        ),
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -264,13 +270,25 @@ private fun VulnScannerContent(
                                 AssistChip(
                                     onClick = {},
                                     label = { Text("Verified") },
-                                    leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = "Verified vulnerability", modifier = Modifier.size(16.dp)) }
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.CheckCircle,
+                                            contentDescription = "Verified vulnerability",
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                    },
                                 )
                             }
                             AssistChip(
                                 onClick = { onVerify(vuln.id) },
                                 label = { Text("Verify") },
-                                leadingIcon = { Icon(Icons.Default.FactCheck, contentDescription = "Verify vulnerability", modifier = Modifier.size(16.dp)) }
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.FactCheck,
+                                        contentDescription = "Verify vulnerability",
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                },
                             )
                         }
                     }
@@ -280,7 +298,7 @@ private fun VulnScannerContent(
             item {
                 EmptyView(
                     message = stringResource(R.string.vuln_none_discovered),
-                    icon = Icons.Default.CheckCircle
+                    icon = Icons.Default.CheckCircle,
                 )
             }
         }
@@ -310,30 +328,35 @@ private fun VulnScannerContent(
 
 @Composable
 private fun SeverityBadge(severity: VulnerabilitySeverity) {
-    val color = when (severity) {
-        VulnerabilitySeverity.CRITICAL -> Color.Red
-        VulnerabilitySeverity.HIGH -> Color(0xFFFF6D00)
-        VulnerabilitySeverity.MEDIUM -> Color(0xFFFFAB00)
-        VulnerabilitySeverity.LOW -> Color(0xFF4CAF50)
-        VulnerabilitySeverity.NONE -> Color.Gray
-        VulnerabilitySeverity.INFORMATIONAL -> Color(0xFF2196F3)
-    }
+    val color =
+        when (severity) {
+            VulnerabilitySeverity.CRITICAL -> Color.Red
+            VulnerabilitySeverity.HIGH -> Color(0xFFFF6D00)
+            VulnerabilitySeverity.MEDIUM -> Color(0xFFFFAB00)
+            VulnerabilitySeverity.LOW -> Color(0xFF4CAF50)
+            VulnerabilitySeverity.NONE -> Color.Gray
+            VulnerabilitySeverity.INFORMATIONAL -> Color(0xFF2196F3)
+        }
     Surface(
         shape = MaterialTheme.shapes.small,
-        color = color.copy(alpha = 0.15f)
+        color = color.copy(alpha = 0.15f),
     ) {
         Text(
             severity.name,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             style = MaterialTheme.typography.labelSmall,
             color = color,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
     }
 }
 
 @Composable
-private fun StatItem(label: String, count: Int, color: Color) {
+private fun StatItem(
+    label: String,
+    count: Int,
+    color: Color,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("$count", style = MaterialTheme.typography.titleLarge, color = color, fontWeight = FontWeight.Bold)
         Text(label, style = MaterialTheme.typography.labelSmall)
@@ -341,74 +364,75 @@ private fun StatItem(label: String, count: Int, color: Color) {
 }
 
 @HiltViewModel
-class VulnScannerViewModel @Inject constructor(
-    private val vulnScanningUseCase: VulnerabilityScanningUseCase,
-    private val scanningUseCase: com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
-) : ViewModel() {
+class VulnScannerViewModel
+    @Inject
+    constructor(
+        private val vulnScanningUseCase: VulnerabilityScanningUseCase,
+        private val scanningUseCase: com.btsec.testtool.domain.usecase.BluetoothScanningUseCase,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(VulnScannerUiState())
+        val uiState: StateFlow<VulnScannerUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(VulnScannerUiState())
-    val uiState: StateFlow<VulnScannerUiState> = _uiState.asStateFlow()
-
-    init {
-        _uiState.update { it.copy(isLoading = true) }
-        viewModelScope.launch {
-            vulnScanningUseCase.getScanStatus().collect { status ->
-                _uiState.update { it.copy(scanStatus = status, isLoading = false) }
-            }
-        }
-        viewModelScope.launch {
-            vulnScanningUseCase.getScanProgress().collect { progress ->
-                _uiState.update { it.copy(scanProgress = progress) }
-            }
-        }
-        viewModelScope.launch {
-            try {
-                vulnScanningUseCase.getAllVulnerabilityDefinitions().collect { defs ->
-                    _uiState.update { it.copy(definitions = defs, isLoading = false) }
+        init {
+            _uiState.update { it.copy(isLoading = true) }
+            viewModelScope.launch {
+                vulnScanningUseCase.getScanStatus().collect { status ->
+                    _uiState.update { it.copy(scanStatus = status, isLoading = false) }
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message ?: "Failed to load definitions", isLoading = false) }
+            }
+            viewModelScope.launch {
+                vulnScanningUseCase.getScanProgress().collect { progress ->
+                    _uiState.update { it.copy(scanProgress = progress) }
+                }
+            }
+            viewModelScope.launch {
+                try {
+                    vulnScanningUseCase.getAllVulnerabilityDefinitions().collect { defs ->
+                        _uiState.update { it.copy(definitions = defs, isLoading = false) }
+                    }
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(error = e.message ?: "Failed to load definitions", isLoading = false) }
+                }
+            }
+            viewModelScope.launch {
+                vulnScanningUseCase.getAllDiscoveredVulnerabilities().collect { vulns ->
+                    _uiState.update { it.copy(discoveredVulns = vulns) }
+                }
+            }
+            viewModelScope.launch {
+                vulnScanningUseCase.getVulnerabilityStatistics().collect { stats ->
+                    _uiState.update { it.copy(statistics = stats) }
+                }
             }
         }
-        viewModelScope.launch {
-            vulnScanningUseCase.getAllDiscoveredVulnerabilities().collect { vulns ->
-                _uiState.update { it.copy(discoveredVulns = vulns) }
+
+        fun startScan() {
+            viewModelScope.launch {
+                val device = scanningUseCase.getSelectedDevice()
+                if (device == null) {
+                    _uiState.update { it.copy(error = "No device selected. Please scan and select a device first.") }
+                    return@launch
+                }
+                vulnScanningUseCase.startVulnerabilityScan(device)
             }
         }
-        viewModelScope.launch {
-            vulnScanningUseCase.getVulnerabilityStatistics().collect { stats ->
-                _uiState.update { it.copy(statistics = stats) }
+
+        fun stopScan() {
+            viewModelScope.launch { vulnScanningUseCase.stopScan() }
+        }
+
+        fun verifyVulnerability(vulnId: String) {
+            viewModelScope.launch {
+                vulnScanningUseCase.updateVulnerabilityVerification(vulnId, true, "Manually verified")
             }
         }
-    }
 
-    fun startScan() {
-        viewModelScope.launch {
-            val device = scanningUseCase.getSelectedDevice()
-            if (device == null) {
-                _uiState.update { it.copy(error = "No device selected. Please scan and select a device first.") }
-                return@launch
-            }
-            vulnScanningUseCase.startVulnerabilityScan(device)
+        fun retry() {
+            _uiState.update { it.copy(error = null, isLoading = true) }
+            // Re-trigger loading by re-collecting flows (they're already active via init)
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
-
-    fun stopScan() {
-        viewModelScope.launch { vulnScanningUseCase.stopScan() }
-    }
-
-    fun verifyVulnerability(vulnId: String) {
-        viewModelScope.launch {
-            vulnScanningUseCase.updateVulnerabilityVerification(vulnId, true, "Manually verified")
-        }
-    }
-
-    fun retry() {
-        _uiState.update { it.copy(error = null, isLoading = true) }
-        // Re-trigger loading by re-collecting flows (they're already active via init)
-        _uiState.update { it.copy(isLoading = false) }
-    }
-}
 
 data class VulnScannerUiState(
     val isLoading: Boolean = false,
@@ -417,5 +441,5 @@ data class VulnScannerUiState(
     val scanProgress: ScanProgress? = null,
     val definitions: List<VulnerabilityDefinition> = emptyList(),
     val discoveredVulns: List<Vulnerability> = emptyList(),
-    val statistics: VulnerabilityStatistics? = null
+    val statistics: VulnerabilityStatistics? = null,
 )

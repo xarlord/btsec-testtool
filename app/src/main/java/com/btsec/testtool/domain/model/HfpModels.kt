@@ -29,7 +29,7 @@ enum class HfpTestCategory(val description: String) {
     SMS_ACCESS("SMS read/send without auth"),
     AUTHENTICATION_BYPASS("Connect to HFP without pairing"),
     DOS("Denial of service (call flood, audio hog)"),
-    INJECTION("Command injection / chaining")
+    INJECTION("Command injection / chaining"),
 }
 
 /**
@@ -40,7 +40,7 @@ enum class HfpSeverity {
     HIGH,
     MEDIUM,
     LOW,
-    INFO
+    INFO,
 }
 
 /**
@@ -52,10 +52,11 @@ data class HfpTestResult(
     val command: String,
     val response: String?,
     val vulnerable: Boolean,
-    val confidence: Double,  // 0.0-1.0
+    // 0.0-1.0
+    val confidence: Double,
     val evidence: String,
     val severity: HfpSeverity,
-    val recommendation: String
+    val recommendation: String,
 )
 
 /**
@@ -71,7 +72,7 @@ data class HfpTestSuite(
     val lowCount: Int,
     val infoCount: Int,
     val overallRisk: HfpSeverity,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )
 
 /**
@@ -80,6 +81,7 @@ data class HfpTestSuite(
 data class HfpCallState(
     val hasActiveCall: Boolean,
     val callNumber: String?,
-    val callType: String?,  // "incoming", "outgoing", "missed"
-    val callDuration: Int?
+    // "incoming", "outgoing", "missed"
+    val callType: String?,
+    val callDuration: Int?,
 )

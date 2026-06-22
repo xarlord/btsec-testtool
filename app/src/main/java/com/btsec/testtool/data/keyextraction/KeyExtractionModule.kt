@@ -28,7 +28,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object KeyExtractionModule {
-
     /**
      * A no-op fallback probe that returns [KeyNegotiationResult.Unavailable]
      * for all operations. Used when no specific device probe has been configured.
@@ -40,7 +39,7 @@ object KeyExtractionModule {
 
         override suspend fun readCharacteristic(
             serviceUuid: String,
-            charUuid: String
+            charUuid: String,
         ): ByteArray? = null
 
         override fun getEncryptionInfo(): EncryptionInfo? = null
@@ -53,7 +52,7 @@ object KeyExtractionModule {
     @Provides
     @Singleton
     fun provideKeyExtractionProbe(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): KeyExtractionProbe {
         return NoOpProbe()
     }

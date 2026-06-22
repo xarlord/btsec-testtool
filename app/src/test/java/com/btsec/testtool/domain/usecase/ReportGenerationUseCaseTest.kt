@@ -4,10 +4,10 @@
  */
 package com.btsec.testtool.domain.usecase
 
-import com.btsec.testtool.domain.repository.ReportRepository
-import com.btsec.testtool.domain.repository.VulnerabilityRepository
 import com.btsec.testtool.domain.repository.FuzzingRepository
 import com.btsec.testtool.domain.repository.KeyExtractionRepository
+import com.btsec.testtool.domain.repository.ReportRepository
+import com.btsec.testtool.domain.repository.VulnerabilityRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class ReportGenerationUseCaseTest {
-
     private lateinit var useCase: ReportGenerationUseCase
     private val reportRepo: ReportRepository = mockk(relaxed = true)
     private val vulnRepo: VulnerabilityRepository = mockk(relaxed = true)
@@ -31,30 +30,34 @@ class ReportGenerationUseCaseTest {
     }
 
     @Test
-    fun `exportToPdf delegates to repository`() = runTest {
-        coEvery { reportRepo.exportToPdf("r1", "/tmp/out.pdf") } returns Result.success(File("/tmp/out.pdf"))
-        val result = useCase.exportToPdf("r1", "/tmp/out.pdf")
-        assertTrue(result.isSuccess)
-    }
+    fun `exportToPdf delegates to repository`() =
+        runTest {
+            coEvery { reportRepo.exportToPdf("r1", "/tmp/out.pdf") } returns Result.success(File("/tmp/out.pdf"))
+            val result = useCase.exportToPdf("r1", "/tmp/out.pdf")
+            assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `exportToHtml delegates to repository`() = runTest {
-        coEvery { reportRepo.exportToHtml("r1", "/tmp/out.html") } returns Result.success(File("/tmp/out.html"))
-        val result = useCase.exportToHtml("r1", "/tmp/out.html")
-        assertTrue(result.isSuccess)
-    }
+    fun `exportToHtml delegates to repository`() =
+        runTest {
+            coEvery { reportRepo.exportToHtml("r1", "/tmp/out.html") } returns Result.success(File("/tmp/out.html"))
+            val result = useCase.exportToHtml("r1", "/tmp/out.html")
+            assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `exportToJson delegates to repository`() = runTest {
-        coEvery { reportRepo.exportToJson("r1", "/tmp/out.json") } returns Result.success(File("/tmp/out.json"))
-        val result = useCase.exportToJson("r1", "/tmp/out.json")
-        assertTrue(result.isSuccess)
-    }
+    fun `exportToJson delegates to repository`() =
+        runTest {
+            coEvery { reportRepo.exportToJson("r1", "/tmp/out.json") } returns Result.success(File("/tmp/out.json"))
+            val result = useCase.exportToJson("r1", "/tmp/out.json")
+            assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `exportToCsv delegates to repository`() = runTest {
-        coEvery { reportRepo.exportToCsv("r1", "/tmp/out.csv") } returns Result.success(File("/tmp/out.csv"))
-        val result = useCase.exportToCsv("r1", "/tmp/out.csv")
-        assertTrue(result.isSuccess)
-    }
+    fun `exportToCsv delegates to repository`() =
+        runTest {
+            coEvery { reportRepo.exportToCsv("r1", "/tmp/out.csv") } returns Result.success(File("/tmp/out.csv"))
+            val result = useCase.exportToCsv("r1", "/tmp/out.csv")
+            assertTrue(result.isSuccess)
+        }
 }

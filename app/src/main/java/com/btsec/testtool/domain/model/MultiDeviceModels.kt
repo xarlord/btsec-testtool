@@ -9,7 +9,14 @@
 package com.btsec.testtool.domain.model
 
 enum class DeviceScanState {
-    QUEUED, CONNECTING, CONNECTED, SCANNING, TESTING, COMPLETED, FAILED, CANCELLED
+    QUEUED,
+    CONNECTING,
+    CONNECTED,
+    SCANNING,
+    TESTING,
+    COMPLETED,
+    FAILED,
+    CANCELLED,
 }
 
 data class ParallelScanTarget(
@@ -17,11 +24,13 @@ data class ParallelScanTarget(
     val deviceName: String?,
     val priority: ScanPriority,
     val state: DeviceScanState = DeviceScanState.QUEUED,
-    val progress: Float = 0f, // 0.0-1.0
-    val assignedSlot: Int = -1, // Connection slot (0 to maxConnections-1)
+    // 0.0-1.0
+    val progress: Float = 0f,
+    // Connection slot (0 to maxConnections-1)
+    val assignedSlot: Int = -1,
     val error: String? = null,
     val startTime: Long? = null,
-    val endTime: Long? = null
+    val endTime: Long? = null,
 )
 
 enum class ScanPriority { LOW, NORMAL, HIGH, CRITICAL }
@@ -35,7 +44,8 @@ data class ParallelScanConfig(
     val stopOnFirstCritical: Boolean = false,
     val includeServiceDiscovery: Boolean = true,
     val includeFuzzing: Boolean = false,
-    val maxConnectionsPerSlot: Int = 10 // Rotate devices through slots
+    // Rotate devices through slots
+    val maxConnectionsPerSlot: Int = 10,
 )
 
 data class ParallelScanResult(
@@ -45,7 +55,8 @@ data class ParallelScanResult(
     val vulnerabilitiesFound: Int,
     val criticalFindings: Int,
     val highFindings: Int,
-    val testData: String? = null // JSON blob of results
+    // JSON blob of results
+    val testData: String? = null,
 )
 
 data class ParallelScanSession(
@@ -53,11 +64,12 @@ data class ParallelScanSession(
     val config: ParallelScanConfig,
     val targets: List<ParallelScanTarget>,
     val results: List<ParallelScanResult>,
-    val activeSlots: List<String>, // device addresses currently in slots
+    // device addresses currently in slots
+    val activeSlots: List<String>,
     val totalDurationMs: Long,
     val completedCount: Int,
     val failedCount: Int,
-    val cancelledCount: Int
+    val cancelledCount: Int,
 )
 
 data class ConnectionPoolStatus(
@@ -65,7 +77,7 @@ data class ConnectionPoolStatus(
     val activeSlots: Int,
     val queuedDevices: Int,
     val completedDevices: Int,
-    val slotDetails: List<ConnectionSlot>
+    val slotDetails: List<ConnectionSlot>,
 )
 
 data class ConnectionSlot(
@@ -73,5 +85,5 @@ data class ConnectionSlot(
     val deviceAddress: String?,
     val state: DeviceScanState,
     val connectedAt: Long?,
-    val devicesProcessed: Int
+    val devicesProcessed: Int,
 )

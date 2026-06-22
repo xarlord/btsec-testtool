@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface SdpEnumerationRepository {
-
     /**
      * Start an SDP browse on the connected device.
      * Emits discovered services as they are found.

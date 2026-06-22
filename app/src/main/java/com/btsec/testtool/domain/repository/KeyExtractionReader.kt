@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require explicit authorization.
  */
 interface KeyExtractionReader {
-
     /**
      * Get current extraction status.
      */
@@ -88,7 +87,7 @@ interface KeyExtractionReader {
     suspend fun verifyKey(
         keyType: KeyType,
         keyValue: ByteArray,
-        device: BluetoothDevice
+        device: BluetoothDevice,
     ): Boolean
 
     /**
@@ -100,7 +99,7 @@ interface KeyExtractionReader {
      */
     suspend fun deriveKey(
         extractedKey: KeyExtractionResult,
-        targetKeyType: KeyType
+        targetKeyType: KeyType,
     ): ByteArray?
 
     /**
@@ -115,7 +114,10 @@ interface KeyExtractionReader {
      * @param keyValue Key value to check
      * @return true if key matches a known default
      */
-    suspend fun isKnownDefaultKey(keyType: KeyType, keyValue: ByteArray): Boolean
+    suspend fun isKnownDefaultKey(
+        keyType: KeyType,
+        keyValue: ByteArray,
+    ): Boolean
 
     /**
      * Get information about a known default key.
@@ -125,7 +127,10 @@ interface KeyExtractionReader {
     /**
      * Look up a device's key in the database.
      */
-    suspend fun lookupKeyInDatabase(deviceAddress: String, keyType: KeyType): ByteArray?
+    suspend fun lookupKeyInDatabase(
+        deviceAddress: String,
+        keyType: KeyType,
+    ): ByteArray?
 
     /**
      * Analyze BLE encryption strength.

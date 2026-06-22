@@ -23,7 +23,6 @@ import java.time.Instant
  * Addresses GitHub issue #228: No tests for ExportFormatters.
  */
 class ExportFormattersTest {
-
     private lateinit var formatters: ExportFormatters
     private lateinit var testReport: SecurityReport
 
@@ -35,60 +34,66 @@ class ExportFormattersTest {
         val device = TestHelpers.createTestBluetoothDevice()
         val vuln = TestHelpers.createTestVulnerability()
 
-        testReport = SecurityReport(
-            id = "report-001",
-            authId = "BTSEC-20260207-A1B2C3D4",
-            title = "Test Security Report",
-            generatedAt = now,
-            testPeriod = ReportPeriod(start = now.minusSeconds(3600), end = now),
-            targetDevices = listOf(device),
-            vulnerabilities = listOf(vuln),
-            fuzzingResults = listOf(
-                FuzzResult(
-                    id = "fuzz-1",
-                    config = TestHelpers.createTestFuzzConfig(device),
-                    startTime = now.minusSeconds(1800),
-                    endTime = now,
-                    status = FuzzStatus.COMPLETED,
-                    packetsSent = 100,
-                    packetsReceived = 95,
-                    errors = emptyList(),
-                    findings = emptyList(),
-                    captureFile = null
-                )
-            ),
-            keyExtractionResults = listOf(
-                TestHelpers.createTestKeyExtractionResult(extracted = false)
-            ),
-            executiveSummary = "Test executive summary",
-            findings = listOf(
-                ReportFinding(
-                    category = FindingCategory.UNEXPECTED_RESPONSE,
-                    severity = VulnerabilitySeverity.MEDIUM,
-                    count = 3,
-                    description = "Unexpected responses detected",
-                    affectedDevices = listOf("AA:BB:CC:DD:EE:FF")
-                )
-            ),
-            recommendations = listOf(
-                Recommendation(
-                    priority = RecommendationPriority.HIGH,
-                    title = "Update Firmware",
-                    description = "Device firmware is outdated",
-                    affectedDevices = listOf("AA:BB:CC:DD:EE:FF"),
-                    implementation = "Apply vendor patch",
-                    verification = "Re-scan after update"
-                )
-            ),
-            appendix = ReportAppendix(
-                toolsUsed = listOf("BTSec TestTool v1.5"),
-                testMethodology = "Automated BLE fuzzing and vulnerability scanning",
-                limitations = listOf("Limited to BLE protocol"),
-                glossary = mapOf("BLE" to "Bluetooth Low Energy"),
-                references = emptyList()
-            ),
-            status = ReportStatus.FINAL
-        )
+        testReport =
+            SecurityReport(
+                id = "report-001",
+                authId = "BTSEC-20260207-A1B2C3D4",
+                title = "Test Security Report",
+                generatedAt = now,
+                testPeriod = ReportPeriod(start = now.minusSeconds(3600), end = now),
+                targetDevices = listOf(device),
+                vulnerabilities = listOf(vuln),
+                fuzzingResults =
+                    listOf(
+                        FuzzResult(
+                            id = "fuzz-1",
+                            config = TestHelpers.createTestFuzzConfig(device),
+                            startTime = now.minusSeconds(1800),
+                            endTime = now,
+                            status = FuzzStatus.COMPLETED,
+                            packetsSent = 100,
+                            packetsReceived = 95,
+                            errors = emptyList(),
+                            findings = emptyList(),
+                            captureFile = null,
+                        ),
+                    ),
+                keyExtractionResults =
+                    listOf(
+                        TestHelpers.createTestKeyExtractionResult(extracted = false),
+                    ),
+                executiveSummary = "Test executive summary",
+                findings =
+                    listOf(
+                        ReportFinding(
+                            category = FindingCategory.UNEXPECTED_RESPONSE,
+                            severity = VulnerabilitySeverity.MEDIUM,
+                            count = 3,
+                            description = "Unexpected responses detected",
+                            affectedDevices = listOf("AA:BB:CC:DD:EE:FF"),
+                        ),
+                    ),
+                recommendations =
+                    listOf(
+                        Recommendation(
+                            priority = RecommendationPriority.HIGH,
+                            title = "Update Firmware",
+                            description = "Device firmware is outdated",
+                            affectedDevices = listOf("AA:BB:CC:DD:EE:FF"),
+                            implementation = "Apply vendor patch",
+                            verification = "Re-scan after update",
+                        ),
+                    ),
+                appendix =
+                    ReportAppendix(
+                        toolsUsed = listOf("BTSec TestTool v1.5"),
+                        testMethodology = "Automated BLE fuzzing and vulnerability scanning",
+                        limitations = listOf("Limited to BLE protocol"),
+                        glossary = mapOf("BLE" to "Bluetooth Low Energy"),
+                        references = emptyList(),
+                    ),
+                status = ReportStatus.FINAL,
+            )
     }
 
     // ── JSON Tests ──
@@ -139,9 +144,10 @@ class ExportFormattersTest {
     @Test
     @DisplayName("JSON escapes special characters in title")
     fun toJson_escapesSpecialCharactersInTitle() {
-        val reportWithSpecialChars = testReport.copy(
-            title = "Report with \"quotes\" and \\backslashes\\"
-        )
+        val reportWithSpecialChars =
+            testReport.copy(
+                title = "Report with \"quotes\" and \\backslashes\\",
+            )
         val json = formatters.toJson(reportWithSpecialChars)
 
         assertTrue(json.contains("\\\"quotes\\\""))
@@ -151,11 +157,12 @@ class ExportFormattersTest {
     @Test
     @DisplayName("JSON handles empty collections")
     fun toJson_handlesEmptyCollections() {
-        val emptyReport = testReport.copy(
-            targetDevices = emptyList(),
-            vulnerabilities = emptyList(),
-            findings = emptyList()
-        )
+        val emptyReport =
+            testReport.copy(
+                targetDevices = emptyList(),
+                vulnerabilities = emptyList(),
+                findings = emptyList(),
+            )
         val json = formatters.toJson(emptyReport)
 
         assertTrue(json.contains("\"targetDevices\": ["))
@@ -166,9 +173,10 @@ class ExportFormattersTest {
     @Test
     @DisplayName("JSON escapes newlines in strings")
     fun toJson_handlesNewlinesInStrings() {
-        val reportWithNewlines = testReport.copy(
-            executiveSummary = "Line one\nLine two\nLine three"
-        )
+        val reportWithNewlines =
+            testReport.copy(
+                executiveSummary = "Line one\nLine two\nLine three",
+            )
         val json = formatters.toJson(reportWithNewlines)
 
         assertTrue(json.contains("\\n"))
@@ -246,10 +254,11 @@ class ExportFormattersTest {
     @Test
     @DisplayName("HTML escapes special characters to prevent XSS")
     fun toHtml_escapesHtmlSpecialCharacters() {
-        val reportWithHtml = testReport.copy(
-            title = "<script>alert('xss')</script>",
-            executiveSummary = "Test with <b>bold</b> & 'quotes'"
-        )
+        val reportWithHtml =
+            testReport.copy(
+                title = "<script>alert('xss')</script>",
+                executiveSummary = "Test with <b>bold</b> & 'quotes'",
+            )
         val html = formatters.toHtml(reportWithHtml)
 
         assertFalse(html.contains("<script>alert"))
@@ -306,9 +315,10 @@ class ExportFormattersTest {
     @Test
     @DisplayName("CSV escapes commas in fields")
     fun toCsv_escapesCommasInFields() {
-        val vulnWithCommas = testReport.vulnerabilities.first().copy(
-            name = "Vuln, with, commas"
-        )
+        val vulnWithCommas =
+            testReport.vulnerabilities.first().copy(
+                name = "Vuln, with, commas",
+            )
         val report = testReport.copy(vulnerabilities = listOf(vulnWithCommas))
         val csv = formatters.toCsv(report)
 
@@ -318,11 +328,12 @@ class ExportFormattersTest {
     @Test
     @DisplayName("CSV handles empty report with header only")
     fun toCsv_handlesEmptyReport() {
-        val emptyReport = testReport.copy(
-            vulnerabilities = emptyList(),
-            findings = emptyList(),
-            recommendations = emptyList()
-        )
+        val emptyReport =
+            testReport.copy(
+                vulnerabilities = emptyList(),
+                findings = emptyList(),
+                recommendations = emptyList(),
+            )
         val csv = formatters.toCsv(emptyReport)
 
         assertTrue(csv.startsWith("Type,CVE/ID,"))
@@ -364,9 +375,10 @@ class ExportFormattersTest {
     @Test
     @DisplayName("CSV escapes double quotes in fields")
     fun toCsv_escapingFieldWithDoubleQuotes() {
-        val vuln = testReport.vulnerabilities.first().copy(
-            name = "Vuln \"with\" quotes"
-        )
+        val vuln =
+            testReport.vulnerabilities.first().copy(
+                name = "Vuln \"with\" quotes",
+            )
         val report = testReport.copy(vulnerabilities = listOf(vuln))
         val csv = formatters.toCsv(report)
 

@@ -9,7 +9,6 @@
 package com.btsec.testtool.domain.repository
 
 import com.btsec.testtool.domain.model.*
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Composite repository for consent tracking and audit logging.
@@ -46,7 +45,7 @@ data class AuditLogEntry(
     val errorMessage: String?,
     val deviceInfo: DeviceInfo,
     val durationMs: Long?,
-    val metadata: Map<String, String>
+    val metadata: Map<String, String>,
 )
 
 /**
@@ -60,7 +59,7 @@ data class AuditStatistics(
     val uniqueAuthorizations: Int,
     val uniqueOperations: Int,
     val dateRange: DateRange,
-    val topOperations: List<OperationCount>
+    val topOperations: List<OperationCount>,
 )
 
 /**
@@ -73,7 +72,7 @@ data class AuthAuditStatistics(
     val failedOperations: Int,
     val firstOperation: java.time.Instant,
     val lastOperation: java.time.Instant,
-    val operationBreakdown: Map<String, Int>
+    val operationBreakdown: Map<String, Int>,
 )
 
 /**
@@ -81,7 +80,7 @@ data class AuthAuditStatistics(
  */
 data class OperationCount(
     val operation: String,
-    val count: Int
+    val count: Int,
 )
 
 /**
@@ -94,7 +93,7 @@ data class DataRetentionSummary(
     val recordsThreeToSevenYears: Long,
     val recordsOverSevenYears: Long,
     val oldestRecord: java.time.Instant?,
-    val newestRecord: java.time.Instant?
+    val newestRecord: java.time.Instant?,
 )
 
 /**
@@ -110,7 +109,7 @@ data class ComplianceReport(
     val operationsByType: Map<String, Int>,
     val successRate: Double,
     val findings: List<ComplianceFinding>,
-    val recommendations: List<String>
+    val recommendations: List<String>,
 )
 
 /**
@@ -121,7 +120,7 @@ data class ComplianceFinding(
     val severity: ComplianceSeverity,
     val description: String,
     val affectedRecords: Int,
-    val recommendation: String
+    val recommendation: String,
 )
 
 /**
@@ -133,7 +132,7 @@ enum class ComplianceCategory {
     DATA_RETENTION,
     FAILED_OPERATIONS,
     UNAUTHORIZED_ACCESS,
-    OTHER
+    OTHER,
 }
 
 /**
@@ -144,7 +143,7 @@ enum class ComplianceSeverity {
     HIGH,
     MEDIUM,
     LOW,
-    INFO
+    INFO,
 }
 
 /**
@@ -153,5 +152,5 @@ enum class ComplianceSeverity {
 enum class AuditExportFormat {
     JSON,
     CSV,
-    XML
+    XML,
 }

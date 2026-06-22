@@ -20,22 +20,18 @@ data class ConsentRecordEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
     val id: String,
-
     @ColumnInfo(name = "auth_id")
     val authId: String,
-
     @ColumnInfo(name = "action")
     val action: String,
-
+    // epoch millis
     @ColumnInfo(name = "timestamp")
-    val timestamp: Long, // epoch millis
-
+    val timestamp: Long,
     @ColumnInfo(name = "authorized")
     val authorized: Boolean,
-
+    // JSON of DeviceInfo
     @ColumnInfo(name = "device_info")
-    val deviceInfo: String, // JSON of DeviceInfo
-
+    val deviceInfo: String,
     @ColumnInfo(name = "user_signature")
-    val userSignature: String?
+    val userSignature: String?,
 )

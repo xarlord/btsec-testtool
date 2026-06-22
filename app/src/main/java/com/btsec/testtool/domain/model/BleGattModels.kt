@@ -15,9 +15,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class BleService(
-    val uuid: String,                  // Service UUID
-    val primary: Boolean = true,              // Is primary service
-    val characteristics: List<BleCharacteristic> = emptyList()
+    // Service UUID
+    val uuid: String,
+    // Is primary service
+    val primary: Boolean = true,
+    val characteristics: List<BleCharacteristic> = emptyList(),
 )
 
 /**
@@ -25,11 +27,15 @@ data class BleService(
  */
 @Serializable
 data class BleCharacteristic(
-    val uuid: String,                  // Characteristic UUID
-    val properties: CharacteristicProperties,  // Read/write/notify properties
-    val permissions: CharacteristicPermissions? = null,  // Permissions
-    val value: ByteArray? = null,      // Current value (if readable)
-    val descriptors: List<BleDescriptor> = emptyList()
+    // Characteristic UUID
+    val uuid: String,
+    // Read/write/notify properties
+    val properties: CharacteristicProperties,
+    // Permissions
+    val permissions: CharacteristicPermissions? = null,
+    // Current value (if readable)
+    val value: ByteArray? = null,
+    val descriptors: List<BleDescriptor> = emptyList(),
 ) {
     /**
      * Check if characteristic is readable.
@@ -58,7 +64,7 @@ data class CharacteristicProperties(
     val notify: Boolean = false,
     val indicate: Boolean = false,
     val signedWrite: Boolean = false,
-    val extendedProperties: Boolean = false
+    val extendedProperties: Boolean = false,
 )
 
 /**
@@ -73,7 +79,7 @@ data class CharacteristicPermissions(
     val writeEncrypted: Boolean = false,
     val writeEncryptedMitm: Boolean = false,
     val writeSigned: Boolean = false,
-    val writeSignedMitm: Boolean = false
+    val writeSignedMitm: Boolean = false,
 )
 
 /**
@@ -82,5 +88,5 @@ data class CharacteristicPermissions(
 @Serializable
 data class BleDescriptor(
     val uuid: String,
-    val value: ByteArray? = null
+    val value: ByteArray? = null,
 )

@@ -27,7 +27,6 @@ import kotlin.test.assertTrue
  */
 @DisplayName("RiskScoringUseCase Tests")
 class RiskScoringUseCaseTest {
-
     private lateinit var useCase: RiskScoringUseCase
     private lateinit var testDevice: BluetoothDevice
 
@@ -43,7 +42,7 @@ class RiskScoringUseCaseTest {
         category: FindingCategory = FindingCategory.UNEXPECTED_RESPONSE,
         severity: VulnerabilitySeverity = VulnerabilitySeverity.MEDIUM,
         description: String = "Test finding",
-        reproducible: Boolean = false
+        reproducible: Boolean = false,
     ): FuzzFinding {
         return FuzzFinding(
             timestamp = Instant.now(),
@@ -53,7 +52,7 @@ class RiskScoringUseCaseTest {
             packetData = null,
             response = null,
             category = category,
-            reproducible = reproducible
+            reproducible = reproducible,
         )
     }
 
@@ -62,7 +61,6 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Empty findings")
     inner class EmptyFindings {
-
         @Test
         @DisplayName("Empty findings should return INFO severity")
         fun emptyFindings_infoSeverity() {
@@ -117,73 +115,77 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Single crash finding")
     inner class SingleCrashFinding {
-
         @Test
         @DisplayName("Single critical crash should produce HIGH or CRITICAL severity")
         fun criticalCrash_highOrCriticalSeverity() {
-            val finding = createFinding(
-                category = FindingCategory.CRASH,
-                severity = VulnerabilitySeverity.CRITICAL
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.CRASH,
+                    severity = VulnerabilitySeverity.CRITICAL,
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.severity == RiskSeverity.HIGH ||
                     assessment.severity == RiskSeverity.CRITICAL,
-                "Expected HIGH or CRITICAL but got ${assessment.severity} with score ${assessment.overallScore}"
+                "Expected HIGH or CRITICAL but got ${assessment.severity} with score ${assessment.overallScore}",
             )
         }
 
         @Test
         @DisplayName("Single critical crash should produce high score")
         fun criticalCrash_highScore() {
-            val finding = createFinding(
-                category = FindingCategory.CRASH,
-                severity = VulnerabilitySeverity.CRITICAL
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.CRASH,
+                    severity = VulnerabilitySeverity.CRITICAL,
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.overallScore >= 7.0,
-                "Expected score >= 7.0 but got ${assessment.overallScore}"
+                "Expected score >= 7.0 but got ${assessment.overallScore}",
             )
         }
 
         @Test
         @DisplayName("Crash finding should map to OWASP A03 Injection")
         fun crashFinding_mapsToOwaspInjection() {
-            val finding = createFinding(
-                category = FindingCategory.CRASH,
-                severity = VulnerabilitySeverity.HIGH
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.CRASH,
+                    severity = VulnerabilitySeverity.HIGH,
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.owaspMappings.any { it.category == OwaspCategory.A03_INJECTION },
-                "Expected OWASP A03 Injection mapping"
+                "Expected OWASP A03 Injection mapping",
             )
         }
 
         @Test
         @DisplayName("Reproducible crash should score higher than non-reproducible")
         fun reproducibleCrash_higherScore() {
-            val nonRepro = createFinding(
-                category = FindingCategory.CRASH,
-                severity = VulnerabilitySeverity.HIGH,
-                reproducible = false
-            )
-            val repro = createFinding(
-                category = FindingCategory.CRASH,
-                severity = VulnerabilitySeverity.HIGH,
-                reproducible = true
-            )
+            val nonRepro =
+                createFinding(
+                    category = FindingCategory.CRASH,
+                    severity = VulnerabilitySeverity.HIGH,
+                    reproducible = false,
+                )
+            val repro =
+                createFinding(
+                    category = FindingCategory.CRASH,
+                    severity = VulnerabilitySeverity.HIGH,
+                    reproducible = true,
+                )
 
             val nonReproScore = useCase.assessRisk(listOf(nonRepro), testDevice).overallScore
             val reproScore = useCase.assessRisk(listOf(repro), testDevice).overallScore
 
             assertTrue(
                 reproScore > nonReproScore,
-                "Reproducible crash ($reproScore) should score higher than non-reproducible ($nonReproScore)"
+                "Reproducible crash ($reproScore) should score higher than non-reproducible ($nonReproScore)",
             )
         }
     }
@@ -193,52 +195,54 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Single information leak")
     inner class SingleInformationLeak {
-
         @Test
         @DisplayName("Single info leak should produce MEDIUM or lower severity")
         fun infoLeak_mediumSeverity() {
-            val finding = createFinding(
-                category = FindingCategory.INFORMATION_LEAK,
-                severity = VulnerabilitySeverity.MEDIUM
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.INFORMATION_LEAK,
+                    severity = VulnerabilitySeverity.MEDIUM,
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.severity == RiskSeverity.MEDIUM ||
                     assessment.severity == RiskSeverity.LOW ||
                     assessment.severity == RiskSeverity.INFO,
-                "Expected MEDIUM, LOW, or INFO but got ${assessment.severity}"
+                "Expected MEDIUM, LOW, or INFO but got ${assessment.severity}",
             )
         }
 
         @Test
         @DisplayName("Info leak should map to OWASP A01 Broken Access Control")
         fun infoLeak_mapsToOwaspBrokenAccessControl() {
-            val finding = createFinding(
-                category = FindingCategory.INFORMATION_LEAK,
-                severity = VulnerabilitySeverity.MEDIUM
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.INFORMATION_LEAK,
+                    severity = VulnerabilitySeverity.MEDIUM,
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.owaspMappings.any { it.category == OwaspCategory.A01_BROKEN_ACCESS_CONTROL },
-                "Expected OWASP A01 Broken Access Control mapping"
+                "Expected OWASP A01 Broken Access Control mapping",
             )
         }
 
         @Test
         @DisplayName("Info leak should map to BISTF GATT vulnerability")
         fun infoLeak_mapsToBistfGatt() {
-            val finding = createFinding(
-                category = FindingCategory.INFORMATION_LEAK,
-                severity = VulnerabilitySeverity.MEDIUM,
-                description = "Information leak via GATT characteristic"
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.INFORMATION_LEAK,
+                    severity = VulnerabilitySeverity.MEDIUM,
+                    description = "Information leak via GATT characteristic",
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.GATT_VULN },
-                "Expected BISTF GATT vulnerability mapping"
+                "Expected BISTF GATT vulnerability mapping",
             )
         }
     }
@@ -248,43 +252,45 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Multiple findings compound score")
     inner class MultipleFindings {
-
         @Test
         @DisplayName("Multiple findings should compound to higher score than individual")
         fun multipleFindings_compoundScore() {
-            val singleFinding = createFinding(
-                category = FindingCategory.UNEXPECTED_RESPONSE,
-                severity = VulnerabilitySeverity.MEDIUM
-            )
+            val singleFinding =
+                createFinding(
+                    category = FindingCategory.UNEXPECTED_RESPONSE,
+                    severity = VulnerabilitySeverity.MEDIUM,
+                )
             val singleScore = useCase.assessRisk(listOf(singleFinding), testDevice).overallScore
 
-            val multipleFindings = listOf(
-                createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH),
-                createFinding(category = FindingCategory.INFORMATION_LEAK, severity = VulnerabilitySeverity.MEDIUM),
-                createFinding(category = FindingCategory.UNEXPECTED_RESPONSE, severity = VulnerabilitySeverity.LOW)
-            )
+            val multipleFindings =
+                listOf(
+                    createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH),
+                    createFinding(category = FindingCategory.INFORMATION_LEAK, severity = VulnerabilitySeverity.MEDIUM),
+                    createFinding(category = FindingCategory.UNEXPECTED_RESPONSE, severity = VulnerabilitySeverity.LOW),
+                )
             val compoundScore = useCase.assessRisk(multipleFindings, testDevice).overallScore
 
             assertTrue(
                 compoundScore > singleScore,
-                "Multiple findings ($compoundScore) should score higher than single ($singleScore)"
+                "Multiple findings ($compoundScore) should score higher than single ($singleScore)",
             )
         }
 
         @Test
         @DisplayName("Multiple high-severity findings should produce CRITICAL score")
         fun multipleHighSeverity_criticalScore() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.CRITICAL),
-                createFinding(category = FindingCategory.BUFFER_OVERFLOW, severity = VulnerabilitySeverity.CRITICAL),
-                createFinding(category = FindingCategory.MEMORY_CORRUPTION, severity = VulnerabilitySeverity.HIGH),
-                createFinding(category = FindingCategory.BYPASS, severity = VulnerabilitySeverity.HIGH)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.CRITICAL),
+                    createFinding(category = FindingCategory.BUFFER_OVERFLOW, severity = VulnerabilitySeverity.CRITICAL),
+                    createFinding(category = FindingCategory.MEMORY_CORRUPTION, severity = VulnerabilitySeverity.HIGH),
+                    createFinding(category = FindingCategory.BYPASS, severity = VulnerabilitySeverity.HIGH),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             assertTrue(
                 assessment.severity == RiskSeverity.CRITICAL,
-                "Expected CRITICAL but got ${assessment.severity} with score ${assessment.overallScore}"
+                "Expected CRITICAL but got ${assessment.severity} with score ${assessment.overallScore}",
             )
         }
     }
@@ -294,7 +300,6 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("OWASP mapping correctness")
     inner class OwaspMapping {
-
         @Test
         @DisplayName("Buffer overflow maps to A03 Injection")
         fun bufferOverflow_mapsToInjection() {
@@ -302,7 +307,7 @@ class RiskScoringUseCaseTest {
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
-                assessment.owaspMappings.any { it.category == OwaspCategory.A03_INJECTION }
+                assessment.owaspMappings.any { it.category == OwaspCategory.A03_INJECTION },
             )
         }
 
@@ -313,7 +318,7 @@ class RiskScoringUseCaseTest {
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
-                assessment.owaspMappings.any { it.category == OwaspCategory.A08_DATA_INTEGRITY }
+                assessment.owaspMappings.any { it.category == OwaspCategory.A08_DATA_INTEGRITY },
             )
         }
 
@@ -324,7 +329,7 @@ class RiskScoringUseCaseTest {
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
-                assessment.owaspMappings.any { it.category == OwaspCategory.A01_BROKEN_ACCESS_CONTROL }
+                assessment.owaspMappings.any { it.category == OwaspCategory.A01_BROKEN_ACCESS_CONTROL },
             )
         }
 
@@ -335,7 +340,7 @@ class RiskScoringUseCaseTest {
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
-                assessment.owaspMappings.any { it.category == OwaspCategory.A05_MISCONFIG }
+                assessment.owaspMappings.any { it.category == OwaspCategory.A05_MISCONFIG },
             )
         }
 
@@ -346,38 +351,40 @@ class RiskScoringUseCaseTest {
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
-                assessment.owaspMappings.any { it.category == OwaspCategory.A04_INSECURE_DESIGN }
+                assessment.owaspMappings.any { it.category == OwaspCategory.A04_INSECURE_DESIGN },
             )
         }
 
         @Test
         @DisplayName("Multiple categories produce multiple OWASP mappings")
         fun multipleCategories_multipleMappings() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.CRASH),
-                createFinding(category = FindingCategory.INFORMATION_LEAK),
-                createFinding(category = FindingCategory.UNEXPECTED_RESPONSE)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.CRASH),
+                    createFinding(category = FindingCategory.INFORMATION_LEAK),
+                    createFinding(category = FindingCategory.UNEXPECTED_RESPONSE),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             assertTrue(
                 assessment.owaspMappings.size >= 3,
-                "Expected at least 3 OWASP mappings but got ${assessment.owaspMappings.size}"
+                "Expected at least 3 OWASP mappings but got ${assessment.owaspMappings.size}",
             )
         }
 
         @Test
         @DisplayName("OWASP mappings include finding descriptions")
         fun owaspMappings_includeFindingDescriptions() {
-            val finding = createFinding(
-                category = FindingCategory.CRASH,
-                description = "Device crashed on malformed L2CAP packet"
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.CRASH,
+                    description = "Device crashed on malformed L2CAP packet",
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.owaspMappings.any { it.findings.contains("Device crashed on malformed L2CAP packet") },
-                "Expected finding description in OWASP mapping"
+                "Expected finding description in OWASP mapping",
             )
         }
     }
@@ -387,7 +394,6 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("BISTF mapping correctness")
     inner class BistfMapping {
-
         @Test
         @DisplayName("L2CAP in description maps to BISTF-01")
         fun l2capDescription_mapsToL2cap() {
@@ -396,7 +402,7 @@ class RiskScoringUseCaseTest {
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.L2CAP_VULN },
-                "Expected BISTF-01 L2CAP mapping"
+                "Expected BISTF-01 L2CAP mapping",
             )
         }
 
@@ -408,7 +414,7 @@ class RiskScoringUseCaseTest {
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.GATT_VULN },
-                "Expected BISTF-02 GATT mapping"
+                "Expected BISTF-02 GATT mapping",
             )
         }
 
@@ -420,7 +426,7 @@ class RiskScoringUseCaseTest {
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.SMP_VULN },
-                "Expected BISTF-03 SMP mapping"
+                "Expected BISTF-03 SMP mapping",
             )
         }
 
@@ -432,7 +438,7 @@ class RiskScoringUseCaseTest {
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.ATT_VULN },
-                "Expected BISTF-04 ATT mapping"
+                "Expected BISTF-04 ATT mapping",
             )
         }
 
@@ -444,7 +450,7 @@ class RiskScoringUseCaseTest {
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.HCI_VULN },
-                "Expected BISTF-05 HCI mapping"
+                "Expected BISTF-05 HCI mapping",
             )
         }
 
@@ -456,22 +462,24 @@ class RiskScoringUseCaseTest {
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.PRIVACY },
-                "Expected BISTF-06 Privacy mapping"
+                "Expected BISTF-06 Privacy mapping",
             )
         }
 
         @Test
         @DisplayName("Default crash finding maps to BISTF-01 L2CAP")
         fun defaultCrash_mapsToL2cap() {
-            val finding = createFinding(
-                category = FindingCategory.CRASH,
-                description = "Device crashed"  // No layer keyword
-            )
+            val finding =
+                createFinding(
+                    category = FindingCategory.CRASH,
+                    // No layer keyword
+                    description = "Device crashed",
+                )
             val assessment = useCase.assessRisk(listOf(finding), testDevice)
 
             assertTrue(
                 assessment.bistfMappings.any { it.category == BistfCategory.L2CAP_VULN },
-                "Default crash should map to BISTF-01 L2CAP"
+                "Default crash should map to BISTF-01 L2CAP",
             )
         }
     }
@@ -481,82 +489,86 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Recommendations")
     inner class Recommendations {
-
         @Test
         @DisplayName("Assessment with findings should generate recommendations")
         fun findings_produceRecommendations() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             assertTrue(
                 assessment.recommendations.isNotEmpty(),
-                "Expected at least one recommendation"
+                "Expected at least one recommendation",
             )
         }
 
         @Test
         @DisplayName("Recommendations include OWASP category references")
         fun recommendations_includeOwaspReferences() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             assertTrue(
                 assessment.recommendations.any { it.contains("A03") },
-                "Expected A03 reference in recommendations"
+                "Expected A03 reference in recommendations",
             )
         }
 
         @Test
         @DisplayName("Recommendations include BISTF category references")
         fun recommendations_includeBistfReferences() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             assertTrue(
                 assessment.recommendations.any { it.contains("BISTF") },
-                "Expected BISTF reference in recommendations"
+                "Expected BISTF reference in recommendations",
             )
         }
 
         @Test
         @DisplayName("Many high-severity findings trigger URGENT recommendation")
         fun manyCriticalFindings_urgentRecommendation() {
-            val findings = (1..5).map {
-                createFinding(
-                    category = FindingCategory.CRASH,
-                    severity = VulnerabilitySeverity.CRITICAL,
-                    description = "Critical crash #$it"
-                )
-            }
+            val findings =
+                (1..5).map {
+                    createFinding(
+                        category = FindingCategory.CRASH,
+                        severity = VulnerabilitySeverity.CRITICAL,
+                        description = "Critical crash #$it",
+                    )
+                }
             val assessment = useCase.assessRisk(findings, testDevice)
 
             assertTrue(
                 assessment.recommendations.any { it.contains("URGENT") },
-                "Expected URGENT recommendation for many critical findings"
+                "Expected URGENT recommendation for many critical findings",
             )
         }
 
         @Test
         @DisplayName("Reproducible findings trigger reproducibility recommendation")
         fun reproducibleFindings_reproducibilityRecommendation() {
-            val findings = listOf(
-                createFinding(
-                    category = FindingCategory.CRASH,
-                    severity = VulnerabilitySeverity.HIGH,
-                    reproducible = true
+            val findings =
+                listOf(
+                    createFinding(
+                        category = FindingCategory.CRASH,
+                        severity = VulnerabilitySeverity.HIGH,
+                        reproducible = true,
+                    ),
                 )
-            )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             assertTrue(
                 assessment.recommendations.any { it.contains("Reproducible") },
-                "Expected reproducibility recommendation"
+                "Expected reproducibility recommendation",
             )
         }
     }
@@ -566,7 +578,6 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Score thresholds")
     inner class ScoreThresholds {
-
         @Test
         @DisplayName("classifySeverity 9.0 should be CRITICAL")
         fun threshold90_critical() {
@@ -633,28 +644,29 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Risk factors")
     inner class RiskFactors {
-
         @Test
         @DisplayName("Each finding category produces correct risk factor")
         fun allCategories_produceFactors() {
-            val findings = FindingCategory.entries.map { category ->
-                createFinding(category = category)
-            }
+            val findings =
+                FindingCategory.entries.map { category ->
+                    createFinding(category = category)
+                }
             val assessment = useCase.assessRisk(findings, testDevice)
 
             // Not all categories necessarily produce separate factors (some are grouped)
             assertTrue(
                 assessment.factors.isNotEmpty(),
-                "Expected risk factors for all finding categories"
+                "Expected risk factors for all finding categories",
             )
         }
 
         @Test
         @DisplayName("Crash findings have HIGH weight")
         fun crashFactors_haveHighWeight() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.CRASH, severity = VulnerabilitySeverity.HIGH),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             val crashFactor = assessment.factors.find { it.name.contains("Crash") }
@@ -665,9 +677,10 @@ class RiskScoringUseCaseTest {
         @Test
         @DisplayName("Info leak findings have MEDIUM weight")
         fun infoLeakFactors_haveMediumWeight() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.INFORMATION_LEAK, severity = VulnerabilitySeverity.MEDIUM)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.INFORMATION_LEAK, severity = VulnerabilitySeverity.MEDIUM),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             val leakFactor = assessment.factors.find { it.name.contains("Disclosure") }
@@ -678,9 +691,10 @@ class RiskScoringUseCaseTest {
         @Test
         @DisplayName("Unexpected response findings have LOW weight")
         fun unexpectedResponseFactors_haveLowWeight() {
-            val findings = listOf(
-                createFinding(category = FindingCategory.UNEXPECTED_RESPONSE, severity = VulnerabilitySeverity.LOW)
-            )
+            val findings =
+                listOf(
+                    createFinding(category = FindingCategory.UNEXPECTED_RESPONSE, severity = VulnerabilitySeverity.LOW),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             val responseFactor = assessment.factors.find { it.name.contains("Unexpected") }
@@ -694,31 +708,31 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Realistic scenario with 10+ findings")
     inner class RealisticScenario {
-
         @Test
         @DisplayName("10+ mixed findings produce comprehensive assessment")
         fun tenPlusFindings_comprehensiveAssessment() {
-            val findings = listOf(
-                createFinding(FindingCategory.CRASH, VulnerabilitySeverity.CRITICAL, "L2CAP crash on oversized packet", true),
-                createFinding(FindingCategory.CRASH, VulnerabilitySeverity.HIGH, "GATT service crash", true),
-                createFinding(FindingCategory.BUFFER_OVERFLOW, VulnerabilitySeverity.CRITICAL, "Buffer overflow in ATT handler", true),
-                createFinding(FindingCategory.MEMORY_CORRUPTION, VulnerabilitySeverity.HIGH, "Memory corruption via malformed SMP"),
-                createFinding(FindingCategory.INFORMATION_LEAK, VulnerabilitySeverity.MEDIUM, "GATT characteristic data leak"),
-                createFinding(FindingCategory.INFORMATION_LEAK, VulnerabilitySeverity.LOW, "Device name information disclosure"),
-                createFinding(FindingCategory.BYPASS, VulnerabilitySeverity.HIGH, "Authentication bypass via SMP"),
-                createFinding(FindingCategory.UNEXPECTED_RESPONSE, VulnerabilitySeverity.MEDIUM, "Unexpected ATT response"),
-                createFinding(FindingCategory.UNEXPECTED_RESPONSE, VulnerabilitySeverity.LOW, "Anomalous GATT notification"),
-                createFinding(FindingCategory.HANG, VulnerabilitySeverity.MEDIUM, "Device hang on malformed HCI command"),
-                createFinding(FindingCategory.NO_RESPONSE, VulnerabilitySeverity.MEDIUM, "No response to L2CAP echo request"),
-                createFinding(FindingCategory.DELAYED_RESPONSE, VulnerabilitySeverity.LOW, "Delayed GATT response")
-            )
+            val findings =
+                listOf(
+                    createFinding(FindingCategory.CRASH, VulnerabilitySeverity.CRITICAL, "L2CAP crash on oversized packet", true),
+                    createFinding(FindingCategory.CRASH, VulnerabilitySeverity.HIGH, "GATT service crash", true),
+                    createFinding(FindingCategory.BUFFER_OVERFLOW, VulnerabilitySeverity.CRITICAL, "Buffer overflow in ATT handler", true),
+                    createFinding(FindingCategory.MEMORY_CORRUPTION, VulnerabilitySeverity.HIGH, "Memory corruption via malformed SMP"),
+                    createFinding(FindingCategory.INFORMATION_LEAK, VulnerabilitySeverity.MEDIUM, "GATT characteristic data leak"),
+                    createFinding(FindingCategory.INFORMATION_LEAK, VulnerabilitySeverity.LOW, "Device name information disclosure"),
+                    createFinding(FindingCategory.BYPASS, VulnerabilitySeverity.HIGH, "Authentication bypass via SMP"),
+                    createFinding(FindingCategory.UNEXPECTED_RESPONSE, VulnerabilitySeverity.MEDIUM, "Unexpected ATT response"),
+                    createFinding(FindingCategory.UNEXPECTED_RESPONSE, VulnerabilitySeverity.LOW, "Anomalous GATT notification"),
+                    createFinding(FindingCategory.HANG, VulnerabilitySeverity.MEDIUM, "Device hang on malformed HCI command"),
+                    createFinding(FindingCategory.NO_RESPONSE, VulnerabilitySeverity.MEDIUM, "No response to L2CAP echo request"),
+                    createFinding(FindingCategory.DELAYED_RESPONSE, VulnerabilitySeverity.LOW, "Delayed GATT response"),
+                )
             val assessment = useCase.assessRisk(findings, testDevice)
 
             // Should be at least HIGH (CRITICAL possible depending on composition)
             assertTrue(
                 assessment.severity == RiskSeverity.CRITICAL ||
                     assessment.severity == RiskSeverity.HIGH,
-                "Expected HIGH or CRITICAL but got ${assessment.severity}"
+                "Expected HIGH or CRITICAL but got ${assessment.severity}",
             )
 
             // Score should be high
@@ -745,16 +759,17 @@ class RiskScoringUseCaseTest {
             // Timestamp should be recent
             assertTrue(
                 assessment.timestamp.isAfter(Instant.now().minusSeconds(5)),
-                "Timestamp should be recent"
+                "Timestamp should be recent",
             )
         }
 
         @Test
         @DisplayName("Null device should still work correctly")
         fun nullDevice_stillWorks() {
-            val findings = listOf(
-                createFinding(FindingCategory.CRASH, VulnerabilitySeverity.HIGH, "Crash finding")
-            )
+            val findings =
+                listOf(
+                    createFinding(FindingCategory.CRASH, VulnerabilitySeverity.HIGH, "Crash finding"),
+                )
             val assessment = useCase.assessRisk(findings, null)
 
             assertNotNull(assessment)
@@ -767,7 +782,6 @@ class RiskScoringUseCaseTest {
     @Nested
     @DisplayName("Weighted score calculation")
     inner class WeightedScoreCalculation {
-
         @Test
         @DisplayName("Empty factors produce 0.0 score")
         fun emptyFactors_zeroScore() {
@@ -777,9 +791,10 @@ class RiskScoringUseCaseTest {
         @Test
         @DisplayName("Single max factor produces high score")
         fun singleMaxFactor_highScore() {
-            val factors = listOf(
-                RiskFactor("test", RiskScoringUseCase.WEIGHT_HIGH, 1.0, "test")
-            )
+            val factors =
+                listOf(
+                    RiskFactor("test", RiskScoringUseCase.WEIGHT_HIGH, 1.0, "test"),
+                )
             val score = useCase.calculateWeightedScore(factors)
             assertEquals(10.0, score, "Max factor should produce 10.0 score")
         }
@@ -787,9 +802,10 @@ class RiskScoringUseCaseTest {
         @Test
         @DisplayName("Single zero factor produces 0.0 score")
         fun singleZeroFactor_zeroScore() {
-            val factors = listOf(
-                RiskFactor("test", RiskScoringUseCase.WEIGHT_HIGH, 0.0, "test")
-            )
+            val factors =
+                listOf(
+                    RiskFactor("test", RiskScoringUseCase.WEIGHT_HIGH, 0.0, "test"),
+                )
             val score = useCase.calculateWeightedScore(factors)
             assertEquals(0.0, score)
         }

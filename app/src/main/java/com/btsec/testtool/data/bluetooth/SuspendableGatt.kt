@@ -11,16 +11,7 @@ package com.btsec.testtool.data.bluetooth
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.content.Context
-import com.btsec.testtool.domain.model.BleCharacteristic
-import com.btsec.testtool.domain.model.BleDescriptor
-import com.btsec.testtool.domain.model.BleService
 import com.btsec.testtool.domain.model.BluetoothDevice
-import com.btsec.testtool.domain.model.BluetoothType
-import com.btsec.testtool.domain.model.BondState
-import com.btsec.testtool.domain.model.CharacteristicProperties
-import com.btsec.testtool.domain.model.DeviceClass
-import com.btsec.testtool.domain.repository.ConnectionPriority
-import com.btsec.testtool.domain.repository.WriteType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.resumeWithException
 
 /**
  * Wrapper that converts async BluetoothGatt callbacks to Kotlin suspend functions and Flows.
@@ -41,7 +31,6 @@ import kotlin.coroutines.resumeWithException
  * - Automatic cleanup on close
  */
 class SuspendableGatt {
-
     private var gatt: BluetoothGatt? = null
     private val connectionState = MutableStateFlow<ConnectionStateInternal>(ConnectionStateInternal.Disconnected)
 
@@ -52,8 +41,11 @@ class SuspendableGatt {
 
     sealed class ConnectionStateInternal {
         data object Disconnected : ConnectionStateInternal()
+
         data object Connecting : ConnectionStateInternal()
+
         data object Connected : ConnectionStateInternal()
+
         data class Error(val message: String) : ConnectionStateInternal()
     }
 
@@ -61,129 +53,152 @@ class SuspendableGatt {
     suspend fun connect(
         device: android.bluetooth.BluetoothDevice,
         context: Context,
-        transport: Int = android.bluetooth.BluetoothDevice.TRANSPORT_LE
+        transport: Int = android.bluetooth.BluetoothDevice.TRANSPORT_LE,
     ): BluetoothGatt {
         val deferred = CompletableDeferred<BluetoothGatt>()
 
-        callback = object : BluetoothGattCallback() {
-            override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-                when (newState) {
-                    BluetoothGatt.STATE_CONNECTED -> {
-                        connectionState.value = ConnectionStateInternal.Connected
-                        this@SuspendableGatt.gatt = gatt
-                        Timber.d("GATT connected to ${device.address}")
-                        deferred.tryComplete(gatt)
-                    }
-                    BluetoothGatt.STATE_DISCONNECTED -> {
-                        connectionState.value = ConnectionStateInternal.Disconnected
-                        Timber.d("GATT disconnected from ${device.address}, status=$status")
-                        if (!deferred.isCompleted) {
-                            deferred.completeExceptionally(
-                                GattException("Connection failed with status: $status")
-                            )
+        callback =
+            object : BluetoothGattCallback() {
+                override fun onConnectionStateChange(
+                    gatt: BluetoothGatt,
+                    status: Int,
+                    newState: Int,
+                ) {
+                    when (newState) {
+                        BluetoothGatt.STATE_CONNECTED -> {
+                            connectionState.value = ConnectionStateInternal.Connected
+                            this@SuspendableGatt.gatt = gatt
+                            Timber.d("GATT connected to ${device.address}")
+                            deferred.tryComplete(gatt)
                         }
-                        // Cancel all pending operations
-                        pendingOperations.values.forEach { it.cancel() }
-                        pendingOperations.clear()
+                        BluetoothGatt.STATE_DISCONNECTED -> {
+                            connectionState.value = ConnectionStateInternal.Disconnected
+                            Timber.d("GATT disconnected from ${device.address}, status=$status")
+                            if (!deferred.isCompleted) {
+                                deferred.completeExceptionally(
+                                    GattException("Connection failed with status: $status"),
+                                )
+                            }
+                            // Cancel all pending operations
+                            pendingOperations.values.forEach { it.cancel() }
+                            pendingOperations.clear()
+                        }
+                    }
+                }
+
+                override fun onServicesDiscovered(
+                    gatt: BluetoothGatt,
+                    status: Int,
+                ) {
+                    val key = "discover_services"
+
+                    @Suppress("UNCHECKED_CAST")
+                    val op = pendingOperations.remove(key) as? CompletableDeferred<List<BluetoothGattService>>
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        op?.tryComplete(gatt.services ?: emptyList())
+                    } else {
+                        op?.completeExceptionally(GattException("Service discovery failed: $status"))
+                    }
+                }
+
+                override fun onCharacteristicRead(
+                    gatt: BluetoothGatt,
+                    characteristic: BluetoothGattCharacteristic,
+                    value: ByteArray,
+                    status: Int,
+                ) {
+                    val key = "read_${characteristic.uuid}"
+
+                    @Suppress("UNCHECKED_CAST")
+                    val op = pendingOperations.remove(key) as? CompletableDeferred<ByteArray>
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        op?.tryComplete(value)
+                    } else {
+                        op?.completeExceptionally(GattException("Characteristic read failed: $status"))
+                    }
+                }
+
+                override fun onCharacteristicWrite(
+                    gatt: BluetoothGatt,
+                    characteristic: BluetoothGattCharacteristic,
+                    status: Int,
+                ) {
+                    val key = "write_${characteristic.uuid}"
+
+                    @Suppress("UNCHECKED_CAST")
+                    val op = pendingOperations.remove(key) as? CompletableDeferred<Boolean>
+                    op?.tryComplete(status == BluetoothGatt.GATT_SUCCESS)
+                }
+
+                override fun onCharacteristicChanged(
+                    gatt: BluetoothGatt,
+                    characteristic: BluetoothGattCharacteristic,
+                    value: ByteArray,
+                ) {
+                    notificationChannels[characteristic.uuid]?.trySend(value)
+                }
+
+                override fun onDescriptorRead(
+                    gatt: BluetoothGatt,
+                    descriptor: BluetoothGattDescriptor,
+                    status: Int,
+                    value: ByteArray,
+                ) {
+                    val key = "read_desc_${descriptor.uuid}"
+
+                    @Suppress("UNCHECKED_CAST")
+                    val op = pendingOperations.remove(key) as? CompletableDeferred<ByteArray>
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        op?.tryComplete(value)
+                    } else {
+                        op?.tryCompleteExceptionarily(GattException("Descriptor read failed: $status"))
+                    }
+                }
+
+                override fun onDescriptorWrite(
+                    gatt: BluetoothGatt,
+                    descriptor: BluetoothGattDescriptor,
+                    status: Int,
+                ) {
+                    val key = "write_desc_${descriptor.uuid}"
+
+                    @Suppress("UNCHECKED_CAST")
+                    val op = pendingOperations.remove(key) as? CompletableDeferred<Boolean>
+                    op?.tryComplete(status == BluetoothGatt.GATT_SUCCESS)
+                }
+
+                override fun onMtuChanged(
+                    gatt: BluetoothGatt,
+                    mtu: Int,
+                    status: Int,
+                ) {
+                    val key = "mtu"
+
+                    @Suppress("UNCHECKED_CAST")
+                    val op = pendingOperations.remove(key) as? CompletableDeferred<Int>
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        op?.tryComplete(mtu)
+                    } else {
+                        op?.tryCompleteExceptionarily(GattException("MTU change failed: $status"))
+                    }
+                }
+
+                override fun onReadRemoteRssi(
+                    gatt: BluetoothGatt,
+                    rssi: Int,
+                    status: Int,
+                ) {
+                    val key = "rssi"
+
+                    @Suppress("UNCHECKED_CAST")
+                    val op = pendingOperations.remove(key) as? CompletableDeferred<Int>
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        op?.tryComplete(rssi)
+                    } else {
+                        op?.tryCompleteExceptionarily(GattException("RSSI read failed: $status"))
                     }
                 }
             }
-
-            override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-                val key = "discover_services"
-                @Suppress("UNCHECKED_CAST")
-                val op = pendingOperations.remove(key) as? CompletableDeferred<List<BluetoothGattService>>
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    op?.tryComplete(gatt.services ?: emptyList())
-                } else {
-                    op?.completeExceptionally(GattException("Service discovery failed: $status"))
-                }
-            }
-
-            override fun onCharacteristicRead(
-                gatt: BluetoothGatt,
-                characteristic: BluetoothGattCharacteristic,
-                value: ByteArray,
-                status: Int
-            ) {
-                val key = "read_${characteristic.uuid}"
-                @Suppress("UNCHECKED_CAST")
-                val op = pendingOperations.remove(key) as? CompletableDeferred<ByteArray>
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    op?.tryComplete(value)
-                } else {
-                    op?.completeExceptionally(GattException("Characteristic read failed: $status"))
-                }
-            }
-
-            override fun onCharacteristicWrite(
-                gatt: BluetoothGatt,
-                characteristic: BluetoothGattCharacteristic,
-                status: Int
-            ) {
-                val key = "write_${characteristic.uuid}"
-                @Suppress("UNCHECKED_CAST")
-                val op = pendingOperations.remove(key) as? CompletableDeferred<Boolean>
-                op?.tryComplete(status == BluetoothGatt.GATT_SUCCESS)
-            }
-
-            override fun onCharacteristicChanged(
-                gatt: BluetoothGatt,
-                characteristic: BluetoothGattCharacteristic,
-                value: ByteArray
-            ) {
-                notificationChannels[characteristic.uuid]?.trySend(value)
-            }
-
-            override fun onDescriptorRead(
-                gatt: BluetoothGatt,
-                descriptor: BluetoothGattDescriptor,
-                status: Int,
-                value: ByteArray
-            ) {
-                val key = "read_desc_${descriptor.uuid}"
-                @Suppress("UNCHECKED_CAST")
-                val op = pendingOperations.remove(key) as? CompletableDeferred<ByteArray>
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    op?.tryComplete(value)
-                } else {
-                    op?.tryCompleteExceptionarily(GattException("Descriptor read failed: $status"))
-                }
-            }
-
-            override fun onDescriptorWrite(
-                gatt: BluetoothGatt,
-                descriptor: BluetoothGattDescriptor,
-                status: Int
-            ) {
-                val key = "write_desc_${descriptor.uuid}"
-                @Suppress("UNCHECKED_CAST")
-                val op = pendingOperations.remove(key) as? CompletableDeferred<Boolean>
-                op?.tryComplete(status == BluetoothGatt.GATT_SUCCESS)
-            }
-
-            override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
-                val key = "mtu"
-                @Suppress("UNCHECKED_CAST")
-                val op = pendingOperations.remove(key) as? CompletableDeferred<Int>
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    op?.tryComplete(mtu)
-                } else {
-                    op?.tryCompleteExceptionarily(GattException("MTU change failed: $status"))
-                }
-            }
-
-            override fun onReadRemoteRssi(gatt: BluetoothGatt, rssi: Int, status: Int) {
-                val key = "rssi"
-                @Suppress("UNCHECKED_CAST")
-                val op = pendingOperations.remove(key) as? CompletableDeferred<Int>
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    op?.tryComplete(rssi)
-                } else {
-                    op?.tryCompleteExceptionarily(GattException("RSSI read failed: $status"))
-                }
-            }
-        }
 
         val gattInstance = device.connectGatt(context, false, callback, transport)
         return withTimeoutOrNull(30_000L) {
@@ -215,7 +230,10 @@ class SuspendableGatt {
     }
 
     @SuppressLint("MissingPermission")
-    suspend fun writeCharacteristic(characteristic: BluetoothGattCharacteristic, value: ByteArray): Boolean {
+    suspend fun writeCharacteristic(
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray,
+    ): Boolean {
         val g = gatt ?: throw GattException("Not connected")
         val deferred = CompletableDeferred<Boolean>()
         pendingOperations["write_${characteristic.uuid}"] = deferred
@@ -242,7 +260,10 @@ class SuspendableGatt {
     }
 
     @SuppressLint("MissingPermission")
-    suspend fun writeDescriptor(descriptor: BluetoothGattDescriptor, value: ByteArray): Boolean {
+    suspend fun writeDescriptor(
+        descriptor: BluetoothGattDescriptor,
+        value: ByteArray,
+    ): Boolean {
         val g = gatt ?: throw GattException("Not connected")
         val deferred = CompletableDeferred<Boolean>()
         pendingOperations["write_desc_${descriptor.uuid}"] = deferred
@@ -302,5 +323,14 @@ class SuspendableGatt {
     class GattException(message: String) : Exception(message)
 }
 
-private fun <T> CompletableDeferred<T>.tryComplete(value: T) = try { complete(value) } catch (_: Exception) {}
-private fun <T> CompletableDeferred<T>.tryCompleteExceptionarily(e: Exception) = try { completeExceptionally(e) } catch (_: Exception) {}
+private fun <T> CompletableDeferred<T>.tryComplete(value: T) =
+    try {
+        complete(value)
+    } catch (_: Exception) {
+    }
+
+private fun <T> CompletableDeferred<T>.tryCompleteExceptionarily(e: Exception) =
+    try {
+        completeExceptionally(e)
+    } catch (_: Exception) {
+    }

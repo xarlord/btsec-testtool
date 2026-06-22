@@ -13,8 +13,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import dagger.hilt.android.HiltAndroidApp
 import androidx.work.Configuration
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,7 +28,6 @@ import timber.log.Timber
  */
 @HiltAndroidApp
 class BtSecTestToolApplication : Application() {
-
     // Application scope for coroutines
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -61,37 +60,40 @@ class BtSecTestToolApplication : Application() {
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Main notification channel
-            val mainChannel = NotificationChannel(
-                CHANNEL_ID_MAIN,
-                "Main Notifications",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "Main application notifications"
-                setShowBadge(false)
-            }
+            val mainChannel =
+                NotificationChannel(
+                    CHANNEL_ID_MAIN,
+                    "Main Notifications",
+                    NotificationManager.IMPORTANCE_DEFAULT,
+                ).apply {
+                    description = "Main application notifications"
+                    setShowBadge(false)
+                }
 
             // Foreground service channel
-            val serviceChannel = NotificationChannel(
-                CHANNEL_ID_SERVICE,
-                "Background Services",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Background service notifications for scanning"
-                setShowBadge(false)
-                setSound(null, null)
-            }
+            val serviceChannel =
+                NotificationChannel(
+                    CHANNEL_ID_SERVICE,
+                    "Background Services",
+                    NotificationManager.IMPORTANCE_LOW,
+                ).apply {
+                    description = "Background service notifications for scanning"
+                    setShowBadge(false)
+                    setSound(null, null)
+                }
 
             // Testing notifications channel
-            val testingChannel = NotificationChannel(
-                CHANNEL_ID_TESTING,
-                "Testing Notifications",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Notifications for testing activities"
-                setShowBadge(true)
-                enableVibration(true)
-                enableLights(true)
-            }
+            val testingChannel =
+                NotificationChannel(
+                    CHANNEL_ID_TESTING,
+                    "Testing Notifications",
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply {
+                    description = "Notifications for testing activities"
+                    setShowBadge(true)
+                    enableVibration(true)
+                    enableLights(true)
+                }
 
             notificationManager.createNotificationChannel(mainChannel)
             notificationManager.createNotificationChannel(serviceChannel)

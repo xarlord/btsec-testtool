@@ -33,79 +33,81 @@ import javax.inject.Singleton
  * MAP uses the OBEX protocol to access SMS/MMS/email folders.
  */
 @Singleton
-class MapSecurityRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
-) : MapSecurityRepository {
+class MapSecurityRepositoryImpl
+    @Inject
+    constructor(
+        @ApplicationContext private val context: Context,
+    ) : MapSecurityRepository {
+        private val bluetoothManager: BluetoothManager =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
 
-    private val bluetoothManager: BluetoothManager =
-        context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        private val connected = MutableStateFlow(false)
+        private var socket: BluetoothSocket? = null
+        private val savedReports = MutableStateFlow<Map<String, List<PbmapTestReport>>>(emptyMap())
 
-    private val connected = MutableStateFlow(false)
-    private var socket: BluetoothSocket? = null
-    private val savedReports = MutableStateFlow<Map<String, List<PbmapTestReport>>>(emptyMap())
+        @SuppressLint("MissingPermission")
+        override suspend fun connect(deviceAddress: String): Result<Unit> {
+            return try {
+                disconnect()
+                val device =
+                    bluetoothManager.adapter?.getRemoteDevice(deviceAddress)
+                        ?: return Result.failure(Exception("Device not found: $deviceAddress"))
 
-    @SuppressLint("MissingPermission")
-    override suspend fun connect(deviceAddress: String): Result<Unit> {
-        return try {
-            disconnect()
-            val device = bluetoothManager.adapter?.getRemoteDevice(deviceAddress)
-                ?: return Result.failure(Exception("Device not found: $deviceAddress"))
+                val mapSocket = device.createRfcommSocketToServiceRecord(MAP_MSE_UUID)
+                mapSocket.connect()
 
-            val mapSocket = device.createRfcommSocketToServiceRecord(MAP_MSE_UUID)
-            mapSocket.connect()
+                socket = mapSocket
+                connected.value = true
+                Timber.i("MAP connected to $deviceAddress")
+                Result.success(Unit)
+            } catch (e: SecurityException) {
+                Timber.e(e, "Missing Bluetooth permissions")
+                Result.failure(e)
+            } catch (e: IOException) {
+                Timber.e(e, "MAP connection failed")
+                Result.failure(e)
+            }
+        }
 
-            socket = mapSocket
-            connected.value = true
-            Timber.i("MAP connected to $deviceAddress")
-            Result.success(Unit)
-        } catch (e: SecurityException) {
-            Timber.e(e, "Missing Bluetooth permissions")
-            Result.failure(e)
-        } catch (e: IOException) {
-            Timber.e(e, "MAP connection failed")
-            Result.failure(e)
+        override suspend fun disconnect() {
+            try {
+                socket?.close()
+            } catch (e: IOException) {
+                Timber.w(e, "Error closing MAP socket")
+            }
+            socket = null
+            connected.value = false
+        }
+
+        override suspend fun accessFolder(folder: MapFolder): MapAccessResult {
+            val startTime = System.currentTimeMillis()
+            Timber.d("accessFolder: $folder (OBEX framing required)")
+
+            return MapAccessResult(
+                folder = folder,
+                accessible = false,
+                messageCount = 0,
+                messages = emptyList(),
+                requiredAuth = true,
+                testDurationMs = System.currentTimeMillis() - startTime,
+            )
+        }
+
+        override fun isMapConnected(): Flow<Boolean> = connected
+
+        override suspend fun saveTestReport(report: PbmapTestReport) {
+            val updated = savedReports.value.toMutableMap()
+            val list = (updated[report.targetDevice] ?: emptyList()).toMutableList()
+            list.add(report)
+            updated[report.targetDevice] = list
+            savedReports.value = updated
+        }
+
+        override fun getTestReports(deviceAddress: String): Flow<List<PbmapTestReport>> {
+            return savedReports.map { it[deviceAddress] ?: emptyList() }
+        }
+
+        companion object {
+            private val MAP_MSE_UUID: UUID = UUID.fromString("00001132-0000-1000-8000-00805F9B34FB")
         }
     }
-
-    override suspend fun disconnect() {
-        try {
-            socket?.close()
-        } catch (e: IOException) {
-            Timber.w(e, "Error closing MAP socket")
-        }
-        socket = null
-        connected.value = false
-    }
-
-    override suspend fun accessFolder(folder: MapFolder): MapAccessResult {
-        val startTime = System.currentTimeMillis()
-        Timber.d("accessFolder: $folder (OBEX framing required)")
-
-        return MapAccessResult(
-            folder = folder,
-            accessible = false,
-            messageCount = 0,
-            messages = emptyList(),
-            requiredAuth = true,
-            testDurationMs = System.currentTimeMillis() - startTime
-        )
-    }
-
-    override fun isMapConnected(): Flow<Boolean> = connected
-
-    override suspend fun saveTestReport(report: PbmapTestReport) {
-        val updated = savedReports.value.toMutableMap()
-        val list = (updated[report.targetDevice] ?: emptyList()).toMutableList()
-        list.add(report)
-        updated[report.targetDevice] = list
-        savedReports.value = updated
-    }
-
-    override fun getTestReports(deviceAddress: String): Flow<List<PbmapTestReport>> {
-        return savedReports.map { it[deviceAddress] ?: emptyList() }
-    }
-
-    companion object {
-        private val MAP_MSE_UUID: UUID = UUID.fromString("00001132-0000-1000-8000-00805F9B34FB")
-    }
-}

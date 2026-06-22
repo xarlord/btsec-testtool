@@ -8,8 +8,6 @@
  */
 package com.btsec.testtool.domain.model
 
-import java.time.Instant
-
 /**
  * Represents a single scan session with aggregated metrics.
  */
@@ -20,7 +18,7 @@ data class ScanSession(
     val deviceCount: Int,
     val vulnerabilitiesFound: Int,
     val riskScore: Double,
-    val severity: RiskSeverity
+    val severity: RiskSeverity,
 )
 
 /**
@@ -34,7 +32,7 @@ data class AnalyticsSummary(
     val severityDistribution: Map<RiskSeverity, Int>,
     val trendData: List<TrendPoint>,
     val topVulnerableDevices: List<DeviceRiskEntry>,
-    val categoryBreakdown: Map<String, Int>
+    val categoryBreakdown: Map<String, Int>,
 )
 
 /**
@@ -44,7 +42,7 @@ data class TrendPoint(
     val timestamp: Long,
     val riskScore: Double,
     val vulnerabilityCount: Int,
-    val sessionLabel: String
+    val sessionLabel: String,
 )
 
 /**
@@ -56,5 +54,5 @@ data class DeviceRiskEntry(
     val riskScore: Double,
     val severity: RiskSeverity,
     val vulnerabilityCount: Int,
-    val lastScanned: Long
+    val lastScanned: Long,
 )

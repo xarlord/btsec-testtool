@@ -24,9 +24,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 /**
@@ -35,31 +32,32 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Provides
     @Singleton
     fun provideDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): BtSecDatabase {
         return Room.databaseBuilder(
             context,
             BtSecDatabase::class.java,
-            BtSecDatabase.DATABASE_NAME
+            BtSecDatabase.DATABASE_NAME,
         )
-            .addCallback(object : RoomDatabase.Callback() {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                    // Database created — seed data can be added here if needed
-                }
+            .addCallback(
+                object : RoomDatabase.Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        // Database created — seed data can be added here if needed
+                    }
 
-                override fun onOpen(db: SupportSQLiteDatabase) {
-                    super.onOpen(db)
-                    // Enable WAL mode for better concurrent read/write performance
-                    db.execSQL("PRAGMA journal_mode=WAL")
-                    // Enable foreign key enforcement
-                    db.execSQL("PRAGMA foreign_keys=ON")
-                }
-            })
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        super.onOpen(db)
+                        // Enable WAL mode for better concurrent read/write performance
+                        db.execSQL("PRAGMA journal_mode=WAL")
+                        // Enable foreign key enforcement
+                        db.execSQL("PRAGMA foreign_keys=ON")
+                    }
+                },
+            )
             .build()
     }
 

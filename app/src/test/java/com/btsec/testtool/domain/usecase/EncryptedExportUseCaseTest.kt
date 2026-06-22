@@ -22,7 +22,6 @@ import java.io.File
  * Only for AUTHORIZED security testing purposes.
  */
 class EncryptedExportUseCaseTest {
-
     private val useCase = EncryptedExportUseCase()
 
     @TempDir

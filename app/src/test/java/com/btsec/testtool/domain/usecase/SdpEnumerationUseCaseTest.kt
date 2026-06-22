@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class SdpEnumerationUseCaseTest {
-
     private lateinit var useCase: SdpEnumerationUseCase
 
     @BeforeEach
@@ -37,7 +36,6 @@ class SdpEnumerationUseCaseTest {
     @Nested
     @DisplayName("identifyProfile")
     inner class IdentifyProfile {
-
         @Test
         @DisplayName("should identify HFP from UUID 111E")
         fun testIdentifyProfile_knownHfp() {
@@ -80,17 +78,17 @@ class SdpEnumerationUseCaseTest {
     @Nested
     @DisplayName("parseProtocolDescriptors")
     inner class ParseProtocolDescriptors {
-
         @Test
         @DisplayName("should extract RFCOMM channel from protocol descriptor")
         fun testParseProtocolDescriptors_rfcommChannel() {
-            val descriptors = listOf(
-                ProtocolDescriptor(
-                    protocolUuid = "0003",
-                    protocolName = "RFCOMM",
-                    parameters = mapOf("channel" to 5)
+            val descriptors =
+                listOf(
+                    ProtocolDescriptor(
+                        protocolUuid = "0003",
+                        protocolName = "RFCOMM",
+                        parameters = mapOf("channel" to 5),
+                    ),
                 )
-            )
             val (channel, psm) = useCase.parseProtocolDescriptors(descriptors)
             assertThat(channel).isEqualTo(5)
             assertThat(psm).isNull()
@@ -99,13 +97,14 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should extract L2CAP PSM from protocol descriptor")
         fun testParseProtocolDescriptors_l2capPsm() {
-            val descriptors = listOf(
-                ProtocolDescriptor(
-                    protocolUuid = "0100",
-                    protocolName = "L2CAP",
-                    parameters = mapOf("psm" to 0x000F)
+            val descriptors =
+                listOf(
+                    ProtocolDescriptor(
+                        protocolUuid = "0100",
+                        protocolName = "L2CAP",
+                        parameters = mapOf("psm" to 0x000F),
+                    ),
                 )
-            )
             val (channel, psm) = useCase.parseProtocolDescriptors(descriptors)
             assertThat(channel).isNull()
             assertThat(psm).isEqualTo(0x000F)
@@ -114,10 +113,11 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should extract both RFCOMM and L2CAP from combined descriptors")
         fun testParseProtocolDescriptors_both() {
-            val descriptors = listOf(
-                ProtocolDescriptor("0100", "L2CAP", mapOf("psm" to 17)),
-                ProtocolDescriptor("0003", "RFCOMM", mapOf("channel" to 3))
-            )
+            val descriptors =
+                listOf(
+                    ProtocolDescriptor("0100", "L2CAP", mapOf("psm" to 17)),
+                    ProtocolDescriptor("0003", "RFCOMM", mapOf("channel" to 3)),
+                )
             val (channel, psm) = useCase.parseProtocolDescriptors(descriptors)
             assertThat(channel).isEqualTo(3)
             assertThat(psm).isEqualTo(17)
@@ -135,20 +135,20 @@ class SdpEnumerationUseCaseTest {
     @Nested
     @DisplayName("analyzeSecurity")
     inner class AnalyzeSecurity {
-
         @Test
         @DisplayName("should report HIGH for service without authentication")
         fun testAnalyzeSecurity_noAuthService() {
-            val services = listOf(
-                SdpService(
-                    uuid = "1101",
-                    profile = BtProfile.SPP,
-                    name = "SPP",
-                    rfcommChannel = 1,
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = false
+            val services =
+                listOf(
+                    SdpService(
+                        uuid = "1101",
+                        profile = BtProfile.SPP,
+                        name = "SPP",
+                        rfcommChannel = 1,
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = false,
+                    ),
                 )
-            )
             val findings = useCase.analyzeSecurity(services)
             assertThat(findings.any { it.severity == SecurityRisk.HIGH && it.service == "Serial Port Profile" })
                 .isTrue()
@@ -157,16 +157,17 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should report CRITICAL for PBAP without authentication")
         fun testAnalyzeSecurity_pbapWithoutAuth() {
-            val services = listOf(
-                SdpService(
-                    uuid = "112F",
-                    profile = BtProfile.PBAP_PSE,
-                    name = "PBAP",
-                    rfcommChannel = 2,
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = false
+            val services =
+                listOf(
+                    SdpService(
+                        uuid = "112F",
+                        profile = BtProfile.PBAP_PSE,
+                        name = "PBAP",
+                        rfcommChannel = 2,
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = false,
+                    ),
                 )
-            )
             val findings = useCase.analyzeSecurity(services)
             assertThat(findings.any { it.severity == SecurityRisk.CRITICAL }).isTrue()
         }
@@ -174,16 +175,17 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should report CRITICAL for SAP accessible")
         fun testAnalyzeSecurity_sapAccessible() {
-            val services = listOf(
-                SdpService(
-                    uuid = "112D",
-                    profile = BtProfile.SAP,
-                    name = "SAP",
-                    rfcommChannel = 4,
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = true
+            val services =
+                listOf(
+                    SdpService(
+                        uuid = "112D",
+                        profile = BtProfile.SAP,
+                        name = "SAP",
+                        rfcommChannel = 4,
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = true,
+                    ),
                 )
-            )
             val findings = useCase.analyzeSecurity(services)
             assertThat(findings.any { it.severity == SecurityRisk.CRITICAL && it.service == "SIM Access Profile" })
                 .isTrue()
@@ -192,24 +194,25 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should return empty findings when all services are secure")
         fun testAnalyzeSecurity_allSecure() {
-            val services = listOf(
-                SdpService(
-                    uuid = "110A",
-                    profile = BtProfile.A2DP_SOURCE,
-                    name = "A2DP Source",
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = true,
-                    requiresEncryption = true
-                ),
-                SdpService(
-                    uuid = "110B",
-                    profile = BtProfile.A2DP_SINK,
-                    name = "A2DP Sink",
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = true,
-                    requiresEncryption = true
+            val services =
+                listOf(
+                    SdpService(
+                        uuid = "110A",
+                        profile = BtProfile.A2DP_SOURCE,
+                        name = "A2DP Source",
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = true,
+                        requiresEncryption = true,
+                    ),
+                    SdpService(
+                        uuid = "110B",
+                        profile = BtProfile.A2DP_SINK,
+                        name = "A2DP Sink",
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = true,
+                        requiresEncryption = true,
+                    ),
                 )
-            )
             val findings = useCase.analyzeSecurity(services)
             assertThat(findings).isEmpty()
         }
@@ -217,43 +220,47 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should report MEDIUM for multiple services without encryption")
         fun testAnalyzeSecurity_multipleNoEncryption() {
-            val services = listOf(
-                SdpService(
-                    uuid = "110A",
-                    profile = BtProfile.A2DP_SOURCE,
-                    name = "A2DP Source",
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = true,
-                    requiresEncryption = false
-                ),
-                SdpService(
-                    uuid = "110B",
-                    profile = BtProfile.A2DP_SINK,
-                    name = "A2DP Sink",
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = true,
-                    requiresEncryption = false
+            val services =
+                listOf(
+                    SdpService(
+                        uuid = "110A",
+                        profile = BtProfile.A2DP_SOURCE,
+                        name = "A2DP Source",
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = true,
+                        requiresEncryption = false,
+                    ),
+                    SdpService(
+                        uuid = "110B",
+                        profile = BtProfile.A2DP_SINK,
+                        name = "A2DP Sink",
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = true,
+                        requiresEncryption = false,
+                    ),
                 )
-            )
             val findings = useCase.analyzeSecurity(services)
-            assertThat(findings.any {
-                it.severity == SecurityRisk.MEDIUM && it.issue.contains("encryption")
-            }).isTrue()
+            assertThat(
+                findings.any {
+                    it.severity == SecurityRisk.MEDIUM && it.issue.contains("encryption")
+                },
+            ).isTrue()
         }
 
         @Test
         @DisplayName("should report CRITICAL for MAP without authentication")
         fun testAnalyzeSecurity_mapWithoutAuth() {
-            val services = listOf(
-                SdpService(
-                    uuid = "1132",
-                    profile = BtProfile.MAP_MSE,
-                    name = "MAP Server",
-                    rfcommChannel = 3,
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = false
+            val services =
+                listOf(
+                    SdpService(
+                        uuid = "1132",
+                        profile = BtProfile.MAP_MSE,
+                        name = "MAP Server",
+                        rfcommChannel = 3,
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = false,
+                    ),
                 )
-            )
             val findings = useCase.analyzeSecurity(services)
             assertThat(findings.any { it.severity == SecurityRisk.CRITICAL }).isTrue()
         }
@@ -261,28 +268,30 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should report MEDIUM for hidden services")
         fun testAnalyzeSecurity_hiddenService() {
-            val services = listOf(
-                SdpService(
-                    uuid = "1101",
-                    profile = BtProfile.SPP,
-                    name = "Hidden SPP",
-                    protocolDescriptors = emptyList(),
-                    requiresAuthentication = true,
-                    requiresEncryption = true,
-                    isHidden = true
+            val services =
+                listOf(
+                    SdpService(
+                        uuid = "1101",
+                        profile = BtProfile.SPP,
+                        name = "Hidden SPP",
+                        protocolDescriptors = emptyList(),
+                        requiresAuthentication = true,
+                        requiresEncryption = true,
+                        isHidden = true,
+                    ),
                 )
-            )
             val findings = useCase.analyzeSecurity(services)
-            assertThat(findings.any {
-                it.severity == SecurityRisk.MEDIUM && it.issue.contains("not advertised")
-            }).isTrue()
+            assertThat(
+                findings.any {
+                    it.severity == SecurityRisk.MEDIUM && it.issue.contains("not advertised")
+                },
+            ).isTrue()
         }
     }
 
     @Nested
     @DisplayName("detectHiddenServices")
     inner class DetectHiddenServices {
-
         @Test
         @DisplayName("should find UUIDs present in discovered but not in advertised")
         fun testDetectHiddenServices_findsDiscrepancy() {
@@ -314,26 +323,27 @@ class SdpEnumerationUseCaseTest {
     @Nested
     @DisplayName("generateScanReport")
     inner class GenerateScanReport {
-
         @Test
         @DisplayName("should generate non-empty report")
         fun testGenerateScanReport_notEmpty() {
-            val result = SdpScanResult(
-                deviceAddress = "AA:BB:CC:DD:EE:FF",
-                deviceName = "TestDevice",
-                services = listOf(
-                    SdpService(
-                        uuid = "1101",
-                        profile = BtProfile.SPP,
-                        name = "SPP",
-                        rfcommChannel = 1,
-                        protocolDescriptors = emptyList()
-                    )
-                ),
-                hiddenServices = emptyList(),
-                securityIssues = emptyList(),
-                scanDurationMs = 1500L
-            )
+            val result =
+                SdpScanResult(
+                    deviceAddress = "AA:BB:CC:DD:EE:FF",
+                    deviceName = "TestDevice",
+                    services =
+                        listOf(
+                            SdpService(
+                                uuid = "1101",
+                                profile = BtProfile.SPP,
+                                name = "SPP",
+                                rfcommChannel = 1,
+                                protocolDescriptors = emptyList(),
+                            ),
+                        ),
+                    hiddenServices = emptyList(),
+                    securityIssues = emptyList(),
+                    scanDurationMs = 1500L,
+                )
             val report = useCase.generateScanReport(result)
             assertThat(report).isNotEmpty()
             assertThat(report).contains("SDP Enumeration Security Report")
@@ -344,30 +354,33 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("should include security findings in report")
         fun testGenerateScanReport_includesFindings() {
-            val result = SdpScanResult(
-                deviceAddress = "AA:BB:CC:DD:EE:FF",
-                deviceName = "TestDevice",
-                services = listOf(
-                    SdpService(
-                        uuid = "112F",
-                        profile = BtProfile.PBAP_PSE,
-                        name = "PBAP",
-                        rfcommChannel = 2,
-                        protocolDescriptors = emptyList(),
-                        requiresAuthentication = false
-                    )
-                ),
-                hiddenServices = emptyList(),
-                securityIssues = listOf(
-                    SdpSecurityFinding(
-                        severity = SecurityRisk.CRITICAL,
-                        service = "PBAP Server",
-                        issue = "PBAP is accessible without authentication",
-                        recommendation = "Require authentication for PBAP Server access"
-                    )
-                ),
-                scanDurationMs = 2000L
-            )
+            val result =
+                SdpScanResult(
+                    deviceAddress = "AA:BB:CC:DD:EE:FF",
+                    deviceName = "TestDevice",
+                    services =
+                        listOf(
+                            SdpService(
+                                uuid = "112F",
+                                profile = BtProfile.PBAP_PSE,
+                                name = "PBAP",
+                                rfcommChannel = 2,
+                                protocolDescriptors = emptyList(),
+                                requiresAuthentication = false,
+                            ),
+                        ),
+                    hiddenServices = emptyList(),
+                    securityIssues =
+                        listOf(
+                            SdpSecurityFinding(
+                                severity = SecurityRisk.CRITICAL,
+                                service = "PBAP Server",
+                                issue = "PBAP is accessible without authentication",
+                                recommendation = "Require authentication for PBAP Server access",
+                            ),
+                        ),
+                    scanDurationMs = 2000L,
+                )
             val report = useCase.generateScanReport(result)
             assertThat(report).contains("CRITICAL")
             assertThat(report).contains("PBAP Server")
@@ -378,7 +391,6 @@ class SdpEnumerationUseCaseTest {
     @Nested
     @DisplayName("SecurityRisk ordering")
     inner class SecurityRiskOrdering {
-
         @Test
         @DisplayName("CRITICAL should be more severe than HIGH")
         fun testSecurityRiskOrdering() {
@@ -398,12 +410,13 @@ class SdpEnumerationUseCaseTest {
         @Test
         @DisplayName("SdpService default securityRisk should be UNKNOWN")
         fun testSdpService_defaultSecurityRiskIsUnknown() {
-            val service = SdpService(
-                uuid = "DEAD",
-                profile = BtProfile.UNKNOWN,
-                name = "Unknown Service",
-                protocolDescriptors = emptyList()
-            )
+            val service =
+                SdpService(
+                    uuid = "DEAD",
+                    profile = BtProfile.UNKNOWN,
+                    name = "Unknown Service",
+                    protocolDescriptors = emptyList(),
+                )
             assertThat(service.securityRisk).isEqualTo(SecurityRisk.UNKNOWN)
         }
     }

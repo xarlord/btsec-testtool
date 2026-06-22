@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface RfcommFuzzingRepository {
-
     /**
      * Discover available RFCOMM channels on a device via SDP.
      *
@@ -38,7 +37,10 @@ interface RfcommFuzzingRepository {
      * @param channelNumber The RFCOMM channel number (1-30).
      * @return Result.success if connected, Result.failure on error.
      */
-    suspend fun connect(deviceAddress: String, channelNumber: Int): Result<Unit>
+    suspend fun connect(
+        deviceAddress: String,
+        channelNumber: Int,
+    ): Result<Unit>
 
     /**
      * Disconnect from the current RFCOMM channel.

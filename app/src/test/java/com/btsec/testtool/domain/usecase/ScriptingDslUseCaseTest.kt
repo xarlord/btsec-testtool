@@ -12,8 +12,8 @@ import com.btsec.testtool.domain.model.ErrorAction
 import com.btsec.testtool.domain.model.ScriptStep
 import com.btsec.testtool.domain.model.ScriptStepType
 import com.btsec.testtool.domain.model.ScriptValidationSeverity
-import com.btsec.testtool.domain.model.TestScript
 import com.btsec.testtool.domain.model.ScriptVariable
+import com.btsec.testtool.domain.model.TestScript
 import com.btsec.testtool.domain.model.VariableType
 import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test
  * Only for AUTHORIZED security testing purposes.
  */
 class ScriptingDslUseCaseTest {
-
     private lateinit var useCase: ScriptingDslUseCase
 
     @BeforeEach
@@ -51,13 +50,15 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript with CONNECT before READ passes without error")
     fun testValidateScript_connectBeforeRead_ok() {
-        val script = TestScript(
-            name = "valid",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.CONNECT, params = mapOf("address" to "AA:BB:CC:DD:EE:FF")),
-                ScriptStep(type = ScriptStepType.READ, params = mapOf("service" to "s1", "characteristic" to "c1"))
+        val script =
+            TestScript(
+                name = "valid",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.CONNECT, params = mapOf("address" to "AA:BB:CC:DD:EE:FF")),
+                        ScriptStep(type = ScriptStepType.READ, params = mapOf("service" to "s1", "characteristic" to "c1")),
+                    ),
             )
-        )
         val validations = useCase.validateScript(script)
         val errors = validations.filter { it.severity == ScriptValidationSeverity.ERROR }
         assertThat(errors).isEmpty()
@@ -66,12 +67,14 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript with READ without CONNECT returns ERROR")
     fun testValidateScript_readWithoutConnect_error() {
-        val script = TestScript(
-            name = "no-connect",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.READ, params = mapOf("service" to "s1", "characteristic" to "c1"))
+        val script =
+            TestScript(
+                name = "no-connect",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.READ, params = mapOf("service" to "s1", "characteristic" to "c1")),
+                    ),
             )
-        )
         val validations = useCase.validateScript(script)
         val errors = validations.filter { it.severity == ScriptValidationSeverity.ERROR }
         assertThat(errors).isNotEmpty()
@@ -81,12 +84,14 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript with LOOP exceeding 1000 iterations returns WARNING")
     fun testValidateScript_loopNoMax_warning() {
-        val script = TestScript(
-            name = "big-loop",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.LOOP, params = mapOf("maxIterations" to "5000"))
+        val script =
+            TestScript(
+                name = "big-loop",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.LOOP, params = mapOf("maxIterations" to "5000")),
+                    ),
             )
-        )
         val validations = useCase.validateScript(script)
         val warnings = validations.filter { it.severity == ScriptValidationSeverity.WARNING }
         assertThat(warnings).isNotEmpty()
@@ -96,16 +101,18 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript with undefined variable reference returns ERROR")
     fun testValidateScript_undefinedVariable_error() {
-        val script = TestScript(
-            name = "bad-var",
-            steps = listOf(
-                ScriptStep(
-                    type = ScriptStepType.WRITE,
-                    params = mapOf("value" to "\${undefinedVar}"),
-                    onError = ErrorAction.STOP
-                )
+        val script =
+            TestScript(
+                name = "bad-var",
+                steps =
+                    listOf(
+                        ScriptStep(
+                            type = ScriptStepType.WRITE,
+                            params = mapOf("value" to "\${undefinedVar}"),
+                            onError = ErrorAction.STOP,
+                        ),
+                    ),
             )
-        )
         val validations = useCase.validateScript(script)
         val errors = validations.filter { it.severity == ScriptValidationSeverity.ERROR }
         assertThat(errors.any { it.message.contains("Undefined variable") }).isTrue()
@@ -114,12 +121,14 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript without DISCONNECT returns INFO")
     fun testValidateScript_disconnectAtEnd_info() {
-        val script = TestScript(
-            name = "no-disconnect",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.SCAN)
+        val script =
+            TestScript(
+                name = "no-disconnect",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.SCAN),
+                    ),
             )
-        )
         val validations = useCase.validateScript(script)
         val infos = validations.filter { it.severity == ScriptValidationSeverity.INFO }
         assertThat(infos.any { it.message.contains("DISCONNECT") }).isTrue()
@@ -128,19 +137,21 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript with fully valid script returns no errors")
     fun testValidateScript_validScript_noErrors() {
-        val script = TestScript(
-            name = "valid-script",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.SCAN, params = mapOf("duration" to "3000")),
-                ScriptStep(type = ScriptStepType.CONNECT, params = mapOf("address" to "AA:BB:CC:DD:EE:FF")),
-                ScriptStep(
-                    type = ScriptStepType.READ,
-                    params = mapOf("service" to "s1", "characteristic" to "c1")
-                ),
-                ScriptStep(type = ScriptStepType.DISCONNECT)
-            ),
-            variables = listOf(ScriptVariable(name = "myVar", value = "42"))
-        )
+        val script =
+            TestScript(
+                name = "valid-script",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.SCAN, params = mapOf("duration" to "3000")),
+                        ScriptStep(type = ScriptStepType.CONNECT, params = mapOf("address" to "AA:BB:CC:DD:EE:FF")),
+                        ScriptStep(
+                            type = ScriptStepType.READ,
+                            params = mapOf("service" to "s1", "characteristic" to "c1"),
+                        ),
+                        ScriptStep(type = ScriptStepType.DISCONNECT),
+                    ),
+                variables = listOf(ScriptVariable(name = "myVar", value = "42")),
+            )
         val validations = useCase.validateScript(script)
         val errors = validations.filter { it.severity == ScriptValidationSeverity.ERROR }
         assertThat(errors).isEmpty()
@@ -165,10 +176,11 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("resolveVariable resolves multiple variables in one string")
     fun testResolveVariable_nested() {
-        val result = useCase.resolveVariable(
-            "\${a} and \${b}",
-            mapOf("a" to "hello", "b" to "world")
-        )
+        val result =
+            useCase.resolveVariable(
+                "\${a} and \${b}",
+                mapOf("a" to "hello", "b" to "world"),
+            )
         assertThat(result).isEqualTo("hello and world")
     }
 
@@ -189,14 +201,16 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("estimateDuration sums step timeouts and wait durations")
     fun testEstimateDuration_sumTimeouts() {
-        val script = TestScript(
-            name = "timed",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.SCAN, timeout = 5000),
-                ScriptStep(type = ScriptStepType.WAIT, params = mapOf("duration" to "2000"), timeout = 3000),
-                ScriptStep(type = ScriptStepType.CONNECT, timeout = 10000)
+        val script =
+            TestScript(
+                name = "timed",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.SCAN, timeout = 5000),
+                        ScriptStep(type = ScriptStepType.WAIT, params = mapOf("duration" to "2000"), timeout = 3000),
+                        ScriptStep(type = ScriptStepType.CONNECT, timeout = 10000),
+                    ),
             )
-        )
         val duration = useCase.estimateDuration(script)
         // 5000 + 3000 + 2000 (wait) + 10000 = 20000
         assertThat(duration).isEqualTo(20000L)
@@ -229,11 +243,12 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("serializeScriptToJson produces valid JSON string")
     fun testSerializeScriptToJson_valid() {
-        val script = TestScript(
-            name = "json-test",
-            description = "serialization test",
-            steps = listOf(ScriptStep(type = ScriptStepType.SCAN))
-        )
+        val script =
+            TestScript(
+                name = "json-test",
+                description = "serialization test",
+                steps = listOf(ScriptStep(type = ScriptStepType.SCAN)),
+            )
         val json = useCase.serializeScriptToJson(script)
         assertThat(json).contains("json-test")
         assertThat(json).contains("SCAN")
@@ -242,29 +257,32 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("JSON round-trip preserves script data")
     fun testSerializeRoundTrip() {
-        val original = TestScript(
-            name = "roundtrip",
-            description = "round trip test",
-            author = "tester",
-            version = 2,
-            targetDevice = "AA:BB:CC:DD:EE:FF",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.CONNECT, params = mapOf("address" to "AA:BB:CC:DD:EE:FF")),
-                ScriptStep(
-                    type = ScriptStepType.WRITE,
-                    params = mapOf("service" to "s1", "characteristic" to "c1", "value" to "0x01"),
-                    label = "write-step",
-                    onError = ErrorAction.RETRY,
-                    timeout = 15000
-                ),
-                ScriptStep(type = ScriptStepType.DISCONNECT)
-            ),
-            variables = listOf(
-                ScriptVariable(name = "count", value = "10", type = VariableType.INTEGER)
-            ),
-            timeout = 120000,
-            tags = listOf("ble", "security")
-        )
+        val original =
+            TestScript(
+                name = "roundtrip",
+                description = "round trip test",
+                author = "tester",
+                version = 2,
+                targetDevice = "AA:BB:CC:DD:EE:FF",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.CONNECT, params = mapOf("address" to "AA:BB:CC:DD:EE:FF")),
+                        ScriptStep(
+                            type = ScriptStepType.WRITE,
+                            params = mapOf("service" to "s1", "characteristic" to "c1", "value" to "0x01"),
+                            label = "write-step",
+                            onError = ErrorAction.RETRY,
+                            timeout = 15000,
+                        ),
+                        ScriptStep(type = ScriptStepType.DISCONNECT),
+                    ),
+                variables =
+                    listOf(
+                        ScriptVariable(name = "count", value = "10", type = VariableType.INTEGER),
+                    ),
+                timeout = 120000,
+                tags = listOf("ble", "security"),
+            )
         val json = useCase.serializeScriptToJson(original)
         val restored = useCase.parseScriptFromJson(json)
 
@@ -285,12 +303,14 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript with LOOP without maxIterations returns ERROR")
     fun testValidateScript_loopWithoutBound_error() {
-        val script = TestScript(
-            name = "infinite-loop",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.LOOP, params = mapOf("startIndex" to "0"))
+        val script =
+            TestScript(
+                name = "infinite-loop",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.LOOP, params = mapOf("startIndex" to "0")),
+                    ),
             )
-        )
         val validations = useCase.validateScript(script)
         val errors = validations.filter { it.severity == ScriptValidationSeverity.ERROR }
         assertThat(errors.any { it.message.contains("no maxIterations") }).isTrue()
@@ -299,12 +319,14 @@ class ScriptingDslUseCaseTest {
     @Test
     @DisplayName("validateScript with ASSERT missing expected returns ERROR")
     fun testValidateScript_assertMissingExpected_error() {
-        val script = TestScript(
-            name = "bad-assert",
-            steps = listOf(
-                ScriptStep(type = ScriptStepType.ASSERT, params = mapOf("field" to "status"))
+        val script =
+            TestScript(
+                name = "bad-assert",
+                steps =
+                    listOf(
+                        ScriptStep(type = ScriptStepType.ASSERT, params = mapOf("field" to "status")),
+                    ),
             )
-        )
         val validations = useCase.validateScript(script)
         val errors = validations.filter { it.severity == ScriptValidationSeverity.ERROR }
         assertThat(errors.any { it.message.contains("missing") }).isTrue()

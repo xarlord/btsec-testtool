@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface SapSecurityRepository {
-
     /**
      * Connect to a device's SAP profile.
      *
@@ -42,7 +41,10 @@ interface SapSecurityRepository {
      * @param timeoutMs Response timeout in milliseconds.
      * @return The response bytes, or null on timeout.
      */
-    suspend fun sendApdu(apdu: SimApdu, timeoutMs: Long = 5000): ByteArray?
+    suspend fun sendApdu(
+        apdu: SimApdu,
+        timeoutMs: Long = 5000,
+    ): ByteArray?
 
     /**
      * Request the SIM ATR (Answer to Reset).

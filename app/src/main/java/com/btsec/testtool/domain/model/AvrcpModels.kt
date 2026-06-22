@@ -19,13 +19,13 @@ package com.btsec.testtool.domain.model
 
 /** Categories of AVRCP security tests. */
 enum class AvrcpTestCategory {
-    MEDIA_CONTROL,          // Play/pause/skip without auth
-    BROWSING,               // Browse media library without auth
-    PATH_TRAVERSAL,         // Navigate outside media directories
-    METADATA_EXTRACTION,    // Extract media item metadata
+    MEDIA_CONTROL, // Play/pause/skip without auth
+    BROWSING, // Browse media library without auth
+    PATH_TRAVERSAL, // Navigate outside media directories
+    METADATA_EXTRACTION, // Extract media item metadata
     NOTIFICATION_INJECTION, // Register for event notifications
-    VENDOR_COMMAND_FUZZ,    // Fuzz vendor-specific AVRCP commands
-    VOLUME_MANIPULATION     // Change volume without auth
+    VENDOR_COMMAND_FUZZ, // Fuzz vendor-specific AVRCP commands
+    VOLUME_MANIPULATION, // Change volume without auth
 }
 
 /** Represents a media item discovered via AVRCP browsing. */
@@ -38,7 +38,7 @@ data class AvrcpMediaItem(
     val trackNumber: Int?,
     val duration: Int?,
     val type: MediaItemType,
-    val path: String?
+    val path: String?,
 )
 
 /** Type of media item found via browsing. */
@@ -54,7 +54,7 @@ data class AvrcpTestResult(
     val confidence: Double,
     val evidence: String,
     val severity: AvrcpSeverity,
-    val recommendation: String
+    val recommendation: String,
 )
 
 /** Severity levels for AVRCP test findings. */
@@ -66,7 +66,7 @@ data class AvrcpBrowseResult(
     val depth: Int,
     val itemsFound: Int,
     val traversalSuccessful: Boolean,
-    val sensitivePaths: List<String>
+    val sensitivePaths: List<String>,
 )
 
 /** Overall report for an AVRCP security test session. */
@@ -77,5 +77,5 @@ data class AvrcpTestReport(
     val mediaItemsExtracted: Int,
     val criticalCount: Int,
     val highCount: Int,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )

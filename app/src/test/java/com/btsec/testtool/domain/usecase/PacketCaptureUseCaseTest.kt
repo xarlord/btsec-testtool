@@ -26,7 +26,6 @@ import java.nio.ByteOrder
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class PacketCaptureUseCaseTest {
-
     private lateinit var useCase: PacketCaptureUseCase
 
     @BeforeEach
@@ -37,15 +36,15 @@ class PacketCaptureUseCaseTest {
     @Nested
     @DisplayName("createPacket")
     inner class CreatePacket {
-
         @Test
         @DisplayName("should generate packet with valid UUID id")
         fun testCreatePacket_hasValidId() {
-            val packet = useCase.createPacket(
-                data = byteArrayOf(0x01, 0x02),
-                direction = PacketDirection.SENT,
-                type = PacketType.ATT
-            )
+            val packet =
+                useCase.createPacket(
+                    data = byteArrayOf(0x01, 0x02),
+                    direction = PacketDirection.SENT,
+                    type = PacketType.ATT,
+                )
 
             assertThat(packet.id).isNotEmpty()
             assertThat(packet.id).contains("-")
@@ -57,11 +56,12 @@ class PacketCaptureUseCaseTest {
         @DisplayName("should set correct timestamp near current time")
         fun testCreatePacket_correctTimestamp() {
             val before = System.currentTimeMillis()
-            val packet = useCase.createPacket(
-                data = byteArrayOf(0x01),
-                direction = PacketDirection.SENT,
-                type = PacketType.ATT
-            )
+            val packet =
+                useCase.createPacket(
+                    data = byteArrayOf(0x01),
+                    direction = PacketDirection.SENT,
+                    type = PacketType.ATT,
+                )
             val after = System.currentTimeMillis()
 
             assertThat(packet.timestamp).isAtLeast(before)
@@ -72,11 +72,12 @@ class PacketCaptureUseCaseTest {
         @DisplayName("should compute correct size from data")
         fun testCreatePacket_correctSize() {
             val data = byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05)
-            val packet = useCase.createPacket(
-                data = data,
-                direction = PacketDirection.RECEIVED,
-                type = PacketType.L2CAP
-            )
+            val packet =
+                useCase.createPacket(
+                    data = data,
+                    direction = PacketDirection.RECEIVED,
+                    type = PacketType.L2CAP,
+                )
 
             assertThat(packet.size).isEqualTo(5)
         }
@@ -85,21 +86,29 @@ class PacketCaptureUseCaseTest {
     @Nested
     @DisplayName("filterPackets")
     inner class FilterPackets {
-
         private lateinit var testPackets: List<CapturedPacket>
 
         @BeforeEach
         fun createTestPackets() {
-            testPackets = listOf(
-                CapturedPacket("1", 1000L, PacketType.ATT, PacketDirection.SENT,
-                    byteArrayOf(0x01, 0x02), 2, "Local", "Remote"),
-                CapturedPacket("2", 2000L, PacketType.ATT, PacketDirection.RECEIVED,
-                    byteArrayOf(0x03, 0x04), 2, "Remote", "Local"),
-                CapturedPacket("3", 3000L, PacketType.L2CAP, PacketDirection.SENT,
-                    byteArrayOf(0xAA.toByte(), 0xBB.toByte()), 2, "Local", "Device1"),
-                CapturedPacket("4", 4000L, PacketType.SMP, PacketDirection.RECEIVED,
-                    byteArrayOf(0xFF.toByte()), 1, "Device2", "Local")
-            )
+            testPackets =
+                listOf(
+                    CapturedPacket(
+                        "1", 1000L, PacketType.ATT, PacketDirection.SENT,
+                        byteArrayOf(0x01, 0x02), 2, "Local", "Remote",
+                    ),
+                    CapturedPacket(
+                        "2", 2000L, PacketType.ATT, PacketDirection.RECEIVED,
+                        byteArrayOf(0x03, 0x04), 2, "Remote", "Local",
+                    ),
+                    CapturedPacket(
+                        "3", 3000L, PacketType.L2CAP, PacketDirection.SENT,
+                        byteArrayOf(0xAA.toByte(), 0xBB.toByte()), 2, "Local", "Device1",
+                    ),
+                    CapturedPacket(
+                        "4", 4000L, PacketType.SMP, PacketDirection.RECEIVED,
+                        byteArrayOf(0xFF.toByte()), 1, "Device2", "Local",
+                    ),
+                )
         }
 
         @Test
@@ -114,10 +123,11 @@ class PacketCaptureUseCaseTest {
         @Test
         @DisplayName("should filter by direction")
         fun testFilterPackets_byDirection() {
-            val result = useCase.filterPackets(
-                testPackets,
-                PacketFilter(direction = PacketDirection.SENT)
-            )
+            val result =
+                useCase.filterPackets(
+                    testPackets,
+                    PacketFilter(direction = PacketDirection.SENT),
+                )
 
             assertThat(result).hasSize(2)
             assertThat(result.all { it.direction == PacketDirection.SENT }).isTrue()
@@ -126,10 +136,11 @@ class PacketCaptureUseCaseTest {
         @Test
         @DisplayName("should filter by search query matching hex")
         fun testFilterPackets_bySearchQuery() {
-            val result = useCase.filterPackets(
-                testPackets,
-                PacketFilter(searchQuery = "aa bb")
-            )
+            val result =
+                useCase.filterPackets(
+                    testPackets,
+                    PacketFilter(searchQuery = "aa bb"),
+                )
 
             assertThat(result).hasSize(1)
             assertThat(result[0].id).isEqualTo("3")
@@ -138,10 +149,11 @@ class PacketCaptureUseCaseTest {
         @Test
         @DisplayName("should filter by search query matching source")
         fun testFilterPackets_bySearchQuerySource() {
-            val result = useCase.filterPackets(
-                testPackets,
-                PacketFilter(searchQuery = "device1")
-            )
+            val result =
+                useCase.filterPackets(
+                    testPackets,
+                    PacketFilter(searchQuery = "device1"),
+                )
 
             assertThat(result).hasSize(1)
             assertThat(result[0].source).isEqualTo("Local") // source of packet 3 whose destination is Device1
@@ -160,10 +172,11 @@ class PacketCaptureUseCaseTest {
         @Test
         @DisplayName("should return empty list when no match")
         fun testFilterPackets_noMatch_returnsEmpty() {
-            val result = useCase.filterPackets(
-                testPackets,
-                PacketFilter(type = PacketType.HCI)
-            )
+            val result =
+                useCase.filterPackets(
+                    testPackets,
+                    PacketFilter(type = PacketType.HCI),
+                )
 
             assertThat(result).isEmpty()
         }
@@ -172,7 +185,6 @@ class PacketCaptureUseCaseTest {
     @Nested
     @DisplayName("computeStats")
     inner class ComputeStats {
-
         @Test
         @DisplayName("should return zero stats for empty list")
         fun testComputeStats_emptyList() {
@@ -189,14 +201,33 @@ class PacketCaptureUseCaseTest {
         @Test
         @DisplayName("should compute correct counts and averages")
         fun testComputeStats_correctCounts() {
-            val packets = listOf(
-                CapturedPacket("1", 1000L, PacketType.ATT, PacketDirection.SENT,
-                    byteArrayOf(0x01, 0x02, 0x03), 3),
-                CapturedPacket("2", 2000L, PacketType.ATT, PacketDirection.RECEIVED,
-                    byteArrayOf(0x04, 0x05), 2),
-                CapturedPacket("3", 5000L, PacketType.L2CAP, PacketDirection.SENT,
-                    byteArrayOf(0x06), 1)
-            )
+            val packets =
+                listOf(
+                    CapturedPacket(
+                        "1",
+                        1000L,
+                        PacketType.ATT,
+                        PacketDirection.SENT,
+                        byteArrayOf(0x01, 0x02, 0x03),
+                        3,
+                    ),
+                    CapturedPacket(
+                        "2",
+                        2000L,
+                        PacketType.ATT,
+                        PacketDirection.RECEIVED,
+                        byteArrayOf(0x04, 0x05),
+                        2,
+                    ),
+                    CapturedPacket(
+                        "3",
+                        5000L,
+                        PacketType.L2CAP,
+                        PacketDirection.SENT,
+                        byteArrayOf(0x06),
+                        1,
+                    ),
+                )
 
             val stats = useCase.computeStats(packets)
 
@@ -210,14 +241,33 @@ class PacketCaptureUseCaseTest {
         @Test
         @DisplayName("should compute correct type distribution")
         fun testComputeStats_typeDistribution() {
-            val packets = listOf(
-                CapturedPacket("1", 1000L, PacketType.ATT, PacketDirection.SENT,
-                    byteArrayOf(0x01), 1),
-                CapturedPacket("2", 2000L, PacketType.ATT, PacketDirection.SENT,
-                    byteArrayOf(0x02), 1),
-                CapturedPacket("3", 3000L, PacketType.L2CAP, PacketDirection.RECEIVED,
-                    byteArrayOf(0x03), 1)
-            )
+            val packets =
+                listOf(
+                    CapturedPacket(
+                        "1",
+                        1000L,
+                        PacketType.ATT,
+                        PacketDirection.SENT,
+                        byteArrayOf(0x01),
+                        1,
+                    ),
+                    CapturedPacket(
+                        "2",
+                        2000L,
+                        PacketType.ATT,
+                        PacketDirection.SENT,
+                        byteArrayOf(0x02),
+                        1,
+                    ),
+                    CapturedPacket(
+                        "3",
+                        3000L,
+                        PacketType.L2CAP,
+                        PacketDirection.RECEIVED,
+                        byteArrayOf(0x03),
+                        1,
+                    ),
+                )
 
             val stats = useCase.computeStats(packets)
 
@@ -229,7 +279,6 @@ class PacketCaptureUseCaseTest {
     @Nested
     @DisplayName("formatTimestamp")
     inner class FormatTimestamp {
-
         @Test
         @DisplayName("should format timestamp as HH:mm:ss.SSS")
         fun testFormatTimestamp() {
@@ -249,7 +298,6 @@ class PacketCaptureUseCaseTest {
     @Nested
     @DisplayName("formatHexRow")
     inner class FormatHexRow {
-
         @Test
         @DisplayName("should format single row correctly")
         fun testFormatHexRow_singleRow() {
@@ -276,14 +324,20 @@ class PacketCaptureUseCaseTest {
     @Nested
     @DisplayName("exportToPcap")
     inner class ExportToPcap {
-
         @Test
         @DisplayName("should produce valid PCAP global header")
         fun testExportToPcap_validHeader() {
-            val packets = listOf(
-                CapturedPacket("1", 1700000000000L, PacketType.ATT, PacketDirection.SENT,
-                    byteArrayOf(0x01, 0x02), 2)
-            )
+            val packets =
+                listOf(
+                    CapturedPacket(
+                        "1",
+                        1700000000000L,
+                        PacketType.ATT,
+                        PacketDirection.SENT,
+                        byteArrayOf(0x01, 0x02),
+                        2,
+                    ),
+                )
 
             val pcap = useCase.exportToPcap(packets)
             val buffer = ByteBuffer.wrap(pcap).order(ByteOrder.LITTLE_ENDIAN)
@@ -306,12 +360,25 @@ class PacketCaptureUseCaseTest {
         @Test
         @DisplayName("should include correct number of packet records")
         fun testExportToPcap_packetCount() {
-            val packets = listOf(
-                CapturedPacket("1", 1700000000000L, PacketType.ATT, PacketDirection.SENT,
-                    byteArrayOf(0x01), 1),
-                CapturedPacket("2", 1700000000100L, PacketType.L2CAP, PacketDirection.RECEIVED,
-                    byteArrayOf(0x02, 0x03), 2)
-            )
+            val packets =
+                listOf(
+                    CapturedPacket(
+                        "1",
+                        1700000000000L,
+                        PacketType.ATT,
+                        PacketDirection.SENT,
+                        byteArrayOf(0x01),
+                        1,
+                    ),
+                    CapturedPacket(
+                        "2",
+                        1700000000100L,
+                        PacketType.L2CAP,
+                        PacketDirection.RECEIVED,
+                        byteArrayOf(0x02, 0x03),
+                        2,
+                    ),
+                )
 
             val pcap = useCase.exportToPcap(packets)
 

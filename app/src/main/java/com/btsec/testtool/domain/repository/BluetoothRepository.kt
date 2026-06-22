@@ -9,7 +9,6 @@
 package com.btsec.testtool.domain.repository
 
 import com.btsec.testtool.domain.model.*
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Composite repository for Bluetooth operations.
@@ -35,16 +34,16 @@ enum class BluetoothState {
     TURNING_ON,
     ON,
     TURNING_OFF,
-    ERROR
+    ERROR,
 }
 
 /**
  * Write types for BLE characteristics.
  */
 enum class WriteType {
-    DEFAULT,              // Write with response
-    WITHOUT_RESPONSE,     // Write without response
-    SIGNED                // Signed write
+    DEFAULT, // Write with response
+    WITHOUT_RESPONSE, // Write without response
+    SIGNED, // Signed write
 }
 
 /**
@@ -53,7 +52,7 @@ enum class WriteType {
 enum class ConnectionPriority {
     BALANCED,
     HIGH,
-    LOW_POWER
+    LOW_POWER,
 }
 
 /**
@@ -66,7 +65,7 @@ data class CapturedPacket(
     val data: ByteArray,
     val channel: Int?,
     val rssi: Int?,
-    val size: Int = data.size
+    val size: Int = data.size,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -101,10 +100,10 @@ data class CapturedPacket(
  * Packet direction (relative to device under test).
  */
 enum class PacketDirection {
-    INBOUND,      // From device to tester
-    OUTBOUND,     // From tester to device
-    BROADCAST,    // Broadcast packet
-    UNKNOWN
+    INBOUND, // From device to tester
+    OUTBOUND, // From tester to device
+    BROADCAST, // Broadcast packet
+    UNKNOWN,
 }
 
 /**
@@ -112,19 +111,21 @@ enum class PacketDirection {
  */
 enum class PacketType {
     // BLE packets
-    ADV_IND,              // Connectable undirected advertising
-    ADV_DIRECT_IND,       // Connectable directed advertising
-    ADV_SCAN_IND,         // Scannable undirected advertising
-    ADV_NONCONN_IND,      // Non-connectable undirected advertising
-    SCAN_REQ,             // Scan request
-    SCAN_RSP,             // Scan response
-    CONNECT_REQ,          // Connect request
-    DATA,                 // Data packet (LL_DATA)
+    ADV_IND, // Connectable undirected advertising
+    ADV_DIRECT_IND, // Connectable directed advertising
+    ADV_SCAN_IND, // Scannable undirected advertising
+    ADV_NONCONN_IND, // Non-connectable undirected advertising
+    SCAN_REQ, // Scan request
+    SCAN_RSP, // Scan response
+    CONNECT_REQ, // Connect request
+    DATA, // Data packet (LL_DATA)
+
     // Classic Bluetooth
-    ACL,                  // Asynchronous Connection-Less
-    SCO,                  // Synchronous Connection-Oriented
+    ACL, // Asynchronous Connection-Less
+    SCO, // Synchronous Connection-Oriented
+
     // Other
-    UNKNOWN
+    UNKNOWN,
 }
 
 /**
@@ -137,7 +138,7 @@ data class PacketStatistics(
     val broadcastPackets: Int,
     val bytesCaptured: Long,
     val startTime: java.time.Instant?,
-    val durationSeconds: Long
+    val durationSeconds: Long,
 )
 
 /**
@@ -151,7 +152,7 @@ data class BluetoothOperation(
     val success: Boolean,
     val errorMessage: String?,
     val durationMs: Long?,
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -174,5 +175,5 @@ enum class OperationType {
     REQUEST_MTU,
     READ_RSSI,
     PACKET_MONITOR_START,
-    PACKET_MONITOR_STOP
+    PACKET_MONITOR_STOP,
 }

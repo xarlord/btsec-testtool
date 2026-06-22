@@ -26,7 +26,7 @@ enum class OwaspCategory(val id: String, val displayName: String) {
     A08_DATA_INTEGRITY("A08", "Software and Data Integrity Failures"),
     A09_LOGGING_FAIL("A09", "Security Logging and Monitoring Failures"),
     A10_SSRF("A10", "Server-Side Request Forgery"),
-    BLE_SPECIFIC("BLE", "BLE-Specific Vulnerability")
+    BLE_SPECIFIC("BLE", "BLE-Specific Vulnerability"),
 }
 
 /**
@@ -39,7 +39,7 @@ enum class BistfCategory(val id: String, val displayName: String) {
     SMP_VULN("BISTF-03", "SMP/Pairing Vulnerability"),
     ATT_VULN("BISTF-04", "ATT Vulnerability"),
     HCI_VULN("BISTF-05", "HCI Vulnerability"),
-    PRIVACY("BISTF-06", "Privacy/Tracking")
+    PRIVACY("BISTF-06", "Privacy/Tracking"),
 }
 
 /**
@@ -49,8 +49,9 @@ enum class BistfCategory(val id: String, val displayName: String) {
 data class RiskFactor(
     val name: String,
     val weight: Double,
-    val score: Double,  // 0.0 to 1.0
-    val description: String
+    // 0.0 to 1.0
+    val score: Double,
+    val description: String,
 )
 
 /**
@@ -58,13 +59,14 @@ data class RiskFactor(
  */
 @Serializable
 data class RiskAssessment(
-    val overallScore: Double,  // 0.0 to 10.0 (CVSS-like)
+    // 0.0 to 10.0 (CVSS-like)
+    val overallScore: Double,
     val severity: RiskSeverity,
     val owaspMappings: List<OwaspMapping>,
     val bistfMappings: List<BistfMapping>,
     val factors: List<RiskFactor>,
     val recommendations: List<String>,
-    @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val timestamp: Instant,
 )
 
 /**
@@ -72,11 +74,11 @@ data class RiskAssessment(
  */
 @Serializable
 enum class RiskSeverity {
-    CRITICAL,  // 9.0+
-    HIGH,      // 7.0-8.9
-    MEDIUM,    // 4.0-6.9
-    LOW,       // 1.0-3.9
-    INFO       // < 1.0
+    CRITICAL, // 9.0+
+    HIGH, // 7.0-8.9
+    MEDIUM, // 4.0-6.9
+    LOW, // 1.0-3.9
+    INFO, // < 1.0
 }
 
 /**
@@ -86,7 +88,7 @@ enum class RiskSeverity {
 data class OwaspMapping(
     val category: OwaspCategory,
     val findings: List<String>,
-    val contribution: Double
+    val contribution: Double,
 )
 
 /**
@@ -96,5 +98,5 @@ data class OwaspMapping(
 data class BistfMapping(
     val category: BistfCategory,
     val findings: List<String>,
-    val contribution: Double
+    val contribution: Double,
 )

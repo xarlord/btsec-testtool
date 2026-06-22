@@ -11,17 +11,16 @@ package com.btsec.testtool.service
 import android.app.Notification
 import android.app.Service
 import android.content.Intent
-import android.os.IBinder
 import android.content.pm.ServiceInfo
 import android.os.Build
-import kotlinx.coroutines.*
-import timber.log.Timber
+import android.os.IBinder
 import com.btsec.testtool.BtSecTestToolApplication.Companion.CHANNEL_ID_SERVICE
 import com.btsec.testtool.BtSecTestToolApplication.Companion.NOTIFICATION_ID_SCAN
-import com.btsec.testtool.data.bluetooth.BluetoothRepositoryImpl
 import com.btsec.testtool.domain.model.BluetoothDevice
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -39,7 +38,6 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class BluetoothScanService : Service() {
-
     companion object {
         const val EXTRA_AUTH_ID = "extra_auth_id"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
@@ -61,7 +59,11 @@ class BluetoothScanService : Service() {
         Timber.i("BluetoothScanService created")
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         if (!validateAuthorization(intent)) {
             Timber.w("Unauthorized intent received — stopping service")
             stopSelf()
@@ -88,7 +90,10 @@ class BluetoothScanService : Service() {
      * Start actual BLE scanning by collecting the scan flow from BluetoothRepository.
      * Results are tracked in discoveredDevices and the notification is updated.
      */
-    private fun startBleScan(authId: String, filterAddress: String?) {
+    private fun startBleScan(
+        authId: String,
+        filterAddress: String?,
+    ) {
         if (isScanning) {
             Timber.w("Scan already in progress — ignoring duplicate start")
             return
@@ -98,24 +103,25 @@ class BluetoothScanService : Service() {
         discoveredDevices.clear()
         updateNotification("Scanning... (0 devices)")
 
-        scanJob = serviceScope.launch {
-            try {
-                bluetoothRepository.startScan(filterAddress).collect { device ->
-                    discoveredDevices[device.address] = device
-                    val count = discoveredDevices.size
-                    updateNotification("Scanning... ($count device${if (count != 1) "s" else ""})")
-                    Timber.d("Found device: ${device.address} (${device.name ?: "unknown"}) — total: $count")
+        scanJob =
+            serviceScope.launch {
+                try {
+                    bluetoothRepository.startScan(filterAddress).collect { device ->
+                        discoveredDevices[device.address] = device
+                        val count = discoveredDevices.size
+                        updateNotification("Scanning... ($count device${if (count != 1) "s" else ""})")
+                        Timber.d("Found device: ${device.address} (${device.name ?: "unknown"}) — total: $count")
+                    }
+                } catch (e: CancellationException) {
+                    Timber.i("Scan job cancelled — normal shutdown")
+                } catch (e: Exception) {
+                    Timber.e(e, "Scan flow error")
+                    updateNotification("Scan error: ${e.message}")
+                } finally {
+                    isScanning = false
+                    updateNotification("Scan complete (${discoveredDevices.size} devices found)")
                 }
-            } catch (e: CancellationException) {
-                Timber.i("Scan job cancelled — normal shutdown")
-            } catch (e: Exception) {
-                Timber.e(e, "Scan flow error")
-                updateNotification("Scan error: ${e.message}")
-            } finally {
-                isScanning = false
-                updateNotification("Scan complete (${discoveredDevices.size} devices found)")
             }
-        }
 
         Timber.i("Started BLE scan with auth: ${authId.take(10)}***")
     }
@@ -184,7 +190,7 @@ class BluetoothScanService : Service() {
             startForeground(
                 NOTIFICATION_ID_SCAN,
                 notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
             )
         } else {
             startForeground(NOTIFICATION_ID_SCAN, notification)

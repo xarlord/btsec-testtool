@@ -20,37 +20,31 @@ data class VulnDefinitionEntity(
     @PrimaryKey
     @ColumnInfo(name = "cve_id")
     val cveId: String,
-
     @ColumnInfo(name = "name")
     val name: String,
-
     @ColumnInfo(name = "description")
     val description: String,
-
+    // VulnerabilitySeverity enum name
     @ColumnInfo(name = "severity")
-    val severity: String, // VulnerabilitySeverity enum name
-
+    val severity: String,
     @ColumnInfo(name = "cvss_score")
     val cvssScore: Double,
-
+    // VulnerabilityCategory enum name
     @ColumnInfo(name = "category")
-    val category: String, // VulnerabilityCategory enum name
-
+    val category: String,
+    // Bluetooth version ranges string
     @ColumnInfo(name = "affected_versions")
-    val affectedVersions: String, // Bluetooth version ranges string
-
+    val affectedVersions: String,
+    // JSON array of strings
     @ColumnInfo(name = "affected_profiles")
-    val affectedProfiles: String, // JSON array of strings
-
+    val affectedProfiles: String,
     @ColumnInfo(name = "year_discovered")
     val yearDiscovered: Int,
-
+    // JSON array of strings
     @ColumnInfo(name = "references")
-    val references: String, // JSON array of strings
-
+    val references: String,
     @ColumnInfo(name = "mitigation")
     val mitigation: String,
-
     @ColumnInfo(name = "test_methodology")
-    val testMethodology: String
+    val testMethodology: String,
 )

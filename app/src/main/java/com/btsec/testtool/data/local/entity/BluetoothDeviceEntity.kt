@@ -20,37 +20,33 @@ data class BluetoothDeviceEntity(
     @PrimaryKey
     @ColumnInfo(name = "address")
     val address: String,
-
     @ColumnInfo(name = "name")
     val name: String?,
-
+    // BluetoothType enum name
     @ColumnInfo(name = "type")
-    val type: String, // BluetoothType enum name
-
+    val type: String,
+    // DeviceClass enum name
     @ColumnInfo(name = "device_class")
-    val deviceClass: String?, // DeviceClass enum name
-
+    val deviceClass: String?,
+    // BondState enum name
     @ColumnInfo(name = "bond_state")
-    val bondState: String, // BondState enum name
-
+    val bondState: String,
     @ColumnInfo(name = "rssi")
     val rssi: Int?,
-
     @ColumnInfo(name = "tx_power")
     val txPower: Int?,
-
+    // epoch millis
     @ColumnInfo(name = "first_seen")
-    val firstSeen: Long, // epoch millis
-
+    val firstSeen: Long,
+    // epoch millis
     @ColumnInfo(name = "last_seen")
-    val lastSeen: Long, // epoch millis
-
+    val lastSeen: Long,
     @ColumnInfo(name = "scan_count")
     val scanCount: Int,
-
+    // JSON array of strings
     @ColumnInfo(name = "services")
-    val services: String, // JSON array of strings
-
+    val services: String,
+    // JSON map of Int -> Base64 String
     @ColumnInfo(name = "manufacturer_data")
-    val manufacturerData: String // JSON map of Int -> Base64 String
+    val manufacturerData: String,
 )

@@ -13,11 +13,11 @@ package com.btsec.testtool.domain.model
  * Used for color-coded timeline visualization in AUTHORIZED security testing.
  */
 enum class PacketType(val displayName: String, val colorHex: Long) {
-    ATT("ATT", 0xFF2196F3),      // Blue
-    L2CAP("L2CAP", 0xFF9C27B0),  // Purple
-    SMP("SMP", 0xFFFF9800),      // Orange
-    HCI("HCI", 0xFF4CAF50),      // Green
-    UNKNOWN("Unknown", 0xFF9E9E9E) // Gray
+    ATT("ATT", 0xFF2196F3), // Blue
+    L2CAP("L2CAP", 0xFF9C27B0), // Purple
+    SMP("SMP", 0xFFFF9800), // Orange
+    HCI("HCI", 0xFF4CAF50), // Green
+    UNKNOWN("Unknown", 0xFF9E9E9E), // Gray
 }
 
 /**
@@ -37,9 +37,10 @@ data class CapturedPacket(
     val data: ByteArray,
     val size: Int = data.size,
     val source: String = "",
-    val destination: String = ""
+    val destination: String = "",
 ) {
     override fun equals(other: Any?) = this === other || (other is CapturedPacket && id == other.id)
+
     override fun hashCode() = id.hashCode()
 }
 
@@ -49,7 +50,7 @@ data class CapturedPacket(
 data class PacketFilter(
     val type: PacketType? = null,
     val direction: PacketDirection? = null,
-    val searchQuery: String? = null
+    val searchQuery: String? = null,
 )
 
 /**
@@ -62,5 +63,5 @@ data class PacketStats(
     val receivedCount: Int,
     val typeDistribution: Map<PacketType, Int>,
     val averageSize: Double,
-    val durationMs: Long
+    val durationMs: Long,
 )

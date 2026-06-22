@@ -8,7 +8,6 @@
  */
 package com.btsec.testtool.domain.repository
 
-import com.btsec.testtool.domain.model.HfpTestResult
 import com.btsec.testtool.domain.model.HfpTestSuite
 import kotlinx.coroutines.flow.Flow
 
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.Flow
  * All operations require prior AUTHORIZATION.
  */
 interface HfpSecurityRepository {
-
     /**
      * Connect to a device's HFP profile.
      *
@@ -42,7 +40,10 @@ interface HfpSecurityRepository {
      * @param timeoutMs Response timeout in milliseconds.
      * @return The raw response string, or null on timeout.
      */
-    suspend fun sendAtCommand(command: String, timeoutMs: Long = 5000): String?
+    suspend fun sendAtCommand(
+        command: String,
+        timeoutMs: Long = 5000,
+    ): String?
 
     /**
      * Get the current call state from the HFP connection.

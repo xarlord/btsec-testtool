@@ -21,145 +21,151 @@ import javax.inject.Inject
  * This is the CRITICAL security component - all testing operations
  * must pass through authorization checks before execution.
  */
-class AuthorizationUseCase @Inject constructor(
-    private val authorizationRepository: AuthorizationRepository,
-    private val consentRepository: ConsentRepository
-) {
+class AuthorizationUseCase
+    @Inject
+    constructor(
+        private val authorizationRepository: AuthorizationRepository,
+        private val consentRepository: ConsentRepository,
+    ) {
+        /**
+         * Verify an authorization ID.
+         *
+         * @param authId Authorization ID to verify (format: BTSEC-YYYYMMDD-XXXXXXXX)
+         * @return Result of verification
+         */
+        suspend fun verifyAuthorization(authId: String): AuthorizationResult {
+            if (!isValidAuthIdFormat(authId)) {
+                return AuthorizationResult.Error("Invalid authorization ID format")
+            }
 
-    /**
-     * Verify an authorization ID.
-     *
-     * @param authId Authorization ID to verify (format: BTSEC-YYYYMMDD-XXXXXXXX)
-     * @return Result of verification
-     */
-    suspend fun verifyAuthorization(authId: String): AuthorizationResult {
-        if (!isValidAuthIdFormat(authId)) {
-            return AuthorizationResult.Error("Invalid authorization ID format")
+            val authorization =
+                authorizationRepository.verifyAuthorization(authId)
+                    ?: return AuthorizationResult.Error("Authorization verification failed")
+
+            authorizationRepository.storeAuthorization(authorization)
+            return AuthorizationResult.Success(authorization)
         }
 
-        val authorization = authorizationRepository.verifyAuthorization(authId)
-            ?: return AuthorizationResult.Error("Authorization verification failed")
-
-        authorizationRepository.storeAuthorization(authorization)
-        return AuthorizationResult.Success(authorization)
-    }
-
-    /**
-     * Get the current active authorization.
-     */
-    fun getCurrentAuthorization(): Flow<Authorization?> {
-        return authorizationRepository.getCurrentAuthorization()
-    }
-
-    /**
-     * Check if an action is authorized.
-     *
-     * @param action Action to check
-     * @return true if authorized
-     */
-    suspend fun isActionAuthorized(action: TestAction): Boolean {
-        return authorizationRepository.isActionAuthorized(action)
-    }
-
-    /**
-     * Check if a target device is within scope.
-     *
-     * @param deviceAddress MAC address of target
-     * @return true if in scope
-     */
-    suspend fun isTargetInScope(deviceAddress: String): Boolean {
-        return authorizationRepository.isTargetInScope(deviceAddress)
-    }
-
-    /**
-     * Request authorization for an action with user consent.
-     *
-     * @param action Action requiring authorization
-     * @param deviceInfo Device information
-     * @return Authorization decision
-     */
-    suspend fun requestActionAuthorization(
-        action: TestAction,
-        deviceInfo: DeviceInfo
-    ): ActionAuthorizationResult {
-        // Get current authorization
-        val authorization = authorizationRepository.getCurrentAuthorization().first()
-            ?: return ActionAuthorizationResult.NoAuthorization
-
-        // Check if action is allowed
-        if (!authorization.scope.isActionAllowed(action)) {
-            return ActionAuthorizationResult.ActionNotAllowed
+        /**
+         * Get the current active authorization.
+         */
+        fun getCurrentAuthorization(): Flow<Authorization?> {
+            return authorizationRepository.getCurrentAuthorization()
         }
 
-        // Check time window
-        if (!authorization.scope.isWithinValidWindow()) {
-            return ActionAuthorizationResult.OutsideValidWindow
+        /**
+         * Check if an action is authorized.
+         *
+         * @param action Action to check
+         * @return true if authorized
+         */
+        suspend fun isActionAuthorized(action: TestAction): Boolean {
+            return authorizationRepository.isActionAuthorized(action)
         }
 
-        // Request consent
-        val consent = consentRepository.requestConsent(
-            authorization.authId,
-            action,
-            deviceInfo
-        )
+        /**
+         * Check if a target device is within scope.
+         *
+         * @param deviceAddress MAC address of target
+         * @return true if in scope
+         */
+        suspend fun isTargetInScope(deviceAddress: String): Boolean {
+            return authorizationRepository.isTargetInScope(deviceAddress)
+        }
 
-        return if (consent != null && consent.authorized) {
-            ActionAuthorizationResult.Authorized(consent)
-        } else {
-            ActionAuthorizationResult.ConsentDenied
+        /**
+         * Request authorization for an action with user consent.
+         *
+         * @param action Action requiring authorization
+         * @param deviceInfo Device information
+         * @return Authorization decision
+         */
+        suspend fun requestActionAuthorization(
+            action: TestAction,
+            deviceInfo: DeviceInfo,
+        ): ActionAuthorizationResult {
+            // Get current authorization
+            val authorization =
+                authorizationRepository.getCurrentAuthorization().first()
+                    ?: return ActionAuthorizationResult.NoAuthorization
+
+            // Check if action is allowed
+            if (!authorization.scope.isActionAllowed(action)) {
+                return ActionAuthorizationResult.ActionNotAllowed
+            }
+
+            // Check time window
+            if (!authorization.scope.isWithinValidWindow()) {
+                return ActionAuthorizationResult.OutsideValidWindow
+            }
+
+            // Request consent
+            val consent =
+                consentRepository.requestConsent(
+                    authorization.authId,
+                    action,
+                    deviceInfo,
+                )
+
+            return if (consent != null && consent.authorized) {
+                ActionAuthorizationResult.Authorized(consent)
+            } else {
+                ActionAuthorizationResult.ConsentDenied
+            }
+        }
+
+        /**
+         * Get the current test scope.
+         */
+        fun getCurrentScope(): Flow<TestScope?> {
+            return authorizationRepository.getCurrentScope()
+        }
+
+        /**
+         * Revoke the current authorization.
+         */
+        suspend fun revokeAuthorization() {
+            authorizationRepository.revokeAuthorization()
+        }
+
+        /**
+         * Get authorization details.
+         */
+        suspend fun getAuthorizationDetails(): AuthorizationDetails? {
+            val authorization =
+                authorizationRepository.getCurrentAuthorization().first()
+                    ?: return null
+
+            val scope = authorization.scope
+            return AuthorizationDetails(
+                authId = authorization.authId,
+                issuedTo = authorization.issuedTo,
+                issuedBy = authorization.issuedBy,
+                issuedAt = authorization.issuedAt,
+                expiresAt = authorization.expiresAt,
+                validFrom = scope.validFrom,
+                validUntil = scope.validUntil,
+                allowedActions = scope.allowedActions,
+                authorizedTargets = scope.authorizedTargets,
+                maxPacketsPerSecond = scope.maxPacketsPerSecond,
+                requiresSupervision = scope.requiresSupervision,
+            )
+        }
+
+        /**
+         * Validate authorization ID format.
+         */
+        private fun isValidAuthIdFormat(authId: String): Boolean {
+            return authId.matches(Regex("^BTSEC-\\d{8}-[A-Z0-9]{8}$"))
         }
     }
-
-    /**
-     * Get the current test scope.
-     */
-    fun getCurrentScope(): Flow<TestScope?> {
-        return authorizationRepository.getCurrentScope()
-    }
-
-    /**
-     * Revoke the current authorization.
-     */
-    suspend fun revokeAuthorization() {
-        authorizationRepository.revokeAuthorization()
-    }
-
-    /**
-     * Get authorization details.
-     */
-    suspend fun getAuthorizationDetails(): AuthorizationDetails? {
-        val authorization = authorizationRepository.getCurrentAuthorization().first()
-            ?: return null
-
-        val scope = authorization.scope
-        return AuthorizationDetails(
-            authId = authorization.authId,
-            issuedTo = authorization.issuedTo,
-            issuedBy = authorization.issuedBy,
-            issuedAt = authorization.issuedAt,
-            expiresAt = authorization.expiresAt,
-            validFrom = scope.validFrom,
-            validUntil = scope.validUntil,
-            allowedActions = scope.allowedActions,
-            authorizedTargets = scope.authorizedTargets,
-            maxPacketsPerSecond = scope.maxPacketsPerSecond,
-            requiresSupervision = scope.requiresSupervision
-        )
-    }
-
-    /**
-     * Validate authorization ID format.
-     */
-    private fun isValidAuthIdFormat(authId: String): Boolean {
-        return authId.matches(Regex("^BTSEC-\\d{8}-[A-Z0-9]{8}$"))
-    }
-}
 
 /**
  * Result of authorization verification.
  */
 sealed class AuthorizationResult {
     data class Success(val authorization: Authorization) : AuthorizationResult()
+
     data class Error(val message: String) : AuthorizationResult()
 }
 
@@ -168,9 +174,13 @@ sealed class AuthorizationResult {
  */
 sealed class ActionAuthorizationResult {
     data object NoAuthorization : ActionAuthorizationResult()
+
     data object ActionNotAllowed : ActionAuthorizationResult()
+
     data object OutsideValidWindow : ActionAuthorizationResult()
+
     data object ConsentDenied : ActionAuthorizationResult()
+
     data class Authorized(val consent: ConsentRecord) : ActionAuthorizationResult()
 }
 
@@ -188,7 +198,7 @@ data class AuthorizationDetails(
     val allowedActions: Set<TestAction>,
     val authorizedTargets: List<TargetDevice>,
     val maxPacketsPerSecond: Int,
-    val requiresSupervision: Boolean
+    val requiresSupervision: Boolean,
 ) {
     /**
      * Check if authorization is currently valid.

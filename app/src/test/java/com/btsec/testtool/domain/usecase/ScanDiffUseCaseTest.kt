@@ -26,7 +26,6 @@ import java.time.Instant
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class ScanDiffUseCaseTest {
-
     private lateinit var useCase: ScanDiffUseCase
 
     @BeforeEach
@@ -42,32 +41,33 @@ class ScanDiffUseCaseTest {
         bondState: BondState = BondState.NONE,
         deviceClass: DeviceClass? = null,
         txPower: Int? = null,
-        type: BluetoothType = BluetoothType.UNKNOWN
-    ): BluetoothDevice = BluetoothDevice(
-        address = address,
-        name = name,
-        rssi = rssi,
-        services = services,
-        bondState = bondState,
-        deviceClass = deviceClass,
-        txPower = txPower,
-        type = type,
-        firstSeen = Instant.now(),
-        lastSeen = Instant.now()
-    )
+        type: BluetoothType = BluetoothType.UNKNOWN,
+    ): BluetoothDevice =
+        BluetoothDevice(
+            address = address,
+            name = name,
+            rssi = rssi,
+            services = services,
+            bondState = bondState,
+            deviceClass = deviceClass,
+            txPower = txPower,
+            type = type,
+            firstSeen = Instant.now(),
+            lastSeen = Instant.now(),
+        )
 
     @Nested
     @DisplayName("identical scans")
     inner class IdenticalScans {
-
         @Test
         @DisplayName("should mark all devices as UNCHANGED for identical scans")
         fun identicalScans() {
-            val devices = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
-                makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60),
-                makeDevice("AA:BB:CC:DD:EE:03", "Device C", -70)
-            )
+            val devices =
+                listOf(
+                    makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
+                    makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60),
+                    makeDevice("AA:BB:CC:DD:EE:03", "Device C", -70),
+                )
 
             val result = useCase.diffScans(devices, devices)
 
@@ -97,16 +97,16 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("all added")
     inner class AllAdded {
-
         @Test
         @DisplayName("should mark all comparison devices as ADDED when baseline is empty")
         fun allAdded() {
             val baseline = emptyList<BluetoothDevice>()
-            val comparison = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
-                makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60),
-                makeDevice("AA:BB:CC:DD:EE:03", "Device C", -70)
-            )
+            val comparison =
+                listOf(
+                    makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
+                    makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60),
+                    makeDevice("AA:BB:CC:DD:EE:03", "Device C", -70),
+                )
 
             val result = useCase.diffScans(baseline, comparison)
 
@@ -130,14 +130,14 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("all removed")
     inner class AllRemoved {
-
         @Test
         @DisplayName("should mark all baseline devices as REMOVED when comparison is empty")
         fun allRemoved() {
-            val baseline = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
-                makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60)
-            )
+            val baseline =
+                listOf(
+                    makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
+                    makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60),
+                )
             val comparison = emptyList<BluetoothDevice>()
 
             val result = useCase.diffScans(baseline, comparison)
@@ -160,20 +160,24 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("partial matches")
     inner class PartialMatches {
-
         @Test
         @DisplayName("should categorise mixed overlap correctly")
         fun mixedOverlap() {
-            val baseline = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
-                makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60),
-                makeDevice("AA:BB:CC:DD:EE:03", "Device C", -70)
-            )
-            val comparison = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50), // unchanged
-                makeDevice("AA:BB:CC:DD:EE:02", "Device B", -55), // modified (rssi)
-                makeDevice("AA:BB:CC:DD:EE:04", "Device D", -65)  // added
-            )
+            val baseline =
+                listOf(
+                    makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
+                    makeDevice("AA:BB:CC:DD:EE:02", "Device B", -60),
+                    makeDevice("AA:BB:CC:DD:EE:03", "Device C", -70),
+                )
+            val comparison =
+                listOf(
+                    // unchanged
+                    makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50),
+                    // modified (rssi)
+                    makeDevice("AA:BB:CC:DD:EE:02", "Device B", -55),
+                    // added
+                    makeDevice("AA:BB:CC:DD:EE:04", "Device D", -65),
+                )
 
             val result = useCase.diffScans(baseline, comparison)
 
@@ -192,7 +196,6 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("RSSI changes")
     inner class RssiChanges {
-
         @Test
         @DisplayName("should detect RSSI change only")
         fun rssiChange() {
@@ -236,7 +239,6 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("name changes")
     inner class NameChanges {
-
         @Test
         @DisplayName("should detect name change")
         fun nameChange() {
@@ -267,18 +269,27 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("service changes")
     inner class ServiceChanges {
-
         @Test
         @DisplayName("should detect new service UUIDs")
         fun newServices() {
-            val baseline = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50,
-                    services = listOf("00001800-0000-1000-8000-00805f9b34fb"))
-            )
-            val comparison = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Device A", -50,
-                    services = listOf("00001800-0000-1000-8000-00805f9b34fb", "00001801-0000-1000-8000-00805f9b34fb"))
-            )
+            val baseline =
+                listOf(
+                    makeDevice(
+                        "AA:BB:CC:DD:EE:01",
+                        "Device A",
+                        -50,
+                        services = listOf("00001800-0000-1000-8000-00805f9b34fb"),
+                    ),
+                )
+            val comparison =
+                listOf(
+                    makeDevice(
+                        "AA:BB:CC:DD:EE:01",
+                        "Device A",
+                        -50,
+                        services = listOf("00001800-0000-1000-8000-00805f9b34fb", "00001801-0000-1000-8000-00805f9b34fb"),
+                    ),
+                )
 
             val result = useCase.diffScans(baseline, comparison)
 
@@ -290,22 +301,31 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("multiple field changes")
     inner class MultipleFieldChanges {
-
         @Test
         @DisplayName("should report all changed fields")
         fun multipleChanges() {
-            val baseline = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "Old", -50,
-                    bondState = BondState.NONE,
-                    deviceClass = DeviceClass.PHONE,
-                    type = BluetoothType.BLE)
-            )
-            val comparison = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "New", -75,
-                    bondState = BondState.BONDED,
-                    deviceClass = DeviceClass.COMPUTER,
-                    type = BluetoothType.DUAL_MODE)
-            )
+            val baseline =
+                listOf(
+                    makeDevice(
+                        "AA:BB:CC:DD:EE:01",
+                        "Old",
+                        -50,
+                        bondState = BondState.NONE,
+                        deviceClass = DeviceClass.PHONE,
+                        type = BluetoothType.BLE,
+                    ),
+                )
+            val comparison =
+                listOf(
+                    makeDevice(
+                        "AA:BB:CC:DD:EE:01",
+                        "New",
+                        -75,
+                        bondState = BondState.BONDED,
+                        deviceClass = DeviceClass.COMPUTER,
+                        type = BluetoothType.DUAL_MODE,
+                    ),
+                )
 
             val result = useCase.diffScans(baseline, comparison)
 
@@ -318,16 +338,16 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("scan IDs")
     inner class ScanIds {
-
         @Test
         @DisplayName("should preserve custom scan IDs")
         fun customIds() {
-            val result = useCase.diffScans(
-                baseline = emptyList(),
-                comparison = emptyList(),
-                baselineScanId = "scan-001",
-                comparisonScanId = "scan-002"
-            )
+            val result =
+                useCase.diffScans(
+                    baseline = emptyList(),
+                    comparison = emptyList(),
+                    baselineScanId = "scan-001",
+                    comparisonScanId = "scan-002",
+                )
 
             assertThat(result.baselineScanId).isEqualTo("scan-001")
             assertThat(result.comparisonScanId).isEqualTo("scan-002")
@@ -346,35 +366,37 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("performance with large device lists")
     inner class Performance {
-
         @Test
         @DisplayName("should handle 10+ device lists efficiently")
         fun largeDeviceLists() {
-            val baseline = (1..15).map { i ->
-                makeDevice(
-                    address = "AA:BB:CC:DD:EE:%02X".format(i),
-                    name = "Device-$i",
-                    rssi = -40 - i,
-                    services = listOf("service-$i"),
-                    bondState = if (i % 3 == 0) BondState.BONDED else BondState.NONE,
-                    deviceClass = DeviceClass.entries[i % DeviceClass.entries.size],
-                    type = BluetoothType.entries[i % BluetoothType.entries.size]
-                )
-            }
+            val baseline =
+                (1..15).map { i ->
+                    makeDevice(
+                        address = "AA:BB:CC:DD:EE:%02X".format(i),
+                        name = "Device-$i",
+                        rssi = -40 - i,
+                        services = listOf("service-$i"),
+                        bondState = if (i % 3 == 0) BondState.BONDED else BondState.NONE,
+                        deviceClass = DeviceClass.entries[i % DeviceClass.entries.size],
+                        type = BluetoothType.entries[i % BluetoothType.entries.size],
+                    )
+                }
 
             // comparison: remove 3, add 3, modify 3, keep rest unchanged
-            val comparison = baseline
-                .filterNot { it.address.endsWith("01") || it.address.endsWith("02") || it.address.endsWith("03") }
-                .mapIndexed { idx, device ->
-                    when {
-                        idx in 0..2 -> device.copy(rssi = device.rssi?.plus(5)) // modify
-                        else -> device
-                    }
-                } + listOf(
-                    makeDevice("AA:BB:CC:DD:EE:16", "New-16", -80),
-                    makeDevice("AA:BB:CC:DD:EE:17", "New-17", -85),
-                    makeDevice("AA:BB:CC:DD:EE:18", "New-18", -90)
-                )
+            val comparison =
+                baseline
+                    .filterNot { it.address.endsWith("01") || it.address.endsWith("02") || it.address.endsWith("03") }
+                    .mapIndexed { idx, device ->
+                        when {
+                            idx in 0..2 -> device.copy(rssi = device.rssi?.plus(5)) // modify
+                            else -> device
+                        }
+                    } +
+                    listOf(
+                        makeDevice("AA:BB:CC:DD:EE:16", "New-16", -80),
+                        makeDevice("AA:BB:CC:DD:EE:17", "New-17", -85),
+                        makeDevice("AA:BB:CC:DD:EE:18", "New-18", -90),
+                    )
 
             val start = System.currentTimeMillis()
             val result = useCase.diffScans(baseline, comparison)
@@ -393,22 +415,27 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("summary consistency")
     inner class SummaryConsistency {
-
         @Test
         @DisplayName("summary counts should sum correctly")
         fun summaryConsistency() {
-            val baseline = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "A", -50),
-                makeDevice("AA:BB:CC:DD:EE:02", "B", -60),
-                makeDevice("AA:BB:CC:DD:EE:03", "C", -70),
-                makeDevice("AA:BB:CC:DD:EE:04", "D", -80)
-            )
-            val comparison = listOf(
-                makeDevice("AA:BB:CC:DD:EE:01", "A", -50),    // unchanged
-                makeDevice("AA:BB:CC:DD:EE:02", "B", -55),    // modified
-                makeDevice("AA:BB:CC:DD:EE:05", "E", -65),    // added
-                makeDevice("AA:BB:CC:DD:EE:06", "F", -75)     // added
-            )
+            val baseline =
+                listOf(
+                    makeDevice("AA:BB:CC:DD:EE:01", "A", -50),
+                    makeDevice("AA:BB:CC:DD:EE:02", "B", -60),
+                    makeDevice("AA:BB:CC:DD:EE:03", "C", -70),
+                    makeDevice("AA:BB:CC:DD:EE:04", "D", -80),
+                )
+            val comparison =
+                listOf(
+                    // unchanged
+                    makeDevice("AA:BB:CC:DD:EE:01", "A", -50),
+                    // modified
+                    makeDevice("AA:BB:CC:DD:EE:02", "B", -55),
+                    // added
+                    makeDevice("AA:BB:CC:DD:EE:05", "E", -65),
+                    // added
+                    makeDevice("AA:BB:CC:DD:EE:06", "F", -75),
+                )
 
             val result = useCase.diffScans(baseline, comparison)
             val s = result.summary
@@ -427,7 +454,6 @@ class ScanDiffUseCaseTest {
     @Nested
     @DisplayName("txPower changes")
     inner class TxPowerChanges {
-
         @Test
         @DisplayName("should detect TX power change")
         fun txPowerChange() {

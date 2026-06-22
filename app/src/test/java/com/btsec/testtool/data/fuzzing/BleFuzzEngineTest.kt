@@ -11,7 +11,6 @@ package com.btsec.testtool.data.fuzzing
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.btsec.testtool.domain.model.*
-import com.btsec.testtool.domain.repository.FuzzProgress
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -34,26 +33,26 @@ import java.time.Instant
 @OptIn(ExperimentalCoroutinesApi::class)
 @DisplayName("BleFuzzEngine")
 class BleFuzzEngineTest {
-
     private lateinit var context: Context
     private lateinit var payloadGenerator: FuzzPayloadGenerator
     private lateinit var engine: BleFuzzEngine
 
-    private val testDevice = BluetoothDevice(
-        address = "AA:BB:CC:DD:EE:FF",
-        name = "Test Device",
-        type = BluetoothType.BLE,
-        deviceClass = DeviceClass.PHONE,
-        bondState = BondState.BONDED,
-        rssi = -50,
-        txPower = 4,
-        firstSeen = Instant.now(),
-        lastSeen = Instant.now()
-    )
+    private val testDevice =
+        BluetoothDevice(
+            address = "AA:BB:CC:DD:EE:FF",
+            name = "Test Device",
+            type = BluetoothType.BLE,
+            deviceClass = DeviceClass.PHONE,
+            bondState = BondState.BONDED,
+            rssi = -50,
+            txPower = 4,
+            firstSeen = Instant.now(),
+            lastSeen = Instant.now(),
+        )
 
     private fun createConfig(
         device: BluetoothDevice = testDevice,
-        packetCount: Int = 10
+        packetCount: Int = 10,
     ) = FuzzConfig(
         targetDevice = device,
         targetService = null,
@@ -63,7 +62,7 @@ class BleFuzzEngineTest {
         packetsPerSecond = 10,
         randomSeed = 42L,
         dataPatterns = emptyList(),
-        durationSeconds = null
+        durationSeconds = null,
     )
 
     @BeforeEach
@@ -80,7 +79,6 @@ class BleFuzzEngineTest {
     @Nested
     @DisplayName("isBluetoothHardwareAvailable")
     inner class HardwareAvailabilityTests {
-
         @Test
         @DisplayName("returns false when BluetoothManager is not available (null service)")
         fun noBluetoothManager() {
@@ -130,46 +128,50 @@ class BleFuzzEngineTest {
     @Nested
     @DisplayName("executeFuzzing — no hardware fallback")
     inner class NoHardwareFallbackTests {
-
         @Test
         @DisplayName("throws IllegalStateException when BluetoothManager is not available")
-        fun throwsWhenNoBluetoothManager() = runTest {
-            every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns null
-            val engine = BleFuzzEngine(payloadGenerator, context)
-            val config = createConfig()
+        fun throwsWhenNoBluetoothManager() =
+            runTest {
+                every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns null
+                val engine = BleFuzzEngine(payloadGenerator, context)
+                val config = createConfig()
 
-            val ex = assertThrows<IllegalStateException> {
-                engine.executeFuzzing(config, { }, { })
+                val ex =
+                    assertThrows<IllegalStateException> {
+                        engine.executeFuzzing(config, { }, { })
+                    }
+                assertThat(ex.message).contains("No Bluetooth hardware available")
             }
-            assertThat(ex.message).contains("No Bluetooth hardware available")
-        }
 
         @Test
         @DisplayName("throws IllegalStateException when BluetoothAdapter is null")
-        fun throwsWhenNoBluetoothAdapter() = runTest {
-            val btManager = mockk<BluetoothManager>(relaxed = true)
-            every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns btManager
-            every { btManager.adapter } returns null
-            val engine = BleFuzzEngine(payloadGenerator, context)
-            val config = createConfig()
+        fun throwsWhenNoBluetoothAdapter() =
+            runTest {
+                val btManager = mockk<BluetoothManager>(relaxed = true)
+                every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns btManager
+                every { btManager.adapter } returns null
+                val engine = BleFuzzEngine(payloadGenerator, context)
+                val config = createConfig()
 
-            val ex = assertThrows<IllegalStateException> {
-                engine.executeFuzzing(config, { }, { })
+                val ex =
+                    assertThrows<IllegalStateException> {
+                        engine.executeFuzzing(config, { }, { })
+                    }
+                assertThat(ex.message).contains("No Bluetooth hardware available")
             }
-            assertThat(ex.message).contains("No Bluetooth hardware available")
-        }
 
         @Test
         @DisplayName("does not produce fake results when no hardware is available")
-        fun noFakeResults() = runTest {
-            every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns null
-            val engine = BleFuzzEngine(payloadGenerator, context)
-            val config = createConfig()
+        fun noFakeResults() =
+            runTest {
+                every { context.getSystemService(Context.BLUETOOTH_SERVICE) } returns null
+                val engine = BleFuzzEngine(payloadGenerator, context)
+                val config = createConfig()
 
-            // Should throw rather than return a result with fake data
-            assertThrows<IllegalStateException> {
-                engine.executeFuzzing(config, { }, { })
+                // Should throw rather than return a result with fake data
+                assertThrows<IllegalStateException> {
+                    engine.executeFuzzing(config, { }, { })
+                }
             }
-        }
     }
 }

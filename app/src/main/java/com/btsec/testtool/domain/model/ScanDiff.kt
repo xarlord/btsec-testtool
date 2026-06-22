@@ -15,7 +15,7 @@ enum class DiffType {
     ADDED,
     REMOVED,
     MODIFIED,
-    UNCHANGED
+    UNCHANGED,
 }
 
 /**
@@ -36,7 +36,7 @@ data class DeviceDiff(
     val currentRssi: Int?,
     val previousName: String?,
     val currentName: String?,
-    val changedFields: List<String>
+    val changedFields: List<String>,
 )
 
 /**
@@ -57,7 +57,7 @@ data class ScanDiffResult(
     val removed: List<DeviceDiff>,
     val modified: List<DeviceDiff>,
     val unchanged: List<DeviceDiff>,
-    val summary: ScanDiffSummary
+    val summary: ScanDiffSummary,
 )
 
 /**
@@ -69,5 +69,5 @@ data class ScanDiffSummary(
     val addedCount: Int,
     val removedCount: Int,
     val modifiedCount: Int,
-    val unchangedCount: Int
+    val unchangedCount: Int,
 )

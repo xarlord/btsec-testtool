@@ -30,11 +30,11 @@ enum class SapMessageType(val code: Int) {
     STATUS_IND(0x0E),
     TRANSFER_CARD_READER_STATUS_REQ(0x0F),
     TRANSFER_CARD_READER_STATUS_RESP(0x10),
-    ERROR_RESP(0x11);
+    ERROR_RESP(0x11),
+    ;
 
     companion object {
-        fun fromCode(code: Int): SapMessageType? =
-            entries.find { it.code == code }
+        fun fromCode(code: Int): SapMessageType? = entries.find { it.code == code }
     }
 }
 
@@ -50,11 +50,11 @@ enum class SimAccessStatus(val code: Int) {
     ERROR_CARD_POWERED_OFF(0x04),
     ERROR_CARD_REMOVED_RESET(0x05),
     ERROR_CARD_POWERED_OFF_RESET(0x06),
-    ERROR_UNKNOWN(0x07);
+    ERROR_UNKNOWN(0x07),
+    ;
 
     companion object {
-        fun fromCode(code: Int): SimAccessStatus? =
-            entries.find { it.code == code }
+        fun fromCode(code: Int): SimAccessStatus? = entries.find { it.code == code }
     }
 }
 
@@ -64,16 +64,16 @@ enum class SimAccessStatus(val code: Int) {
  * in AUTHORIZED penetration testing scenarios.
  */
 enum class SapTestCategory {
-    CONNECTION_ACCESS,       // Connect to SIM without auth
-    APDU_INJECTION,         // Send arbitrary APDU commands to SIM
-    ATR_EXTRACTION,         // Read SIM ATR (Answer to Reset)
-    SIM_DATA_READ,          // Read SIM files (IMSI, ICCID, phonebook)
-    SIM_POWER_CONTROL,      // Power off/on SIM card
-    SIM_RESET,              // Reset SIM card
-    CARD_READER_STATUS,     // Read card reader status
-    AUTHENTICATION_BYPASS,   // Access SIM without pairing
-    EMERGENCY_CALL,          // Check if emergency calls possible via SAP
-    DOS                      // Denial of service (power off SIM, reset loop)
+    CONNECTION_ACCESS, // Connect to SIM without auth
+    APDU_INJECTION, // Send arbitrary APDU commands to SIM
+    ATR_EXTRACTION, // Read SIM ATR (Answer to Reset)
+    SIM_DATA_READ, // Read SIM files (IMSI, ICCID, phonebook)
+    SIM_POWER_CONTROL, // Power off/on SIM card
+    SIM_RESET, // Reset SIM card
+    CARD_READER_STATUS, // Read card reader status
+    AUTHENTICATION_BYPASS, // Access SIM without pairing
+    EMERGENCY_CALL, // Check if emergency calls possible via SAP
+    DOS, // Denial of service (power off SIM, reset loop)
 }
 
 /**
@@ -81,21 +81,28 @@ enum class SapTestCategory {
  * Used in AUTHORIZED security testing to craft and send APDU commands.
  */
 data class SimApdu(
-    val cla: Int,    // Class byte
-    val ins: Int,    // Instruction byte
-    val p1: Int,     // Parameter 1
-    val p2: Int,     // Parameter 2
+    // Class byte
+    val cla: Int,
+    // Instruction byte
+    val ins: Int,
+    // Parameter 1
+    val p1: Int,
+    // Parameter 2
+    val p2: Int,
     val data: ByteArray = byteArrayOf(),
-    val le: Int? = null  // Expected response length
+    // Expected response length
+    val le: Int? = null,
 ) {
     override fun equals(other: Any?): Boolean =
-        this === other || (other is SimApdu &&
-            cla == other.cla &&
-            ins == other.ins &&
-            p1 == other.p1 &&
-            p2 == other.p2 &&
-            data.contentEquals(other.data) &&
-            le == other.le)
+        this === other || (
+            other is SimApdu &&
+                cla == other.cla &&
+                ins == other.ins &&
+                p1 == other.p1 &&
+                p2 == other.p2 &&
+                data.contentEquals(other.data) &&
+                le == other.le
+        )
 
     override fun hashCode(): Int {
         var result = 31 * cla + ins
@@ -128,8 +135,7 @@ data class SimApdu(
     /**
      * Returns a human-readable hex representation of the APDU.
      */
-    fun toHexString(): String =
-        toBytes().joinToString(" ") { "%02X".format(it) }
+    fun toHexString(): String = toBytes().joinToString(" ") { "%02X".format(it) }
 }
 
 /**
@@ -146,7 +152,7 @@ data class SapTestResult(
     val confidence: Double,
     val evidence: String,
     val severity: SapSeverity,
-    val recommendation: String
+    val recommendation: String,
 )
 
 /**
@@ -163,7 +169,7 @@ data class SapSimData(
     val operatorName: String? = null,
     val phoneNumbers: List<String> = emptyList(),
     val simType: String? = null,
-    val atr: String? = null
+    val atr: String? = null,
 )
 
 /**
@@ -176,5 +182,5 @@ data class SapTestReport(
     val simDataExtracted: SapSimData?,
     val criticalCount: Int,
     val highCount: Int,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )

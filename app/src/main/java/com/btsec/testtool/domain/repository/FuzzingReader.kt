@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.Flow
  * and result review tools to depend on a narrow, query-only contract.
  */
 interface FuzzingReader {
-
     /**
      * Get the current fuzzing status.
      */
@@ -52,7 +51,10 @@ interface FuzzingReader {
     /**
      * Get fuzzing results within a date range.
      */
-    fun getFuzzingResultsInRange(start: java.time.Instant, end: java.time.Instant): Flow<List<FuzzResult>>
+    fun getFuzzingResultsInRange(
+        start: java.time.Instant,
+        end: java.time.Instant,
+    ): Flow<List<FuzzResult>>
 
     /**
      * Get findings from a specific fuzzing test.

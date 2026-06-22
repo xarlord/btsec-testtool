@@ -21,14 +21,13 @@ import org.junit.Test
  * Related issues: #132, #178
  */
 class IspRepositoryInterfacesTest {
-
     // ========== KeyExtractionRepository ==========
 
     @Test
     fun keyExtractionRepository_extendsKeyExtractionReader() {
         assertTrue(
             "KeyExtractionRepository should extend KeyExtractionReader",
-            KeyExtractionReader::class.java.isAssignableFrom(KeyExtractionRepository::class.java)
+            KeyExtractionReader::class.java.isAssignableFrom(KeyExtractionRepository::class.java),
         )
     }
 
@@ -36,7 +35,7 @@ class IspRepositoryInterfacesTest {
     fun keyExtractionRepository_extendsKeyExtractionWriter() {
         assertTrue(
             "KeyExtractionRepository should extend KeyExtractionWriter",
-            KeyExtractionWriter::class.java.isAssignableFrom(KeyExtractionRepository::class.java)
+            KeyExtractionWriter::class.java.isAssignableFrom(KeyExtractionRepository::class.java),
         )
     }
 
@@ -46,7 +45,7 @@ class IspRepositoryInterfacesTest {
     fun bluetoothRepository_extendsBluetoothStateReader() {
         assertTrue(
             "BluetoothRepository should extend BluetoothStateReader",
-            BluetoothStateReader::class.java.isAssignableFrom(BluetoothRepository::class.java)
+            BluetoothStateReader::class.java.isAssignableFrom(BluetoothRepository::class.java),
         )
     }
 
@@ -54,7 +53,7 @@ class IspRepositoryInterfacesTest {
     fun bluetoothRepository_extendsBluetoothOperationsWriter() {
         assertTrue(
             "BluetoothRepository should extend BluetoothOperationsWriter",
-            BluetoothOperationsWriter::class.java.isAssignableFrom(BluetoothRepository::class.java)
+            BluetoothOperationsWriter::class.java.isAssignableFrom(BluetoothRepository::class.java),
         )
     }
 
@@ -64,7 +63,7 @@ class IspRepositoryInterfacesTest {
     fun reportRepository_extendsReportReader() {
         assertTrue(
             "ReportRepository should extend ReportReader",
-            ReportReader::class.java.isAssignableFrom(ReportRepository::class.java)
+            ReportReader::class.java.isAssignableFrom(ReportRepository::class.java),
         )
     }
 
@@ -72,7 +71,7 @@ class IspRepositoryInterfacesTest {
     fun reportRepository_extendsReportWriter() {
         assertTrue(
             "ReportRepository should extend ReportWriter",
-            ReportWriter::class.java.isAssignableFrom(ReportRepository::class.java)
+            ReportWriter::class.java.isAssignableFrom(ReportRepository::class.java),
         )
     }
 
@@ -82,7 +81,7 @@ class IspRepositoryInterfacesTest {
     fun consentRepository_extendsConsentReader() {
         assertTrue(
             "ConsentRepository should extend ConsentReader",
-            ConsentReader::class.java.isAssignableFrom(ConsentRepository::class.java)
+            ConsentReader::class.java.isAssignableFrom(ConsentRepository::class.java),
         )
     }
 
@@ -90,7 +89,7 @@ class IspRepositoryInterfacesTest {
     fun consentRepository_extendsConsentWriter() {
         assertTrue(
             "ConsentRepository should extend ConsentWriter",
-            ConsentWriter::class.java.isAssignableFrom(ConsentRepository::class.java)
+            ConsentWriter::class.java.isAssignableFrom(ConsentRepository::class.java),
         )
     }
 
@@ -100,7 +99,7 @@ class IspRepositoryInterfacesTest {
     fun vulnerabilityRepository_extendsVulnerabilityReader() {
         assertTrue(
             "VulnerabilityRepository should extend VulnerabilityReader",
-            VulnerabilityReader::class.java.isAssignableFrom(VulnerabilityRepository::class.java)
+            VulnerabilityReader::class.java.isAssignableFrom(VulnerabilityRepository::class.java),
         )
     }
 
@@ -108,7 +107,7 @@ class IspRepositoryInterfacesTest {
     fun vulnerabilityRepository_extendsVulnerabilityWriter() {
         assertTrue(
             "VulnerabilityRepository should extend VulnerabilityWriter",
-            VulnerabilityWriter::class.java.isAssignableFrom(VulnerabilityRepository::class.java)
+            VulnerabilityWriter::class.java.isAssignableFrom(VulnerabilityRepository::class.java),
         )
     }
 
@@ -118,7 +117,7 @@ class IspRepositoryInterfacesTest {
     fun fuzzingRepository_extendsFuzzingReader() {
         assertTrue(
             "FuzzingRepository should extend FuzzingReader",
-            FuzzingReader::class.java.isAssignableFrom(FuzzingRepository::class.java)
+            FuzzingReader::class.java.isAssignableFrom(FuzzingRepository::class.java),
         )
     }
 
@@ -126,7 +125,7 @@ class IspRepositoryInterfacesTest {
     fun fuzzingRepository_extendsFuzzingWriter() {
         assertTrue(
             "FuzzingRepository should extend FuzzingWriter",
-            FuzzingWriter::class.java.isAssignableFrom(FuzzingRepository::class.java)
+            FuzzingWriter::class.java.isAssignableFrom(FuzzingRepository::class.java),
         )
     }
 
@@ -136,7 +135,7 @@ class IspRepositoryInterfacesTest {
     fun sdpEnumerationRepository_exists() {
         assertTrue(
             "SdpEnumerationRepository should be an interface",
-            SdpEnumerationRepository::class.java.isInterface
+            SdpEnumerationRepository::class.java.isInterface,
         )
     }
 
@@ -144,7 +143,7 @@ class IspRepositoryInterfacesTest {
     fun rfcommFuzzingRepository_exists() {
         assertTrue(
             "RfcommFuzzingRepository should be an interface",
-            RfcommFuzzingRepository::class.java.isInterface
+            RfcommFuzzingRepository::class.java.isInterface,
         )
     }
 
@@ -152,7 +151,7 @@ class IspRepositoryInterfacesTest {
     fun hfpSecurityRepository_exists() {
         assertTrue(
             "HfpSecurityRepository should be an interface",
-            HfpSecurityRepository::class.java.isInterface
+            HfpSecurityRepository::class.java.isInterface,
         )
     }
 
@@ -160,7 +159,7 @@ class IspRepositoryInterfacesTest {
     fun avrcpSecurityRepository_exists() {
         assertTrue(
             "AvrcpSecurityRepository should be an interface",
-            AvrcpSecurityRepository::class.java.isInterface
+            AvrcpSecurityRepository::class.java.isInterface,
         )
     }
 
@@ -168,7 +167,7 @@ class IspRepositoryInterfacesTest {
     fun pbapSecurityRepository_exists() {
         assertTrue(
             "PbapSecurityRepository should be an interface",
-            PbapSecurityRepository::class.java.isInterface
+            PbapSecurityRepository::class.java.isInterface,
         )
     }
 
@@ -176,7 +175,7 @@ class IspRepositoryInterfacesTest {
     fun mapSecurityRepository_exists() {
         assertTrue(
             "MapSecurityRepository should be an interface",
-            MapSecurityRepository::class.java.isInterface
+            MapSecurityRepository::class.java.isInterface,
         )
     }
 
@@ -184,7 +183,7 @@ class IspRepositoryInterfacesTest {
     fun sapSecurityRepository_exists() {
         assertTrue(
             "SapSecurityRepository should be an interface",
-            SapSecurityRepository::class.java.isInterface
+            SapSecurityRepository::class.java.isInterface,
         )
     }
 
@@ -192,7 +191,7 @@ class IspRepositoryInterfacesTest {
     fun l2capSecurityRepository_exists() {
         assertTrue(
             "L2capSecurityRepository should be an interface",
-            L2capSecurityRepository::class.java.isInterface
+            L2capSecurityRepository::class.java.isInterface,
         )
     }
 
@@ -200,7 +199,7 @@ class IspRepositoryInterfacesTest {
     fun snoopCaptureRepository_exists() {
         assertTrue(
             "SnoopCaptureRepository should be an interface",
-            SnoopCaptureRepository::class.java.isInterface
+            SnoopCaptureRepository::class.java.isInterface,
         )
     }
 }

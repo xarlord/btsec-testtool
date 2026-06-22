@@ -29,7 +29,7 @@ data class SecurityReport(
     val findings: List<ReportFinding> = emptyList(),
     val recommendations: List<Recommendation> = emptyList(),
     val appendix: ReportAppendix,
-    val status: ReportStatus = ReportStatus.DRAFT
+    val status: ReportStatus = ReportStatus.DRAFT,
 )
 
 /**
@@ -38,7 +38,7 @@ data class SecurityReport(
 @Serializable
 data class ReportPeriod(
     @Serializable(with = InstantAsEpochMillisSerializer::class) val start: Instant,
-    @Serializable(with = InstantAsEpochMillisSerializer::class) val end: Instant
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val end: Instant,
 )
 
 /**
@@ -50,7 +50,8 @@ data class ReportFinding(
     val severity: VulnerabilitySeverity,
     val count: Int = 0,
     val description: String = "",
-    val affectedDevices: List<String> = emptyList()  // Device addresses
+    // Device addresses
+    val affectedDevices: List<String> = emptyList(),
 )
 
 /**
@@ -63,7 +64,7 @@ data class Recommendation(
     val description: String = "",
     val affectedDevices: List<String> = emptyList(),
     val implementation: String = "",
-    val verification: String = ""
+    val verification: String = "",
 )
 
 /**
@@ -74,7 +75,7 @@ enum class RecommendationPriority {
     CRITICAL,
     HIGH,
     MEDIUM,
-    LOW
+    LOW,
 }
 
 /**
@@ -86,7 +87,7 @@ data class ReportAppendix(
     val testMethodology: String = "",
     val limitations: List<String> = emptyList(),
     val glossary: Map<String, String> = emptyMap(),
-    val references: List<String> = emptyList()
+    val references: List<String> = emptyList(),
 )
 
 /**
@@ -97,5 +98,5 @@ enum class ReportStatus {
     DRAFT,
     REVIEW,
     FINAL,
-    ARCHIVED
+    ARCHIVED,
 }

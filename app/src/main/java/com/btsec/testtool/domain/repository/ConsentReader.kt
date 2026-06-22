@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.Flow
  * 5. Tamper-evident
  */
 interface ConsentReader {
-
     /**
      * Check if consent exists for a specific action.
      *
@@ -37,7 +36,10 @@ interface ConsentReader {
      * @param action Action to check
      * @return true if consent has been granted
      */
-    suspend fun hasConsent(authId: String, action: TestAction): Boolean
+    suspend fun hasConsent(
+        authId: String,
+        action: TestAction,
+    ): Boolean
 
     /**
      * Get consent status for all actions.
@@ -54,7 +56,10 @@ interface ConsentReader {
      * @param action Action to check
      * @return Most recent consent record or null
      */
-    suspend fun getLatestConsent(authId: String, action: TestAction): ConsentRecord?
+    suspend fun getLatestConsent(
+        authId: String,
+        action: TestAction,
+    ): ConsentRecord?
 
     /**
      * Get all consent records for an authorization.
@@ -66,7 +71,7 @@ interface ConsentReader {
      */
     fun getConsentRecordsInRange(
         start: java.time.Instant,
-        end: java.time.Instant
+        end: java.time.Instant,
     ): Flow<List<ConsentRecord>>
 
     /**
@@ -95,7 +100,7 @@ interface ConsentReader {
      */
     fun getAuditLogInRange(
         start: java.time.Instant,
-        end: java.time.Instant
+        end: java.time.Instant,
     ): Flow<List<AuditLogEntry>>
 
     /**

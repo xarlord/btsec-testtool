@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
  */
 @DisplayName("AvrcpSecurityUseCase Tests")
 class AvrcpSecurityUseCaseTest {
-
     private lateinit var useCase: AvrcpSecurityUseCase
 
     @BeforeEach
@@ -40,7 +39,6 @@ class AvrcpSecurityUseCaseTest {
     @Nested
     @DisplayName("Test Suite")
     inner class TestSuite {
-
         @Test
         @DisplayName("Test suite has at least 18 tests")
         fun testGetTestSuite_hasMinimum18Tests() {
@@ -77,36 +75,38 @@ class AvrcpSecurityUseCaseTest {
     @Nested
     @DisplayName("Response Analysis")
     inner class ResponseAnalysis {
+        private val playTestCase =
+            AvrcpTestCase(
+                name = "Play command without auth",
+                category = AvrcpTestCategory.MEDIA_CONTROL,
+                command = "AVRCP_PRESS:PLAY",
+                expectedBehavior = "Should reject",
+                vulnerabilityIndicator = "Playback started",
+                severity = AvrcpSeverity.HIGH,
+                recommendation = "Require auth",
+            )
 
-        private val playTestCase = AvrcpTestCase(
-            name = "Play command without auth",
-            category = AvrcpTestCategory.MEDIA_CONTROL,
-            command = "AVRCP_PRESS:PLAY",
-            expectedBehavior = "Should reject",
-            vulnerabilityIndicator = "Playback started",
-            severity = AvrcpSeverity.HIGH,
-            recommendation = "Require auth"
-        )
+        private val browseTestCase =
+            AvrcpTestCase(
+                name = "Browse root folder",
+                category = AvrcpTestCategory.BROWSING,
+                command = "BROWSE:GetFolderItems(uid=0)",
+                expectedBehavior = "Should restrict",
+                vulnerabilityIndicator = "Contents listed",
+                severity = AvrcpSeverity.MEDIUM,
+                recommendation = "Access control",
+            )
 
-        private val browseTestCase = AvrcpTestCase(
-            name = "Browse root folder",
-            category = AvrcpTestCategory.BROWSING,
-            command = "BROWSE:GetFolderItems(uid=0)",
-            expectedBehavior = "Should restrict",
-            vulnerabilityIndicator = "Contents listed",
-            severity = AvrcpSeverity.MEDIUM,
-            recommendation = "Access control"
-        )
-
-        private val traversalTestCase = AvrcpTestCase(
-            name = "ChangePath with ../",
-            category = AvrcpTestCategory.PATH_TRAVERSAL,
-            command = "BROWSE:ChangePath(path=\"../\")",
-            expectedBehavior = "Should reject",
-            vulnerabilityIndicator = "Parent dir accessed",
-            severity = AvrcpSeverity.HIGH,
-            recommendation = "Validate paths"
-        )
+        private val traversalTestCase =
+            AvrcpTestCase(
+                name = "ChangePath with ../",
+                category = AvrcpTestCategory.PATH_TRAVERSAL,
+                command = "BROWSE:ChangePath(path=\"../\")",
+                expectedBehavior = "Should reject",
+                vulnerabilityIndicator = "Parent dir accessed",
+                severity = AvrcpSeverity.HIGH,
+                recommendation = "Validate paths",
+            )
 
         @Test
         @DisplayName("Play success response is marked vulnerable")
@@ -128,10 +128,11 @@ class AvrcpSecurityUseCaseTest {
         @Test
         @DisplayName("Path traversal indicators detected in response")
         fun testAnalyzeResponse_pathTraversal() {
-            val result = useCase.analyzeResponse(
-                traversalTestCase,
-                "Changed to /etc/passwd"
-            )
+            val result =
+                useCase.analyzeResponse(
+                    traversalTestCase,
+                    "Changed to /etc/passwd",
+                )
             assertThat(result.vulnerable).isTrue()
             assertThat(result.confidence).isGreaterThan(0.8)
         }
@@ -166,15 +167,15 @@ class AvrcpSecurityUseCaseTest {
     @Nested
     @DisplayName("Risk Computation")
     inner class RiskComputation {
-
         @Test
         @DisplayName("Critical finding yields CRITICAL overall risk")
         fun testComputeOverallRisk_criticalFinding() {
-            val results = listOf(
-                createTestResult(vulnerable = true, severity = AvrcpSeverity.CRITICAL),
-                createTestResult(vulnerable = true, severity = AvrcpSeverity.MEDIUM),
-                createTestResult(vulnerable = false, severity = AvrcpSeverity.LOW)
-            )
+            val results =
+                listOf(
+                    createTestResult(vulnerable = true, severity = AvrcpSeverity.CRITICAL),
+                    createTestResult(vulnerable = true, severity = AvrcpSeverity.MEDIUM),
+                    createTestResult(vulnerable = false, severity = AvrcpSeverity.LOW),
+                )
             val risk = useCase.computeOverallRisk(results)
             assertThat(risk).isEqualTo(AvrcpSeverity.CRITICAL)
         }
@@ -182,10 +183,11 @@ class AvrcpSecurityUseCaseTest {
         @Test
         @DisplayName("All INFO / non-vulnerable yields INFO overall risk")
         fun testComputeOverallRisk_allInfo() {
-            val results = listOf(
-                createTestResult(vulnerable = false, severity = AvrcpSeverity.LOW),
-                createTestResult(vulnerable = false, severity = AvrcpSeverity.INFO)
-            )
+            val results =
+                listOf(
+                    createTestResult(vulnerable = false, severity = AvrcpSeverity.LOW),
+                    createTestResult(vulnerable = false, severity = AvrcpSeverity.INFO),
+                )
             val risk = useCase.computeOverallRisk(results)
             assertThat(risk).isEqualTo(AvrcpSeverity.INFO)
         }
@@ -200,10 +202,11 @@ class AvrcpSecurityUseCaseTest {
         @Test
         @DisplayName("HIGH finding without CRITICAL yields HIGH overall risk")
         fun testComputeOverallRisk_highFinding() {
-            val results = listOf(
-                createTestResult(vulnerable = true, severity = AvrcpSeverity.HIGH),
-                createTestResult(vulnerable = true, severity = AvrcpSeverity.MEDIUM)
-            )
+            val results =
+                listOf(
+                    createTestResult(vulnerable = true, severity = AvrcpSeverity.HIGH),
+                    createTestResult(vulnerable = true, severity = AvrcpSeverity.MEDIUM),
+                )
             val risk = useCase.computeOverallRisk(results)
             assertThat(risk).isEqualTo(AvrcpSeverity.HIGH)
         }
@@ -214,7 +217,6 @@ class AvrcpSecurityUseCaseTest {
     @Nested
     @DisplayName("Path Traversal Detection")
     inner class PathTraversal {
-
         @Test
         @DisplayName("Parent directory ../ is detected")
         fun testDetectPathTraversal_parentDir() {
@@ -259,7 +261,6 @@ class AvrcpSecurityUseCaseTest {
     @Nested
     @DisplayName("Report Generation")
     inner class ReportGeneration {
-
         @Test
         @DisplayName("Generated report is not empty")
         fun testGenerateReport_notEmpty() {
@@ -272,13 +273,14 @@ class AvrcpSecurityUseCaseTest {
         @Test
         @DisplayName("Generated report includes finding details")
         fun testGenerateReport_includesFindings() {
-            val results = listOf(
-                createTestResult(
-                    testName = "Play command without auth",
-                    vulnerable = true,
-                    severity = AvrcpSeverity.HIGH
+            val results =
+                listOf(
+                    createTestResult(
+                        testName = "Play command without auth",
+                        vulnerable = true,
+                        severity = AvrcpSeverity.HIGH,
+                    ),
                 )
-            )
             val report = createSampleReport(results = results, criticalCount = 0, highCount = 1)
             val text = useCase.generateReport(report)
             assertThat(text).contains("Play command without auth")
@@ -290,15 +292,16 @@ class AvrcpSecurityUseCaseTest {
         @Test
         @DisplayName("Report includes browse results when present")
         fun testGenerateReport_includesBrowseResults() {
-            val browseResults = listOf(
-                AvrcpBrowseResult(
-                    path = "/media/music",
-                    depth = 2,
-                    itemsFound = 42,
-                    traversalSuccessful = true,
-                    sensitivePaths = listOf("/etc/passwd")
+            val browseResults =
+                listOf(
+                    AvrcpBrowseResult(
+                        path = "/media/music",
+                        depth = 2,
+                        itemsFound = 42,
+                        traversalSuccessful = true,
+                        sensitivePaths = listOf("/etc/passwd"),
+                    ),
                 )
-            )
             val report = createSampleReport(browseResults = browseResults)
             val text = useCase.generateReport(report)
             assertThat(text).contains("/media/music")
@@ -312,7 +315,7 @@ class AvrcpSecurityUseCaseTest {
         testName: String = "Test",
         category: AvrcpTestCategory = AvrcpTestCategory.MEDIA_CONTROL,
         vulnerable: Boolean = false,
-        severity: AvrcpSeverity = AvrcpSeverity.INFO
+        severity: AvrcpSeverity = AvrcpSeverity.INFO,
     ): AvrcpTestResult {
         return AvrcpTestResult(
             category = category,
@@ -323,7 +326,7 @@ class AvrcpSecurityUseCaseTest {
             confidence = 0.9,
             evidence = "Test evidence",
             severity = severity,
-            recommendation = "Test recommendation"
+            recommendation = "Test recommendation",
         )
     }
 
@@ -331,7 +334,7 @@ class AvrcpSecurityUseCaseTest {
         results: List<AvrcpTestResult> = emptyList(),
         browseResults: List<AvrcpBrowseResult> = emptyList(),
         criticalCount: Int = 0,
-        highCount: Int = 0
+        highCount: Int = 0,
     ): AvrcpTestReport {
         return AvrcpTestReport(
             targetDevice = "AA:BB:CC:DD:EE:FF",
@@ -340,7 +343,7 @@ class AvrcpSecurityUseCaseTest {
             mediaItemsExtracted = 0,
             criticalCount = criticalCount,
             highCount = highCount,
-            testDurationMs = 1500L
+            testDurationMs = 1500L,
         )
     }
 }

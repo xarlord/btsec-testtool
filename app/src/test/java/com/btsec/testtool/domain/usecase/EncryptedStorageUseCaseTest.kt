@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test
  */
 @DisplayName("EncryptedStorageUseCase Tests")
 class EncryptedStorageUseCaseTest {
-
     private lateinit var useCase: EncryptedStorageUseCase
 
     @BeforeEach
@@ -42,7 +41,6 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("deriveKey")
     inner class DeriveKeyTests {
-
         @Test
         @DisplayName("returns a 32-byte (256-bit) key")
         fun testDeriveKey_correctLength() {
@@ -75,7 +73,6 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("generateSalt")
     inner class GenerateSaltTests {
-
         @Test
         @DisplayName("returns a 32-byte salt")
         fun testGenerateSalt_correctLength() {
@@ -97,7 +94,6 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("validatePassphrase")
     inner class ValidatePassphraseTests {
-
         @Test
         @DisplayName("accepts a valid passphrase")
         fun testValidatePassphrase_validPassword() {
@@ -134,17 +130,17 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("computeStorageStats")
     inner class ComputeStorageStatsTests {
-
         @Test
         @DisplayName("returns correct counts and encryption level")
         fun testComputeStorageStats_correctCounts() {
-            val stats = useCase.computeStorageStats(
-                scanResults = 10,
-                vulnerabilityReports = 3,
-                fuzzingSessions = 2,
-                dbSize = 4096L,
-                encryptionLevel = StorageEncryptionLevel.STANDARD
-            )
+            val stats =
+                useCase.computeStorageStats(
+                    scanResults = 10,
+                    vulnerabilityReports = 3,
+                    fuzzingSessions = 2,
+                    dbSize = 4096L,
+                    encryptionLevel = StorageEncryptionLevel.STANDARD,
+                )
             assertThat(stats.totalScanResults).isEqualTo(10)
             assertThat(stats.totalVulnerabilityReports).isEqualTo(3)
             assertThat(stats.totalFuzzingSessions).isEqualTo(2)
@@ -159,16 +155,16 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("auditLog")
     inner class AuditLogTests {
-
         @Test
         @DisplayName("creates an entry with correct fields")
         fun testAuditLog_correctFields() {
-            val entry = useCase.auditLog(
-                action = StorageAction.WRITE,
-                dataType = "scan_result",
-                recordCount = 5,
-                success = true
-            )
+            val entry =
+                useCase.auditLog(
+                    action = StorageAction.WRITE,
+                    dataType = "scan_result",
+                    recordCount = 5,
+                    success = true,
+                )
             assertThat(entry.action).isEqualTo(StorageAction.WRITE)
             assertThat(entry.dataType).isEqualTo("scan_result")
             assertThat(entry.recordCount).isEqualTo(5)
@@ -190,7 +186,6 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("shouldAutoLock")
     inner class ShouldAutoLockTests {
-
         @Test
         @DisplayName("returns true when timeout has expired")
         fun testShouldAutoLock_expired() {
@@ -211,7 +206,6 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("getEncryptionRecommendation")
     inner class EncryptionRecommendationTests {
-
         @Test
         @DisplayName("HIGH sensitivity recommends MILITARY_GRADE")
         fun testGetEncryptionRecommendation_high() {
@@ -239,25 +233,26 @@ class EncryptedStorageUseCaseTest {
     @Nested
     @DisplayName("generateBackupMetadata")
     inner class BackupMetadataTests {
-
         @Test
         @DisplayName("produces valid JSON with expected fields")
         fun testGenerateBackupMetadata_validJson() {
-            val config = StorageConfig(
-                encryptionLevel = StorageEncryptionLevel.STANDARD,
-                keyDerivationIterations = 10000,
-                autoLockTimeoutMs = 300000L,
-                biometricUnlockEnabled = true,
-                databaseSizeBytes = 8192L,
-                lastBackupTime = 1700000000000L
-            )
-            val stats = useCase.computeStorageStats(
-                scanResults = 42,
-                vulnerabilityReports = 7,
-                fuzzingSessions = 3,
-                dbSize = 8192L,
-                encryptionLevel = StorageEncryptionLevel.STANDARD
-            )
+            val config =
+                StorageConfig(
+                    encryptionLevel = StorageEncryptionLevel.STANDARD,
+                    keyDerivationIterations = 10000,
+                    autoLockTimeoutMs = 300000L,
+                    biometricUnlockEnabled = true,
+                    databaseSizeBytes = 8192L,
+                    lastBackupTime = 1700000000000L,
+                )
+            val stats =
+                useCase.computeStorageStats(
+                    scanResults = 42,
+                    vulnerabilityReports = 7,
+                    fuzzingSessions = 3,
+                    dbSize = 8192L,
+                    encryptionLevel = StorageEncryptionLevel.STANDARD,
+                )
             val json = useCase.generateBackupMetadata(config, stats)
 
             // Should not throw

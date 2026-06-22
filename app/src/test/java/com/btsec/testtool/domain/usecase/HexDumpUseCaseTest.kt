@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class HexDumpUseCaseTest {
-
     private lateinit var useCase: HexDumpUseCase
 
     @BeforeEach
@@ -31,7 +30,6 @@ class HexDumpUseCaseTest {
     @Nested
     @DisplayName("generateHexDump")
     inner class GenerateHexDump {
-
         @Test
         @DisplayName("should handle empty byte array")
         fun emptyByteArray() {
@@ -142,11 +140,12 @@ class HexDumpUseCaseTest {
         fun metadata() {
             val data = "test".toByteArray()
 
-            val result = useCase.generateHexDump(
-                data = data,
-                characteristicUuid = "00002a00-0000-1000-8000-00805f9b34fb",
-                serviceUuid = "00001800-0000-1000-8000-00805f9b34fb"
-            )
+            val result =
+                useCase.generateHexDump(
+                    data = data,
+                    characteristicUuid = "00002a00-0000-1000-8000-00805f9b34fb",
+                    serviceUuid = "00001800-0000-1000-8000-00805f9b34fb",
+                )
 
             assertThat(result.characteristicUuid).isEqualTo("00002a00-0000-1000-8000-00805f9b34fb")
             assertThat(result.serviceUuid).isEqualTo("00001800-0000-1000-8000-00805f9b34fb")
@@ -181,7 +180,6 @@ class HexDumpUseCaseTest {
     @Nested
     @DisplayName("searchInDump")
     inner class SearchInDump {
-
         @Test
         @DisplayName("should return all entries for blank query")
         fun blankQuery() {
@@ -243,16 +241,16 @@ class HexDumpUseCaseTest {
     @Nested
     @DisplayName("formatFullDump")
     inner class FormatFullDump {
-
         @Test
         @DisplayName("should include metadata header")
         fun metadataHeader() {
             val data = "AB".toByteArray()
-            val result = useCase.generateHexDump(
-                data = data,
-                characteristicUuid = "test-uuid",
-                serviceUuid = "svc-uuid"
-            )
+            val result =
+                useCase.generateHexDump(
+                    data = data,
+                    characteristicUuid = "test-uuid",
+                    serviceUuid = "svc-uuid",
+                )
 
             val output = useCase.formatFullDump(result)
 
@@ -278,7 +276,6 @@ class HexDumpUseCaseTest {
     @Nested
     @DisplayName("formatAsRawHex")
     inner class FormatAsRawHex {
-
         @Test
         @DisplayName("should format bytes as continuous hex string")
         fun rawHex() {
@@ -301,7 +298,6 @@ class HexDumpUseCaseTest {
     @Nested
     @DisplayName("formatAsBinary")
     inner class FormatAsBinary {
-
         @Test
         @DisplayName("should format bytes as binary strings")
         fun binary() {
@@ -316,7 +312,6 @@ class HexDumpUseCaseTest {
     @Nested
     @DisplayName("formatAsText")
     inner class FormatAsText {
-
         @Test
         @DisplayName("should decode UTF-8 text")
         fun text() {

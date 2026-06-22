@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("AnalyticsUseCase")
 class AnalyticsUseCaseTest {
-
     private lateinit var useCase: AnalyticsUseCase
 
     @BeforeEach
@@ -33,21 +32,21 @@ class AnalyticsUseCaseTest {
         deviceCount: Int = 1,
         vulnerabilitiesFound: Int = 0,
         riskScore: Double = 0.0,
-        severity: RiskSeverity = RiskSeverity.INFO
-    ): ScanSession = ScanSession(
-        id = id,
-        startTime = startTime,
-        endTime = endTime,
-        deviceCount = deviceCount,
-        vulnerabilitiesFound = vulnerabilitiesFound,
-        riskScore = riskScore,
-        severity = severity
-    )
+        severity: RiskSeverity = RiskSeverity.INFO,
+    ): ScanSession =
+        ScanSession(
+            id = id,
+            startTime = startTime,
+            endTime = endTime,
+            deviceCount = deviceCount,
+            vulnerabilitiesFound = vulnerabilitiesFound,
+            riskScore = riskScore,
+            severity = severity,
+        )
 
     @Nested
     @DisplayName("computeSummary")
     inner class ComputeSummary {
-
         @Test
         @DisplayName("returns empty summary for empty sessions list")
         fun testComputeSummary_emptySessions() {
@@ -66,12 +65,13 @@ class AnalyticsUseCaseTest {
         @Test
         @DisplayName("returns correct summary for a single session")
         fun testComputeSummary_singleSession() {
-            val session = createSession(
-                deviceCount = 3,
-                vulnerabilitiesFound = 5,
-                riskScore = 7.5,
-                severity = RiskSeverity.HIGH
-            )
+            val session =
+                createSession(
+                    deviceCount = 3,
+                    vulnerabilitiesFound = 5,
+                    riskScore = 7.5,
+                    severity = RiskSeverity.HIGH,
+                )
 
             val result = useCase.computeSummary(listOf(session))
 
@@ -84,32 +84,33 @@ class AnalyticsUseCaseTest {
         @Test
         @DisplayName("returns correct summary for multiple sessions")
         fun testComputeSummary_multipleSessions() {
-            val sessions = listOf(
-                createSession(
-                    id = "s1",
-                    deviceCount = 2,
-                    vulnerabilitiesFound = 3,
-                    riskScore = 5.0,
-                    severity = RiskSeverity.MEDIUM,
-                    startTime = 1000L
-                ),
-                createSession(
-                    id = "s2",
-                    deviceCount = 4,
-                    vulnerabilitiesFound = 7,
-                    riskScore = 8.5,
-                    severity = RiskSeverity.HIGH,
-                    startTime = 2000L
-                ),
-                createSession(
-                    id = "s3",
-                    deviceCount = 1,
-                    vulnerabilitiesFound = 1,
-                    riskScore = 2.0,
-                    severity = RiskSeverity.LOW,
-                    startTime = 3000L
+            val sessions =
+                listOf(
+                    createSession(
+                        id = "s1",
+                        deviceCount = 2,
+                        vulnerabilitiesFound = 3,
+                        riskScore = 5.0,
+                        severity = RiskSeverity.MEDIUM,
+                        startTime = 1000L,
+                    ),
+                    createSession(
+                        id = "s2",
+                        deviceCount = 4,
+                        vulnerabilitiesFound = 7,
+                        riskScore = 8.5,
+                        severity = RiskSeverity.HIGH,
+                        startTime = 2000L,
+                    ),
+                    createSession(
+                        id = "s3",
+                        deviceCount = 1,
+                        vulnerabilitiesFound = 1,
+                        riskScore = 2.0,
+                        severity = RiskSeverity.LOW,
+                        startTime = 3000L,
+                    ),
                 )
-            )
 
             val result = useCase.computeSummary(sessions)
 
@@ -123,15 +124,15 @@ class AnalyticsUseCaseTest {
     @Nested
     @DisplayName("computeTrend")
     inner class ComputeTrend {
-
         @Test
         @DisplayName("returns trend points sorted by time ascending")
         fun testComputeTrend_sortedByTime() {
-            val sessions = listOf(
-                createSession(id = "c", startTime = 3000L, riskScore = 3.0),
-                createSession(id = "a", startTime = 1000L, riskScore = 1.0),
-                createSession(id = "b", startTime = 2000L, riskScore = 2.0)
-            )
+            val sessions =
+                listOf(
+                    createSession(id = "c", startTime = 3000L, riskScore = 3.0),
+                    createSession(id = "a", startTime = 1000L, riskScore = 1.0),
+                    createSession(id = "b", startTime = 2000L, riskScore = 2.0),
+                )
 
             val trend = useCase.computeTrend(sessions)
 
@@ -154,10 +155,11 @@ class AnalyticsUseCaseTest {
         @Test
         @DisplayName("maps vulnerability counts correctly")
         fun testComputeTrend_vulnerabilityCounts() {
-            val sessions = listOf(
-                createSession(id = "a", startTime = 1000L, vulnerabilitiesFound = 5),
-                createSession(id = "b", startTime = 2000L, vulnerabilitiesFound = 3)
-            )
+            val sessions =
+                listOf(
+                    createSession(id = "a", startTime = 1000L, vulnerabilitiesFound = 5),
+                    createSession(id = "b", startTime = 2000L, vulnerabilitiesFound = 3),
+                )
 
             val trend = useCase.computeTrend(sessions)
 
@@ -169,15 +171,15 @@ class AnalyticsUseCaseTest {
     @Nested
     @DisplayName("getTopVulnerableDevices")
     inner class GetTopVulnerableDevices {
-
         @Test
         @DisplayName("returns devices sorted by risk score descending")
         fun testGetTopVulnerableDevices_sortedByRisk() {
-            val sessions = listOf(
-                createSession(id = "low", riskScore = 2.0, severity = RiskSeverity.LOW),
-                createSession(id = "critical", riskScore = 9.5, severity = RiskSeverity.CRITICAL),
-                createSession(id = "medium", riskScore = 5.0, severity = RiskSeverity.MEDIUM)
-            )
+            val sessions =
+                listOf(
+                    createSession(id = "low", riskScore = 2.0, severity = RiskSeverity.LOW),
+                    createSession(id = "critical", riskScore = 9.5, severity = RiskSeverity.CRITICAL),
+                    createSession(id = "medium", riskScore = 5.0, severity = RiskSeverity.MEDIUM),
+                )
 
             val devices = useCase.getTopVulnerableDevices(sessions)
 
@@ -190,9 +192,10 @@ class AnalyticsUseCaseTest {
         @Test
         @DisplayName("respects the limit parameter")
         fun testGetTopVulnerableDevices_respectsLimit() {
-            val sessions = (1..5).map { i ->
-                createSession(id = "s$i", riskScore = i.toDouble())
-            }
+            val sessions =
+                (1..5).map { i ->
+                    createSession(id = "s$i", riskScore = i.toDouble())
+                }
 
             val devices = useCase.getTopVulnerableDevices(sessions, limit = 3)
 
@@ -214,19 +217,19 @@ class AnalyticsUseCaseTest {
     @Nested
     @DisplayName("getSeverityDistribution")
     inner class GetSeverityDistribution {
-
         @Test
         @DisplayName("counts severities correctly")
         fun testGetSeverityDistribution_correctCounts() {
-            val sessions = listOf(
-                createSession(severity = RiskSeverity.CRITICAL),
-                createSession(severity = RiskSeverity.HIGH),
-                createSession(severity = RiskSeverity.HIGH),
-                createSession(severity = RiskSeverity.MEDIUM),
-                createSession(severity = RiskSeverity.MEDIUM),
-                createSession(severity = RiskSeverity.MEDIUM),
-                createSession(severity = RiskSeverity.LOW)
-            )
+            val sessions =
+                listOf(
+                    createSession(severity = RiskSeverity.CRITICAL),
+                    createSession(severity = RiskSeverity.HIGH),
+                    createSession(severity = RiskSeverity.HIGH),
+                    createSession(severity = RiskSeverity.MEDIUM),
+                    createSession(severity = RiskSeverity.MEDIUM),
+                    createSession(severity = RiskSeverity.MEDIUM),
+                    createSession(severity = RiskSeverity.LOW),
+                )
 
             val distribution = useCase.getSeverityDistribution(sessions)
 
@@ -246,10 +249,11 @@ class AnalyticsUseCaseTest {
         @Test
         @DisplayName("does not include severities with zero count")
         fun testGetSeverityDistribution_noZeroCounts() {
-            val sessions = listOf(
-                createSession(severity = RiskSeverity.HIGH),
-                createSession(severity = RiskSeverity.HIGH)
-            )
+            val sessions =
+                listOf(
+                    createSession(severity = RiskSeverity.HIGH),
+                    createSession(severity = RiskSeverity.HIGH),
+                )
 
             val distribution = useCase.getSeverityDistribution(sessions)
 
@@ -262,7 +266,6 @@ class AnalyticsUseCaseTest {
     @Nested
     @DisplayName("getCategoryBreakdown")
     inner class GetCategoryBreakdown {
-
         @Test
         @DisplayName("counts categories correctly")
         fun testGetCategoryBreakdown_correctCounts() {
@@ -286,14 +289,14 @@ class AnalyticsUseCaseTest {
     @Nested
     @DisplayName("averageRiskScore")
     inner class AverageRiskScore {
-
         @Test
         @DisplayName("computes correct average across sessions")
         fun testAverageRiskScore() {
-            val sessions = listOf(
-                createSession(riskScore = 3.0),
-                createSession(riskScore = 7.0)
-            )
+            val sessions =
+                listOf(
+                    createSession(riskScore = 3.0),
+                    createSession(riskScore = 7.0),
+                )
 
             val result = useCase.computeSummary(sessions)
 
@@ -314,15 +317,15 @@ class AnalyticsUseCaseTest {
     @Nested
     @DisplayName("totalVulnerabilities")
     inner class TotalVulnerabilities {
-
         @Test
         @DisplayName("sums vulnerabilities across all sessions")
         fun testTotalVulnerabilities() {
-            val sessions = listOf(
-                createSession(vulnerabilitiesFound = 5),
-                createSession(vulnerabilitiesFound = 3),
-                createSession(vulnerabilitiesFound = 10)
-            )
+            val sessions =
+                listOf(
+                    createSession(vulnerabilitiesFound = 5),
+                    createSession(vulnerabilitiesFound = 3),
+                    createSession(vulnerabilitiesFound = 10),
+                )
 
             val result = useCase.computeSummary(sessions)
 

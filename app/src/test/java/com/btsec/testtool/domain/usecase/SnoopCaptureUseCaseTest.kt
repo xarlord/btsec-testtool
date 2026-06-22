@@ -25,7 +25,6 @@ import java.nio.ByteOrder
  * All test scenarios are designed for AUTHORIZED security testing validation.
  */
 class SnoopCaptureUseCaseTest {
-
     private lateinit var useCase: SnoopCaptureUseCase
 
     @BeforeEach
@@ -38,18 +37,19 @@ class SnoopCaptureUseCaseTest {
     private fun buildBtsnoopFile(records: List<ByteArray>): ByteArray {
         val header = ByteBuffer.allocate(16).order(ByteOrder.BIG_ENDIAN)
         header.put("btsnoop\u0000".toByteArray())
-        header.putInt(1)   // version
+        header.putInt(1) // version
         header.putInt(1001) // H4 datalink type
 
-        val recordBytes = records.flatMap { record ->
-            val recHeader = ByteBuffer.allocate(24).order(ByteOrder.BIG_ENDIAN)
-            recHeader.putInt(record.size)  // originalLength
-            recHeader.putInt(record.size)  // includedLength
-            recHeader.putInt(0)            // flags (sent)
-            recHeader.putInt(0)            // drops
-            recHeader.putLong(0L)          // timestamp
-            recHeader.array().toList() + record.toList()
-        }
+        val recordBytes =
+            records.flatMap { record ->
+                val recHeader = ByteBuffer.allocate(24).order(ByteOrder.BIG_ENDIAN)
+                recHeader.putInt(record.size) // originalLength
+                recHeader.putInt(record.size) // includedLength
+                recHeader.putInt(0) // flags (sent)
+                recHeader.putInt(0) // drops
+                recHeader.putLong(0L) // timestamp
+                recHeader.array().toList() + record.toList()
+            }
         return header.array().toList().plus(recordBytes).toByteArray()
     }
 
@@ -59,28 +59,32 @@ class SnoopCaptureUseCaseTest {
         header.putInt(1)
         header.putInt(1001)
 
-        val recordBytes = records.flatMap { (record, flags, ts) ->
-            val recHeader = ByteBuffer.allocate(24).order(ByteOrder.BIG_ENDIAN)
-            recHeader.putInt(record.size)
-            recHeader.putInt(record.size)
-            recHeader.putInt(flags)
-            recHeader.putInt(0)
-            recHeader.putLong(ts)
-            recHeader.array().toList() + record.toList()
-        }
+        val recordBytes =
+            records.flatMap { (record, flags, ts) ->
+                val recHeader = ByteBuffer.allocate(24).order(ByteOrder.BIG_ENDIAN)
+                recHeader.putInt(record.size)
+                recHeader.putInt(record.size)
+                recHeader.putInt(flags)
+                recHeader.putInt(0)
+                recHeader.putLong(ts)
+                recHeader.array().toList() + record.toList()
+            }
         return header.array().toList().plus(recordBytes).toByteArray()
     }
 
-    private fun aclDataWithL2cap(cid: Int, l2capPayload: ByteArray): ByteArray {
+    private fun aclDataWithL2cap(
+        cid: Int,
+        l2capPayload: ByteArray,
+    ): ByteArray {
         // H4 type(1) + ACL header(4) + L2CAP length(2) + CID(2) + payload
         val l2capLen = l2capPayload.size
         val totalLen = 1 + 4 + 2 + 2 + l2capLen
         val buf = ByteBuffer.allocate(totalLen).order(ByteOrder.LITTLE_ENDIAN)
-        buf.put(0x02.toByte())          // H4: ACL_DATA
-        buf.putShort(0x0040)            // ACL handle
+        buf.put(0x02.toByte()) // H4: ACL_DATA
+        buf.putShort(0x0040) // ACL handle
         buf.putShort((4 + l2capLen).toShort()) // ACL length (L2CAP header + payload)
-        buf.putShort(l2capLen.toShort())  // L2CAP length
-        buf.putShort(cid.toShort())       // L2CAP CID
+        buf.putShort(l2capLen.toShort()) // L2CAP length
+        buf.putShort(cid.toShort()) // L2CAP CID
         buf.put(l2capPayload)
         return buf.array()
     }
@@ -90,7 +94,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("parseBtsnoopHeader")
     inner class ParseBtsnoopHeader {
-
         @Test
         @DisplayName("parses valid magic, version, and datalink type")
         fun testParseBtsnoopHeader_validMagic() {
@@ -115,7 +118,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("parseBtsnoopRecord")
     inner class ParseBtsnoopRecord {
-
         @Test
         @DisplayName("parses a single ACL data packet")
         fun testParseBtsnoopRecord_singleAclPacket() {
@@ -145,7 +147,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("parseAllRecords")
     inner class ParseAllRecords {
-
         @Test
         @DisplayName("returns empty list for header-only file")
         fun testParseAllRecords_emptyFile() {
@@ -157,7 +158,7 @@ class SnoopCaptureUseCaseTest {
         @Test
         @DisplayName("parses multiple records sequentially")
         fun testParseAllRecords_multipleRecords() {
-            val rec1 = byteArrayOf(0x01, 0x03, 0x0C, 0x00)  // HCI Command
+            val rec1 = byteArrayOf(0x01, 0x03, 0x0C, 0x00) // HCI Command
             val rec2 = byteArrayOf(0x04, 0x0E, 0x04, 0x01, 0x03, 0x0C, 0x00) // HCI Event
             val rec3 = byteArrayOf(0x02, 0x40, 0x00, 0x02, 0x00, 0x02, 0x00, 0x04, 0x00) // ACL
             val file = buildBtsnoopFile(listOf(rec1, rec2, rec3))
@@ -174,7 +175,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("decodeAclPacket")
     inner class DecodeAclPacket {
-
         @Test
         @DisplayName("decodes ATT protocol (CID 0x0004)")
         fun testDecodeAclPacket_attProtocol() {
@@ -225,7 +225,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("decodePacket")
     inner class DecodePacket {
-
         @Test
         @DisplayName("full decode of an ATT packet produces correct protocolHint and hexDump")
         fun testDecodePacket_fullDecode() {
@@ -257,7 +256,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("computeSessionStats")
     inner class ComputeSessionStats {
-
         @Test
         @DisplayName("counts packets by type and direction correctly")
         fun testComputeSessionStats_correctCounts() {
@@ -265,11 +263,15 @@ class SnoopCaptureUseCaseTest {
             val rec2 = byteArrayOf(0x04, 0x0E, 0x04, 0x01, 0x03, 0x0C, 0x00) // Event (recv)
             val rec3 = byteArrayOf(0x02, 0x40, 0x00, 0x04, 0x00, 0x02, 0x00, 0x04, 0x00, 0xAA.toByte(), 0xBB.toByte()) // ACL (sent)
 
-            val file = buildBtsnoopFileWithFlags(listOf(
-                Triple(rec1, 0, 1000L),
-                Triple(rec2, 1, 2000L),  // received
-                Triple(rec3, 0, 3000L)
-            ))
+            val file =
+                buildBtsnoopFileWithFlags(
+                    listOf(
+                        Triple(rec1, 0, 1000L),
+                        // received
+                        Triple(rec2, 1, 2000L),
+                        Triple(rec3, 0, 3000L),
+                    ),
+                )
             val records = useCase.parseAllRecords(file)
             val stats = useCase.computeSessionStats(records)
 
@@ -288,7 +290,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("exportToPcap")
     inner class ExportToPcap {
-
         @Test
         @DisplayName("produces valid PCAP global header")
         fun testExportToPcap_validHeader() {
@@ -302,9 +303,9 @@ class SnoopCaptureUseCaseTest {
             assertThat(buf.getInt()).isEqualTo(0xA1B2C3D4.toInt()) // PCAP magic
             buf.getShort() // version_major
             buf.getShort() // version_minor
-            buf.getInt()   // thiszone
-            buf.getInt()   // sigfigs
-            buf.getInt()   // snaplen
+            buf.getInt() // thiszone
+            buf.getInt() // sigfigs
+            buf.getInt() // snaplen
             assertThat(buf.getInt()).isEqualTo(201) // DLT_BLUETOOTH_HCI_H4
         }
 
@@ -329,7 +330,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("identifyProtocol")
     inner class IdentifyProtocol {
-
         @Test
         @DisplayName("maps known CIDs to protocol names")
         fun testIdentifyProtocol_knownChannels() {
@@ -347,7 +347,6 @@ class SnoopCaptureUseCaseTest {
     @Nested
     @DisplayName("formatTimestamp")
     inner class FormatTimestamp {
-
         @Test
         @DisplayName("converts btsnoop epoch to ISO-8601")
         fun testFormatTimestamp() {

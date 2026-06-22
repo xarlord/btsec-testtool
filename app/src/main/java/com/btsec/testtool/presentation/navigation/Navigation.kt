@@ -15,11 +15,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.btsec.testtool.presentation.feature.dashboard.DashboardScreen
+import com.btsec.testtool.presentation.feature.diff.ScanDiffScreen
 import com.btsec.testtool.presentation.feature.fuzzer.FuzzerScreen
 import com.btsec.testtool.presentation.feature.hexdump.HexDumpScreen
 import com.btsec.testtool.presentation.feature.keys.KeyExtractionScreen
 import com.btsec.testtool.presentation.feature.reports.ReportsScreen
-import com.btsec.testtool.presentation.feature.diff.ScanDiffScreen
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
 import com.btsec.testtool.presentation.feature.settings.SettingsScreen
 import com.btsec.testtool.presentation.feature.vulns.VulnScannerScreen
@@ -49,12 +49,12 @@ object Routes {
 fun BTSecNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Routes.DASHBOARD
+    startDestination: String = Routes.DASHBOARD,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
     ) {
         // Dashboard screen - Entry point (main hub)
         composable(route = Routes.DASHBOARD) {
@@ -71,55 +71,55 @@ fun BTSecNavGraph(
         // Scanner screen
         composable(route = Routes.SCANNER) {
             ScannerScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
         // Fuzzer screen
         composable(route = Routes.FUZZER) {
             FuzzerScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
         // Key Extraction screen
         composable(route = Routes.KEYS) {
             KeyExtractionScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
         // Vulnerability Scanner screen
         composable(route = Routes.VULNS) {
             VulnScannerScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
         // Reports screen
         composable(route = Routes.REPORTS) {
             ReportsScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
         // Settings screen
         composable(route = Routes.SETTINGS) {
             SettingsScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
         // Scan Diff screen
         composable(route = Routes.SCAN_DIFF) {
             ScanDiffScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 
         // Hex Dump Viewer screen
         composable(
-            route = "${Routes.HEXDUMP}/{characteristicUuid}/{serviceUuid}"
+            route = "${Routes.HEXDUMP}/{characteristicUuid}/{serviceUuid}",
         ) { backStackEntry ->
             val characteristicUuid = backStackEntry.arguments?.getString("characteristicUuid") ?: return@composable
             val serviceUuid = backStackEntry.arguments?.getString("serviceUuid") ?: return@composable
@@ -127,8 +127,9 @@ fun BTSecNavGraph(
             HexDumpScreen(
                 characteristicUuid = characteristicUuid,
                 serviceUuid = serviceUuid,
-                characteristicData = byteArrayOf(), // Data would be passed via SavedStateHandle or shared ViewModel in production
-                onBack = { navController.popBackStack() }
+                // Data would be passed via SavedStateHandle or shared ViewModel in production
+                characteristicData = byteArrayOf(),
+                onBack = { navController.popBackStack() },
             )
         }
     }

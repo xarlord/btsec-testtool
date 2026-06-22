@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.Flow
  * analytics components to depend on a narrow, query-only contract.
  */
 interface BluetoothStateReader {
-
     /**
      * Check if Bluetooth is enabled.
      */

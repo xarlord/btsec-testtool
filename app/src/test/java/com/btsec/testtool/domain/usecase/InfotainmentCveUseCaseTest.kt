@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class InfotainmentCveUseCaseTest {
-
     private lateinit var useCase: InfotainmentCveUseCase
 
     @BeforeEach
@@ -164,25 +163,27 @@ class InfotainmentCveUseCaseTest {
     @Test
     fun testGenerateReport_includesCveCounts() {
         val cve = useCase.getCveDatabase().first()
-        val testResult = CveTestResult(
-            cve = cve,
-            tested = true,
-            vulnerable = true,
-            confidence = 0.9,
-            evidence = "exploitable",
-            testDurationMs = 100L
-        )
-        val report = InfotainmentTestReport(
-            targetDevice = "BMW 330i",
-            detectedUnit = InfotainmentUnit.BMW_HU_NBT,
-            results = listOf(testResult),
-            vulnerabilitiesFound = 1,
-            criticalCount = 0,
-            highCount = 1,
-            mediumCount = 0,
-            testedCveCount = 1,
-            testDurationMs = 500L
-        )
+        val testResult =
+            CveTestResult(
+                cve = cve,
+                tested = true,
+                vulnerable = true,
+                confidence = 0.9,
+                evidence = "exploitable",
+                testDurationMs = 100L,
+            )
+        val report =
+            InfotainmentTestReport(
+                targetDevice = "BMW 330i",
+                detectedUnit = InfotainmentUnit.BMW_HU_NBT,
+                results = listOf(testResult),
+                vulnerabilitiesFound = 1,
+                criticalCount = 0,
+                highCount = 1,
+                mediumCount = 0,
+                testedCveCount = 1,
+                testDurationMs = 500L,
+            )
         val text = useCase.generateReport(report)
         assertThat(text).contains("Vulnerabilities Found: 1")
         assertThat(text).contains("CVEs Tested: 1")
@@ -192,25 +193,27 @@ class InfotainmentCveUseCaseTest {
     @Test
     fun testGenerateReport_includesEvidence() {
         val cve = useCase.getCveDatabase().first()
-        val testResult = CveTestResult(
-            cve = cve,
-            tested = true,
-            vulnerable = true,
-            confidence = 0.9,
-            evidence = "RFCOMM connected without auth",
-            testDurationMs = 100L
-        )
-        val report = InfotainmentTestReport(
-            targetDevice = "BMW 330i",
-            detectedUnit = InfotainmentUnit.BMW_HU_NBT,
-            results = listOf(testResult),
-            vulnerabilitiesFound = 1,
-            criticalCount = 0,
-            highCount = 1,
-            mediumCount = 0,
-            testedCveCount = 1,
-            testDurationMs = 500L
-        )
+        val testResult =
+            CveTestResult(
+                cve = cve,
+                tested = true,
+                vulnerable = true,
+                confidence = 0.9,
+                evidence = "RFCOMM connected without auth",
+                testDurationMs = 100L,
+            )
+        val report =
+            InfotainmentTestReport(
+                targetDevice = "BMW 330i",
+                detectedUnit = InfotainmentUnit.BMW_HU_NBT,
+                results = listOf(testResult),
+                vulnerabilitiesFound = 1,
+                criticalCount = 0,
+                highCount = 1,
+                mediumCount = 0,
+                testedCveCount = 1,
+                testDurationMs = 500L,
+            )
         val text = useCase.generateReport(report)
         assertThat(text).contains("RFCOMM connected without auth")
         assertThat(text).contains("CVE-2018-9313")
@@ -219,17 +222,18 @@ class InfotainmentCveUseCaseTest {
 
     @Test
     fun testGenerateReport_unknownDevice() {
-        val report = InfotainmentTestReport(
-            targetDevice = "Unknown Device",
-            detectedUnit = null,
-            results = emptyList(),
-            vulnerabilitiesFound = 0,
-            criticalCount = 0,
-            highCount = 0,
-            mediumCount = 0,
-            testedCveCount = 0,
-            testDurationMs = 0L
-        )
+        val report =
+            InfotainmentTestReport(
+                targetDevice = "Unknown Device",
+                detectedUnit = null,
+                results = emptyList(),
+                vulnerabilitiesFound = 0,
+                criticalCount = 0,
+                highCount = 0,
+                mediumCount = 0,
+                testedCveCount = 0,
+                testDurationMs = 0L,
+            )
         val text = useCase.generateReport(report)
         assertThat(text).contains("Unknown Device")
         assertThat(text).contains("Unknown")

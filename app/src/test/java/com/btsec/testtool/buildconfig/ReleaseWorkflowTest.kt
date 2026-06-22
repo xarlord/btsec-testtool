@@ -18,12 +18,12 @@ import java.io.File
  * Related to: Issue #302 (APK rename fails — wrong output path with product flavors)
  */
 class ReleaseWorkflowTest {
-
     private val workflowFile: File by lazy {
-        val candidates = listOf(
-            File(".github/workflows/semantic-release.yml"),
-            File("../.github/workflows/semantic-release.yml"),
-        )
+        val candidates =
+            listOf(
+                File(".github/workflows/semantic-release.yml"),
+                File("../.github/workflows/semantic-release.yml"),
+            )
         candidates.first { it.exists() }
     }
 

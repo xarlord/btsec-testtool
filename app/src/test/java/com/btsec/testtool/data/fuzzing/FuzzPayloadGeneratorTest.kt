@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test
  * match expected characteristics.
  */
 class FuzzPayloadGeneratorTest {
-
     private lateinit var generator: FuzzPayloadGenerator
 
     @BeforeEach

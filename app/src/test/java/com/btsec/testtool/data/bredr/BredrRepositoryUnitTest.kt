@@ -9,7 +9,6 @@
 package com.btsec.testtool.data.bredr
 
 import com.btsec.testtool.domain.model.*
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -25,7 +24,6 @@ import org.junit.Test
  * Uses reflection to access private state for verification.
  */
 class BredrRepositoryUnitTest {
-
     private lateinit var sdpRepo: SdpEnumerationRepositoryImpl
     private lateinit var rfcommRepo: RfcommFuzzingRepositoryImpl
     private lateinit var hfpRepo: HfpSecurityRepositoryImpl
@@ -46,30 +44,33 @@ class BredrRepositoryUnitTest {
     // ========== SDP Enumeration ==========
 
     @Test
-    fun sdpEnumeration_saveAndRetrieveScanResult() = runTest {
-        // Given a scan result
-        val result = SdpScanResult(
-            deviceAddress = "AA:BB:CC:DD:EE:FF",
-            deviceName = "TestDevice",
-            services = listOf(
-                SdpService(
-                    uuid = "00001101-0000-1000-8000-00805F9B34FB",
-                    profile = BtProfile.SPP,
-                    name = "Serial Port",
-                    protocolDescriptors = emptyList()
+    fun sdpEnumeration_saveAndRetrieveScanResult() =
+        runTest {
+            // Given a scan result
+            val result =
+                SdpScanResult(
+                    deviceAddress = "AA:BB:CC:DD:EE:FF",
+                    deviceName = "TestDevice",
+                    services =
+                        listOf(
+                            SdpService(
+                                uuid = "00001101-0000-1000-8000-00805F9B34FB",
+                                profile = BtProfile.SPP,
+                                name = "Serial Port",
+                                protocolDescriptors = emptyList(),
+                            ),
+                        ),
+                    hiddenServices = emptyList(),
+                    securityIssues = emptyList(),
+                    scanDurationMs = 500L,
                 )
-            ),
-            hiddenServices = emptyList(),
-            securityIssues = emptyList(),
-            scanDurationMs = 500L
-        )
 
-        // Verify model structure
-        assertEquals("AA:BB:CC:DD:EE:FF", result.deviceAddress)
-        assertEquals("TestDevice", result.deviceName)
-        assertEquals(1, result.services.size)
-        assertEquals(BtProfile.SPP, result.services[0].profile)
-    }
+            // Verify model structure
+            assertEquals("AA:BB:CC:DD:EE:FF", result.deviceAddress)
+            assertEquals("TestDevice", result.deviceName)
+            assertEquals(1, result.services.size)
+            assertEquals(BtProfile.SPP, result.services[0].profile)
+        }
 
     @Test
     fun sdpModels_btProfileFromUuid() {
@@ -92,18 +93,19 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun hfpModel_testSuiteStructure() {
-        val suite = HfpTestSuite(
-            deviceAddress = "AA:BB:CC:DD:EE:FF",
-            deviceName = "TestDevice",
-            results = emptyList(),
-            criticalCount = 0,
-            highCount = 0,
-            mediumCount = 0,
-            lowCount = 0,
-            infoCount = 0,
-            overallRisk = HfpSeverity.INFO,
-            testDurationMs = 1000L
-        )
+        val suite =
+            HfpTestSuite(
+                deviceAddress = "AA:BB:CC:DD:EE:FF",
+                deviceName = "TestDevice",
+                results = emptyList(),
+                criticalCount = 0,
+                highCount = 0,
+                mediumCount = 0,
+                lowCount = 0,
+                infoCount = 0,
+                overallRisk = HfpSeverity.INFO,
+                testDurationMs = 1000L,
+            )
 
         assertEquals("AA:BB:CC:DD:EE:FF", suite.deviceAddress)
         assertEquals(HfpSeverity.INFO, suite.overallRisk)
@@ -112,17 +114,18 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun hfpModel_testResultStructure() {
-        val result = HfpTestResult(
-            category = HfpTestCategory.INJECTION,
-            testName = "Command Chain",
-            command = "ATD;+CMGF=1",
-            response = "OK OK",
-            vulnerable = true,
-            confidence = 0.9,
-            evidence = "Multiple OK responses",
-            severity = HfpSeverity.HIGH,
-            recommendation = "Block chained commands"
-        )
+        val result =
+            HfpTestResult(
+                category = HfpTestCategory.INJECTION,
+                testName = "Command Chain",
+                command = "ATD;+CMGF=1",
+                response = "OK OK",
+                vulnerable = true,
+                confidence = 0.9,
+                evidence = "Multiple OK responses",
+                severity = HfpSeverity.HIGH,
+                recommendation = "Block chained commands",
+            )
 
         assertTrue(result.vulnerable)
         assertEquals(HfpSeverity.HIGH, result.severity)
@@ -133,14 +136,15 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun rfcommModels_channelStructure() {
-        val channel = RfcommChannel(
-            channelNumber = 5,
-            serviceName = "Serial Port",
-            uuid = "00001101-0000-1000-8000-00805F9B34FB",
-            profileName = "SPP",
-            requiresAuth = false,
-            requiresEncryption = false
-        )
+        val channel =
+            RfcommChannel(
+                channelNumber = 5,
+                serviceName = "Serial Port",
+                uuid = "00001101-0000-1000-8000-00805F9B34FB",
+                profileName = "SPP",
+                requiresAuth = false,
+                requiresEncryption = false,
+            )
 
         assertEquals(5, channel.channelNumber)
         assertFalse(channel.requiresAuth)
@@ -148,10 +152,11 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun rfcommModels_fuzzConfigDefaults() {
-        val config = RfcommFuzzConfig(
-            targetChannel = 1,
-            method = RfcommFuzzMethod.BINARY_FUZZ
-        )
+        val config =
+            RfcommFuzzConfig(
+                targetChannel = 1,
+                method = RfcommFuzzMethod.BINARY_FUZZ,
+            )
 
         assertEquals(1, config.targetChannel)
         assertEquals(RfcommFuzzMethod.BINARY_FUZZ, config.method)
@@ -163,17 +168,18 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun avrcpModel_testResultStructure() {
-        val result = AvrcpTestResult(
-            category = AvrcpTestCategory.MEDIA_CONTROL,
-            testName = "Play without auth",
-            command = "PLAY",
-            response = null,
-            vulnerable = true,
-            confidence = 0.85,
-            evidence = "Playback started",
-            severity = AvrcpSeverity.HIGH,
-            recommendation = "Require pairing for media control"
-        )
+        val result =
+            AvrcpTestResult(
+                category = AvrcpTestCategory.MEDIA_CONTROL,
+                testName = "Play without auth",
+                command = "PLAY",
+                response = null,
+                vulnerable = true,
+                confidence = 0.85,
+                evidence = "Playback started",
+                severity = AvrcpSeverity.HIGH,
+                recommendation = "Require pairing for media control",
+            )
 
         assertTrue(result.vulnerable)
         assertEquals(AvrcpSeverity.HIGH, result.severity)
@@ -181,17 +187,18 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun avrcpModel_mediaItemStructure() {
-        val item = AvrcpMediaItem(
-            uid = 42L,
-            title = "Test Song",
-            artist = "Test Artist",
-            album = "Test Album",
-            genre = "Rock",
-            trackNumber = 1,
-            duration = 180,
-            type = MediaItemType.TRACK,
-            path = "/Music/test.mp3"
-        )
+        val item =
+            AvrcpMediaItem(
+                uid = 42L,
+                title = "Test Song",
+                artist = "Test Artist",
+                album = "Test Album",
+                genre = "Rock",
+                trackNumber = 1,
+                duration = 180,
+                type = MediaItemType.TRACK,
+                path = "/Music/test.mp3",
+            )
 
         assertEquals(42L, item.uid)
         assertEquals(MediaItemType.TRACK, item.type)
@@ -201,11 +208,12 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun pbapModel_phonebookEntry() {
-        val entry = PhonebookEntry(
-            name = "John Doe",
-            phoneNumbers = listOf("+1234567890"),
-            emails = listOf("john@example.com")
-        )
+        val entry =
+            PhonebookEntry(
+                name = "John Doe",
+                phoneNumbers = listOf("+1234567890"),
+                emails = listOf("john@example.com"),
+            )
 
         assertEquals("John Doe", entry.name)
         assertEquals(1, entry.phoneNumbers.size)
@@ -213,14 +221,15 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun pbapModel_accessResult() {
-        val result = PbapAccessResult(
-            phonebookType = PhonebookType.MAIN_CONTACTS,
-            accessible = true,
-            entryCount = 50,
-            entries = emptyList(),
-            requiredAuth = false,
-            testDurationMs = 200L
-        )
+        val result =
+            PbapAccessResult(
+                phonebookType = PhonebookType.MAIN_CONTACTS,
+                accessible = true,
+                entryCount = 50,
+                entries = emptyList(),
+                requiredAuth = false,
+                testDurationMs = 200L,
+            )
 
         assertTrue(result.accessible)
         assertFalse(result.requiredAuth)
@@ -229,14 +238,15 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun mapModel_accessResult() {
-        val result = MapAccessResult(
-            folder = MapFolder.INBOX,
-            accessible = true,
-            messageCount = 10,
-            messages = emptyList(),
-            requiredAuth = false,
-            testDurationMs = 150L
-        )
+        val result =
+            MapAccessResult(
+                folder = MapFolder.INBOX,
+                accessible = true,
+                messageCount = 10,
+                messages = emptyList(),
+                requiredAuth = false,
+                testDurationMs = 150L,
+            )
 
         assertEquals(MapFolder.INBOX, result.folder)
         assertTrue(result.accessible)
@@ -246,24 +256,25 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun sapModel_apduConstruction() {
-        val apdu = SimApdu(
-            cla = 0x00,
-            ins = 0xA4,
-            p1 = 0x08,
-            p2 = 0x00,
-            data = byteArrayOf(0x3F, 0x00),
-            le = 0x02
-        )
+        val apdu =
+            SimApdu(
+                cla = 0x00,
+                ins = 0xA4,
+                p1 = 0x08,
+                p2 = 0x00,
+                data = byteArrayOf(0x3F, 0x00),
+                le = 0x02,
+            )
 
         val bytes = apdu.toBytes()
         assertEquals(0x00.toByte(), bytes[0]) // CLA
         assertEquals(0xA4.toByte(), bytes[1]) // INS
         assertEquals(0x08.toByte(), bytes[2]) // P1
         assertEquals(0x00.toByte(), bytes[3]) // P2
-        assertEquals(2, bytes[4])              // Lc
-        assertEquals(0x3F.toByte(), bytes[5])  // Data[0]
-        assertEquals(0x00.toByte(), bytes[6])  // Data[1]
-        assertEquals(0x02.toByte(), bytes[7])  // Le
+        assertEquals(2, bytes[4]) // Lc
+        assertEquals(0x3F.toByte(), bytes[5]) // Data[0]
+        assertEquals(0x00.toByte(), bytes[6]) // Data[1]
+        assertEquals(0x02.toByte(), bytes[7]) // Le
     }
 
     @Test
@@ -294,11 +305,12 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun l2capModel_packetStructure() {
-        val packet = L2capPacket(
-            length = 10,
-            channelId = 0x0001,
-            payload = byteArrayOf(0x01, 0x02, 0x03)
-        )
+        val packet =
+            L2capPacket(
+                length = 10,
+                channelId = 0x0001,
+                payload = byteArrayOf(0x01, 0x02, 0x03),
+            )
 
         assertEquals(10, packet.length)
         assertEquals(0x0001, packet.channelId)
@@ -308,16 +320,17 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun snoopModel_recordStructure() {
-        val record = SnoopRecord(
-            originalLength = 100,
-            includedLength = 100,
-            flags = 0x02,
-            drops = 0,
-            timestampMicros = 1234567890L,
-            data = byteArrayOf(0x01, 0x02, 0x03, 0x04),
-            packetType = HciPacketType.COMMAND,
-            direction = SnoopDirection.SENT
-        )
+        val record =
+            SnoopRecord(
+                originalLength = 100,
+                includedLength = 100,
+                flags = 0x02,
+                drops = 0,
+                timestampMicros = 1234567890L,
+                data = byteArrayOf(0x01, 0x02, 0x03, 0x04),
+                packetType = HciPacketType.COMMAND,
+                direction = SnoopDirection.SENT,
+            )
 
         assertEquals(HciPacketType.COMMAND, record.packetType)
         assertEquals(SnoopDirection.SENT, record.direction)
@@ -325,19 +338,20 @@ class BredrRepositoryUnitTest {
 
     @Test
     fun snoopModel_captureSession() {
-        val session = SnoopCaptureSession(
-            id = "test-session",
-            startTime = 1000L,
-            endTime = 2000L,
-            totalPackets = 50,
-            sentPackets = 30,
-            receivedPackets = 20,
-            aclPackets = 40,
-            scoPackets = 5,
-            hciCommands = 3,
-            hciEvents = 2,
-            fileSizeBytes = 4096L
-        )
+        val session =
+            SnoopCaptureSession(
+                id = "test-session",
+                startTime = 1000L,
+                endTime = 2000L,
+                totalPackets = 50,
+                sentPackets = 30,
+                receivedPackets = 20,
+                aclPackets = 40,
+                scoPackets = 5,
+                hciCommands = 3,
+                hciEvents = 2,
+                fileSizeBytes = 4096L,
+            )
 
         assertEquals(50, session.totalPackets)
         assertEquals(30, session.sentPackets)

@@ -54,16 +54,9 @@ import com.btsec.testtool.domain.repository.SnoopCaptureRepository
 import com.btsec.testtool.domain.repository.VulnerabilityReader
 import com.btsec.testtool.domain.repository.VulnerabilityRepository
 import com.btsec.testtool.domain.repository.VulnerabilityWriter
-import com.btsec.testtool.domain.usecase.AuthorizationUseCase
-import com.btsec.testtool.domain.usecase.BluetoothScanningUseCase
-import com.btsec.testtool.domain.usecase.FuzzingUseCase
-import com.btsec.testtool.domain.usecase.KeyExtractionUseCase
-import com.btsec.testtool.domain.usecase.ReportGenerationUseCase
-import com.btsec.testtool.domain.usecase.VulnerabilityScanningUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -73,185 +66,126 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindAuthorizationRepository(impl: AuthorizationRepositoryImpl): AuthorizationRepository
 
     @Binds
     @Singleton
-    abstract fun bindAuthorizationRepository(
-        impl: AuthorizationRepositoryImpl
-    ): AuthorizationRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindBluetoothRepository(
-        impl: BluetoothRepositoryImpl
-    ): BluetoothRepository
+    abstract fun bindBluetoothRepository(impl: BluetoothRepositoryImpl): BluetoothRepository
 
     // Segregated sub-interfaces (ISP) — bound to the same impl so narrow
     // read/write contracts can be injected without depending on the full
     // repository. See issue #368 (Hilt MissingBinding for ConsentReader).
     @Binds
     @Singleton
-    abstract fun bindBluetoothStateReader(
-        impl: BluetoothRepositoryImpl
-    ): BluetoothStateReader
+    abstract fun bindBluetoothStateReader(impl: BluetoothRepositoryImpl): BluetoothStateReader
 
     @Binds
     @Singleton
-    abstract fun bindBluetoothOperationsWriter(
-        impl: BluetoothRepositoryImpl
-    ): BluetoothOperationsWriter
+    abstract fun bindBluetoothOperationsWriter(impl: BluetoothRepositoryImpl): BluetoothOperationsWriter
 
     @Binds
     @Singleton
-    abstract fun bindConsentRepository(
-        impl: ConsentRepositoryImpl
-    ): ConsentRepository
+    abstract fun bindConsentRepository(impl: ConsentRepositoryImpl): ConsentRepository
 
     @Binds
     @Singleton
-    abstract fun bindConsentReader(
-        impl: ConsentRepositoryImpl
-    ): ConsentReader
+    abstract fun bindConsentReader(impl: ConsentRepositoryImpl): ConsentReader
 
     @Binds
     @Singleton
-    abstract fun bindConsentWriter(
-        impl: ConsentRepositoryImpl
-    ): ConsentWriter
+    abstract fun bindConsentWriter(impl: ConsentRepositoryImpl): ConsentWriter
 
     @Binds
     @Singleton
-    abstract fun bindFuzzingRepository(
-        impl: FuzzingRepositoryImpl
-    ): FuzzingRepository
+    abstract fun bindFuzzingRepository(impl: FuzzingRepositoryImpl): FuzzingRepository
 
     @Binds
     @Singleton
-    abstract fun bindFuzzingReader(
-        impl: FuzzingRepositoryImpl
-    ): FuzzingReader
+    abstract fun bindFuzzingReader(impl: FuzzingRepositoryImpl): FuzzingReader
 
     @Binds
     @Singleton
-    abstract fun bindFuzzingWriter(
-        impl: FuzzingRepositoryImpl
-    ): FuzzingWriter
+    abstract fun bindFuzzingWriter(impl: FuzzingRepositoryImpl): FuzzingWriter
 
     @Binds
     @Singleton
-    abstract fun bindKeyExtractionRepository(
-        impl: KeyExtractionRepositoryImpl
-    ): KeyExtractionRepository
+    abstract fun bindKeyExtractionRepository(impl: KeyExtractionRepositoryImpl): KeyExtractionRepository
 
     @Binds
     @Singleton
-    abstract fun bindKeyExtractionReader(
-        impl: KeyExtractionRepositoryImpl
-    ): KeyExtractionReader
+    abstract fun bindKeyExtractionReader(impl: KeyExtractionRepositoryImpl): KeyExtractionReader
 
     @Binds
     @Singleton
-    abstract fun bindKeyExtractionWriter(
-        impl: KeyExtractionRepositoryImpl
-    ): KeyExtractionWriter
+    abstract fun bindKeyExtractionWriter(impl: KeyExtractionRepositoryImpl): KeyExtractionWriter
 
     @Binds
     @Singleton
-    abstract fun bindReportRepository(
-        impl: ReportRepositoryImpl
-    ): ReportRepository
+    abstract fun bindReportRepository(impl: ReportRepositoryImpl): ReportRepository
 
     @Binds
     @Singleton
-    abstract fun bindReportReader(
-        impl: ReportRepositoryImpl
-    ): ReportReader
+    abstract fun bindReportReader(impl: ReportRepositoryImpl): ReportReader
 
     @Binds
     @Singleton
-    abstract fun bindReportWriter(
-        impl: ReportRepositoryImpl
-    ): ReportWriter
+    abstract fun bindReportWriter(impl: ReportRepositoryImpl): ReportWriter
 
     @Binds
     @Singleton
-    abstract fun bindVulnerabilityRepository(
-        impl: VulnerabilityRepositoryImpl
-    ): VulnerabilityRepository
+    abstract fun bindVulnerabilityRepository(impl: VulnerabilityRepositoryImpl): VulnerabilityRepository
 
     @Binds
     @Singleton
-    abstract fun bindVulnerabilityReader(
-        impl: VulnerabilityRepositoryImpl
-    ): VulnerabilityReader
+    abstract fun bindVulnerabilityReader(impl: VulnerabilityRepositoryImpl): VulnerabilityReader
 
     @Binds
     @Singleton
-    abstract fun bindVulnerabilityWriter(
-        impl: VulnerabilityRepositoryImpl
-    ): VulnerabilityWriter
+    abstract fun bindVulnerabilityWriter(impl: VulnerabilityRepositoryImpl): VulnerabilityWriter
 
     @Binds
     @Singleton
-    abstract fun bindVulnerabilityProbe(
-        impl: ProductionBtProbe
-    ): VulnerabilityProbe
+    abstract fun bindVulnerabilityProbe(impl: ProductionBtProbe): VulnerabilityProbe
 
     // ========== BR/EDR Profile Repositories (#331) ==========
 
     @Binds
     @Singleton
-    abstract fun bindSdpEnumerationRepository(
-        impl: SdpEnumerationRepositoryImpl
-    ): SdpEnumerationRepository
+    abstract fun bindSdpEnumerationRepository(impl: SdpEnumerationRepositoryImpl): SdpEnumerationRepository
 
     @Binds
     @Singleton
-    abstract fun bindRfcommFuzzingRepository(
-        impl: RfcommFuzzingRepositoryImpl
-    ): RfcommFuzzingRepository
+    abstract fun bindRfcommFuzzingRepository(impl: RfcommFuzzingRepositoryImpl): RfcommFuzzingRepository
 
     @Binds
     @Singleton
-    abstract fun bindHfpSecurityRepository(
-        impl: HfpSecurityRepositoryImpl
-    ): HfpSecurityRepository
+    abstract fun bindHfpSecurityRepository(impl: HfpSecurityRepositoryImpl): HfpSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindAvrcpSecurityRepository(
-        impl: AvrcpSecurityRepositoryImpl
-    ): AvrcpSecurityRepository
+    abstract fun bindAvrcpSecurityRepository(impl: AvrcpSecurityRepositoryImpl): AvrcpSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindPbapSecurityRepository(
-        impl: PbapSecurityRepositoryImpl
-    ): PbapSecurityRepository
+    abstract fun bindPbapSecurityRepository(impl: PbapSecurityRepositoryImpl): PbapSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindMapSecurityRepository(
-        impl: MapSecurityRepositoryImpl
-    ): MapSecurityRepository
+    abstract fun bindMapSecurityRepository(impl: MapSecurityRepositoryImpl): MapSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindSapSecurityRepository(
-        impl: SapSecurityRepositoryImpl
-    ): SapSecurityRepository
+    abstract fun bindSapSecurityRepository(impl: SapSecurityRepositoryImpl): SapSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindL2capSecurityRepository(
-        impl: L2capSecurityRepositoryImpl
-    ): L2capSecurityRepository
+    abstract fun bindL2capSecurityRepository(impl: L2capSecurityRepositoryImpl): L2capSecurityRepository
 
     @Binds
     @Singleton
-    abstract fun bindSnoopCaptureRepository(
-        impl: SnoopCaptureRepositoryImpl
-    ): SnoopCaptureRepository
+    abstract fun bindSnoopCaptureRepository(impl: SnoopCaptureRepositoryImpl): SnoopCaptureRepository
 }
 
 /**

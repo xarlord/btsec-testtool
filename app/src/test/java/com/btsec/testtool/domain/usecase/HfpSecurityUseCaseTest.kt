@@ -8,8 +8,8 @@
  */
 package com.btsec.testtool.domain.usecase
 
-import com.btsec.testtool.domain.model.HfpTestCategory
 import com.btsec.testtool.domain.model.HfpSeverity
+import com.btsec.testtool.domain.model.HfpTestCategory
 import com.btsec.testtool.domain.model.HfpTestResult
 import com.btsec.testtool.domain.model.HfpTestSuite
 import org.junit.jupiter.api.Assertions.*
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
  */
 @DisplayName("HfpSecurityUseCase Tests")
 class HfpSecurityUseCaseTest {
-
     private lateinit var useCase: HfpSecurityUseCase
 
     @BeforeEach
@@ -49,7 +48,7 @@ class HfpSecurityUseCaseTest {
         confidence: Double = 0.0,
         evidence: String = "",
         severity: HfpSeverity = HfpSeverity.MEDIUM,
-        recommendation: String = ""
+        recommendation: String = "",
     ): HfpTestResult {
         return HfpTestResult(
             category = category,
@@ -60,13 +59,13 @@ class HfpSecurityUseCaseTest {
             confidence = confidence,
             evidence = evidence,
             severity = severity,
-            recommendation = recommendation
+            recommendation = recommendation,
         )
     }
 
     private fun createTestSuite(
         results: List<HfpTestResult>,
-        overallRisk: HfpSeverity = HfpSeverity.INFO
+        overallRisk: HfpSeverity = HfpSeverity.INFO,
     ): HfpTestSuite {
         return HfpTestSuite(
             deviceAddress = "AA:BB:CC:DD:EE:FF",
@@ -78,7 +77,7 @@ class HfpSecurityUseCaseTest {
             lowCount = results.count { it.vulnerable && it.severity == HfpSeverity.LOW },
             infoCount = results.count { it.vulnerable && it.severity == HfpSeverity.INFO },
             overallRisk = overallRisk,
-            testDurationMs = 1500L
+            testDurationMs = 1500L,
         )
     }
 
@@ -87,7 +86,6 @@ class HfpSecurityUseCaseTest {
     @Nested
     @DisplayName("Test Suite Generation")
     inner class TestSuiteGeneration {
-
         @Test
         @DisplayName("Should have at least 20 predefined test cases")
         fun testGetTestSuite_hasMinimum20Tests() {
@@ -105,7 +103,7 @@ class HfpSecurityUseCaseTest {
             for (category in expectedCategories) {
                 assertTrue(
                     coveredCategories.contains(category),
-                    "Missing category: $category"
+                    "Missing category: $category",
                 )
             }
         }
@@ -129,7 +127,6 @@ class HfpSecurityUseCaseTest {
     @Nested
     @DisplayName("Response Analysis")
     inner class ResponseAnalysis {
-
         @Test
         @DisplayName("Format string %x leak should be detected as vulnerable")
         fun testAnalyzeResponse_formatStringLeak() {
@@ -239,25 +236,26 @@ class HfpSecurityUseCaseTest {
     @Nested
     @DisplayName("Overall Risk Computation")
     inner class RiskComputation {
-
         @Test
         @DisplayName("Any CRITICAL finding should yield CRITICAL overall risk")
         fun testComputeOverallRisk_criticalFinding() {
-            val results = listOf(
-                createTestResult(severity = HfpSeverity.LOW, vulnerable = true),
-                createTestResult(severity = HfpSeverity.MEDIUM, vulnerable = true),
-                createTestResult(severity = HfpSeverity.CRITICAL, vulnerable = true)
-            )
+            val results =
+                listOf(
+                    createTestResult(severity = HfpSeverity.LOW, vulnerable = true),
+                    createTestResult(severity = HfpSeverity.MEDIUM, vulnerable = true),
+                    createTestResult(severity = HfpSeverity.CRITICAL, vulnerable = true),
+                )
             assertEquals(HfpSeverity.CRITICAL, useCase.computeOverallRisk(results))
         }
 
         @Test
         @DisplayName("Only LOW findings should yield LOW overall risk")
         fun testComputeOverallRisk_allLow() {
-            val results = listOf(
-                createTestResult(severity = HfpSeverity.LOW, vulnerable = true),
-                createTestResult(severity = HfpSeverity.LOW, vulnerable = true)
-            )
+            val results =
+                listOf(
+                    createTestResult(severity = HfpSeverity.LOW, vulnerable = true),
+                    createTestResult(severity = HfpSeverity.LOW, vulnerable = true),
+                )
             assertEquals(HfpSeverity.LOW, useCase.computeOverallRisk(results))
         }
 
@@ -270,20 +268,22 @@ class HfpSecurityUseCaseTest {
         @Test
         @DisplayName("Non-vulnerable results should yield INFO overall risk")
         fun testComputeOverallRisk_allSafe() {
-            val results = listOf(
-                createTestResult(severity = HfpSeverity.CRITICAL, vulnerable = false),
-                createTestResult(severity = HfpSeverity.HIGH, vulnerable = false)
-            )
+            val results =
+                listOf(
+                    createTestResult(severity = HfpSeverity.CRITICAL, vulnerable = false),
+                    createTestResult(severity = HfpSeverity.HIGH, vulnerable = false),
+                )
             assertEquals(HfpSeverity.INFO, useCase.computeOverallRisk(results))
         }
 
         @Test
         @DisplayName("HIGH finding without CRITICAL should yield HIGH overall risk")
         fun testComputeOverallRisk_highFinding() {
-            val results = listOf(
-                createTestResult(severity = HfpSeverity.MEDIUM, vulnerable = true),
-                createTestResult(severity = HfpSeverity.HIGH, vulnerable = true)
-            )
+            val results =
+                listOf(
+                    createTestResult(severity = HfpSeverity.MEDIUM, vulnerable = true),
+                    createTestResult(severity = HfpSeverity.HIGH, vulnerable = true),
+                )
             assertEquals(HfpSeverity.HIGH, useCase.computeOverallRisk(results))
         }
     }
@@ -293,19 +293,20 @@ class HfpSecurityUseCaseTest {
     @Nested
     @DisplayName("Report Generation")
     inner class ReportGeneration {
-
         @Test
         @DisplayName("Generated report should not be empty")
         fun testGenerateReport_notEmpty() {
-            val suite = createTestSuite(
-                results = listOf(
-                    createTestResult(
-                        testName = "Test A",
-                        vulnerable = false,
-                        severity = HfpSeverity.INFO
-                    )
+            val suite =
+                createTestSuite(
+                    results =
+                        listOf(
+                            createTestResult(
+                                testName = "Test A",
+                                vulnerable = false,
+                                severity = HfpSeverity.INFO,
+                            ),
+                        ),
                 )
-            )
             val report = useCase.generateReport(suite)
             assertTrue(report.isNotBlank(), "Report should not be blank")
             assertTrue(report.contains("HFP Security Test Report"))
@@ -315,17 +316,19 @@ class HfpSecurityUseCaseTest {
         @Test
         @DisplayName("Report should include critical findings")
         fun testGenerateReport_includesCriticalFindings() {
-            val suite = createTestSuite(
-                results = listOf(
-                    createTestResult(
-                        testName = "Critical Vuln",
-                        vulnerable = true,
-                        severity = HfpSeverity.CRITICAL,
-                        evidence = "Memory leaked"
-                    )
-                ),
-                overallRisk = HfpSeverity.CRITICAL
-            )
+            val suite =
+                createTestSuite(
+                    results =
+                        listOf(
+                            createTestResult(
+                                testName = "Critical Vuln",
+                                vulnerable = true,
+                                severity = HfpSeverity.CRITICAL,
+                                evidence = "Memory leaked",
+                            ),
+                        ),
+                    overallRisk = HfpSeverity.CRITICAL,
+                )
             val report = useCase.generateReport(suite)
             assertTrue(report.contains("Critical Vuln"), "Report should mention the finding name")
             assertTrue(report.contains("VULNERABLE"), "Report should show VULNERABLE status")
@@ -352,8 +355,9 @@ class HfpSecurityUseCaseTest {
         val formatStringTests = suite.filter { it.category == HfpTestCategory.FORMAT_STRING }
         for (tc in formatStringTests) {
             assertEquals(
-                HfpSeverity.CRITICAL, tc.severity,
-                "Format string test '${tc.name}' should be CRITICAL"
+                HfpSeverity.CRITICAL,
+                tc.severity,
+                "Format string test '${tc.name}' should be CRITICAL",
             )
         }
 
@@ -361,8 +365,9 @@ class HfpSecurityUseCaseTest {
         val authBypassTests = suite.filter { it.category == HfpTestCategory.AUTHENTICATION_BYPASS }
         for (tc in authBypassTests) {
             assertEquals(
-                HfpSeverity.CRITICAL, tc.severity,
-                "Auth bypass test '${tc.name}' should be CRITICAL"
+                HfpSeverity.CRITICAL,
+                tc.severity,
+                "Auth bypass test '${tc.name}' should be CRITICAL",
             )
         }
 
@@ -370,8 +375,9 @@ class HfpSecurityUseCaseTest {
         val phonebookTests = suite.filter { it.category == HfpTestCategory.PHONEBOOK_ACCESS }
         for (tc in phonebookTests) {
             assertEquals(
-                HfpSeverity.CRITICAL, tc.severity,
-                "Phonebook test '${tc.name}' should be CRITICAL"
+                HfpSeverity.CRITICAL,
+                tc.severity,
+                "Phonebook test '${tc.name}' should be CRITICAL",
             )
         }
     }
@@ -384,7 +390,7 @@ class HfpSecurityUseCaseTest {
             val result = useCase.analyzeResponse(tc, "OK")
             assertTrue(
                 result.confidence in 0.0..1.0,
-                "Confidence for '${tc.name}' should be in [0.0, 1.0], got ${result.confidence}"
+                "Confidence for '${tc.name}' should be in [0.0, 1.0], got ${result.confidence}",
             )
         }
     }

@@ -11,8 +11,8 @@ package com.btsec.testtool.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.btsec.testtool.data.local.dao.BluetoothDao
 import com.btsec.testtool.data.local.dao.AuthorizationDao
+import com.btsec.testtool.data.local.dao.BluetoothDao
 import com.btsec.testtool.data.local.dao.ConsentDao
 import com.btsec.testtool.data.local.dao.FuzzingDao
 import com.btsec.testtool.data.local.dao.KeyExtractionDao
@@ -47,20 +47,25 @@ import com.btsec.testtool.data.local.entity.VulnerabilityEntity
         FuzzResultEntity::class,
         KeyExtractionResultEntity::class,
         SecurityReportEntity::class,
-        BtOperationEntity::class
+        BtOperationEntity::class,
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = false,
 )
 @TypeConverters(BtSecTypeConverters::class)
 abstract class BtSecDatabase : RoomDatabase() {
-
     abstract fun bluetoothDao(): BluetoothDao
+
     abstract fun authorizationDao(): AuthorizationDao
+
     abstract fun consentDao(): ConsentDao
+
     abstract fun vulnerabilityDao(): VulnerabilityDao
+
     abstract fun fuzzingDao(): FuzzingDao
+
     abstract fun keyExtractionDao(): KeyExtractionDao
+
     abstract fun reportDao(): ReportDao
 
     companion object {

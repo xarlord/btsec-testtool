@@ -22,13 +22,13 @@ package com.btsec.testtool.domain.model
  * Each maps to a specific virtual folder in the Phonebook Server.
  */
 enum class PhonebookType {
-    MAIN_CONTACTS,       // telecom/pb.vcf
-    INCOMING_CALLS,      // telecom/ich.vcf
-    OUTGOING_CALLS,      // telecom/och.vcf
-    MISSED_CALLS,        // telecom/mch.vcf
-    COMBINED_CALLS,      // telecom/cch.vcf
-    SPEED_DIAL,          // telecom/spd.vcf
-    FAVORITES            // telecom/fav.vcf
+    MAIN_CONTACTS, // telecom/pb.vcf
+    INCOMING_CALLS, // telecom/ich.vcf
+    OUTGOING_CALLS, // telecom/och.vcf
+    MISSED_CALLS, // telecom/mch.vcf
+    COMBINED_CALLS, // telecom/cch.vcf
+    SPEED_DIAL, // telecom/spd.vcf
+    FAVORITES, // telecom/fav.vcf
 }
 
 /**
@@ -39,7 +39,7 @@ data class PhonebookEntry(
     val phoneNumbers: List<String>,
     val emails: List<String> = emptyList(),
     val organization: String? = null,
-    val note: String? = null
+    val note: String? = null,
 )
 
 /**
@@ -51,14 +51,19 @@ data class PbapAccessResult(
     val entryCount: Int,
     val entries: List<PhonebookEntry>,
     val requiredAuth: Boolean,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )
 
 /**
  * Folders defined by the MAP specification for message access.
  */
 enum class MapFolder {
-    INBOX, OUTBOX, SENT, DELETED, DRAFT, UNREAD
+    INBOX,
+    OUTBOX,
+    SENT,
+    DELETED,
+    DRAFT,
+    UNREAD,
 }
 
 /**
@@ -76,7 +81,7 @@ data class MessageEntry(
     val body: String?,
     val timestamp: Long?,
     val folder: MapFolder,
-    val read: Boolean
+    val read: Boolean,
 )
 
 /**
@@ -88,20 +93,23 @@ data class MapAccessResult(
     val messageCount: Int,
     val messages: List<MessageEntry>,
     val requiredAuth: Boolean,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )
 
 /**
  * A security finding related to data exfiltration risk.
  */
 data class DataExfiltrationFinding(
-    val profile: String,  // "PBAP" or "MAP"
-    val dataType: String,  // "contacts", "call_history", "sms", "email"
+    // "PBAP" or "MAP"
+    val profile: String,
+    // "contacts", "call_history", "sms", "email"
+    val dataType: String,
     val accessible: Boolean,
     val authRequired: Boolean,
-    val dataVolume: String,  // e.g. "247 contacts", "53 messages"
+    // e.g. "247 contacts", "53 messages"
+    val dataVolume: String,
     val severity: PbmapSeverity,
-    val recommendation: String
+    val recommendation: String,
 )
 
 /**
@@ -119,5 +127,5 @@ data class PbmapTestReport(
     val findings: List<DataExfiltrationFinding>,
     val totalDataExposed: Int,
     val criticalFindings: Int,
-    val testDurationMs: Long
+    val testDurationMs: Long,
 )

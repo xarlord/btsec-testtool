@@ -19,19 +19,35 @@ import kotlinx.serialization.json.Json
  * Only to be used for AUTHORIZED security testing purposes.
  */
 
-internal val scriptJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+internal val scriptJson =
+    Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
 
-fun encodeTestScriptToString(script: TestScript): String =
-    scriptJson.encodeToString(TestScript.serializer(), script)
+fun encodeTestScriptToString(script: TestScript): String = scriptJson.encodeToString(TestScript.serializer(), script)
 
-fun decodeTestScriptFromString(json: String): TestScript =
-    scriptJson.decodeFromString(TestScript.serializer(), json)
+fun decodeTestScriptFromString(json: String): TestScript = scriptJson.decodeFromString(TestScript.serializer(), json)
 
 @Serializable
 enum class ScriptStepType {
-    SCAN, CONNECT, DISCONNECT, READ, WRITE, SUBSCRIBE, FUZZ,
-    ASSERT, WAIT, LOG, LOOP, CONDITION, VARIABLE_SET, VARIABLE_GET,
-    SERVICE_DISCOVERY, PAIR, UNPAIR
+    SCAN,
+    CONNECT,
+    DISCONNECT,
+    READ,
+    WRITE,
+    SUBSCRIBE,
+    FUZZ,
+    ASSERT,
+    WAIT,
+    LOG,
+    LOOP,
+    CONDITION,
+    VARIABLE_SET,
+    VARIABLE_GET,
+    SERVICE_DISCOVERY,
+    PAIR,
+    UNPAIR,
 }
 
 @Serializable
@@ -40,7 +56,7 @@ data class ScriptStep(
     val params: Map<String, String> = emptyMap(),
     val label: String? = null,
     val onError: ErrorAction = ErrorAction.STOP,
-    val timeout: Long = 10000
+    val timeout: Long = 10000,
 )
 
 @Serializable
@@ -50,7 +66,7 @@ enum class ErrorAction { STOP, SKIP, RETRY, CONTINUE }
 data class ScriptVariable(
     val name: String,
     val value: String,
-    val type: VariableType = VariableType.STRING
+    val type: VariableType = VariableType.STRING,
 )
 
 @Serializable
@@ -66,7 +82,7 @@ data class TestScript(
     val steps: List<ScriptStep> = emptyList(),
     val variables: List<ScriptVariable> = emptyList(),
     val timeout: Long = 60000,
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
 )
 
 @Serializable
@@ -76,7 +92,7 @@ enum class ScriptValidationSeverity { ERROR, WARNING, INFO }
 data class ScriptValidation(
     val severity: ScriptValidationSeverity,
     val message: String,
-    val stepIndex: Int? = null
+    val stepIndex: Int? = null,
 )
 
 @Serializable
@@ -88,12 +104,17 @@ data class ScriptExecution(
     val currentStep: Int = 0,
     val state: ExecutionState = ExecutionState.PENDING,
     val stepResults: List<StepResult> = emptyList(),
-    val variables: Map<String, String> = emptyMap()
+    val variables: Map<String, String> = emptyMap(),
 )
 
 @Serializable
 enum class ExecutionState {
-    PENDING, RUNNING, PAUSED, COMPLETED, FAILED, CANCELLED
+    PENDING,
+    RUNNING,
+    PAUSED,
+    COMPLETED,
+    FAILED,
+    CANCELLED,
 }
 
 @Serializable
@@ -104,5 +125,5 @@ data class StepResult(
     val startTime: Long,
     val endTime: Long,
     val output: String? = null,
-    val error: String? = null
+    val error: String? = null,
 )

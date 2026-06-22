@@ -4,11 +4,10 @@
  */
 package com.btsec.testtool.domain.usecase
 
-import com.btsec.testtool.domain.repository.FuzzingRepository
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import com.btsec.testtool.domain.repository.ConsentRepository
+import com.btsec.testtool.domain.repository.FuzzingRepository
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class FuzzingUseCaseTest {
-
     private lateinit var useCase: FuzzingUseCase
     private val fuzzRepo: FuzzingRepository = mockk(relaxed = true)
     private val btRepo: BluetoothRepository = mockk(relaxed = true)
@@ -29,9 +27,10 @@ class FuzzingUseCaseTest {
     }
 
     @Test
-    fun `stopFuzzing delegates to repository`() = runTest {
-        coEvery { fuzzRepo.stopFuzzing() } returns Result.success(Unit)
-        val result = useCase.stopFuzzing()
-        assertTrue(result.isSuccess)
-    }
+    fun `stopFuzzing delegates to repository`() =
+        runTest {
+            coEvery { fuzzRepo.stopFuzzing() } returns Result.success(Unit)
+            val result = useCase.stopFuzzing()
+            assertTrue(result.isSuccess)
+        }
 }

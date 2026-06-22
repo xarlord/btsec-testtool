@@ -25,24 +25,26 @@ fun android.bluetooth.BluetoothDevice.toDomainModel(): com.btsec.testtool.domain
     return com.btsec.testtool.domain.model.BluetoothDevice(
         address = address,
         name = name,
-        type = when (type) {
-            android.bluetooth.BluetoothDevice.DEVICE_TYPE_LE -> BluetoothType.BLE
-            android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC -> BluetoothType.CLASSIC
-            android.bluetooth.BluetoothDevice.DEVICE_TYPE_DUAL -> BluetoothType.DUAL_MODE
-            else -> BluetoothType.UNKNOWN
-        },
+        type =
+            when (type) {
+                android.bluetooth.BluetoothDevice.DEVICE_TYPE_LE -> BluetoothType.BLE
+                android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC -> BluetoothType.CLASSIC
+                android.bluetooth.BluetoothDevice.DEVICE_TYPE_DUAL -> BluetoothType.DUAL_MODE
+                else -> BluetoothType.UNKNOWN
+            },
         deviceClass = bluetoothClass?.deviceClass?.let { mapDeviceClass(it) },
-        bondState = when (bondState) {
-            android.bluetooth.BluetoothDevice.BOND_BONDED -> BondState.BONDED
-            android.bluetooth.BluetoothDevice.BOND_BONDING -> BondState.BONDING
-            else -> BondState.NONE
-        },
+        bondState =
+            when (bondState) {
+                android.bluetooth.BluetoothDevice.BOND_BONDED -> BondState.BONDED
+                android.bluetooth.BluetoothDevice.BOND_BONDING -> BondState.BONDING
+                else -> BondState.NONE
+            },
         rssi = null,
         txPower = null,
         firstSeen = Instant.now(),
         lastSeen = Instant.now(),
         services = emptyList(),
-        manufacturerData = emptyMap()
+        manufacturerData = emptyMap(),
     )
 }
 
@@ -64,7 +66,7 @@ fun BluetoothGattService.toDomainModel(): BleService {
     return BleService(
         uuid = uuid.toString(),
         primary = type == BluetoothGattService.SERVICE_TYPE_PRIMARY,
-        characteristics = characteristics.map { it.toDomainModel() }
+        characteristics = characteristics.map { it.toDomainModel() },
     )
 }
 
@@ -72,25 +74,26 @@ fun BluetoothGattCharacteristic.toDomainModel(): BleCharacteristic {
     val props = properties
     return BleCharacteristic(
         uuid = uuid.toString(),
-        properties = CharacteristicProperties(
-            read = props and BluetoothGattCharacteristic.PROPERTY_READ != 0,
-            write = props and BluetoothGattCharacteristic.PROPERTY_WRITE != 0,
-            writeWithoutResponse = props and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0,
-            notify = props and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0,
-            indicate = props and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0,
-            signedWrite = props and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0,
-            extendedProperties = props and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0
-        ),
+        properties =
+            CharacteristicProperties(
+                read = props and BluetoothGattCharacteristic.PROPERTY_READ != 0,
+                write = props and BluetoothGattCharacteristic.PROPERTY_WRITE != 0,
+                writeWithoutResponse = props and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0,
+                notify = props and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0,
+                indicate = props and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0,
+                signedWrite = props and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0,
+                extendedProperties = props and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0,
+            ),
         permissions = null,
         value = value,
-        descriptors = descriptors.map { it.toDomainModel() }
+        descriptors = descriptors.map { it.toDomainModel() },
     )
 }
 
 fun BluetoothGattDescriptor.toDomainModel(): BleDescriptor {
     return BleDescriptor(
         uuid = uuid.toString(),
-        value = value
+        value = value,
     )
 }
 

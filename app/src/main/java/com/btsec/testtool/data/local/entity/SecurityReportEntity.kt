@@ -20,46 +20,43 @@ data class SecurityReportEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
     val id: String,
-
     @ColumnInfo(name = "auth_id")
     val authId: String,
-
     @ColumnInfo(name = "title")
     val title: String,
-
+    // epoch millis
     @ColumnInfo(name = "generated_at")
-    val generatedAt: Long, // epoch millis
-
+    val generatedAt: Long,
+    // epoch millis
     @ColumnInfo(name = "test_period_start")
-    val testPeriodStart: Long, // epoch millis
-
+    val testPeriodStart: Long,
+    // epoch millis
     @ColumnInfo(name = "test_period_end")
-    val testPeriodEnd: Long, // epoch millis
-
+    val testPeriodEnd: Long,
+    // JSON array of BluetoothDevice
     @ColumnInfo(name = "target_devices")
-    val targetDevices: String, // JSON array of BluetoothDevice
-
+    val targetDevices: String,
+    // JSON array of Vulnerability
     @ColumnInfo(name = "vulnerabilities")
-    val vulnerabilities: String, // JSON array of Vulnerability
-
+    val vulnerabilities: String,
+    // JSON array of FuzzResult
     @ColumnInfo(name = "fuzzing_results")
-    val fuzzingResults: String, // JSON array of FuzzResult
-
+    val fuzzingResults: String,
+    // JSON array of KeyExtractionResult
     @ColumnInfo(name = "key_extraction_results")
-    val keyExtractionResults: String, // JSON array of KeyExtractionResult
-
+    val keyExtractionResults: String,
     @ColumnInfo(name = "executive_summary")
     val executiveSummary: String,
-
+    // JSON array of ReportFinding
     @ColumnInfo(name = "findings")
-    val findings: String, // JSON array of ReportFinding
-
+    val findings: String,
+    // JSON array of Recommendation
     @ColumnInfo(name = "recommendations")
-    val recommendations: String, // JSON array of Recommendation
-
+    val recommendations: String,
+    // JSON of ReportAppendix
     @ColumnInfo(name = "appendix")
-    val appendix: String, // JSON of ReportAppendix
-
+    val appendix: String,
+    // ReportStatus enum name
     @ColumnInfo(name = "status")
-    val status: String // ReportStatus enum name
+    val status: String,
 )

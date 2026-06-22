@@ -37,9 +37,7 @@ import com.btsec.testtool.domain.model.RiskSeverity
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnalyticsScreen(
-    onBack: () -> Unit,
-) {
+fun AnalyticsScreen(onBack: () -> Unit) {
     val viewModel: AnalyticsViewModel = hiltViewModel()
     val summary by viewModel.summary.collectAsState()
 
