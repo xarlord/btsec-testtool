@@ -173,6 +173,12 @@ class SapSecurityRepositoryImpl
 
         /**
          * Build a minimal SAP message: [MsgCode(1)] [ParamId(1)] [ParamLen(2)] [Payload]
+         *
+         * Parameter IDs per SAP spec:
+         * - 0x00: No parameter (for simple commands)
+         * - 0x01: APDU parameter (for TRANSFER_APDU_REQ)
+         * - 0x02: ATR parameter (for TRANSFER_ATR_REQ)
+         * - 0x03: Status parameter (for STATUS_IND)
          */
         private fun buildSapMessage(
             msgCode: Int,
@@ -180,7 +186,14 @@ class SapSecurityRepositoryImpl
         ): ByteArray {
             val msg = ByteArray(4 + payload.size)
             msg[0] = msgCode.toByte()
-            msg[1] = 0x00 // Parameter ID placeholder
+            // Parameter ID mapping per Bluetooth SAP specification
+            msg[1] =
+                when (msgCode) {
+                    0x04 -> 0x01 // TRANSFER_APDU_REQ -> APDU parameter
+                    0x06 -> 0x02 // TRANSFER_ATR_REQ -> ATR parameter
+                    0x0E -> 0x03 // STATUS_IND -> Status parameter
+                    else -> 0x00 // Default: no specific parameter
+                }.toByte()
             msg[2] = ((payload.size shr 8) and 0xFF).toByte()
             msg[3] = (payload.size and 0xFF).toByte()
             if (payload.isNotEmpty()) {
