@@ -62,8 +62,11 @@ class SnoopCaptureRepositoryImpl
                 var hciCommands = 0
                 var hciEvents = 0
 
+                // Launch as a child of the ProducerScope (callbackFlow) so the
+                // monitoring coroutine is cancelled automatically when the flow
+                // collector is cancelled — fixing the raw CoroutineScope leak (#380).
                 monitorJob =
-                    CoroutineScope(Dispatchers.IO).launch {
+                    launch(Dispatchers.IO) {
                         val snoopFile = File(SNOOP_LOG_PATH)
 
                         while (isActive) {
@@ -144,53 +147,55 @@ class SnoopCaptureRepositoryImpl
         private fun readNewRecords(file: File): List<SnoopRecord> {
             val records = mutableListOf<SnoopRecord>()
             try {
+                // Use .use { } so the file handle is always closed even if a read
+                // throws mid-record (EOFException on truncated data, etc.) — fixes #379.
                 val raf = RandomAccessFile(file, "r")
+                raf.use {
+                    // If first read, skip snoop header (16 bytes)
+                    if (lastFileSize == 0L) {
+                        it.seek(16)
+                    } else {
+                        it.seek(lastFileSize)
+                    }
 
-                // If first read, skip snoop header (16 bytes)
-                if (lastFileSize == 0L) {
-                    raf.seek(16)
-                } else {
-                    raf.seek(lastFileSize)
+                    while (it.filePointer < it.length() - 24) { // Each record header is 24 bytes
+                        val originalLength = it.readInt().toUnsigned()
+                        val includedLength = it.readInt().toUnsigned()
+                        val flags = it.readInt()
+                        val drops = it.readInt()
+                        val timestampMicros = it.readLong()
+
+                        if (includedLength <= 0 || includedLength > 1_000_000) break
+
+                        val data = ByteArray(includedLength)
+                        it.readFully(data)
+
+                        val direction = if ((flags and 0x01) == 0) SnoopDirection.SENT else SnoopDirection.RECEIVED
+                        val packetType =
+                            when ((flags shr 1) and 0x07) {
+                                1 -> HciPacketType.COMMAND
+                                2 -> HciPacketType.ACL_DATA
+                                3 -> HciPacketType.SCO_DATA
+                                4 -> HciPacketType.EVENT
+                                else -> HciPacketType.UNKNOWN
+                            }
+
+                        records.add(
+                            SnoopRecord(
+                                originalLength = originalLength,
+                                includedLength = includedLength,
+                                flags = flags,
+                                drops = drops,
+                                timestampMicros = timestampMicros,
+                                data = data,
+                                packetType = packetType,
+                                direction = direction,
+                            ),
+                        )
+                    }
+
+                    lastFileSize = it.filePointer
                 }
-
-                while (raf.filePointer < raf.length() - 24) { // Each record header is 24 bytes
-                    val originalLength = raf.readInt().toUnsigned()
-                    val includedLength = raf.readInt().toUnsigned()
-                    val flags = raf.readInt()
-                    val drops = raf.readInt()
-                    val timestampMicros = raf.readLong()
-
-                    if (includedLength <= 0 || includedLength > 1_000_000) break
-
-                    val data = ByteArray(includedLength)
-                    raf.readFully(data)
-
-                    val direction = if ((flags and 0x01) == 0) SnoopDirection.SENT else SnoopDirection.RECEIVED
-                    val packetType =
-                        when ((flags shr 1) and 0x07) {
-                            1 -> HciPacketType.COMMAND
-                            2 -> HciPacketType.ACL_DATA
-                            3 -> HciPacketType.SCO_DATA
-                            4 -> HciPacketType.EVENT
-                            else -> HciPacketType.UNKNOWN
-                        }
-
-                    records.add(
-                        SnoopRecord(
-                            originalLength = originalLength,
-                            includedLength = includedLength,
-                            flags = flags,
-                            drops = drops,
-                            timestampMicros = timestampMicros,
-                            data = data,
-                            packetType = packetType,
-                            direction = direction,
-                        ),
-                    )
-                }
-
-                lastFileSize = raf.filePointer
-                raf.close()
             } catch (e: Exception) {
                 Timber.w(e, "Failed to read snoop records")
             }
