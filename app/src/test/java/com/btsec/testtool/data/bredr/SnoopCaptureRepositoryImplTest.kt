@@ -133,8 +133,9 @@ class SnoopCaptureRepositoryImplTest {
         // an includedLength that promises 100 bytes of payload, but write 0 bytes
         // of payload. This forces readFully() to throw EOFException mid-record.
         val header = ByteArray(16)
-        // "btsnoop\0" magic
-        System.arraycopy("btsnoop\0".toByteArray(), 0, header, 0, 8)
+        // "btsnoop" magic + null terminator
+        val magic = byteArrayOf('b'.code.toByte(), 't'.code.toByte(), 's'.code.toByte(), 'n'.code.toByte(), 'o'.code.toByte(), 'o'.code.toByte(), 'p'.code.toByte(), 0)
+        System.arraycopy(magic, 0, header, 0, 8)
         // version 1, datalink type 1002 (HCI UART / H4)
         header[8] = 0
         header[9] = 0
@@ -182,7 +183,8 @@ class SnoopCaptureRepositoryImplTest {
         tempFile.deleteOnExit()
 
         val header = ByteArray(16)
-        System.arraycopy("btsnoop\0".toByteArray(), 0, header, 0, 8)
+        val magic = byteArrayOf('b'.code.toByte(), 't'.code.toByte(), 's'.code.toByte(), 'n'.code.toByte(), 'o'.code.toByte(), 'o'.code.toByte(), 'p'.code.toByte(), 0)
+        System.arraycopy(magic, 0, header, 0, 8)
         header[11] = 1 // version
         header[15] = 0xEA.toByte() // datalink 1002
 
