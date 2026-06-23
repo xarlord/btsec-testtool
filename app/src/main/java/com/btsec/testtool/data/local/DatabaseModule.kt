@@ -51,9 +51,13 @@ object DatabaseModule {
 
                     override fun onOpen(db: SupportSQLiteDatabase) {
                         super.onOpen(db)
-                        // Enable WAL mode for better concurrent read/write performance
-                        db.execSQL("PRAGMA journal_mode=WAL")
-                        // Enable foreign key enforcement
+                        // Enable foreign key enforcement.
+                        // NOTE: WAL mode is NOT set here. `PRAGMA journal_mode=WAL`
+                        // returns a result row, which makes execSQL() throw
+                        // SQLiteException ("Queries can be performed using SQLiteDatabase
+                        // query or rawQuery methods only"). Room already enables WAL by
+                        // default via RoomDatabase.JOURNAL_MODE_WRITE_AHEAD_LOGGING,
+                        // so the pragma was both redundant and fatal. See #382.
                         db.execSQL("PRAGMA foreign_keys=ON")
                     }
                 },
