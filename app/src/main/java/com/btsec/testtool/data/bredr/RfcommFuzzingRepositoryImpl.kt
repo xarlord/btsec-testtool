@@ -60,8 +60,14 @@ class RfcommFuzzingRepositoryImpl
 
             // Map well-known UUIDs to RFCOMM channel entries
             for (parcelUuid in uuids) {
-                val uuid = parcelUuid.uuid
-                val shortUuid = uuid.toString().take(4).uppercase()
+                // Extract the 4-char short UUID from positions 4-8 of the
+                // standard UUID form (XXXXXXXX-XXXX-...).
+                val shortUuid =
+                    parcelUuid.uuid
+                        .toString()
+                        .replace("-", "")
+                        .uppercase()
+                        .substring(4, 8)
                 val profile = BtProfile.fromUuid(shortUuid)
                 channels.add(
                     RfcommChannel(

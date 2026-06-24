@@ -56,8 +56,15 @@ class SdpEnumerationRepositoryImpl
                     val services = mutableListOf<SdpService>()
 
                     for (parcelUuid in uuids) {
-                        val uuid = parcelUuid.uuid.toString().replace("-", "").uppercase()
-                        val shortUuid = uuid.take(4)
+                        // Extract the 4-char short UUID from positions 4-8 of the
+                        // standard UUID form (XXXXXXXX-XXXX-...). Using take(4) would
+                        // always yield "0000" for Bluetooth base UUIDs.
+                        val shortUuid =
+                            parcelUuid.uuid
+                                .toString()
+                                .replace("-", "")
+                                .uppercase()
+                                .substring(4, 8)
                         val profile = BtProfile.fromUuid(shortUuid)
 
                         val service =

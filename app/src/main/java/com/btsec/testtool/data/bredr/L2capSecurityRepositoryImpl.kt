@@ -62,7 +62,13 @@ class L2capSecurityRepositoryImpl
             val uuids = device.uuids ?: emptyArray()
             val hasClassic =
                 uuids.any {
-                    val short = it.uuid.toString().take(4).uppercase()
+                    // Extract the 4-char short UUID from positions 4-8.
+                    val short =
+                        it.uuid
+                            .toString()
+                            .replace("-", "")
+                            .uppercase()
+                            .substring(4, 8)
                     short in setOf("1101", "1103", "1105", "1106", "111E", "110E", "112F", "1132", "112D")
                 }
             if (hasClassic) {
