@@ -13,8 +13,8 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.btsec.testtool.domain.model.L2capFixedChannel
-import com.btsec.testtool.domain.model.L2capTestCategory
 import com.btsec.testtool.domain.model.L2capSeverity
+import com.btsec.testtool.domain.model.L2capTestCategory
 import com.btsec.testtool.domain.model.L2capTestReport
 import com.btsec.testtool.domain.model.L2capTestResult
 import io.mockk.every

@@ -13,8 +13,8 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.btsec.testtool.domain.model.AvrcpBrowseResult
 import com.btsec.testtool.domain.model.AvrcpMediaItem
-import com.btsec.testtool.domain.model.AvrcpTestCategory
 import com.btsec.testtool.domain.model.AvrcpSeverity
+import com.btsec.testtool.domain.model.AvrcpTestCategory
 import com.btsec.testtool.domain.model.AvrcpTestReport
 import com.btsec.testtool.domain.model.AvrcpTestResult
 import com.btsec.testtool.domain.model.MediaItemType
