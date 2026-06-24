@@ -74,7 +74,7 @@ class RfcommFuzzingRepositoryImpl
                         // Actual channel discovered via SDP
                         channelNumber = 1,
                         serviceName = profile.displayName,
-                        uuid = uuid.toString(),
+                        uuid = parcelUuid.uuid.toString(),
                         profileName = profile.displayName,
                         requiresAuth = false,
                         requiresEncryption = false,
