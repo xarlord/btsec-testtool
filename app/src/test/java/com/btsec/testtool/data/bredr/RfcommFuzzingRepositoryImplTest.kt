@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 /**
  * Unit tests for [RfcommFuzzingRepositoryImpl].
@@ -59,6 +60,15 @@ class RfcommFuzzingRepositoryImplTest {
         repository = RfcommFuzzingRepositoryImpl(context)
     }
 
+    /**
+     * Build a mock [android.os.ParcelUuid] that returns the given UUID string.
+     * In plain JVM tests, ParcelUuid.fromString() returns null, so we mock it.
+     */
+    private fun parcelUuid(uuidStr: String): android.os.ParcelUuid =
+        mockk {
+            every { uuid } returns UUID.fromString(uuidStr)
+        }
+
     @Test
     fun `discoverChannels returns empty list for device with no UUIDs`() =
         runTest {
@@ -76,8 +86,8 @@ class RfcommFuzzingRepositoryImplTest {
             val mockDevice = mockk<BluetoothDevice>(relaxed = true)
             val uuids =
                 arrayOf(
-                    android.os.ParcelUuid.fromString("00001101-0000-1000-8000-00805F9B34FB"),
-                    android.os.ParcelUuid.fromString("0000110E-0000-1000-8000-00805F9B34FB"),
+                    parcelUuid("00001101-0000-1000-8000-00805F9B34FB"),
+                    parcelUuid("0000110E-0000-1000-8000-00805F9B34FB"),
                 )
             every { bluetoothAdapter.getRemoteDevice(any<String>()) } returns mockDevice
             every { mockDevice.uuids } returns uuids

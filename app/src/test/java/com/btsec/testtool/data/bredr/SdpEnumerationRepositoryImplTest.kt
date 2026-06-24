@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 /**
  * Unit tests for [SdpEnumerationRepositoryImpl].
@@ -60,14 +61,23 @@ class SdpEnumerationRepositoryImplTest {
         repository = SdpEnumerationRepositoryImpl(context)
     }
 
+    /**
+     * Build a mock [android.os.ParcelUuid] that returns the given UUID string.
+     * In plain JVM tests, ParcelUuid.fromString() returns null, so we mock it.
+     */
+    private fun parcelUuid(uuidStr: String): android.os.ParcelUuid =
+        mockk {
+            every { uuid } returns UUID.fromString(uuidStr)
+        }
+
     @Test
     fun `browseServices emits services for valid device`() =
         runTest {
             val uuids =
                 arrayOf(
-                    android.os.ParcelUuid.fromString("0000110E-0000-1000-8000-00805F9B34FB"),
-                    android.os.ParcelUuid.fromString("0000111F-0000-1000-8000-00805F9B34FB"),
-                    android.os.ParcelUuid.fromString("0000112F-0000-1000-8000-00805F9B34FB"),
+                    parcelUuid("0000110E-0000-1000-8000-00805F9B34FB"),
+                    parcelUuid("0000111F-0000-1000-8000-00805F9B34FB"),
+                    parcelUuid("0000112F-0000-1000-8000-00805F9B34FB"),
                 )
 
             every { bluetoothAdapter.getRemoteDevice(any<String>()) } returns bluetoothDevice
