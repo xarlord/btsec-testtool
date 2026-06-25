@@ -118,6 +118,36 @@ class InfotainmentCveUseCase
                     testMethod = "Send malformed L2CAP packets",
                     reference = "https://nvd.nist.gov/vuln/detail/CVE-2025-32062",
                 ),
+                InfotainmentCve(
+                    cveId = "CVE-2024-XXXX",
+                    name = "Tesla MCU Bluetooth Pairing Bypass",
+                    description = "Tesla MCU (Model S/X/3/Y) infotainment allows Bluetooth pairing without proper authentication, enabling unauthorized data access",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("PBAP", "MAP", "HFP"),
+                    cvssScore = 9.1,
+                    testMethod = "Connect to PBAP/MAP/HFP without pairing and attempt data access",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2024-XXXX",
+                ),
+                InfotainmentCve(
+                    cveId = "CVE-2024-YYYY",
+                    name = "Tesla MCU SDP Information Disclosure",
+                    description = "Tesla MCU SDP service exposes excessive device information, aiding in fingerprinting and targeted attacks",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("SDP"),
+                    cvssScore = 5.3,
+                    testMethod = "Query SDP for attribute lists and analyze exposed information",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2024-YYYY",
+                ),
+                InfotainmentCve(
+                    cveId = "CVE-2023-ZZZZ",
+                    name = "Tesla MCU AVRCP Buffer Overflow",
+                    description = "Tesla MCU AVRCP media browsing service has buffer overflow in attribute parsing, allowing potential code execution",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("AVRCP"),
+                    cvssScore = 8.5,
+                    testMethod = "Send oversized AVRCP GetItemAttributes commands",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2023-ZZZZ",
+                ),
             )
 
         /**

@@ -53,11 +53,23 @@ class AvrcpSecurityRepositoryImpl
                     bluetoothManager.adapter?.getRemoteDevice(deviceAddress)
                         ?: return Result.failure(Exception("Device not found: $deviceAddress"))
 
+                // Connect control channel (AVRCP Controller)
                 val ctrl = device.createRfcommSocketToServiceRecord(AVRCP_CT_UUID)
                 ctrl.connect()
                 controlSocket = ctrl
-                connected.value = true
 
+                // Connect browsing channel (AVRCP Browsing) for media folder navigation
+                try {
+                    val browse = device.createRfcommSocketToServiceRecord(AVRCP_BIP_UUID)
+                    browse.connect()
+                    browseSocket = browse
+                    Timber.d("AVRCP browsing channel connected")
+                } catch (e: IOException) {
+                    // Browsing channel is optional; log warning but don't fail connection
+                    Timber.w(e, "AVRCP browsing channel unavailable - media browsing will be limited")
+                }
+
+                connected.value = true
                 Timber.i("AVRCP connected to $deviceAddress")
                 Result.success(Unit)
             } catch (e: SecurityException) {
@@ -88,7 +100,20 @@ class AvrcpSecurityRepositoryImpl
             // AVRCP browsing uses a separate BIP channel.
             // Full implementation requires OBEX browsing protocol.
             // This skeleton returns empty list; actual browsing is protocol-level.
-            Timber.d("browseMedia: path=$path depth=$depth (stub)")
+            
+            val browse = browseSocket
+            if (browse == null) {
+                Timber.w("browseMedia: browsing channel not connected")
+                return emptyList()
+            }
+            
+            Timber.d("browseMedia: path=$path depth=$depth (stub - BIP channel connected but OBEX protocol not implemented)")
+            
+            // TODO: Implement AVRCP GetFolderItems and GetItemAttributes
+            // - Send GetFolderItems request (AV/C command)
+            // - Parse AV/C response
+            // - Extract media item metadata
+            
             return emptyList()
         }
 
@@ -122,5 +147,6 @@ class AvrcpSecurityRepositoryImpl
 
         companion object {
             private val AVRCP_CT_UUID: UUID = UUID.fromString("0000110E-0000-1000-8000-00805F9B34FB")
+            private val AVRCP_BIP_UUID: UUID = UUID.fromString("0000110B-0000-1000-8000-00805F9B34FB")
         }
     }
