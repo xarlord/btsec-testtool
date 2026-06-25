@@ -64,11 +64,11 @@ class SnoopCaptureRepositoryImpl
 
                 // Try alternative snoop log paths in order of preference
                 val snoopPaths = listOf(
-                    SNOOP_LOG_PATH_ROOTED,           // Rooted device: /data/misc/bluetooth/logs/btsnoop_hci.log
-                    SNOOP_LOG_PATH_USER,             // User-accessible path (if configured via adb forward)
-                    SNOOP_LOG_PATH_EXTERNAL          // External storage (if copied via companion tool)
+                    SNOOP_LOG_PATH_ROOTED, // Rooted device: /data/misc/bluetooth/logs/btsnoop_hci.log
+                    SNOOP_LOG_PATH_USER, // User-accessible path (if configured via adb forward)
+                    SNOOP_LOG_PATH_EXTERNAL, // External storage (if copied via companion tool)
                 )
-                
+
                 val snoopFile = findAccessibleSnoopFile(snoopPaths)
                 
                 if (snoopFile == null) {

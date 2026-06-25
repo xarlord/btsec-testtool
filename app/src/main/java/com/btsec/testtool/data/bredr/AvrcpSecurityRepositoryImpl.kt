@@ -97,23 +97,19 @@ class AvrcpSecurityRepositoryImpl
             path: String,
             depth: Int,
         ): List<AvrcpMediaItem> {
-            // AVRCP browsing uses a separate BIP channel.
-            // Full implementation requires OBEX browsing protocol.
-            // This skeleton returns empty list; actual browsing is protocol-level.
-            
             val browse = browseSocket
             if (browse == null) {
                 Timber.w("browseMedia: browsing channel not connected")
                 return emptyList()
             }
-            
+
             Timber.d("browseMedia: path=$path depth=$depth (stub - BIP channel connected but OBEX protocol not implemented)")
-            
+
             // TODO: Implement AVRCP GetFolderItems and GetItemAttributes
             // - Send GetFolderItems request (AV/C command)
             // - Parse AV/C response
             // - Extract media item metadata
-            
+
             return emptyList()
         }
 
