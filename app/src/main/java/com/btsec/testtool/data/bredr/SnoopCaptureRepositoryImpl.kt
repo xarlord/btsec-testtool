@@ -62,12 +62,34 @@ class SnoopCaptureRepositoryImpl
                 var hciCommands = 0
                 var hciEvents = 0
 
+                // Try alternative snoop log paths in order of preference
+                val snoopPaths = listOf(
+                    SNOOP_LOG_PATH_ROOTED,           // Rooted device: /data/misc/bluetooth/logs/btsnoop_hci.log
+                    SNOOP_LOG_PATH_USER,             // User-accessible path (if configured via adb forward)
+                    SNOOP_LOG_PATH_EXTERNAL          // External storage (if copied via companion tool)
+                )
+                
+                val snoopFile = findAccessibleSnoopFile(snoopPaths)
+                
+                if (snoopFile == null) {
+                    Timber.e("No accessible HCI snoop log found. Root access, Shizuku, or ADB proxy required.")
+                    Timber.e("Searched paths: ${snoopPaths.joinToString(", ")}")
+                    Timber.e("To enable root-free snoop capture:")
+                    Timber.e("  1. Rooted: Ensure app has root permissions")
+                    Timber.e("  2. Shizuku: Enable Shizuku service (not yet integrated)")
+                    Timber.e("  3. ADB Proxy: Use adb forward to make snoop log available")
+                    close()
+                    awaitClose()
+                    return@callbackFlow
+                }
+
+                Timber.i("Monitoring HCI snoop log: ${snoopFile.absolutePath}")
+
                 // Launch as a child of the ProducerScope (callbackFlow) so the
                 // monitoring coroutine is cancelled automatically when the flow
                 // collector is cancelled — fixing the raw CoroutineScope leak (#380).
                 monitorJob =
                     launch(Dispatchers.IO) {
-                        val snoopFile = File(SNOOP_LOG_PATH)
 
                         while (isActive) {
                             try {
@@ -202,10 +224,36 @@ class SnoopCaptureRepositoryImpl
             return records
         }
 
+        /**
+         * Finds an accessible HCI snoop log file from a list of candidate paths.
+         * Returns the first path that exists and is readable, or null if none found.
+         */
+        private fun findAccessibleSnoopFile(paths: List<String>): File? {
+            for (path in paths) {
+                val file = File(path)
+                try {
+                    if (file.exists() && file.canRead()) {
+                        // Verify it's actually a snoop file by checking size
+                        if (file.length() >= 16) { // Minimum valid snoop header
+                            return file
+                        }
+                    }
+                } catch (e: SecurityException) {
+                    // Expected for non-rooted devices; try next path
+                    continue
+                } catch (e: Exception) {
+                    Timber.w(e, "Error checking snoop log at $path")
+                }
+            }
+            return null
+        }
+
         private fun Int.toUnsigned(): Int = if (this < 0) this + (1L shl 32).toInt() else this
 
         companion object {
-            private const val SNOOP_LOG_PATH = "/data/misc/bluetooth/logs/btsnoop_hci.log"
+            private const val SNOOP_LOG_PATH_ROOTED = "/data/misc/bluetooth/logs/btsnoop_hci.log"
+            private const val SNOOP_LOG_PATH_USER = "/data/local/tmp/btsnoop_hci.log"
+            private const val SNOOP_LOG_PATH_EXTERNAL = "/sdcard/btsnoop_hci.log"
             private const val SNOOP_POLL_INTERVAL_MS = 500L
         }
     }
