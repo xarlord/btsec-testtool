@@ -67,7 +67,43 @@ class SnoopCaptureRepositoryImpl
                 // collector is cancelled — fixing the raw CoroutineScope leak (#380).
                 monitorJob =
                     launch(Dispatchers.IO) {
-                        val snoopFile = File(SNOOP_LOG_PATH)
+                        // Try multiple snoop log paths for root-free access.
+                        // The standard path requires root; alternative paths may be
+                        // accessible via ADB forwarding or a companion tool.
+                        val snoopPaths =
+                            listOf(
+                                SNOOP_LOG_PATH_ROOTED,
+                                SNOOP_LOG_PATH_ADB,
+                                SNOOP_LOG_PATH_EXTERNAL,
+                            )
+                        var snoopFile: File? = null
+
+                        for (path in snoopPaths) {
+                            val candidate = File(path)
+                            try {
+                                if (candidate.exists() && candidate.canRead() && candidate.length() >= 16) {
+                                    snoopFile = candidate
+                                    Timber.i("Using HCI snoop log at: $path")
+                                    break
+                                }
+                            } catch (e: SecurityException) {
+                                Timber.d("Cannot access snoop log at $path (permission denied)")
+                            }
+                        }
+
+                        if (snoopFile == null) {
+                            Timber.e(
+                                "No accessible HCI snoop log found. Tried: ${snoopPaths.joinToString()}",
+                            )
+                            Timber.e(
+                                "Root-free options: (1) adb forward to $SNOOP_LOG_PATH_ADB " +
+                                    "(2) copy via companion tool to $SNOOP_LOG_PATH_EXTERNAL " +
+                                    "(3) enable Bluetooth snoop logging in Developer Options",
+                            )
+                            close()
+                            awaitClose()
+                            return@launch
+                        }
 
                         while (isActive) {
                             try {
@@ -205,7 +241,12 @@ class SnoopCaptureRepositoryImpl
         private fun Int.toUnsigned(): Int = if (this < 0) this + (1L shl 32).toInt() else this
 
         companion object {
-            private const val SNOOP_LOG_PATH = "/data/misc/bluetooth/logs/btsnoop_hci.log"
+            // Rooted device: requires root to read
+            private const val SNOOP_LOG_PATH_ROOTED = "/data/misc/bluetooth/logs/btsnoop_hci.log"
+            // ADB forward target: accessible when user runs `adb forward` (root-free)
+            private const val SNOOP_LOG_PATH_ADB = "/data/local/tmp/btsnoop_hci.log"
+            // External storage: accessible if copied via companion tool (root-free)
+            private const val SNOOP_LOG_PATH_EXTERNAL = "/sdcard/btsnoop_hci.log"
             private const val SNOOP_POLL_INTERVAL_MS = 500L
         }
     }

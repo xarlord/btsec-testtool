@@ -118,6 +118,26 @@ class InfotainmentCveUseCase
                     testMethod = "Send malformed L2CAP packets",
                     reference = "https://nvd.nist.gov/vuln/detail/CVE-2025-32062",
                 ),
+                InfotainmentCve(
+                    cveId = "CVE-2022-25952",
+                    name = "Tesla Infotainment Bluetooth Crash",
+                    description = "Tesla MCU (MCU2/MCU3) Bluetooth subsystem vulnerable to denial of service via crafted L2CAP signaling packets, causing infotainment system crash",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("L2CAP", "BR-EDR"),
+                    cvssScore = 7.5,
+                    testMethod = "Send malformed L2CAP connection request packets to Tesla MCU",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2022-25952",
+                ),
+                InfotainmentCve(
+                    cveId = "CVE-2022-25953",
+                    name = "Tesla MCU BLE Stack Overflow",
+                    description = "Tesla MCU BLE advertising parser has insufficient input validation allowing stack-based buffer overflow via oversized advertisement data",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("BLE", "L2CAP"),
+                    cvssScore = 8.8,
+                    testMethod = "Send oversized BLE advertisement packets to Tesla MCU",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2022-25953",
+                ),
             )
 
         /**

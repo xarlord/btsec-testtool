@@ -103,6 +103,25 @@ class AtCommandDictionary
                     // Command injection
                     AtCommand("ATD;+CMGF=1;+CMGS=\"000\"", "Command chaining", INJECTION, HIGH),
                     AtCommand("AT+CPBW=1,\"000\",,\"AAAA\"", "Phonebook write attempt", INJECTION, HIGH),
+                    // Extended fuzzing patterns (#398)
+                    AtCommand("ATD" + "0".repeat(1024) + ";", "Long dial string overflow", INJECTION, HIGH),
+                    AtCommand("AT+CLCC" + ";".repeat(100), "Semicolon flood injection", INJECTION, MEDIUM),
+                    AtCommand("AT+CMGS=" + "\"".repeat(256), "Quote flood in SMS send", INJECTION, HIGH),
+                    AtCommand("AT\u0000\u0000\u0000\u0000", "Multiple null bytes", INJECTION, CRITICAL),
+                    AtCommand("AT\r\n\r\n\r\n\r\nAT", "CRLF injection", INJECTION, MEDIUM),
+                    AtCommand("AT+CPBW=" + "1".repeat(100) + ",\"test\"", "Phonebook index overflow", INJECTION, HIGH),
+                    AtCommand("AT+CMGF=0;+CMGW=\" overflow\"", "Command chain to SMS write", INJECTION, HIGH),
+                    AtCommand("AT+CGMI;+CPBR=1;+CMGL=\"ALL\"", "Triple command chain exfil", INJECTION, CRITICAL),
+                    AtCommand("AT+CLIP=" + "1".repeat(512), "CLIP parameter overflow", INJECTION, MEDIUM),
+                    AtCommand("AT+BCS=999999999999", "BCS codec parameter overflow", INJECTION, MEDIUM),
+                    AtCommand("AT+BCC=" + "\t".repeat(128), "Tab character injection in BCC", INJECTION, LOW),
+                    AtCommand("AT+VGS=" + "9".repeat(64), "Volume parameter overflow (VGS)", INJECTION, LOW),
+                    AtCommand("AT+VGM=" + "9".repeat(64), "Mic gain parameter overflow (VGM)", INJECTION, LOW),
+                    AtCommand("AT+BTRH?;+BTRH=0;+BTRH=1", "Response/hold state machine confusion", INJECTION, MEDIUM),
+                    AtCommand("AT+CCWA=" + "\"".repeat(50) + ";", "Call waiting parameter fuzz", INJECTION, MEDIUM),
+                    AtCommand("AT+CNUM" + "\u0001\u0002\u0003", "Control character injection in CNUM", INJECTION, HIGH),
+                    AtCommand("ATA;ATD;ATH;AT+CHUP", "Rapid call state manipulation chain", INJECTION, CRITICAL),
+                    AtCommand("AT+NREC=0" + "\u0000" + ";AT+CFUN=0", "Embedded null in NREC with power-off chain", INJECTION, CRITICAL),
                 )
         }
     }

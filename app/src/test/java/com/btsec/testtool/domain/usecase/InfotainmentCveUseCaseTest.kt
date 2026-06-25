@@ -27,8 +27,8 @@ class InfotainmentCveUseCaseTest {
     fun testGetCveDatabase_hasMinimum8Cves() {
         val db = useCase.getCveDatabase()
         assertThat(db.size).isAtLeast(8)
-        // Exact count should be 9 based on the hardcoded database
-        assertThat(db).hasSize(9)
+        // Exact count: 9 base + 2 Tesla = 11
+        assertThat(db).hasSize(11)
     }
 
     @Test
@@ -85,9 +85,10 @@ class InfotainmentCveUseCaseTest {
     }
 
     @Test
-    fun testGetCvesForVendor_tesla_returnsEmpty() {
+    fun testGetCvesForVendor_tesla_returnsCves() {
         val teslaCves = useCase.getCvesForVendor(VehicleVendor.TESLA)
-        assertThat(teslaCves).isEmpty()
+        assertThat(teslaCves).hasSize(2)
+        assertThat(teslaCves.all { it.affectedUnits.contains(InfotainmentUnit.TESLA_MCUMCU2) }).isTrue()
     }
 
     // --- detectInfotainmentUnit ---
