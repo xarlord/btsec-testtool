@@ -211,8 +211,8 @@ class MapSecurityRepositoryImpl
                 text.split(Regex("(?i)BEGIN:BMSG"))
                     .drop(1)
                     .mapNotNull { block ->
-                        val endIdx = block.indexOf(Regex("(?i)END:BMSG"))
-                        if (endIdx >= 0) block.substring(0, endIdx) else null
+                        val endMatch = Regex("(?i)END:BMSG").find(block)
+                        if (endMatch != null) block.substring(0, endMatch.range.first) else null
                     }
 
             for (bmsg in bmsgs) {
@@ -243,7 +243,8 @@ class MapSecurityRepositoryImpl
                         trimmed.startsWith("BEGIN:BBODY", ignoreCase = true) -> {
                             // Extract body text until END:BBODY
                             val bodyStart = bmsg.indexOf(trimmed) + trimmed.length
-                            val bodyEnd = bmsg.indexOf(Regex("(?i)END:BBODY"), bodyStart)
+                            val endBodyMatch = Regex("(?i)END:BBODY").find(bmsg, bodyStart)
+                            val bodyEnd = endBodyMatch?.range?.first ?: -1
                             if (bodyEnd > bodyStart) {
                                 bodyText = bmsg.substring(bodyStart, bodyEnd).trim().take(500)
                             }

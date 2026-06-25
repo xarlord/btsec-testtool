@@ -14,6 +14,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.btsec.testtool.domain.model.PbapAccessResult
 import com.btsec.testtool.domain.model.PbmapTestReport
+import com.btsec.testtool.domain.model.PhonebookEntry
 import com.btsec.testtool.domain.model.PhonebookType
 import com.btsec.testtool.domain.repository.PbapSecurityRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -211,8 +212,8 @@ class PbapSecurityRepositoryImpl
                 text.split(Regex("(?i)BEGIN:VCARD"))
                     .drop(1) // Skip content before first VCARD
                     .mapNotNull { block ->
-                        val endIdx = block.indexOf(Regex("(?i)END:VCARD"))
-                        if (endIdx >= 0) block.substring(0, endIdx) else null
+                        val endMatch = Regex("(?i)END:VCARD").find(block)
+                        if (endMatch != null) block.substring(0, endMatch.range.first) else null
                     }
 
             for (vcard in vcards) {

@@ -282,14 +282,14 @@ object ObexProtocol {
         var connectionId = 0
         var remaining = packetLength - 7
         while (remaining >= 3) {
-            val headerId = dataIn.readByte() and 0xFF
+            val headerId = dataIn.readByte().toInt() and 0xFF
             remaining--
             when {
                 headerId == HEADER_CONNECTION_ID && remaining >= 4 -> {
                     connectionId = dataIn.readInt()
                     remaining -= 4
                 }
-                headerId and 0xC0 == 0xC0 -> {
+                (headerId and 0xC0) == 0xC0 -> {
                     // 4-byte header value
                     if (remaining >= 4) {
                         dataIn.skipBytes(4)
@@ -329,10 +329,10 @@ object ObexProtocol {
         val body = ByteArrayOutputStream()
         var remaining = packetLength - 3
         while (remaining >= 3) {
-            val headerId = dataIn.readByte() and 0xFF
+            val headerId = dataIn.readByte().toInt() and 0xFF
             remaining--
             when {
-                headerId and 0xC0 == 0xC0 -> {
+                (headerId and 0xC0) == 0xC0 -> {
                     if (remaining >= 4) {
                         dataIn.skipBytes(4)
                         remaining -= 4
