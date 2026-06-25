@@ -241,11 +241,8 @@ class SnoopCaptureRepositoryImpl
         private fun Int.toUnsigned(): Int = if (this < 0) this + (1L shl 32).toInt() else this
 
         companion object {
-            // Rooted device: requires root to read
             private const val SNOOP_LOG_PATH_ROOTED = "/data/misc/bluetooth/logs/btsnoop_hci.log"
-            // ADB forward target: accessible when user runs `adb forward` (root-free)
             private const val SNOOP_LOG_PATH_ADB = "/data/local/tmp/btsnoop_hci.log"
-            // External storage: accessible if copied via companion tool (root-free)
             private const val SNOOP_LOG_PATH_EXTERNAL = "/sdcard/btsnoop_hci.log"
             private const val SNOOP_POLL_INTERVAL_MS = 500L
         }

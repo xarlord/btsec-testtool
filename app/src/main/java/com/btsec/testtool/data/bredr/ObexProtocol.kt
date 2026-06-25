@@ -250,7 +250,10 @@ object ObexProtocol {
 
     // ── Internal helpers ──
 
-    private fun buildPacket(opcode: Byte, payload: ByteArray): ByteArray {
+    private fun buildPacket(
+        opcode: Byte,
+        payload: ByteArray,
+    ): ByteArray {
         val totalLength = 3 + payload.size // opcode(1) + length(2) + payload
         return ByteBuffer
             .allocate(totalLength)

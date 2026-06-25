@@ -193,8 +193,9 @@ class L2capSecurityRepositoryImpl
                         "createInsecureL2capChannel",
                         Int::class.javaPrimitiveType,
                     )
-                val socket = method.invoke(device, psm) as? android.bluetooth.BluetoothSocket
-                    ?: return null
+                val socket =
+                    (method.invoke(device, psm) as? android.bluetooth.BluetoothSocket)
+                        ?: return null
 
                 socket.connect()
                 socket.outputStream.write(packet)
