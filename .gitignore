@@ -93,3 +93,4 @@ scripts/ktlint.exe
 scripts/ktlint/
 ktlint/
 .hermes-cron-state
+ktlint
