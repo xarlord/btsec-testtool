@@ -202,3 +202,46 @@ enum class FindingCategory {
     INFORMATION_LEAK, // Information disclosure
     BYPASS, // Security bypass
 }
+
+/**
+ * Structured fuzzing pattern for profile-specific (HFP, etc.) injection testing.
+ *
+ * Describes a named, categorized fuzzing payload with an associated severity,
+ * human-readable description, concrete payload strings, and optional CVE
+ * references. Used by [com.btsec.testtool.data.fuzzing.HfpFuzzingPatterns].
+ */
+data class FuzzingPattern(
+    val id: String,
+    val name: String,
+    val category: FuzzingCategory,
+    val severity: FuzzingSeverity,
+    val description: String,
+    val payloads: List<String>,
+    val cveReferences: List<String> = emptyList(),
+)
+
+/**
+ * Categories of structured fuzzing patterns.
+ *
+ * Each entry targets a distinct class of vulnerability that may be present in
+ * a Bluetooth profile parser (e.g. HFP AT-command handler).
+ */
+enum class FuzzingCategory {
+    AT_INJECTION,
+    BUFFER_OVERFLOW,
+    COMMAND_INJECTION,
+    INTEGER_OVERFLOW,
+    HFP_COMMAND,
+    FORMAT_STRING,
+}
+
+/**
+ * Severity levels for structured fuzzing patterns.
+ */
+enum class FuzzingSeverity {
+    CRITICAL,
+    HIGH,
+    MEDIUM,
+    LOW,
+    INFO,
+}

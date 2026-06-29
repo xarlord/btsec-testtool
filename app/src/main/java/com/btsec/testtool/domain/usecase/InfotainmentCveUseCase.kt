@@ -118,6 +118,36 @@ class InfotainmentCveUseCase
                     testMethod = "Send malformed L2CAP packets",
                     reference = "https://nvd.nist.gov/vuln/detail/CVE-2025-32062",
                 ),
+                InfotainmentCve(
+                    cveId = "CVE-2019-13924",
+                    name = "Tesla Key Fob Replay",
+                    description = "Tesla Model S/X key fob vulnerable to relay attack via Bluetooth LE - allows unauthorized vehicle entry and start",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("BLE", "Key Fob"),
+                    cvssScore = 9.8,
+                    testMethod = "Monitor BLE advertisements during pairing, attempt relay of key fob messages",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2019-13924",
+                ),
+                InfotainmentCve(
+                    cveId = "CVE-2021-26411",
+                    name = "Tesla Bluetooth Relay Attack",
+                    description = "Tesla infotainment Bluetooth stack allows relay attacks on passive entry system - vehicle can be unlocked and started without key fob proximity",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("BLE", "BLE GATT"),
+                    cvssScore = 8.8,
+                    testMethod = "Test BLE passive entry relay using two antennas, verify if vehicle accepts relayed signals",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2021-26411",
+                ),
+                InfotainmentCve(
+                    cveId = "CVE-2020-9331",
+                    name = "Tesla Infotainment DoS",
+                    description = "Crafted Bluetooth packets can cause denial-of-service in Tesla MCU infotainment system",
+                    affectedUnits = listOf(InfotainmentUnit.TESLA_MCUMCU2),
+                    affectedProfiles = listOf("L2CAP", "RFCOMM"),
+                    cvssScore = 6.5,
+                    testMethod = "Send malformed L2CAP/RFCOMM packets to trigger crash or reboot",
+                    reference = "https://nvd.nist.gov/vuln/detail/CVE-2020-9331",
+                ),
             )
 
         /**
