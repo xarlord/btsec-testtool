@@ -14,6 +14,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.btsec.testtool.domain.model.PbapAccessResult
 import com.btsec.testtool.domain.model.PbmapTestReport
+import com.btsec.testtool.domain.model.PhonebookEntry
 import com.btsec.testtool.domain.model.PhonebookType
 import com.btsec.testtool.domain.repository.PbapSecurityRepository
 import com.btsec.testtool.data.bredr.ObexClient
@@ -111,13 +112,13 @@ class PbapSecurityRepositoryImpl
 
                 // Build PBAP path (PCE path format)
                 val pbapPath = when (phonebookType) {
-                    PhonebookType.MAIN -> "telecom/pb.vcf"
-                    PhonebookType.SIM -> "telecom/pb_sim1.vcf"
+                    PhonebookType.MAIN_CONTACTS -> "telecom/pb.vcf"
+                    PhonebookType.INCOMING_CALLS -> "telecom/ich.vcf"
+                    PhonebookType.OUTGOING_CALLS -> "telecom/och.vcf"
+                    PhonebookType.MISSED_CALLS -> "telecom/mch.vcf"
+                    PhonebookType.COMBINED_CALLS -> "telecom/cch.vcf"
+                    PhonebookType.SPEED_DIAL -> "telecom/spd.vcf"
                     PhonebookType.FAVORITES -> "telecom/fav.vcf"
-                    PhonebookType.INCOMING -> "telecom/ich.vcf"
-                    PhonebookType.OUTGOING -> "telecom/och.vcf"
-                    PhonebookType.MISSED -> "telecom/mch.vcf"
-                    PhonebookType.COMBINED -> "telecom/cch.vcf"
                 }
 
                 // Build application parameters
@@ -171,8 +172,8 @@ class PbapSecurityRepositoryImpl
 
         // ── Private helpers ──
 
-        private fun parseVCardEntries(vcfData: ByteArray): List<String> {
-            val entries = mutableListOf<String>()
+        private fun parseVCardEntries(vcfData: ByteArray): List<PhonebookEntry> {
+            val entries = mutableListOf<PhonebookEntry>()
             val vcf = String(vcfData, Charsets.UTF_8)
 
             // vCard entries are separated by BEGIN:VCARD and END:VCARD
@@ -195,15 +196,21 @@ class PbapSecurityRepositoryImpl
                         if (parts.size >= 2) parts.last().trim() else null
                     }
 
-                if (fn != null || tels.isNotEmpty()) {
-                    val entry = buildString {
-                        if (fn != null) append("Name: $fn")
-                        if (tels.isNotEmpty()) {
-                            if (fn != null) append(", ")
-                            append("Phone(s): ${tels.joinToString(", ")}")
-                        }
+                val emails = vcard.lines()
+                    .filter { it.startsWith("EMAIL") }
+                    .mapNotNull { line ->
+                        val parts = line.split(":")
+                        if (parts.size >= 2) parts.last().trim() else null
                     }
-                    entries.add(entry)
+
+                if (fn != null || tels.isNotEmpty()) {
+                    entries.add(PhonebookEntry(
+                        name = fn ?: "",
+                        phoneNumbers = tels,
+                        emails = emails,
+                        organization = null,
+                        note = null,
+                    ))
                 }
             }
 

@@ -307,7 +307,7 @@ internal class ObexClient(
                 // Variable-length text string (HEADER_NAME, HEADER_TYPE)
                 headerId == HEADER_NAME || headerId == HEADER_TYPE -> {
                     if (pos + 1 >= data.size) break
-                    val length = (data[pos].toInt() and 0xFF) shl 8
+                    var length = (data[pos].toInt() and 0xFF) shl 8
                     pos++
                     length += (data[pos].toInt() and 0xFF)
                     pos++
@@ -329,7 +329,7 @@ internal class ObexClient(
                 headerId == HEADER_AUTH_RESPONSE ||
                 headerId == HEADER_TARGET -> {
                     if (pos + 1 >= data.size) break
-                    val length = (data[pos].toInt() and 0xFF) shl 8
+                    var length = (data[pos].toInt() and 0xFF) shl 8
                     pos++
                     length += (data[pos].toInt() and 0xFF)
                     pos++

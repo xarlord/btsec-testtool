@@ -14,6 +14,8 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.btsec.testtool.domain.model.MapAccessResult
 import com.btsec.testtool.domain.model.MapFolder
+import com.btsec.testtool.domain.model.MessageEntry
+import com.btsec.testtool.domain.model.MessageType
 import com.btsec.testtool.domain.model.PbmapTestReport
 import com.btsec.testtool.domain.repository.MapSecurityRepository
 import com.btsec.testtool.data.bredr.ObexClient
@@ -113,10 +115,10 @@ class MapSecurityRepositoryImpl
                 val mapPath = when (folder) {
                     MapFolder.INBOX -> "telecom/msg/inbox"
                     MapFolder.SENT -> "telecom/msg/sent"
-                    MapFolder.DRAFTS -> "telecom/msg/drafts"
+                    MapFolder.DRAFT -> "telecom/msg/drafts"
+                    MapFolder.UNREAD -> "telecom/msg/unread"
                     MapFolder.DELETED -> "telecom/msg/deleted"
                     MapFolder.OUTBOX -> "telecom/msg/outbox"
-                    MapFolder.ALL -> "telecom/msg/all"
                 }
 
                 // Build application parameters
@@ -168,8 +170,8 @@ class MapSecurityRepositoryImpl
 
         // ── Private helpers ──
 
-        private fun parseMapListing(listingData: ByteArray): List<String> {
-            val messages = mutableListOf<String>()
+        private fun parseMapListing(listingData: ByteArray): List<MessageEntry> {
+            val messages = mutableListOf<MessageEntry>()
             val listing = String(listingData, Charsets.UTF_8)
 
             // MAP listing can be XML or plain text
@@ -195,26 +197,45 @@ class MapSecurityRepositoryImpl
                         .lines()
                         .find { it.contains("<timestamp") }
                         ?.let { extractXmlTag(it, "timestamp") }
+                        ?.toLongOrNull()
 
-                    val entry = buildString {
-                        if (sender != null) append("From: $sender")
-                        if (subject != null) {
-                            if (sender != null) append(", ")
-                            append("Subject: $subject")
-                        }
-                        if (timestamp != null) {
-                            if (sender != null || subject != null) append(", ")
-                            append("Time: $timestamp")
-                        }
+                    // Determine message type from content
+                    val type = when {
+                        msgContent.contains("type=\"sms\"", ignoreCase = true) -> MessageType.SMS
+                        msgContent.contains("type=\"mms\"", ignoreCase = true) -> MessageType.MMS
+                        msgContent.contains("type=\"email\"", ignoreCase = true) -> MessageType.EMAIL
+                        else -> MessageType.UNKNOWN
                     }
-                    messages.add(entry)
+
+                    messages.add(MessageEntry(
+                        type = type,
+                        sender = sender,
+                        subject = subject,
+                        body = null, // Folder listing doesn't include body
+                        timestamp = timestamp,
+                        folder = MapFolder.INBOX, // Will be updated by caller
+                        read = false,
+                    ))
                 }
             } else {
                 // Plain text format (one message per line)
                 val lines = listing.lines()
                 for (line in lines) {
                     if (line.isNotBlank()) {
-                        messages.add(line.trim())
+                        val parts = line.split("|")
+                        val sender = if (parts.size > 0) parts[0].trim() else null
+                        val subject = if (parts.size > 1) parts[1].trim() else null
+                        val timestampStr = if (parts.size > 2) parts[2].trim() else null
+                        
+                        messages.add(MessageEntry(
+                            type = MessageType.UNKNOWN,
+                            sender = sender,
+                            subject = subject,
+                            body = null,
+                            timestamp = timestampStr?.toLongOrNull(),
+                            folder = MapFolder.INBOX,
+                            read = false,
+                        ))
                     }
                 }
             }
