@@ -81,16 +81,97 @@ class MapSecurityRepositoryImpl
 
         override suspend fun accessFolder(folder: MapFolder): MapAccessResult {
             val startTime = System.currentTimeMillis()
-            Timber.d("accessFolder: $folder (OBEX framing required)")
+            Timber.d("accessFolder: $folder")
 
-            return MapAccessResult(
-                folder = folder,
-                accessible = false,
-                messageCount = 0,
-                messages = emptyList(),
-                requiredAuth = true,
-                testDurationMs = System.currentTimeMillis() - startTime,
-            )
+            val sock = socket
+            if (sock == null || !connected.value) {
+                return MapAccessResult(
+                    folder = folder,
+                    accessible = false,
+                    messageCount = 0,
+                    messages = emptyList(),
+                    requiredAuth = true,
+                    testDurationMs = System.currentTimeMillis() - startTime,
+                )
+            }
+
+            return try {
+                val obexClient = ObexClient(sock.inputStream, sock.outputStream)
+                val connected = obexClient.connect(ObexClient.UUID_MAP)
+                
+                if (!connected) {
+                    return MapAccessResult(
+                        folder = folder,
+                        accessible = false,
+                        messageCount = 0,
+                        messages = emptyList(),
+                        requiredAuth = true,
+                        testDurationMs = System.currentTimeMillis() - startTime,
+                    )
+                }
+
+                // Map folder type to OBEX path
+                val path = when (folder) {
+                    MapFolder.INBOX -> "inbox"
+                    MapFolder.SENT -> "sent"
+                    MapFolder.DRAFTS -> "drafts"
+                    MapFolder.DELETED -> "deleted"
+                    MapFolder.TEMPLATE -> "template"
+                    MapFolder.OUTBOX -> "outbox"
+                }
+
+                // MAP application parameters for GetFolderListing
+                val appParams = byteArrayOf(0x02, 0x00, 0x02, 0x00, 0x00) // MaxListCount = 0 (all)
+                val data = obexClient.get(path, appParams)
+
+                obexClient.disconnect()
+
+                if (data != null) {
+                    // Parse message listing (simplified)
+                    val messageEntries = parseMessageListing(data)
+                    MapAccessResult(
+                        folder = folder,
+                        accessible = true,
+                        messageCount = messageEntries.size,
+                        messages = messageEntries,
+                        requiredAuth = false,
+                        testDurationMs = System.currentTimeMillis() - startTime,
+                    )
+                } else {
+                    MapAccessResult(
+                        folder = folder,
+                        accessible = false,
+                        messageCount = 0,
+                        messages = emptyList(),
+                        requiredAuth = true,
+                        testDurationMs = System.currentTimeMillis() - startTime,
+                    )
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "MAP access failed")
+                MapAccessResult(
+                    folder = folder,
+                    accessible = false,
+                    messageCount = 0,
+                    messages = emptyList(),
+                    requiredAuth = true,
+                    testDurationMs = System.currentTimeMillis() - startTime,
+                )
+            }
+        }
+
+        private fun parseMessageListing(data: ByteArray): List<String> {
+            val entries = mutableListOf<String>()
+            val content = String(data, Charsets.UTF_8)
+            // Parse simple text-based MAP listing (one entry per line)
+            val lines = content.split("\n")
+            for (line in lines) {
+                val trimmed = line.trim()
+                if (trimmed.isNotEmpty()) {
+                    entries.add(trimmed)
+                }
+            }
+            return entries
         }
 
         override fun isMapConnected(): Flow<Boolean> = connected

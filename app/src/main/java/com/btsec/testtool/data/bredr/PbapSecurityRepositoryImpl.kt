@@ -80,19 +80,97 @@ class PbapSecurityRepositoryImpl
         }
 
         override suspend fun accessPhonebook(phonebookType: PhonebookType): PbapAccessResult {
-            // PBAP access requires OBEX protocol framing.
-            // Full implementation needs OBEX CONNECT + PULL operations.
             val startTime = System.currentTimeMillis()
-            Timber.d("accessPhonebook: $phonebookType (OBEX framing required)")
+            Timber.d("accessPhonebook: $phonebookType")
 
-            return PbapAccessResult(
-                phonebookType = phonebookType,
-                accessible = false,
-                entryCount = 0,
-                entries = emptyList(),
-                requiredAuth = true,
-                testDurationMs = System.currentTimeMillis() - startTime,
-            )
+            val sock = socket
+            if (sock == null || !connected.value) {
+                return PbapAccessResult(
+                    phonebookType = phonebookType,
+                    accessible = false,
+                    entryCount = 0,
+                    entries = emptyList(),
+                    requiredAuth = true,
+                    testDurationMs = System.currentTimeMillis() - startTime,
+                )
+            }
+
+            return try {
+                val obexClient = ObexClient(sock.inputStream, sock.outputStream)
+                val connected = obexClient.connect(ObexClient.UUID_PBAP)
+                
+                if (!connected) {
+                    return PbapAccessResult(
+                        phonebookType = phonebookType,
+                        accessible = false,
+                        entryCount = 0,
+                        entries = emptyList(),
+                        requiredAuth = true,
+                        testDurationMs = System.currentTimeMillis() - startTime,
+                    )
+                }
+
+                // Map phonebook type to OBEX path
+                val path = when (phonebookType) {
+                    PhonebookType.INTERNAL -> "telecom/pb.vcf"
+                    PhonebookType.SIM -> "telecom/pb.vcf"
+                    PhonebookType.FAVORITES -> "telecom/fav.vcf"
+                    PhonebookType.MISSED_CALLS -> "telecom/mch.vcf"
+                    PhonebookType.INCOMING_CALLS -> "telecom/ich.vcf"
+                    PhonebookType.OUTGOING_CALLS -> "telecom/och.vcf"
+                    PhonebookType.COMBINED -> "telecom/cch.vcf"
+                }
+
+                // PBAP application parameters for GetPhonebook
+                val appParams = byteArrayOf(0x01, 0x00, 0x02, 0x00, 0x00) // MaxCount = 0 (all)
+                val data = obexClient.get(path, appParams)
+
+                obexClient.disconnect()
+
+                if (data != null) {
+                    // Parse vCard entries (simplified)
+                    val vcardEntries = parseVCardEntries(data)
+                    PbapAccessResult(
+                        phonebookType = phonebookType,
+                        accessible = true,
+                        entryCount = vcardEntries.size,
+                        entries = vcardEntries,
+                        requiredAuth = false,
+                        testDurationMs = System.currentTimeMillis() - startTime,
+                    )
+                } else {
+                    PbapAccessResult(
+                        phonebookType = phonebookType,
+                        accessible = false,
+                        entryCount = 0,
+                        entries = emptyList(),
+                        requiredAuth = true,
+                        testDurationMs = System.currentTimeMillis() - startTime,
+                    )
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "PBAP access failed")
+                PbapAccessResult(
+                    phonebookType = phonebookType,
+                    accessible = false,
+                    entryCount = 0,
+                    entries = emptyList(),
+                    requiredAuth = true,
+                    testDurationMs = System.currentTimeMillis() - startTime,
+                )
+            }
+        }
+
+        private fun parseVCardEntries(data: ByteArray): List<String> {
+            val entries = mutableListOf<String>()
+            val content = String(data, Charsets.UTF_8)
+            val vcards = content.split("BEGIN:VCARD")
+            for (vcard in vcards) {
+                if (vcard.contains("END:VCARD")) {
+                    entries.add("BEGIN:VCARD$vcard")
+                }
+            }
+            return entries
         }
 
         override fun isPbapConnected(): Flow<Boolean> = connected

@@ -51,8 +51,8 @@ internal class ObexClient(
         private const val MAX_PACKET_SIZE = 0xFFFF // 64KB
         private const val FLAGS_NONE = 0x00
 
-        private const val UUID_PBAP = "0000112f-0000-1000-8000-00805f9b34fb"
-        private const val UUID_MAP = "00001132-0000-1000-8000-00805f9b34fb"
+        const val UUID_PBAP = "0000112f-0000-1000-8000-00805f9b34fb"
+        const val UUID_MAP = "00001132-0000-1000-8000-00805f9b34fb"
     }
 
     private var connectionId: ByteArray? = null

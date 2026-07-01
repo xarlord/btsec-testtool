@@ -56,6 +56,17 @@ class AvrcpSecurityRepositoryImpl
                 val ctrl = device.createRfcommSocketToServiceRecord(AVRCP_CT_UUID)
                 ctrl.connect()
                 controlSocket = ctrl
+
+                // Also connect to browsing channel if available
+                try {
+                    val browse = device.createRfcommSocketToServiceRecord(AVRCP_BROWSE_UUID)
+                    browse.connect()
+                    browseSocket = browse
+                    Timber.i("AVRCP browsing channel connected")
+                } catch (e: IOException) {
+                    Timber.w("AVRCP browsing channel not available: ${e.message}")
+                }
+
                 connected.value = true
 
                 Timber.i("AVRCP connected to $deviceAddress")
@@ -122,5 +133,6 @@ class AvrcpSecurityRepositoryImpl
 
         companion object {
             private val AVRCP_CT_UUID: UUID = UUID.fromString("0000110E-0000-1000-8000-00805F9B34FB")
+            private val AVRCP_BROWSE_UUID: UUID = UUID.fromString("0000110F-0000-1000-8000-00805F9B34FB")
         }
     }
