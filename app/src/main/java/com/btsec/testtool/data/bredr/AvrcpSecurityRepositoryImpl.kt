@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
@@ -96,11 +97,112 @@ class AvrcpSecurityRepositoryImpl
             path: String,
             depth: Int,
         ): List<AvrcpMediaItem> {
-            // AVRCP browsing uses a separate BIP channel.
-            // Full implementation requires OBEX browsing protocol.
-            // This skeleton returns empty list; actual browsing is protocol-level.
-            Timber.d("browseMedia: path=$path depth=$depth (stub)")
-            return emptyList()
+            val sock = browseSocket
+            if (sock == null) {
+                Timber.w("AVRCP browsing socket not connected")
+                return emptyList()
+            }
+
+            return try {
+                // AVRCP Browsing (BIP) uses OBEX-like protocol over dedicated channel
+                val obexClient = ObexClient(sock.inputStream, sock.outputStream)
+                val connected = obexClient.connect(AVRCP_BROWSE_UUID.toString())
+
+                if (!connected) {
+                    Timber.w("AVRCP OBEX browsing connection failed")
+                    return emptyList()
+                }
+
+                // Build AVRCP browsing GET request
+                // Path format: /Item=VirtualFilesystem (root), /Item=Folder_UUID
+                val browsePath = if (path.isEmpty() || path == "/") "/Item=VirtualFilesystem" else path
+                val appParams = buildBrowseAppParams(depth)
+
+                val data = obexClient.get(browsePath, appParams)
+                obexClient.disconnect()
+
+                if (data != null) {
+                    val items = parseBrowsingData(data, browsePath)
+                    Timber.d("AVRCP browse: found ${items.size} items at $browsePath")
+                    items
+                } else {
+                    Timber.w("AVRCP browse: no data returned")
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "AVRCP browsing failed")
+                emptyList()
+            }
+        }
+
+        /**
+         * Build AVRCP browsing application parameters.
+         * Format: [Tag-Length-Value] tuples for depth, folder UID, etc.
+         */
+        private fun buildBrowseAppParams(depth: Int): ByteArray {
+            val params = ByteArrayOutputStream()
+            // Depth parameter (Tag 0x01, Length 0x01, Value)
+            params.write(0x01) // Tag: Depth
+            params.write(0x01) // Length: 1 byte
+            params.write(depth.coerceIn(0, 255).toByte())
+            return params.toByteArray()
+        }
+
+        /**
+         * Parse AVRCP browsing response data.
+         * Extracts media item metadata from OBEX response.
+         */
+        private fun parseBrowsingData(data: ByteArray, parentPath: String): List<AvrcpMediaItem> {
+            val items = mutableListOf<AvrcpMediaItem>()
+            val content = String(data, Charsets.UTF_8)
+
+            // Parse AVRCP browsing folder listing format
+            // Each item: uid=xxx,name=xxx,type=xxx
+            val lines = content.split("\n")
+            for (line in lines) {
+                if (line.trim().isEmpty() || line.startsWith("#")) continue
+
+                val item = parseBrowsingLine(line, parentPath)
+                if (item != null) {
+                    items.add(item)
+                }
+            }
+
+            return items
+        }
+
+        /**
+         * Parse a single browsing line into an AvrcpMediaItem.
+         * Format: uid=123,name=My Folder,type=folder/item
+         */
+        private fun parseBrowsingLine(line: String, parentPath: String): AvrcpMediaItem? {
+            val parts = line.split(",").map { it.trim() }
+            var uid: String? = null
+            var name: String? = null
+            var type: String? = null
+
+            for (part in parts) {
+                val keyValue = part.split("=")
+                if (keyValue.size == 2) {
+                    when (keyValue[0].lowercase()) {
+                        "uid" -> uid = keyValue[1]
+                        "name" -> name = keyValue[1]
+                        "type" -> type = keyValue[1]
+                    }
+                }
+            }
+
+            return if (uid != null && name != null && type != null) {
+                AvrcpMediaItem(
+                    uid = uid,
+                    name = name,
+                    type = type,
+                    path = "$parentPath/$uid",
+                    playable = type == "item",
+                )
+            } else {
+                null
+            }
         }
 
         override suspend fun sendMediaCommand(command: String): Result<Unit> {
