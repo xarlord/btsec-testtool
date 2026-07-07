@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test
  *
  * These tests verify:
  * - HFP connection state management
- * - AT command send/receive behavior (null when disconnected)
+ * - AT command send returns Result.failure when disconnected
  * - Connection cleanup
  * - Test suite storage and retrieval
  */
@@ -143,28 +143,26 @@ class HfpSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `sendAtCommand returns null when not connected`() =
+    fun `sendAtCommand returns failure when not connected`() =
         runTest {
-            val response = repository.sendAtCommand("ATI", 1000)
-            // Should return null when no socket is available
-            assertTrue(response == null)
+            val result = repository.sendAtCommand("ATI", 1000)
+            // Should return Result.failure when no socket is available
+            assertTrue(result.isFailure)
         }
 
     @Test
-    fun `sendAtCommand accepts valid AT commands`() =
+    fun `sendAtCommand accepts valid AT commands - fails when disconnected`() =
         runTest {
-            // When not connected, sendAtCommand will return null
-            val response = repository.sendAtCommand("AT+CLCC", 5000)
-            assertTrue(response == null)
+            val result = repository.sendAtCommand("AT+CLCC", 5000)
+            assertTrue(result.isFailure)
         }
 
     @Test
-    fun `sendAtCommand handles timeout`() =
+    fun `sendAtCommand handles timeout - fails when disconnected`() =
         runTest {
-            // Test with very short timeout
-            val response = repository.sendAtCommand("AT+BTRH", 1)
-            // Should return null on timeout when not connected
-            assertTrue(response == null)
+            val result = repository.sendAtCommand("AT+BTRH", 1)
+            // When not connected, returns failure (not a timeout)
+            assertTrue(result.isFailure)
         }
 
     @Test
@@ -186,7 +184,7 @@ class HfpSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `sendAtCommand with various AT commands`() =
+    fun `sendAtCommand with various AT commands - all fail when disconnected`() =
         runTest {
             val commands =
                 listOf(
@@ -199,9 +197,11 @@ class HfpSecurityRepositoryImplTest {
                 )
 
             for (cmd in commands) {
-                val response = repository.sendAtCommand(cmd, 1000)
-                // Verify no crashes, returns null when disconnected
-                assertTrue(response == null || response is String)
+                val result = repository.sendAtCommand(cmd, 1000)
+                // Verify no crashes, returns failure when disconnected
+                if (!result.isFailure) {
+                    throw AssertionError("sendAtCommand($cmd) should return Result.failure when disconnected")
+                }
             }
         }
 }

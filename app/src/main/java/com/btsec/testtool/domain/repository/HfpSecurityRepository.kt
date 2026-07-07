@@ -38,12 +38,13 @@ interface HfpSecurityRepository {
      *
      * @param command The AT command string (e.g. "ATI", "AT+CLCC").
      * @param timeoutMs Response timeout in milliseconds.
-     * @return The raw response string, or null on timeout.
+     * @return Result.success with the raw response string (null on timeout),
+     *         or Result.failure if not connected or an error occurs.
      */
     suspend fun sendAtCommand(
         command: String,
         timeoutMs: Long = 5000,
-    ): String?
+    ): Result<String?>
 
     /**
      * Get the current call state from the HFP connection.

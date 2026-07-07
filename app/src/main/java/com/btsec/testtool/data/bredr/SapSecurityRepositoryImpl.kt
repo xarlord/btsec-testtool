@@ -82,8 +82,8 @@ class SapSecurityRepositoryImpl
         override suspend fun sendApdu(
             apdu: SimApdu,
             timeoutMs: Long,
-        ): ByteArray? {
-            val sock = socket ?: return null
+        ): Result<ByteArray?> {
+            val sock = socket ?: return Result.failure(Exception("Not connected"))
             return try {
                 val output = sock.outputStream
                 val input = sock.inputStream
@@ -100,15 +100,15 @@ class SapSecurityRepositoryImpl
                         val read = input.read(buffer)
                         if (read > 0) buffer.copyOf(read) else null
                     }
-                response
+                Result.success(response)
             } catch (e: IOException) {
                 Timber.w(e, "SAP APDU send failed")
-                null
+                Result.failure(e)
             }
         }
 
-        override suspend fun requestAtr(): ByteArray? {
-            val sock = socket ?: return null
+        override suspend fun requestAtr(): Result<ByteArray?> {
+            val sock = socket ?: return Result.failure(Exception("Not connected"))
             return try {
                 val output = sock.outputStream
                 val input = sock.inputStream
@@ -119,13 +119,15 @@ class SapSecurityRepositoryImpl
                 output.flush()
 
                 val buffer = ByteArray(4096)
-                withTimeoutOrNull(5000L) {
-                    val read = input.read(buffer)
-                    if (read > 0) buffer.copyOf(read) else null
-                }
+                val response =
+                    withTimeoutOrNull(5000L) {
+                        val read = input.read(buffer)
+                        if (read > 0) buffer.copyOf(read) else null
+                    }
+                Result.success(response)
             } catch (e: IOException) {
                 Timber.w(e, "SAP ATR request failed")
-                null
+                Result.failure(e)
             }
         }
 

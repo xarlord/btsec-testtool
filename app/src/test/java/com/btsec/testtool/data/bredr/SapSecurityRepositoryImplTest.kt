@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test
  *
  * These tests verify:
  * - SAP connection state management
- * - APDU command transmission (null when disconnected)
+ * - APDU command transmission returns Result.failure when disconnected
  * - Connection cleanup
  * - Test report storage and retrieval
  */
@@ -116,34 +116,35 @@ class SapSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `sendApdu returns null when not connected`() =
+    fun `sendApdu returns failure when not connected`() =
         runTest {
             val apdu = SimApdu(0x00, 0xA4, 0x04, 0x00, le = 0x02)
-            val response = repository.sendApdu(apdu, 5000)
-            assertTrue(response == null)
+            val result = repository.sendApdu(apdu, 5000)
+            assertTrue(result.isFailure)
         }
 
     @Test
-    fun `sendApdu accepts valid APDU commands`() =
+    fun `sendApdu accepts valid APDU commands - fails when disconnected`() =
         runTest {
             val apdu = SimApdu(0x00, 0xA4, 0x04, 0x00, byteArrayOf(0x3F, 0x00), 0x02)
-            val response = repository.sendApdu(apdu, 5000)
-            assertTrue(response == null)
+            val result = repository.sendApdu(apdu, 5000)
+            assertTrue(result.isFailure)
         }
 
     @Test
-    fun `sendApdu handles timeout`() =
+    fun `sendApdu handles timeout - fails when disconnected`() =
         runTest {
             val apdu = SimApdu(0x00, 0xA4, 0x04, 0x00, le = 0x02)
-            val response = repository.sendApdu(apdu, 1)
-            assertTrue(response == null)
+            val result = repository.sendApdu(apdu, 1)
+            // When not connected, returns failure (not a timeout)
+            assertTrue(result.isFailure)
         }
 
     @Test
-    fun `requestAtr returns null when not connected`() =
+    fun `requestAtr returns failure when not connected`() =
         runTest {
-            val atr = repository.requestAtr()
-            assertTrue(atr == null)
+            val result = repository.requestAtr()
+            assertTrue(result.isFailure)
         }
 
     @Test
@@ -186,7 +187,7 @@ class SapSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `sendApdu with various APDU commands`() =
+    fun `sendApdu with various APDU commands - all fail when disconnected`() =
         runTest {
             val apduCommands =
                 listOf(
@@ -201,8 +202,10 @@ class SapSecurityRepositoryImplTest {
                 )
 
             for (apdu in apduCommands) {
-                val response = repository.sendApdu(apdu, 1000)
-                assertTrue(response == null)
+                val result = repository.sendApdu(apdu, 1000)
+                if (!result.isFailure) {
+                    throw AssertionError("sendApdu should return Result.failure when disconnected")
+                }
             }
         }
 }
