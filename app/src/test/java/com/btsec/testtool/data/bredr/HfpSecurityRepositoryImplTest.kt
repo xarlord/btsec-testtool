@@ -199,10 +199,9 @@ class HfpSecurityRepositoryImplTest {
             for (cmd in commands) {
                 val result = repository.sendAtCommand(cmd, 1000)
                 // Verify no crashes, returns failure when disconnected
-                assertTrue(
-                    "sendAtCommand($cmd) should return Result.failure when disconnected",
-                    result.isFailure,
-                )
+                if (!result.isFailure) {
+                    throw AssertionError("sendAtCommand($cmd) should return Result.failure when disconnected")
+                }
             }
         }
 }

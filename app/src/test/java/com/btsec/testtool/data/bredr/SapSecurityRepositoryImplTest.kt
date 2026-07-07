@@ -203,10 +203,9 @@ class SapSecurityRepositoryImplTest {
 
             for (apdu in apduCommands) {
                 val result = repository.sendApdu(apdu, 1000)
-                assertTrue(
-                    "sendApdu should return Result.failure when disconnected",
-                    result.isFailure,
-                )
+                if (!result.isFailure) {
+                    throw AssertionError("sendApdu should return Result.failure when disconnected")
+                }
             }
         }
 }

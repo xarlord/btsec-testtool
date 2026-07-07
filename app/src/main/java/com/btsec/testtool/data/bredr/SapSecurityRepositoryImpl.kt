@@ -119,10 +119,11 @@ class SapSecurityRepositoryImpl
                 output.flush()
 
                 val buffer = ByteArray(4096)
-                val response = withTimeoutOrNull(5000L) {
-                    val read = input.read(buffer)
-                    if (read > 0) buffer.copyOf(read) else null
-                }
+                val response =
+                    withTimeoutOrNull(5000L) {
+                        val read = input.read(buffer)
+                        if (read > 0) buffer.copyOf(read) else null
+                    }
                 Result.success(response)
             } catch (e: IOException) {
                 Timber.w(e, "SAP ATR request failed")

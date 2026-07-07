@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<checkstyle version="8.0">
+    <file name="/Users/runner/work/btsec-testtool/btsec-testtool/app/src/main/java/com/btsec/testtool/data/bredr/SapSecurityRepositoryImpl.kt">
+        <error line="122" column="32" severity="error" message="A multiline expression should start on a new line" source="standard:multiline-expression-wrapping" />
+    </file>
+</checkstyle>
