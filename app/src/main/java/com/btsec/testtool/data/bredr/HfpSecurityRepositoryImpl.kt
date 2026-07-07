@@ -81,8 +81,8 @@ class HfpSecurityRepositoryImpl
         override suspend fun sendAtCommand(
             command: String,
             timeoutMs: Long,
-        ): String? {
-            val sock = socket ?: return null
+        ): Result<String?> {
+            val sock = socket ?: return Result.failure(Exception("Not connected"))
             return try {
                 val output = sock.outputStream
                 val input = sock.inputStream
@@ -96,10 +96,10 @@ class HfpSecurityRepositoryImpl
                         val read = input.read(buffer)
                         if (read > 0) String(buffer, 0, read) else null
                     }
-                response?.trim()
+                Result.success(response?.trim())
             } catch (e: IOException) {
                 Timber.w(e, "AT command send failed: $command")
-                null
+                Result.failure(e)
             }
         }
 

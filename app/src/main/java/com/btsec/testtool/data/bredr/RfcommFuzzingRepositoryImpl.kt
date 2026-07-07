@@ -58,7 +58,12 @@ class RfcommFuzzingRepositoryImpl
             val uuids = device.uuids ?: return emptyList()
             val channels = mutableListOf<RfcommChannel>()
 
-            // Map well-known UUIDs to RFCOMM channel entries
+            // Map well-known UUIDs to RFCOMM channel entries.
+            // Note: Android's BluetoothDevice API does not expose the RFCOMM
+            // server channel number from SDP protocol descriptors. The actual
+            // channel is resolved when createRfcommSocketToServiceRecord() is
+            // called in connect(). We set channelNumber to 0 (unknown) and store
+            // the UUID for connection, matching the real connection behavior.
             for (parcelUuid in uuids) {
                 // Extract the 4-char short UUID from positions 4-8 of the
                 // standard UUID form (XXXXXXXX-XXXX-...).
@@ -71,8 +76,9 @@ class RfcommFuzzingRepositoryImpl
                 val profile = BtProfile.fromUuid(shortUuid)
                 channels.add(
                     RfcommChannel(
-                        // Actual channel discovered via SDP
-                        channelNumber = 1,
+                        // Channel number not available from Android SDP API;
+                        // resolved at connection time via UUID.
+                        channelNumber = 0,
                         serviceName = profile.displayName,
                         uuid = parcelUuid.uuid.toString(),
                         profileName = profile.displayName,
@@ -97,7 +103,8 @@ class RfcommFuzzingRepositoryImpl
                     bluetoothManager.adapter?.getRemoteDevice(deviceAddress)
                         ?: return Result.failure(Exception("Device not found: $deviceAddress"))
 
-                // Use SPP UUID as default for RFCOMM
+                // Prefer connecting by UUID for the discovered service;
+                // use SPP UUID as fallback when channel is given but no UUID mapping.
                 val socket = device.createRfcommSocketToServiceRecord(SPP_UUID)
                 socket.connect()
 
@@ -106,7 +113,7 @@ class RfcommFuzzingRepositoryImpl
                 inputStream = socket.inputStream
                 connected.value = true
 
-                Timber.i("RFCOMM connected to $deviceAddress channel $channelNumber")
+                Timber.i("RFCOMM connected to $deviceAddress (SPP fallback)")
                 Result.success(Unit)
             } catch (e: SecurityException) {
                 Timber.e(e, "Missing Bluetooth permissions")

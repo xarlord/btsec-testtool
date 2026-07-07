@@ -11,7 +11,6 @@ package com.btsec.testtool.data.bredr
 import com.btsec.testtool.domain.model.*
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -24,22 +23,9 @@ import org.junit.Test
  * Uses reflection to access private state for verification.
  */
 class BredrRepositoryUnitTest {
-    private lateinit var sdpRepo: SdpEnumerationRepositoryImpl
-    private lateinit var rfcommRepo: RfcommFuzzingRepositoryImpl
-    private lateinit var hfpRepo: HfpSecurityRepositoryImpl
-    private lateinit var avrcpRepo: AvrcpSecurityRepositoryImpl
-    private lateinit var pbapRepo: PbapSecurityRepositoryImpl
-    private lateinit var mapRepo: MapSecurityRepositoryImpl
-    private lateinit var sapRepo: SapSecurityRepositoryImpl
-    private lateinit var l2capRepo: L2capSecurityRepositoryImpl
-    private lateinit var snoopRepo: SnoopCaptureRepositoryImpl
-
-    @Before
-    fun setUp() {
-        // Note: These constructors require Context which we can't provide in unit tests.
-        // We test the public API contracts that don't require Android framework.
-        // The actual Bluetooth operations would be tested in androidTest.
-    }
+    // Note: Repository constructors require Android Context which we can't provide
+    // in pure unit tests. These tests verify model classes, enums, and data structures.
+    // Actual repository behavior is tested in androidTest (instrumented tests).
 
     // ========== SDP Enumeration ==========
 

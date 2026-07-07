@@ -39,19 +39,21 @@ interface SapSecurityRepository {
      *
      * @param apdu The APDU command to send.
      * @param timeoutMs Response timeout in milliseconds.
-     * @return The response bytes, or null on timeout.
+     * @return Result.success with the response bytes (null on timeout),
+     *         or Result.failure if not connected or an error occurs.
      */
     suspend fun sendApdu(
         apdu: SimApdu,
         timeoutMs: Long = 5000,
-    ): ByteArray?
+    ): Result<ByteArray?>
 
     /**
      * Request the SIM ATR (Answer to Reset).
      *
-     * @return The ATR bytes, or null on failure.
+     * @return Result.success with the ATR bytes (null on timeout/failure),
+     *         or Result.failure if not connected or an error occurs.
      */
-    suspend fun requestAtr(): ByteArray?
+    suspend fun requestAtr(): Result<ByteArray?>
 
     /**
      * Power off the SIM card via SAP.
