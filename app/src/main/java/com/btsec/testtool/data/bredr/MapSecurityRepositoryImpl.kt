@@ -308,11 +308,11 @@ class MapSecurityRepositoryImpl
                         val value = line.substringAfter(":").trim()
                         type =
                             when (value.uppercase()) {
-                            "SMS_GSM", "SMS_CDMA" -> MessageType.SMS
-                            "MMS" -> MessageType.MMS
-                            "EMAIL" -> MessageType.EMAIL
-                            else -> MessageType.UNKNOWN
-                        }
+                                "SMS_GSM", "SMS_CDMA" -> MessageType.SMS
+                                "MMS" -> MessageType.MMS
+                                "EMAIL" -> MessageType.EMAIL
+                                else -> MessageType.UNKNOWN
+                            }
                     }
                     line.startsWith("X-ORIGINATOR:") -> {
                         sender = line.substringAfter(":").trim().ifBlank { null }

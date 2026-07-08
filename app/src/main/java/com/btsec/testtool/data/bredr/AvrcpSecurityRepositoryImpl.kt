@@ -157,9 +157,10 @@ class AvrcpSecurityRepositoryImpl
                 // Read AV/C response
                 val input = sock.inputStream
                 val buffer = ByteArray(64)
-                val read = withTimeoutOrNull(500L) {
-                    input.read(buffer)
-                }
+                val read =
+                    withTimeoutOrNull(500L) {
+                        input.read(buffer)
+                    }
                 if (read != null && read > 0) {
                     val responseCode = buffer[0].toInt() and 0x0F
                     Timber.d("AVRCP command response: ctype=0x${responseCode.toString(16)}")
@@ -204,67 +205,75 @@ class AvrcpSecurityRepositoryImpl
 
             when (command.lowercase()) {
                 "play" -> {
-                    opcode = 0x7C // VENDOR DEPENDENT
-                    operands = byteArrayOf(
-                        0x00, 0x00, // Company ID (minimum 3 bytes for vendor)
-                        0x09, 0x00, // Play opcode (AVRCP Play)
-                    )
+                    opcode = 0x7C
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x09, 0x00,
+                        )
                 }
                 "pause" -> {
-                    opcode = 0x7C // VENDOR DEPENDENT
-                    operands = byteArrayOf(
-                        0x00, 0x00,
-                        0x09, 0x00, // Pause opcode (AVRCP Pause)
-                    )
+                    opcode = 0x7C
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x09, 0x00,
+                        )
                 }
                 "stop" -> {
-                    opcode = 0x7E // VENDOR DEPENDENT
-                    operands = byteArrayOf(
-                        0x00, 0x00,
-                        0x09, 0x00, // Stop opcode
-                    )
+                    opcode = 0x7E
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x09, 0x00,
+                        )
                 }
                 "next" -> {
                     opcode = 0x7C
-                    operands = byteArrayOf(
-                        0x00, 0x00,
-                        0x09, 0x00, // Next Track
-                    )
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x09, 0x00,
+                        )
                 }
                 "previous" -> {
                     opcode = 0x7C
-                    operands = byteArrayOf(
-                        0x00, 0x00,
-                        0x09, 0x00, // Previous Track
-                    )
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x09, 0x00,
+                        )
                 }
                 "volume_up" -> {
                     opcode = 0x7C
-                    operands = byteArrayOf(
-                        0x00, 0x00,
-                        0x09, 0x00, // Volume Up
-                    )
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x09, 0x00,
+                        )
                 }
                 "volume_down" -> {
                     opcode = 0x7C
-                    operands = byteArrayOf(
-                        0x00, 0x00,
-                        0x09, 0x00, // Volume Down
-                    )
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x09, 0x00,
+                        )
                 }
                 else -> {
                     // Generic pass-through for unrecognized commands
                     opcode = 0x7C
-                    operands = byteArrayOf(
-                        0x00, 0x00,
-                        0x00, command.toByteArray(Charsets.UTF_8).firstOrNull()?.toByte() ?: 0x00,
-                    )
+                    operands =
+                        byteArrayOf(
+                            0x00, 0x00,
+                            0x00, command.toByteArray(Charsets.UTF_8).firstOrNull()?.toByte() ?: 0x00,
+                        )
                 }
             }
 
             return byteArrayOf(
-                0x00, // CType: CONTROL (0x00)
-                0x09, // Subunit type: PANEL (0x09) | ID: 0x00
+                0x00,
+                0x09,
                 opcode,
                 *operands,
             )
@@ -273,8 +282,7 @@ class AvrcpSecurityRepositoryImpl
         /**
          * Parses AVRCP browsing response (media element tree items).
          *
-         * Each item in the browse response has the format:
-         * [ItemType(1)] [Length(2)] [UID(8)] [Attributes...]
+         * Each item: ItemType(1), Length(2), UID(8), Attributes.
          */
         private fun parseAvrcpBrowseResponse(data: ByteArray): List<AvrcpMediaItem> {
             val items = mutableListOf<AvrcpMediaItem>()
@@ -283,8 +291,9 @@ class AvrcpSecurityRepositoryImpl
             while (offset + 3 < data.size) {
                 val itemType = data[offset].toInt() and 0xFF
                 offset++
-                val itemLen = ((data[offset].toInt() and 0xFF) shl 8) or
-                    (data[offset + 1].toInt() and 0xFF)
+                val itemLen =
+                    ((data[offset].toInt() and 0xFF) shl 8) or
+                        (data[offset + 1].toInt() and 0xFF)
                 offset += 2
 
                 if (offset + itemLen > data.size) break
@@ -310,36 +319,39 @@ class AvrcpSecurityRepositoryImpl
                     attrOffset++
                     val charSetId = data[attrOffset].toInt() and 0xFF
                     attrOffset++
-                    val attrLen = ((data[attrOffset].toInt() and 0xFF) shl 16) or
-                        ((data[attrOffset + 1].toInt() and 0xFF) shl 8) or
-                        (data[attrOffset + 2].toInt() and 0xFF)
+                    val attrLen =
+                        ((data[attrOffset].toInt() and 0xFF) shl 16) or
+                            ((data[attrOffset + 1].toInt() and 0xFF) shl 8) or
+                            (data[attrOffset + 2].toInt() and 0xFF)
                     attrOffset += 3
 
                     if (attrLen > 0 && attrOffset + attrLen <= offset + remainingLen) {
-                        val attrValue = String(data, attrOffset, attrLen, Charsets.UTF_16BE)
-                            .trimEnd('\u0000')
+                        val attrValue =
+                            String(data, attrOffset, attrLen, Charsets.UTF_16BE)
+                                .trimEnd('\u0000')
                         attrs[attrId] = attrValue
                         attrOffset += attrLen
                     }
                 }
 
-                val mediaType = when (itemType) {
-                    0x01 -> MediaItemType.FOLDER
-                    0x02 -> MediaItemType.TRACK
-                    else -> MediaItemType.UNKNOWN
-                }
+                val mediaType =
+                    when (itemType) {
+                        0x01 -> MediaItemType.FOLDER
+                        0x02 -> MediaItemType.TRACK
+                        else -> MediaItemType.UNKNOWN
+                    }
 
                 items.add(
                     AvrcpMediaItem(
                         uid = uid,
-                        title = attrs[0x01], // Media Attribute ID: Title
-                        artist = attrs[0x02], // Artist
-                        album = attrs[0x03], // Album
-                        genre = attrs[0x04], // Genre
+                        title = attrs[0x01],
+                        artist = attrs[0x02],
+                        album = attrs[0x03],
+                        genre = attrs[0x04],
                         trackNumber = attrs[0x05]?.toIntOrNull(),
                         duration = attrs[0x06]?.toIntOrNull(),
                         type = mediaType,
-                        path = attrs[0x07], // Folder path
+                        path = attrs[0x07],
                     ),
                 )
 
