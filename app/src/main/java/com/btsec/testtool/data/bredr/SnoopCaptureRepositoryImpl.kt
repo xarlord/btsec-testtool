@@ -9,20 +9,26 @@
 package com.btsec.testtool.data.bredr
 
 import android.content.Context
+import com.btsec.testtool.data.bredr.strategy.DirectFileSnoopStrategy
 import com.btsec.testtool.domain.model.HciPacketType
 import com.btsec.testtool.domain.model.SnoopCaptureSession
 import com.btsec.testtool.domain.model.SnoopDirection
 import com.btsec.testtool.domain.model.SnoopRecord
 import com.btsec.testtool.domain.repository.SnoopCaptureRepository
+import com.btsec.testtool.domain.repository.SnoopCaptureStrategy
 import com.btsec.testtool.domain.usecase.SnoopCaptureUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 import java.io.File
+import java.io.InputStream
 import java.io.RandomAccessFile
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,10 +36,23 @@ import javax.inject.Singleton
 /**
  * Implementation of [SnoopCaptureRepository].
  *
- * Monitors the HCI snoop log file at the standard Android path
- * and parses new records as they appear.
+ * Uses the strategy pattern to support multiple HCI snoop log capture methods:
+ * - **Direct file read** (requires root) — the original approach
+ * - **Shizuku shell** (root-free) — placeholder, to be wired when Shizuku lib is added
+ * - **Bugreport zip extraction** (root-free, post-capture)
+ *
+ * Strategies are injected via Hilt as a [List] of [SnoopCaptureStrategy]. The
+ * repository auto-selects the first available strategy that [canReadSnoopLog].
+ * The user can override via [selectStrategy].
+ *
+ * For live monitoring (file-tail polling), the repository falls back to direct
+ * [File] I/O using [DirectFileSnoopStrategy.SNOOP_LOG_PATH] — this is the only
+ * strategy that supports incremental polling. Other strategies provide one-shot
+ * reads via [SnoopCaptureStrategy.readSnoopLog].
  *
  * Delegates packet parsing to [SnoopCaptureUseCase].
+ *
+ * Issues: #375 (root-free snoop capture), #412 (strategy pattern refactor)
  */
 @Singleton
 class SnoopCaptureRepositoryImpl
@@ -41,14 +60,21 @@ class SnoopCaptureRepositoryImpl
     constructor(
         @ApplicationContext private val context: Context,
         private val snoopCaptureUseCase: SnoopCaptureUseCase,
+        private val strategies: Set<@JvmSuppressWildcards SnoopCaptureStrategy>,
     ) : SnoopCaptureRepository {
         private val isCapturing = MutableStateFlow(false)
         private val captureSession = MutableStateFlow<SnoopCaptureSession?>(null)
         private val savedSessions = MutableStateFlow<List<SnoopCaptureSession>>(emptyList())
 
-        private var monitorJob: Job? = null
+        private var monitorJob: kotlinx.coroutines.Job? = null
         private var lastFileSize = 0L
         private var sessionStartTime = 0L
+
+        /** The currently selected strategy (or null if none selected yet). */
+        private var activeStrategy: SnoopCaptureStrategy? = null
+
+        /** Mutex to prevent concurrent strategy auto-selection. */
+        private val strategyMutex = Mutex()
 
         override fun startCapture(): Flow<SnoopRecord> {
             return kotlinx.coroutines.flow.callbackFlow {
@@ -66,8 +92,8 @@ class SnoopCaptureRepositoryImpl
                 // monitoring coroutine is cancelled automatically when the flow
                 // collector is cancelled — fixing the raw CoroutineScope leak (#380).
                 monitorJob =
-                    launch(Dispatchers.IO) {
-                        val snoopFile = File(SNOOP_LOG_PATH)
+                    launch(kotlinx.coroutines.Dispatchers.IO) {
+                        val snoopFile = File(DirectFileSnoopStrategy.SNOOP_LOG_PATH)
 
                         while (isActive) {
                             try {
@@ -142,7 +168,79 @@ class SnoopCaptureRepositoryImpl
 
         override fun getSavedSessions(): Flow<List<SnoopCaptureSession>> = savedSessions
 
+        // ── Strategy selection ──
+
+        override fun getAvailableStrategies(): List<SnoopCaptureRepository.StrategyInfo> {
+            return strategies.map { strategy ->
+                SnoopCaptureRepository.StrategyInfo(
+                    name = strategy.getName(),
+                    isAvailable = strategy.isAvailable(),
+                    canRead = strategy.isAvailable() && strategy.canReadSnoopLog(),
+                )
+            }
+        }
+
+        override fun getActiveStrategyName(): String? = activeStrategy?.getName()
+
+        override fun selectStrategy(name: String) {
+            val strategy = strategies.find { it.getName() == name }
+            if (strategy != null && strategy.isAvailable()) {
+                activeStrategy = strategy
+                Timber.i("Snoop capture strategy selected: %s", name)
+            } else {
+                Timber.w("Cannot select strategy '%s': not found or not available", name)
+            }
+        }
+
+        /**
+         * Auto-select the first available strategy that can read the snoop log.
+         *
+         * @return the selected strategy, or null if none can read.
+         */
+        private suspend fun autoSelectStrategy(): SnoopCaptureStrategy? {
+            return strategyMutex.withLock {
+                // Check the currently active strategy first
+                activeStrategy?.let { strategy ->
+                    if (strategy.isAvailable() && strategy.canReadSnoopLog()) {
+                        return strategy
+                    }
+                }
+                // Otherwise scan all strategies
+                for (strategy in strategies) {
+                    try {
+                        if (strategy.isAvailable() && strategy.canReadSnoopLog()) {
+                            activeStrategy = strategy
+                            Timber.i("Auto-selected snoop capture strategy: %s", strategy.getName())
+                            return strategy
+                        }
+                    } catch (e: Exception) {
+                        Timber.w(e, "Strategy %s check failed", strategy.getName())
+                    }
+                }
+                Timber.w("No snoop capture strategy is available")
+                null
+            }
+        }
+
+        /**
+         * Convenience method to read snoop log via the best available strategy.
+         *
+         * For strategies that support streaming (DirectFile), the existing
+         * file-tail polling in [startCapture] is preferred. This method is
+         * intended for one-shot reads (e.g., from bugreport zips).
+         *
+         * @return the snoop log input stream, or null if no strategy can read.
+         */
+        suspend fun readViaStrategy(): InputStream? {
+            val strategy = autoSelectStrategy() ?: return null
+            return strategy.readSnoopLog().getOrNull()
+        }
+
         // ── Private helpers ──
+
+        private suspend fun delay(ms: Long) {
+            kotlinx.coroutines.delay(ms)
+        }
 
         private fun readNewRecords(file: File): List<SnoopRecord> {
             val records = mutableListOf<SnoopRecord>()
@@ -205,7 +303,6 @@ class SnoopCaptureRepositoryImpl
         private fun Int.toUnsigned(): Int = if (this < 0) this + (1L shl 32).toInt() else this
 
         companion object {
-            private const val SNOOP_LOG_PATH = "/data/misc/bluetooth/logs/btsnoop_hci.log"
             private const val SNOOP_POLL_INTERVAL_MS = 500L
         }
     }

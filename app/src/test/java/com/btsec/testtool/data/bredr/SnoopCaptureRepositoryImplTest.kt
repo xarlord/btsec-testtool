@@ -9,10 +9,14 @@
 package com.btsec.testtool.data.bredr
 
 import android.content.Context
+import com.btsec.testtool.data.bredr.strategy.BugreportSnoopStrategy
+import com.btsec.testtool.data.bredr.strategy.DirectFileSnoopStrategy
+import com.btsec.testtool.data.bredr.strategy.ShizukuSnoopStrategy
 import com.btsec.testtool.domain.model.HciPacketType
 import com.btsec.testtool.domain.model.SnoopCaptureSession
 import com.btsec.testtool.domain.model.SnoopDirection
 import com.btsec.testtool.domain.model.SnoopRecord
+import com.btsec.testtool.domain.repository.SnoopCaptureStrategy
 import com.btsec.testtool.domain.usecase.SnoopCaptureUseCase
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
@@ -20,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -37,18 +42,27 @@ import java.nio.ByteOrder
  * - The `readNewRecords` parser does not leak file descriptors when a record
  *   is truncated (regression test for #379 — RandomAccessFile .use{} fix)
  * - The parser correctly decodes a well-formed btsnoop record
+ * - Strategy selection logic (getAvailableStrategies, selectStrategy, getActiveStrategyName)
  */
 @DisplayName("SnoopCaptureRepositoryImpl")
 class SnoopCaptureRepositoryImplTest {
     private lateinit var context: Context
     private lateinit var snoopCaptureUseCase: SnoopCaptureUseCase
+    private lateinit var strategies: Set<SnoopCaptureStrategy>
     private lateinit var repository: SnoopCaptureRepositoryImpl
 
     @BeforeEach
     fun setup() {
         context = mockk(relaxed = true)
         snoopCaptureUseCase = mockk(relaxed = true)
-        repository = SnoopCaptureRepositoryImpl(context, snoopCaptureUseCase)
+        // Provide the default set of strategies (same order as SnoopStrategyModule)
+        strategies =
+            setOf(
+                DirectFileSnoopStrategy(),
+                ShizukuSnoopStrategy(),
+                BugreportSnoopStrategy(),
+            )
+        repository = SnoopCaptureRepositoryImpl(context, snoopCaptureUseCase, strategies)
     }
 
     // ========== Session state ==========
@@ -110,6 +124,51 @@ class SnoopCaptureRepositoryImplTest {
         runTest {
             assertNotNull(repository.getCaptureSession()) // flow exists
             assertEquals(null, repository.getCaptureSession().first())
+        }
+
+    // ========== Strategy selection ==========
+
+    @Test
+    fun `getAvailableStrategies returns all registered strategies`() =
+        runTest {
+            val available = repository.getAvailableStrategies()
+            assertEquals(3, available.size)
+
+            val names = available.map { it.name }
+            assertTrue(names.contains("Direct File"))
+            assertTrue(names.contains("Shizuku"))
+            assertTrue(names.contains("Bugreport"))
+        }
+
+    @Test
+    fun `getActiveStrategyName is null initially`() =
+        runTest {
+            assertNull(repository.getActiveStrategyName())
+        }
+
+    @Test
+    fun `selectStrategy selects by name`() =
+        runTest {
+            repository.selectStrategy("Direct File")
+            assertEquals("Direct File", repository.getActiveStrategyName())
+        }
+
+    @Test
+    fun `selectStrategy ignores unavailable strategy name`() =
+        runTest {
+            repository.selectStrategy("NonexistentStrategy")
+            assertNull(repository.getActiveStrategyName())
+        }
+
+    @Test
+    fun `selectStrategy persists across calls`() =
+        runTest {
+            repository.selectStrategy("Direct File")
+            assertEquals("Direct File", repository.getActiveStrategyName())
+
+            // Selecting an unavailable strategy keeps the previous selection
+            repository.selectStrategy("Bugreport")
+            assertEquals("Direct File", repository.getActiveStrategyName())
         }
 
     // ========== readNewRecords parser (regression tests for #379) ==========
