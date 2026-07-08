@@ -1,0 +1,2711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTSec TestTool - Mobile UI Design Showcase</title>
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & VARIABLES
+       ========================================================================== */
+    :root {
+      --bg-color: #08090a;
+      --phone-bg: #121212;
+      --accent-green: #00E676;
+      --accent-green-rgb: 0, 230, 118;
+      --accent-cyan: #00BCD4;
+      --accent-cyan-rgb: 0, 188, 212;
+      --accent-red: #FF5252;
+      --accent-red-rgb: 255, 82, 82;
+      --accent-orange: #FF9100;
+      
+      --text-primary: #FFFFFF;
+      --text-secondary: #8e9fa0;
+      --text-muted: #526366;
+      
+      --card-bg: #1a1e20;
+      --card-border: rgba(0, 188, 212, 0.15);
+      --card-border-green: rgba(0, 230, 118, 0.15);
+      
+      --glow-green: 0 0 15px rgba(0, 230, 118, 0.35);
+      --glow-cyan: 0 0 15px rgba(0, 188, 212, 0.35);
+      --glow-red: 0 0 15px rgba(255, 82, 82, 0.35);
+      
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 16px;
+      --border-radius-xl: 28px;
+      
+      --font-display: 'Orbitron', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --font-sans: 'Inter', sans-serif;
+    }
+
+    /* ==========================================================================
+       GLOBAL LAYOUT & BACKGROUND
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-cyan) var(--bg-color);
+    }
+    
+    body {
+      background-color: var(--bg-color);
+      /* Cyber Grid Background */
+      background-image: 
+        linear-gradient(rgba(0, 188, 212, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 188, 212, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-cyan);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-green);
+    }
+
+    /* ==========================================================================
+       WEB HUB HEADER & CONTROLS
+       ========================================================================== */
+    .hud-header {
+      width: 100%;
+      max-width: 1600px;
+      padding: 30px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      border-bottom: 1px solid rgba(0, 188, 212, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .hud-logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .hud-logo-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--accent-cyan);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--glow-cyan);
+      background: rgba(0, 188, 212, 0.05);
+      position: relative;
+    }
+
+    .hud-logo-icon::before {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-top: 2px solid var(--accent-green);
+      border-left: 2px solid var(--accent-green);
+      top: -4px;
+      left: -4px;
+    }
+
+    .hud-logo-icon::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-bottom: 2px solid var(--accent-green);
+      border-right: 2px solid var(--accent-green);
+      bottom: -4px;
+      right: -4px;
+    }
+
+    .hud-logo-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--accent-cyan);
+      filter: drop-shadow(0 0 5px var(--accent-cyan));
+    }
+
+    .hud-title-block h1 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin: 0;
+      background: linear-gradient(90deg, #fff, var(--text-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hud-title-block p {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-green);
+      margin: 5px 0 0 0;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: var(--glow-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 12px rgba(0, 230, 118, 0.8); }
+      100% { transform: scale(0.9); opacity: 0.6; }
+    }
+
+    .hud-controls {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-hub {
+      background: rgba(18, 18, 18, 0.7);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      padding: 10px 20px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: var(--border-radius-sm);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-hub:hover, .btn-hub.active {
+      background: var(--accent-cyan);
+      color: var(--bg-color);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-hub.btn-green {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .btn-hub.btn-green:hover, .btn-hub.btn-green.active {
+      background: var(--accent-green);
+      color: var(--bg-color);
+      box-shadow: var(--glow-green);
+    }
+
+    /* ==========================================================================
+       SHOWCASE CONTAINER (GRID vs TABS)
+       ========================================================================== */
+    .showcase-container {
+      width: 100%;
+      max-width: 1600px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-grow: 1;
+    }
+
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      width: 100%;
+      justify-items: center;
+      transition: opacity 0.5s ease;
+    }
+
+    @media (max-width: 1200px) {
+      .screens-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 800px) {
+      .screens-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Single Device Focus Layout */
+    .focus-layout {
+      display: none;
+      width: 100%;
+      max-height: 850px;
+      justify-content: center;
+      align-items: center;
+      gap: 50px;
+      margin-top: 20px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .focus-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 280px;
+    }
+
+    .focus-menu-btn {
+      background: rgba(26, 30, 32, 0.6);
+      border: 1px solid rgba(0, 188, 212, 0.15);
+      color: var(--text-secondary);
+      padding: 15px 20px;
+      border-radius: var(--border-radius-md);
+      font-family: var(--font-display);
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .focus-menu-btn .btn-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      opacity: 0.5;
+    }
+
+    .focus-menu-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      transform: translateX(5px);
+    }
+
+    .focus-menu-btn.active {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      background: rgba(0, 230, 118, 0.05);
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.1);
+      transform: translateX(10px);
+    }
+
+    /* ==========================================================================
+       TACTICAL MOBILE MOCKUP CONTAINER
+       ========================================================================== */
+    .tactical-phone {
+      width: 360px;
+      height: 740px;
+      background: #0d0f10;
+      border-radius: var(--border-radius-xl);
+      padding: 10px;
+      border: 3px solid #1c2224;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), 0 0 30px rgba(0, 188, 212, 0.05);
+      position: relative;
+      user-select: none;
+      transition: border-color 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .tactical-phone.active-sim {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 25px rgba(0, 188, 212, 0.15);
+    }
+
+    /* Cyber Bezel Corners */
+    .tactical-phone::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-top: 3px solid var(--accent-cyan);
+      border-left: 3px solid var(--accent-cyan);
+      top: -3px;
+      left: -3px;
+      border-top-left-radius: var(--border-radius-xl);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .tactical-phone::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-bottom: 3px solid var(--accent-cyan);
+      border-right: 3px solid var(--accent-cyan);
+      bottom: -3px;
+      right: -3px;
+      border-bottom-right-radius: var(--border-radius-xl);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    /* Speaker and Notch */
+    .phone-notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 22px;
+      background: #000;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .phone-speaker {
+      width: 50px;
+      height: 4px;
+      background: #222;
+      border-radius: 2px;
+      margin-bottom: 4px;
+    }
+
+    .phone-camera {
+      width: 6px;
+      height: 6px;
+      background: #111;
+      border-radius: 50%;
+      margin-left: 12px;
+      border: 1px solid #222;
+      box-shadow: inset 0 0 2px rgba(0, 188, 212, 0.8);
+      margin-bottom: 4px;
+    }
+
+    /* Side Buttons */
+    .phone-btn {
+      position: absolute;
+      background: #1c2224;
+      border-radius: 2px;
+    }
+    .phone-btn.power {
+      right: -5px;
+      top: 150px;
+      width: 5px;
+      height: 45px;
+    }
+    .phone-btn.vol-up {
+      left: -5px;
+      top: 130px;
+      width: 5px;
+      height: 35px;
+    }
+    .phone-btn.vol-down {
+      left: -5px;
+      top: 175px;
+      width: 5px;
+      height: 35px;
+    }
+
+    /* ==========================================================================
+       MOBILE OS CONTAINER (THE SCREEN INTERIOR)
+       ========================================================================== */
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background-color: var(--phone-bg);
+      border-radius: calc(var(--border-radius-xl) - 6px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 1px solid #161a1b;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      height: 36px;
+      padding: 12px 20px 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      z-index: 90;
+      background: var(--phone-bg);
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-ble-status {
+      width: 10px;
+      height: 10px;
+      fill: var(--accent-cyan);
+      filter: drop-shadow(0 0 3px var(--accent-cyan));
+    }
+    
+    .icon-ble-status.fuzzing {
+      fill: var(--accent-red);
+      filter: drop-shadow(0 0 3px var(--accent-red));
+      animation: blink 0.8s infinite;
+    }
+    
+    .icon-ble-status.scanning {
+      fill: var(--accent-green);
+      filter: drop-shadow(0 0 3px var(--accent-green));
+      animation: blink 1.2s infinite;
+    }
+
+    @keyframes blink {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+
+    .battery-bar {
+      width: 18px;
+      height: 9px;
+      border: 1px solid var(--text-secondary);
+      border-radius: 2px;
+      position: relative;
+      padding: 1px;
+    }
+
+    .battery-fill {
+      height: 100%;
+      width: 80%;
+      background: var(--accent-green);
+    }
+
+    .battery-head {
+      width: 2px;
+      height: 4px;
+      background: var(--text-secondary);
+      position: absolute;
+      right: -3px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Screen Label (Shows the screen context) */
+    .screen-label {
+      position: absolute;
+      top: 36px;
+      right: 15px;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: rgba(0, 188, 212, 0.4);
+      letter-spacing: 1px;
+      z-index: 10;
+    }
+
+    /* Content Area */
+    .screen-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      padding-top: 10px;
+      padding-bottom: 70px; /* space for navbar */
+      position: relative;
+    }
+
+    /* Screen Title Bar */
+    .screen-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 8px;
+    }
+
+    .screen-title svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--accent-cyan);
+    }
+
+    /* Bottom Navigation Bar */
+    .phone-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(18, 18, 18, 0.95);
+      border-top: 1px solid rgba(0, 188, 212, 0.15);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 10px;
+      z-index: 95;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 48px;
+      height: 48px;
+      border-radius: var(--border-radius-md);
+      position: relative;
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-item span {
+      font-size: 7px;
+      font-family: var(--font-display);
+      margin-top: 4px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-item:hover {
+      color: var(--accent-cyan);
+    }
+
+    .nav-item.active {
+      color: var(--accent-green);
+    }
+
+    .nav-item.active svg {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 0 5px var(--accent-green));
+    }
+    
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      width: 12px;
+      height: 2px;
+      background: var(--accent-green);
+      border-radius: 1px;
+      box-shadow: var(--glow-green);
+    }
+
+    /* ==========================================================================
+       REUSABLE MOBILE COMPONENT STYLES
+       ========================================================================== */
+    .cyber-card {
+      background: rgba(26, 30, 32, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius-md);
+      padding: 12px;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cyber-card.green-border {
+      border-color: var(--card-border-green);
+    }
+    
+    .cyber-card.red-border {
+      border-color: rgba(255, 82, 82, 0.25);
+    }
+
+    .cyber-card-decor {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, transparent 50%, var(--accent-cyan) 50%);
+    }
+
+    .green-border .cyber-card-decor {
+      background: linear-gradient(135deg, transparent 50%, var(--accent-green) 50%);
+    }
+
+    .red-border .cyber-card-decor {
+      background: linear-gradient(135deg, transparent 50%, var(--accent-red) 50%);
+    }
+
+    .card-label {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Buttons */
+    .mobile-btn {
+      width: 100%;
+      background: rgba(0, 188, 212, 0.05);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      padding: 10px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .mobile-btn:hover {
+      background: var(--accent-cyan);
+      color: var(--bg-color);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .mobile-btn.btn-green {
+      background: rgba(0, 230, 118, 0.05);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .mobile-btn.btn-green:hover {
+      background: var(--accent-green);
+      color: var(--bg-color);
+      box-shadow: var(--glow-green);
+    }
+
+    .mobile-btn.btn-red {
+      background: rgba(255, 82, 82, 0.05);
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .mobile-btn.btn-red:hover {
+      background: var(--accent-red);
+      color: var(--bg-color);
+      box-shadow: var(--glow-red);
+    }
+
+    /* Small Switch */
+    .cyber-switch {
+      position: relative;
+      display: inline-block;
+      width: 32px;
+      height: 18px;
+    }
+
+    .cyber-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #2a3133;
+      transition: .3s;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 10px;
+      width: 10px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-secondary);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    .cyber-switch input:checked + .switch-slider {
+      background-color: rgba(0, 230, 118, 0.2);
+      border-color: var(--accent-green);
+    }
+
+    .cyber-switch input:checked + .switch-slider:before {
+      background-color: var(--accent-green);
+      transform: translateX(14px);
+      box-shadow: 0 0 5px var(--accent-green);
+    }
+
+    /* Dropdowns */
+    .mobile-select-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .mobile-select {
+      width: 100%;
+      background: #151a1c;
+      border: 1px solid rgba(0, 188, 212, 0.2);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--border-radius-sm);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+    }
+
+    .mobile-select-wrapper::after {
+      content: '▼';
+      font-size: 8px;
+      color: var(--accent-cyan);
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    /* Status badges */
+    .badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+
+    .badge-cyan { background: rgba(0, 188, 212, 0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
+    .badge-green { background: rgba(0, 230, 118, 0.15); color: var(--accent-green); border: 1px solid var(--accent-green); }
+    .badge-red { background: rgba(255, 82, 82, 0.15); color: var(--accent-red); border: 1px solid var(--accent-red); }
+    .badge-orange { background: rgba(255, 145, 0, 0.15); color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+
+    /* ==========================================================================
+       SCREEN 1: DASHBOARD VIEW
+       ========================================================================== */
+    .radar-panel {
+      height: 160px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, rgba(0, 188, 212, 0.05) 0%, transparent 70%);
+      margin-bottom: 15px;
+      border: 1px dashed rgba(0, 188, 212, 0.15);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+    }
+
+    .radar-sweep {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(0, 188, 212, 0.15) 0deg, rgba(0, 188, 212, 0) 90deg);
+      transform-origin: center;
+      animation: sweep 4s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .scanning-active .radar-sweep {
+      animation-play-state: running;
+    }
+
+    @keyframes sweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .radar-grid-line {
+      position: absolute;
+      border: 1px solid rgba(0, 188, 212, 0.06);
+      border-radius: 50%;
+    }
+    
+    .r-line-1 { width: 40px; height: 40px; }
+    .r-line-2 { width: 85px; height: 85px; }
+    .r-line-3 { width: 130px; height: 130px; }
+    
+    .radar-cross-h {
+      position: absolute;
+      width: 85%;
+      height: 1px;
+      background: rgba(0, 188, 212, 0.06);
+    }
+    .radar-cross-v {
+      position: absolute;
+      height: 85%;
+      width: 1px;
+      background: rgba(0, 188, 212, 0.06);
+    }
+
+    .radar-blip {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: var(--glow-cyan);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .scanning-active .radar-blip {
+      opacity: 1;
+    }
+
+    .blip-1 { top: 30%; left: 35%; animation: blip-pulse 2s infinite 0.2s; }
+    .blip-2 { top: 65%; left: 70%; animation: blip-pulse 2s infinite 1.2s; }
+    .blip-3 { top: 50%; left: 20%; animation: blip-pulse 2s infinite 0.7s; }
+
+    @keyframes blip-pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.6); opacity: 0.3; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    .radar-center {
+      z-index: 2;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #121212;
+      border: 2px solid var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .radar-center svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--accent-cyan);
+    }
+
+    .mini-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .mini-stat-card {
+      background: #171a1c;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: var(--border-radius-md);
+      padding: 10px 5px;
+      text-align: center;
+    }
+
+    .mini-stat-num {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .mini-stat-num.cyan { color: var(--accent-cyan); }
+    .mini-stat-num.green { color: var(--accent-green); }
+    .mini-stat-num.red { color: var(--accent-red); }
+
+    .mini-stat-title {
+      font-size: 7px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .terminal-panel {
+      background: #08090a;
+      border: 1px solid rgba(0, 230, 118, 0.15);
+      border-radius: var(--border-radius-md);
+      height: 170px;
+      padding: 10px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      line-height: 1.4;
+      color: var(--accent-green);
+    }
+
+    .terminal-title {
+      border-bottom: 1px solid rgba(0, 230, 118, 0.15);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+      font-size: 7px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .term-line {
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+
+    .term-line.info { color: var(--accent-cyan); }
+    .term-line.warn { color: var(--accent-orange); }
+    .term-line.danger { color: var(--accent-red); }
+    .term-line .time { color: var(--text-muted); margin-right: 4px; }
+
+    /* ==========================================================================
+       SCREEN 2: DEVICE SCANNER VIEW
+       ========================================================================== */
+    .scan-options-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .scan-pill {
+      background: #171a1c;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      padding: 4px 8px;
+      font-size: 8px;
+      border-radius: var(--border-radius-sm);
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    .scan-pill.active {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 188, 212, 0.05);
+    }
+
+    .scan-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .scan-item {
+      background: #171b1d;
+      border-left: 3px solid var(--accent-cyan);
+      border-radius: var(--border-radius-sm);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .scan-item:hover {
+      background: #202427;
+      transform: translateX(2px);
+    }
+
+    .scan-item.vuln-found {
+      border-left-color: var(--accent-red);
+    }
+
+    .scan-item.secure {
+      border-left-color: var(--accent-green);
+    }
+
+    .scan-item-meta {
+      flex: 1;
+    }
+
+    .scan-item-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .scan-item-mac {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: var(--text-secondary);
+    }
+
+    .scan-item-tags {
+      margin-top: 5px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .scan-item-rssi {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--accent-cyan);
+    }
+
+    .scan-item-rssi.weak { color: var(--text-muted); }
+    .scan-item-rssi.strong { color: var(--accent-green); }
+
+    .rssi-bars {
+      display: flex;
+      gap: 1px;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .rssi-bar {
+      width: 2px;
+      background: #2b3133;
+    }
+    .r-bar-1 { height: 3px; }
+    .r-bar-2 { height: 5px; }
+    .r-bar-3 { height: 7px; }
+    .r-bar-4 { height: 9px; }
+
+    .rssi-strong .rssi-bar { background: var(--accent-green); }
+    .rssi-med .r-bar-1, .rssi-med .r-bar-2, .rssi-med .r-bar-3 { background: var(--accent-cyan); }
+    .rssi-weak .r-bar-1, .rssi-weak .r-bar-2 { background: var(--accent-orange); }
+
+    /* ==========================================================================
+       SCREEN 3: FUZZER VIEW
+       ========================================================================== */
+    .target-box {
+      background: rgba(0, 188, 212, 0.05);
+      border: 1px solid var(--accent-cyan);
+      border-radius: var(--border-radius-md);
+      padding: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .target-details {
+      flex: 1;
+    }
+
+    .target-change-btn {
+      font-family: var(--font-display);
+      font-size: 8px;
+      color: var(--accent-cyan);
+      background: none;
+      border: 1px solid var(--accent-cyan);
+      padding: 3px 6px;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .layer-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .layer-btn {
+      background: #171b1d;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      padding: 8px 0;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      border-radius: var(--border-radius-sm);
+      transition: all 0.2s ease;
+    }
+
+    .layer-btn.active {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 188, 212, 0.08);
+      box-shadow: 0 0 8px rgba(0, 188, 212, 0.1);
+    }
+
+    .slider-container {
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .cyber-range {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #2a3133;
+      outline: none;
+    }
+
+    .cyber-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .fuzz-meter-panel {
+      border: 1px solid rgba(255, 82, 82, 0.15);
+      background: rgba(255, 82, 82, 0.02);
+      border-radius: var(--border-radius-md);
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .fuzz-progress-bar {
+      height: 6px;
+      background: #2a3133;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 8px 0;
+      position: relative;
+    }
+
+    .fuzz-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-red));
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px var(--accent-red);
+    }
+
+    .fuzz-grid-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+    }
+
+    .fuzz-stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 6px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 3px;
+    }
+
+    .fuzz-stat-item span.red { color: var(--accent-red); text-shadow: 0 0 5px var(--accent-red); }
+    .fuzz-stat-item span.cyan { color: var(--accent-cyan); }
+
+    /* ==========================================================================
+       SCREEN 4: VULN SCANNER VIEW
+       ========================================================================== */
+    .vuln-categories {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .vuln-category-row {
+      background: #171b1d;
+      padding: 10px 12px;
+      border-radius: var(--border-radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+
+    .vuln-cat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vuln-cat-title {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .vuln-cat-desc {
+      font-size: 7.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .vuln-audit-results {
+      background: #08090a;
+      border: 1px solid rgba(0, 188, 212, 0.15);
+      border-radius: var(--border-radius-md);
+      padding: 10px;
+      min-height: 140px;
+    }
+
+    .audit-result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .audit-result-item {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    
+    .audit-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .audit-result-item .status-icon {
+      font-weight: bold;
+    }
+
+    .audit-result-item.pass { color: var(--accent-green); }
+    .audit-result-item.fail { color: var(--accent-red); }
+    .audit-result-item.warn { color: var(--accent-orange); }
+
+    /* ==========================================================================
+       SCREEN 5: SECURITY REPORTS VIEW
+       ========================================================================== */
+    .reports-graph-box {
+      background: #171a1c;
+      border: 1px solid rgba(0, 188, 212, 0.1);
+      border-radius: var(--border-radius-md);
+      padding: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 100px;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      padding: 10px 10px 0 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+    }
+
+    .chart-bar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 40px;
+    }
+
+    .chart-bar {
+      width: 16px;
+      background: #2a3133;
+      border-top-left-radius: 2px;
+      border-top-right-radius: 2px;
+      transition: height 1s ease;
+      height: 0; /* Animated on load via JS */
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .chart-bar.crit { background: var(--accent-red); box-shadow: 0 0 10px rgba(255, 82, 82, 0.3); }
+    .chart-bar.high { background: var(--accent-orange); box-shadow: 0 0 10px rgba(255, 145, 0, 0.3); }
+    .chart-bar.med { background: var(--accent-cyan); box-shadow: 0 0 10px rgba(0, 188, 212, 0.3); }
+    .chart-bar.low { background: var(--accent-green); box-shadow: 0 0 10px rgba(0, 230, 118, 0.3); }
+
+    .chart-bar-label {
+      font-family: var(--font-mono);
+      font-size: 7px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    .reports-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .report-card {
+      background: #171b1d;
+      border-left: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius-sm);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .report-card.vuln-crit { border-left-color: var(--accent-red); }
+    .report-card.vuln-warn { border-left-color: var(--accent-orange); }
+    .report-card.vuln-none { border-left-color: var(--accent-green); }
+
+    .report-info {
+      flex: 1;
+    }
+
+    .report-title-txt {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .report-date-txt {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: var(--text-secondary);
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .action-icon-btn {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(0, 188, 212, 0.3);
+      color: var(--accent-cyan);
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-icon-btn:hover {
+      background: var(--accent-cyan);
+      color: var(--bg-color);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .action-icon-btn svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    /* ==========================================================================
+       SCREEN 6: SETTINGS VIEW
+       ========================================================================== */
+    .settings-group {
+      margin-bottom: 18px;
+    }
+
+    .settings-group-hdr {
+      font-family: var(--font-display);
+      font-size: 9px;
+      color: var(--accent-cyan);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      border-left: 2px solid var(--accent-cyan);
+      padding-left: 6px;
+      font-weight: 700;
+    }
+
+    .setting-row {
+      background: #171b1d;
+      padding: 10px 12px;
+      border-radius: var(--border-radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      border: 1px solid rgba(255,255,255,0.01);
+    }
+
+    .setting-details {
+      flex: 1;
+      padding-right: 15px;
+    }
+
+    .setting-title-txt {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .setting-desc-txt {
+      font-size: 7.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      line-height: 1.2;
+    }
+
+    .setting-action {
+      display: flex;
+      align-items: center;
+    }
+
+    .setting-text-input {
+      background: #08090a;
+      border: 1px solid rgba(0, 188, 212, 0.2);
+      color: var(--text-primary);
+      padding: 4px 8px;
+      border-radius: var(--border-radius-sm);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      width: 120px;
+      text-align: right;
+    }
+
+    .setting-text-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
+      outline: none;
+    }
+
+    /* ==========================================================================
+       ANIMATIONS & TRANSITIONS FOR SWITCHING SCREENS
+       ========================================================================== */
+    .screen-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .phone-screen-view {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      animation: tabFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .phone-screen-view.active {
+      display: block;
+    }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================================================
+       DESKTOP LABELS FOR THE GRID SHOWCASE
+       ========================================================================== */
+    .showcase-label {
+      text-align: center;
+      margin-top: 15px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .showcase-label span {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-size: 11px;
+    }
+
+    .showcase-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       WEB HUB HEADER
+       ========================================================================== */ -->
+  <header class="hud-header">
+    <div class="hud-logo">
+      <div class="hud-logo-icon">
+        <!-- Stylized Bluetooth Shield Icon -->
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.47.3.08.4-.13.4-.29V19.4c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .16.1.38.4.29C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2zm1-5.3l1.8 1.8-1.8 1.8V8.7zm0 6.6l1.8 1.8-1.8 1.8v-3.6z"/>
+          <!-- bluetooth custom overlay path -->
+          <path d="M7 12h2l1.5-2.5L12 12l-1.5 2.5L9 12H7m7-5v10l3-5-3-5zm1 3.5l1 1.5-1 1.5V10.5z" fill="#00BCD4"/>
+        </svg>
+      </div>
+      <div class="hud-title-block">
+        <h1>BTSEC TESTTOOL</h1>
+        <p><span class="pulse-dot"></span>MOBILE SECURITY AUDITING PLATFORM // V2.4-BETA</p>
+      </div>
+    </div>
+
+    <!-- Control Center Buttons -->
+    <div class="hud-controls">
+      <button id="btn-show-grid" class="btn-hub active">
+        <svg style="width:14px;height:14px;fill:currentColor;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24">
+          <path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/>
+        </svg>
+        GRID SHOWCASE
+      </button>
+      <button id="btn-show-focus" class="btn-hub">
+        <svg style="width:14px;height:14px;fill:currentColor;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24">
+          <path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0-2-.9-2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14z"/>
+        </svg>
+        INTERACTIVE DEVICE
+      </button>
+      <button id="btn-trigger-action" class="btn-hub btn-green">
+        <svg style="width:14px;height:14px;fill:currentColor;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        LAUNCH SIMULATIONS
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN SHOWCASE WRAPPER
+       ========================================================================== */ -->
+  <main class="showcase-container">
+    
+    <!-- GRID SHOWCASE (Simultaneous 6 screens) -->
+    <div id="grid-layout-view" class="screens-grid">
+      
+      <!-- PHONE 1: DASHBOARD -->
+      <div class="showcase-wrapper">
+        <div class="tactical-phone active-sim" id="phone-grid-1">
+          <!-- notches -->
+          <div class="phone-notch"><div class="phone-speaker"></div><div class="phone-camera"></div></div>
+          <div class="phone-btn power"></div><div class="phone-btn vol-up"></div><div class="phone-btn vol-down"></div>
+          
+          <div class="phone-screen">
+            <!-- OS Status Bar -->
+            <div class="status-bar">
+              <div class="status-left"><span class="status-time">15:02</span></div>
+              <div class="status-right">
+                <svg class="icon-ble-status" viewBox="0 0 24 24"><path d="M7 12l5 5V7l-5 5zm5-5.66L15.66 12 12 15.66V6.34M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                <span>72%</span>
+                <div class="battery-bar"><div class="battery-fill" style="width: 72%"></div><div class="battery-head"></div></div>
+              </div>
+            </div>
+            
+            <div class="screen-label">SCR_DASHBOARD</div>
+            
+            <!-- Dynamic Screens Inside Screen-Wrapper -->
+            <div class="screen-content" id="phone-grid-1-wrapper">
+              <!-- Rendered View (Loaded dynamically to allow multi-instance interaction) -->
+            </div>
+            
+            <!-- Bottom Navigation Bar -->
+            <div class="phone-nav" data-phone-id="grid-1">
+              <!-- Nav elements loaded by JS -->
+            </div>
+          </div>
+        </div>
+        <div class="showcase-label"><span>01</span> Dashboard</div>
+      </div>
+
+      <!-- PHONE 2: SCANNER -->
+      <div class="showcase-wrapper">
+        <div class="tactical-phone active-sim" id="phone-grid-2">
+          <div class="phone-notch"><div class="phone-speaker"></div><div class="phone-camera"></div></div>
+          <div class="phone-btn power"></div><div class="phone-btn vol-up"></div><div class="phone-btn vol-down"></div>
+          <div class="phone-screen">
+            <div class="status-bar">
+              <div class="status-left"><span class="status-time">15:02</span></div>
+              <div class="status-right">
+                <svg class="icon-ble-status scanning" viewBox="0 0 24 24"><path d="M7 12l5 5V7l-5 5zm5-5.66L15.66 12 12 15.66V6.34M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                <span>72%</span>
+                <div class="battery-bar"><div class="battery-fill" style="width: 72%"></div><div class="battery-head"></div></div>
+              </div>
+            </div>
+            <div class="screen-label">SCR_SCANNER</div>
+            <div class="screen-content" id="phone-grid-2-wrapper"></div>
+            <div class="phone-nav" data-phone-id="grid-2"></div>
+          </div>
+        </div>
+        <div class="showcase-label"><span>02</span> Scanner</div>
+      </div>
+
+      <!-- PHONE 3: FUZZER -->
+      <div class="showcase-wrapper">
+        <div class="tactical-phone active-sim" id="phone-grid-3">
+          <div class="phone-notch"><div class="phone-speaker"></div><div class="phone-camera"></div></div>
+          <div class="phone-btn power"></div><div class="phone-btn vol-up"></div><div class="phone-btn vol-down"></div>
+          <div class="phone-screen">
+            <div class="status-bar">
+              <div class="status-left"><span class="status-time">15:02</span></div>
+              <div class="status-right">
+                <svg class="icon-ble-status fuzzing" viewBox="0 0 24 24"><path d="M7 12l5 5V7l-5 5zm5-5.66L15.66 12 12 15.66V6.34M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                <span>72%</span>
+                <div class="battery-bar"><div class="battery-fill" style="width: 72%"></div><div class="battery-head"></div></div>
+              </div>
+            </div>
+            <div class="screen-label">SCR_FUZZER</div>
+            <div class="screen-content" id="phone-grid-3-wrapper"></div>
+            <div class="phone-nav" data-phone-id="grid-3"></div>
+          </div>
+        </div>
+        <div class="showcase-label"><span>03</span> Fuzzer</div>
+      </div>
+
+      <!-- PHONE 4: VULNSCANNER -->
+      <div class="showcase-wrapper">
+        <div class="tactical-phone active-sim" id="phone-grid-4">
+          <div class="phone-notch"><div class="phone-speaker"></div><div class="phone-camera"></div></div>
+          <div class="phone-btn power"></div><div class="phone-btn vol-up"></div><div class="phone-btn vol-down"></div>
+          <div class="phone-screen">
+            <div class="status-bar">
+              <div class="status-left"><span class="status-time">15:02</span></div>
+              <div class="status-right">
+                <svg class="icon-ble-status" viewBox="0 0 24 24"><path d="M7 12l5 5V7l-5 5zm5-5.66L15.66 12 12 15.66V6.34M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                <span>72%</span>
+                <div class="battery-bar"><div class="battery-fill" style="width: 72%"></div><div class="battery-head"></div></div>
+              </div>
+            </div>
+            <div class="screen-label">SCR_VULN_SCANNER</div>
+            <div class="screen-content" id="phone-grid-4-wrapper"></div>
+            <div class="phone-nav" data-phone-id="grid-4"></div>
+          </div>
+        </div>
+        <div class="showcase-label"><span>04</span> VulnScanner</div>
+      </div>
+
+      <!-- PHONE 5: REPORTS -->
+      <div class="showcase-wrapper">
+        <div class="tactical-phone active-sim" id="phone-grid-5">
+          <div class="phone-notch"><div class="phone-speaker"></div><div class="phone-camera"></div></div>
+          <div class="phone-btn power"></div><div class="phone-btn vol-up"></div><div class="phone-btn vol-down"></div>
+          <div class="phone-screen">
+            <div class="status-bar">
+              <div class="status-left"><span class="status-time">15:02</span></div>
+              <div class="status-right">
+                <svg class="icon-ble-status" viewBox="0 0 24 24"><path d="M7 12l5 5V7l-5 5zm5-5.66L15.66 12 12 15.66V6.34M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                <span>72%</span>
+                <div class="battery-bar"><div class="battery-fill" style="width: 72%"></div><div class="battery-head"></div></div>
+              </div>
+            </div>
+            <div class="screen-label">SCR_REPORTS</div>
+            <div class="screen-content" id="phone-grid-5-wrapper"></div>
+            <div class="phone-nav" data-phone-id="grid-5"></div>
+          </div>
+        </div>
+        <div class="showcase-label"><span>05</span> Reports</div>
+      </div>
+
+      <!-- PHONE 6: SETTINGS -->
+      <div class="showcase-wrapper">
+        <div class="tactical-phone active-sim" id="phone-grid-6">
+          <div class="phone-notch"><div class="phone-speaker"></div><div class="phone-camera"></div></div>
+          <div class="phone-btn power"></div><div class="phone-btn vol-up"></div><div class="phone-btn vol-down"></div>
+          <div class="phone-screen">
+            <div class="status-bar">
+              <div class="status-left"><span class="status-time">15:02</span></div>
+              <div class="status-right">
+                <svg class="icon-ble-status" viewBox="0 0 24 24"><path d="M7 12l5 5V7l-5 5zm5-5.66L15.66 12 12 15.66V6.34M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                <span>72%</span>
+                <div class="battery-bar"><div class="battery-fill" style="width: 72%"></div><div class="battery-head"></div></div>
+              </div>
+            </div>
+            <div class="screen-label">SCR_SETTINGS</div>
+            <div class="screen-content" id="phone-grid-6-wrapper"></div>
+            <div class="phone-nav" data-phone-id="grid-6"></div>
+          </div>
+        </div>
+        <div class="showcase-label"><span>06</span> Settings</div>
+      </div>
+
+    </div>
+
+    <!-- FOCUS SHOWCASE (Single device with active switcher) -->
+    <div id="focus-layout-view" class="focus-layout">
+      
+      <!-- Side Menu switcher -->
+      <div class="focus-menu">
+        <button class="focus-menu-btn active" data-target-screen="dashboard">
+          Dashboard <span class="btn-num">[01]</span>
+        </button>
+        <button class="focus-menu-btn" data-target-screen="scanner">
+          Device Scanner <span class="btn-num">[02]</span>
+        </button>
+        <button class="focus-menu-btn" data-target-screen="fuzzer">
+          Protocol Fuzzer <span class="btn-num">[03]</span>
+        </button>
+        <button class="focus-menu-btn" data-target-screen="vulnscanner">
+          Vulnerability Scanner <span class="btn-num">[04]</span>
+        </button>
+        <button class="focus-menu-btn" data-target-screen="reports">
+          Audit Reports <span class="btn-num">[05]</span>
+        </button>
+        <button class="focus-menu-btn" data-target-screen="settings">
+          System Settings <span class="btn-num">[06]</span>
+        </button>
+      </div>
+
+      <!-- Focused Tactical Phone -->
+      <div class="tactical-phone active-sim" id="phone-focus">
+        <div class="phone-notch"><div class="phone-speaker"></div><div class="phone-camera"></div></div>
+        <div class="phone-btn power"></div><div class="phone-btn vol-up"></div><div class="phone-btn vol-down"></div>
+        <div class="phone-screen">
+          <!-- OS Status Bar -->
+          <div class="status-bar">
+            <div class="status-left"><span class="status-time">15:02</span></div>
+            <div class="status-right">
+              <svg class="icon-ble-status" viewBox="0 0 24 24"><path d="M7 12l5 5V7l-5 5zm5-5.66L15.66 12 12 15.66V6.34M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+              <span>72%</span>
+              <div class="battery-bar"><div class="battery-fill" style="width: 72%"></div><div class="battery-head"></div></div>
+            </div>
+          </div>
+          <div class="screen-label" id="focus-screen-label">SCR_DASHBOARD</div>
+          
+          <div class="screen-content" id="phone-focus-wrapper">
+            <!-- Active screen is loaded dynamically by JS -->
+          </div>
+          
+          <!-- Bottom Navigation Bar -->
+          <div class="phone-nav" data-phone-id="focus">
+            <!-- Nav buttons loaded dynamically -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==========================================================================
+       SVG ICON DEFINITIONS
+       ========================================================================== */ -->
+  <svg style="display: none;">
+    <!-- Dashboard Icon -->
+    <g id="icon-dash">
+      <rect x="3" y="3" width="7" height="9" rx="1"/>
+      <rect x="14" y="3" width="7" height="5" rx="1"/>
+      <rect x="3" y="16" width="7" height="5" rx="1"/>
+      <rect x="14" y="12" width="7" height="9" rx="1"/>
+    </g>
+    <!-- Scanner Icon -->
+    <g id="icon-scan">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 7c-2.76 0-5 2.24-5 5h2c0-1.66 1.34-3 3-3V7z"/>
+    </g>
+    <!-- Fuzzer Icon -->
+    <g id="icon-fuzz">
+      <path d="M19 9h-4V3H9v6H5l7 8zM4 19h16v2H4z"/>
+      <path d="M12 2L2 22h20L12 2zm0 4l6.5 13h-13L12 6zm-1 5h2v4h-2v-4zm0-3h2v2h-2V8z" fill-rule="evenodd"/>
+    </g>
+    <!-- VulnScanner Icon -->
+    <g id="icon-vuln">
+      <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+    </g>
+    <!-- Reports Icon -->
+    <g id="icon-report">
+      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z"/>
+    </g>
+    <!-- Settings Icon -->
+    <g id="icon-settings">
+      <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+    </g>
+  </svg>
+
+  <!-- ==========================================================================
+       JAVASCRIPT CORE state-machine & simulators
+       ========================================================================== */ -->
+  <script>
+    // System Global States
+    const state = {
+      isScanning: false,
+      isFuzzing: false,
+      isVulnScanning: false,
+      vulnAuditComplete: false,
+      discoveredCount: 4,
+      fuzzProgress: 0,
+      fuzzPayloads: 0,
+      fuzzCrashes: 0,
+      fuzzSpeed: 250,
+      stats: {
+        discovered: 4,
+        progress: 0,
+        vulns: 1
+      },
+      currentView: {
+        'grid-1': 'dashboard',
+        'grid-2': 'scanner',
+        'grid-3': 'fuzzer',
+        'grid-4': 'vulnscanner',
+        'grid-5': 'reports',
+        'grid-6': 'settings',
+        'focus': 'dashboard'
+      },
+      macSpoofing: true,
+      transceiverHardware: 'Ubertooth One (BLE Sniffer)',
+      logVerbosity: 'Verbose Debug',
+      devices: [
+        { id: 'd1', name: 'SmartLock_V4', mac: 'E4:2C:12:8A:4F:91', rssi: -48, type: 'BLE', threat: 'critical', secure: false, checked: true },
+        { id: 'd2', name: 'Polar H10 HRM', mac: '00:22:D0:85:C9:F4', rssi: -62, type: 'BLE', threat: 'none', secure: true, checked: false },
+        { id: 'd3', name: 'BT_Audio_Adapter', mac: '88:C2:55:01:A2:3B', rssi: -79, type: 'CLASSIC', threat: 'medium', secure: false, checked: false },
+        { id: 'd4', name: 'TileBeacon_x20', mac: 'AC:77:8E:22:1F:D3', rssi: -90, type: 'BEACON', threat: 'low', secure: false, checked: false }
+      ],
+      logs: [
+        { time: '15:02:10', text: 'BLE Controller Initialized: OK', type: 'info' },
+        { time: '15:02:12', text: 'Hardware hook: Ubertooth One active on port 2', type: 'info' },
+        { time: '15:02:14', text: 'MAC Spoofing active: [7A:3F:89:C1:22:E4]', type: 'info' }
+      ]
+    };
+
+    // System Log Manager
+    function addLog(text, type = 'info') {
+      const time = new Date().toTimeString().split(' ')[0];
+      state.logs.unshift({ time, text, type });
+      if (state.logs.length > 20) state.logs.pop();
+      updateAllTerminals();
+    }
+
+    function updateAllTerminals() {
+      const termContents = document.querySelectorAll('.terminal-panel-content');
+      termContents.forEach(el => {
+        el.innerHTML = state.logs.map(log => `
+          <div class="term-line ${log.type}">
+            <span class="time">[${log.time}]</span>${log.text}
+          </div>
+        `).join('');
+      });
+    }
+
+    // ==========================================================================
+    // SCREEN TEMPLATES GENERATOR
+    // ==========================================================================
+    const ScreenTemplates = {
+      
+      // 1. DASHBOARD SCREEN
+      dashboard: (phoneId) => {
+        const isScanningClass = state.isScanning ? 'scanning-active' : '';
+        return `
+          <div class="screen dashboard-screen">
+            <div class="screen-title">
+              <svg viewBox="0 0 24 24"><use href="#icon-dash"/></svg>
+              <span>BTSEC OVERVIEW</span>
+            </div>
+            
+            <div class="radar-panel ${isScanningClass}">
+              <div class="radar-sweep"></div>
+              <div class="radar-grid-line r-line-1"></div>
+              <div class="radar-grid-line r-line-2"></div>
+              <div class="radar-grid-line r-line-3"></div>
+              <div class="radar-cross-h"></div>
+              <div class="radar-cross-v"></div>
+              <div class="radar-blip blip-1"></div>
+              <div class="radar-blip blip-2"></div>
+              <div class="radar-blip blip-3"></div>
+              <div class="radar-center">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.66V13h3.66l-1.83-1.83L13 9.34V6.34l3.66 3.66L13 13.66v4z" fill="var(--accent-cyan)"/></svg>
+              </div>
+            </div>
+
+            <div class="mini-stats-row">
+              <div class="mini-stat-card">
+                <div class="mini-stat-num cyan" id="stat-discovered-${phoneId}">${state.stats.discovered}</div>
+                <div class="mini-stat-title">DEVICES</div>
+              </div>
+              <div class="mini-stat-card">
+                <div class="mini-stat-num green" id="stat-fuzz-${phoneId}">${Math.floor(state.fuzzProgress)}%</div>
+                <div class="mini-stat-title">FUZZING</div>
+              </div>
+              <div class="mini-stat-card">
+                <div class="mini-stat-num red" id="stat-vulns-${phoneId}">${state.stats.vulns}</div>
+                <div class="mini-stat-title">VULNS</div>
+              </div>
+            </div>
+
+            <div class="terminal-panel">
+              <div class="terminal-title">
+                <span>SYSTEM_FEED</span>
+                <span style="color:var(--accent-cyan)">LIVE</span>
+              </div>
+              <div class="terminal-panel-content">
+                <!-- Log content updated here -->
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      // 2. SCANNER SCREEN
+      scanner: (phoneId) => {
+        const scanBtnText = state.isScanning ? 'HALT TRANSCEIVER' : 'ENGAGE SCANNER';
+        const scanBtnClass = state.isScanning ? 'btn-red' : 'btn-green';
+        
+        return `
+          <div class="screen scanner-screen">
+            <div class="screen-title">
+              <svg viewBox="0 0 24 24"><use href="#icon-scan"/></svg>
+              <span>DEVICE SCANNER</span>
+            </div>
+
+            <div class="scan-options-row">
+              <div class="scan-pill active">BLE (4)</div>
+              <div class="scan-pill">CLASSIC (1)</div>
+              <div class="scan-pill">RSSI &gt; -70dBm</div>
+            </div>
+
+            <div class="scan-list" id="scan-list-container-${phoneId}">
+              ${state.devices.map(device => {
+                let badgeClass = 'badge-cyan';
+                let itemClass = '';
+                if (device.threat === 'critical') { badgeClass = 'badge-red'; itemClass = 'vuln-found'; }
+                else if (device.threat === 'medium') { badgeClass = 'badge-orange'; }
+                else if (device.secure) { badgeClass = 'badge-green'; itemClass = 'secure'; }
+                
+                const rssiCategory = device.rssi > -60 ? 'rssi-strong' : (device.rssi > -80 ? 'rssi-med' : 'rssi-weak');
+
+                return `
+                  <div class="scan-item ${itemClass}">
+                    <div class="scan-item-meta">
+                      <div class="scan-item-title">
+                        ${device.name}
+                        <span class="badge ${badgeClass}">${device.threat === 'none' ? 'secure' : device.threat}</span>
+                      </div>
+                      <div class="scan-item-mac">${device.mac}</div>
+                      <div class="scan-item-tags">
+                        <span class="badge badge-cyan" style="font-size:6px; padding:1px 3px;">${device.type}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="scan-item-rssi ${device.rssi > -60 ? 'strong' : ''}">${device.rssi} dBm</div>
+                      <div class="rssi-bars ${rssiCategory}">
+                        <div class="rssi-bar r-bar-1"></div>
+                        <div class="rssi-bar r-bar-2"></div>
+                        <div class="rssi-bar r-bar-3"></div>
+                        <div class="rssi-bar r-bar-4"></div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <button class="mobile-btn ${scanBtnClass}" id="scan-toggle-btn-${phoneId}">
+              ${scanBtnText}
+            </button>
+          </div>
+        `;
+      },
+
+      // 3. PROTOCOL FUZZER SCREEN
+      fuzzer: (phoneId) => {
+        const fuzzBtnText = state.isFuzzing ? 'PAUSE ENGINE' : 'EXECUTE FUZZER';
+        const fuzzBtnClass = state.isFuzzing ? 'btn-red' : 'btn-green';
+        
+        return `
+          <div class="screen fuzzer-screen">
+            <div class="screen-title">
+              <svg viewBox="0 0 24 24"><use href="#icon-fuzz"/></svg>
+              <span>L2CAP/ATT FUZZER</span>
+            </div>
+
+            <div class="target-box">
+              <div class="target-details">
+                <div class="card-label">FUZZ TARGET</div>
+                <div style="font-family:var(--font-mono); font-size:10px; font-weight:700;">SmartLock_V4</div>
+                <div style="font-family:var(--font-mono); font-size:8px; color:var(--text-secondary)">E4:2C:12:8A:4F:91</div>
+              </div>
+              <button class="target-change-btn">CHANGE</button>
+            </div>
+
+            <div class="card-label">MUTATION LEVEL</div>
+            <div class="layer-selector">
+              <div class="layer-btn active">L2CAP</div>
+              <div class="layer-btn">ATT</div>
+              <div class="layer-btn">SMP</div>
+              <div class="layer-btn">HCI</div>
+            </div>
+
+            <div class="cyber-card">
+              <div class="cyber-card-decor"></div>
+              <div class="card-label">MUTATION PROTOCOL</div>
+              <div class="mobile-select-wrapper">
+                <select class="mobile-select">
+                  <option>ATT Malformed MTU Payload</option>
+                  <option>L2CAP Boundary Value Overrun</option>
+                  <option>SMP Key Size Negotiation Flooder</option>
+                  <option>HCI Command Buffer Overflow</option>
+                </select>
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <span>PACKETS / SECOND</span>
+                  <span id="pps-val-${phoneId}">${state.fuzzSpeed} PPS</span>
+                </div>
+                <input type="range" min="10" max="1000" value="${state.fuzzSpeed}" class="cyber-range" id="fuzz-speed-range-${phoneId}">
+              </div>
+            </div>
+
+            <div class="fuzz-meter-panel">
+              <div class="card-label">FUZZING ACTIVITY</div>
+              <div class="fuzz-progress-bar">
+                <div class="fuzz-progress-fill" id="fuzz-progress-fill-${phoneId}" style="width: ${state.fuzzProgress}%"></div>
+              </div>
+              <div class="fuzz-grid-stats">
+                <div class="fuzz-stat-item">
+                  <span>PAYLOADS:</span>
+                  <span class="cyan" id="fuzz-stat-payloads-${phoneId}">${state.fuzzPayloads}</span>
+                </div>
+                <div class="fuzz-stat-item">
+                  <span>CRASHES:</span>
+                  <span class="red" id="fuzz-stat-crashes-${phoneId}">${state.fuzzCrashes}</span>
+                </div>
+              </div>
+            </div>
+
+            <button class="mobile-btn ${fuzzBtnClass}" id="fuzz-toggle-btn-${phoneId}">
+              ${fuzzBtnText}
+            </button>
+          </div>
+        `;
+      },
+
+      // 4. VULNSCANNER SCREEN
+      vulnscanner: (phoneId) => {
+        const auditBtnText = state.isVulnScanning ? 'AUDITING...' : 'START VULN AUDIT';
+        const auditBtnClass = state.isVulnScanning ? 'btn-red' : 'btn-green';
+        
+        return `
+          <div class="screen vuln-screen">
+            <div class="screen-title">
+              <svg viewBox="0 0 24 24"><use href="#icon-vuln"/></svg>
+              <span>VULN AUDITOR</span>
+            </div>
+
+            <div class="target-box">
+              <div class="target-details">
+                <div class="card-label">AUDIT TARGET</div>
+                <div style="font-family:var(--font-mono); font-size:10px; font-weight:700;">Polar H10 HRM</div>
+                <div style="font-family:var(--font-mono); font-size:8px; color:var(--text-secondary)">00:22:D0:85:C9:F4</div>
+              </div>
+              <button class="target-change-btn">SELECT</button>
+            </div>
+
+            <div class="vuln-categories">
+              <div class="vuln-category-row">
+                <div class="vuln-cat-info">
+                  <span class="vuln-cat-title">MITM Vulnerabilities</span>
+                  <span class="vuln-cat-desc">Test vulnerability to Just Works pairing</span>
+                </div>
+                <label class="cyber-switch">
+                  <input type="checkbox" checked id="vuln-check-mitm-${phoneId}">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="vuln-category-row">
+                <div class="vuln-cat-info">
+                  <span class="vuln-cat-title">Entropy Extraction</span>
+                  <span class="vuln-cat-desc">Analyze pairing key size strength</span>
+                </div>
+                <label class="cyber-switch">
+                  <input type="checkbox" checked id="vuln-check-entropy-${phoneId}">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="vuln-category-row">
+                <div class="vuln-cat-info">
+                  <span class="vuln-cat-title">Service Injection</span>
+                  <span class="vuln-cat-desc">Attempt raw attribute database writing</span>
+                </div>
+                <label class="cyber-switch">
+                  <input type="checkbox" id="vuln-check-injection-${phoneId}">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <button class="mobile-btn ${auditBtnClass}" id="vuln-audit-btn-${phoneId}">
+              ${auditBtnText}
+            </button>
+
+            <div class="cyber-card" style="margin-top:15px; min-height:100px;">
+              <div class="card-label">AUDIT REPORTS FEED</div>
+              <div class="vuln-audit-results">
+                <div class="audit-result-list" id="vuln-results-container-${phoneId}">
+                  ${state.vulnAuditComplete ? `
+                    <div class="audit-result-item pass">
+                      <span class="status-icon">✓</span>
+                      <span>Key Entropy: PASS (Secure negotiation forced)</span>
+                    </div>
+                    <div class="audit-result-item fail">
+                      <span class="status-icon">✗</span>
+                      <span>Association Bypass: FAIL (MITM risk identified)</span>
+                    </div>
+                    <div class="audit-result-item warn">
+                      <span class="status-icon">!</span>
+                      <span>Service Descriptor: WARN (Legacy profiles open)</span>
+                    </div>
+                  ` : `
+                    <div style="color:var(--text-muted); font-size:9px; text-align:center; padding-top:20px; font-family:var(--font-mono)">
+                      NO AUDIT ACTIVE<br>[ENGAGE START BUTTON]
+                    </div>
+                  `}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      // 5. REPORTS SCREEN
+      reports: (phoneId) => {
+        return `
+          <div class="screen reports-screen">
+            <div class="screen-title">
+              <svg viewBox="0 0 24 24"><use href="#icon-report"/></svg>
+              <span>SECURITY REPORTS</span>
+            </div>
+
+            <div class="reports-graph-box">
+              <div class="card-label">VULNERABILITY MATRIX</div>
+              <div class="chart-container">
+                <div class="chart-bar-wrapper">
+                  <!-- JS animates height -->
+                  <div class="chart-bar crit" style="height: 65px"></div>
+                  <span class="chart-bar-label">CRIT</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar high" style="height: 40px"></div>
+                  <span class="chart-bar-label">HIGH</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar med" style="height: 25px"></div>
+                  <span class="chart-bar-label">MED</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar low" style="height: 80px"></div>
+                  <span class="chart-bar-label">LOW</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="reports-list">
+              <div class="report-card vuln-crit">
+                <div class="report-info">
+                  <div class="report-title-txt">REPORT_SmartLock_V4</div>
+                  <div class="report-date-txt">2026-07-08 14:22 // Crit (2)</div>
+                </div>
+                <div class="report-actions">
+                  <button class="action-icon-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="report-card vuln-warn">
+                <div class="report-info">
+                  <div class="report-title-txt">REPORT_BT_Audio_Adapter</div>
+                  <div class="report-date-txt">2026-07-06 09:15 // Med (1)</div>
+                </div>
+                <div class="report-actions">
+                  <button class="action-icon-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="report-card vuln-none">
+                <div class="report-info">
+                  <div class="report-title-txt">REPORT_Polar_H10_HRM</div>
+                  <div class="report-date-txt">2026-06-30 18:41 // Secure</div>
+                </div>
+                <div class="report-actions">
+                  <button class="action-icon-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      // 6. SYSTEM SETTINGS SCREEN
+      settings: (phoneId) => {
+        const spoofChecked = state.macSpoofing ? 'checked' : '';
+        return `
+          <div class="screen settings-screen">
+            <div class="screen-title">
+              <svg viewBox="0 0 24 24"><use href="#icon-settings"/></svg>
+              <span>SYSTEM SETTINGS</span>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-group-hdr">HARDWARE TRANSCEIVER</div>
+              
+              <div class="setting-row">
+                <div class="setting-details">
+                  <div class="setting-title-txt">Selected Interface</div>
+                  <div class="setting-desc-txt">Internal Bluetooth controller or external SDR hook</div>
+                </div>
+                <div class="setting-action">
+                  <div class="mobile-select-wrapper">
+                    <select class="mobile-select" id="setting-hw-select-${phoneId}">
+                      <option ${state.transceiverHardware === 'Internal Bluetooth' ? 'selected' : ''}>Internal Bluetooth</option>
+                      <option ${state.transceiverHardware === 'Ubertooth One (BLE Sniffer)' ? 'selected' : ''}>Ubertooth One (BLE Sniffer)</option>
+                      <option ${state.transceiverHardware === 'HackRF One (SDR Mode)' ? 'selected' : ''}>HackRF One (SDR Mode)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-details">
+                  <div class="setting-title-txt">MAC Spoofing Cycle</div>
+                  <div class="setting-desc-txt">Cycle device address regularly while scanning</div>
+                </div>
+                <div class="setting-action">
+                  <label class="cyber-switch">
+                    <input type="checkbox" ${spoofChecked} id="setting-spoof-${phoneId}">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-group-hdr">SECURITY PARAMS</div>
+
+              <div class="setting-row">
+                <div class="setting-details">
+                  <div class="setting-title-txt">Static Target Alias</div>
+                  <div class="setting-desc-txt">Mask found targets under user-defined label</div>
+                </div>
+                <div class="setting-action">
+                  <input type="text" value="BTS_DEV_MASK" class="setting-text-input" id="setting-alias-${phoneId}">
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-details">
+                  <div class="setting-title-txt">Terminal Logging</div>
+                  <div class="setting-desc-txt">Set verbosity levels for logs feed</div>
+                </div>
+                <div class="setting-action">
+                  <div class="mobile-select-wrapper">
+                    <select class="mobile-select" id="setting-verbosity-${phoneId}">
+                      <option ${state.logVerbosity === 'Verbose Debug' ? 'selected' : ''}>Verbose Debug</option>
+                      <option ${state.logVerbosity === 'Information Only' ? 'selected' : ''}>Information Only</option>
+                      <option ${state.logVerbosity === 'Warnings & Errors' ? 'selected' : ''}>Warnings & Errors</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    // Navbar Builder for a specific phone instance
+    function buildNavbar(phoneId, activeTab) {
+      const tabs = [
+        { key: 'dashboard', label: 'DASH', icon: 'icon-dash' },
+        { key: 'scanner', label: 'SCAN', icon: 'icon-scan' },
+        { key: 'fuzzer', label: 'FUZZ', icon: 'icon-fuzz' },
+        { key: 'vulnscanner', label: 'AUDIT', icon: 'icon-vuln' },
+        { key: 'reports', label: 'REPORTS', icon: 'icon-report' },
+        { key: 'settings', label: 'SETTINGS', icon: 'icon-settings' }
+      ];
+
+      return tabs.map(tab => `
+        <div class="nav-item ${tab.key === activeTab ? 'active' : ''}" onclick="switchPhoneScreen('${phoneId}', '${tab.key}')">
+          <svg viewBox="0 0 24 24"><use href="#${tab.icon}"/></svg>
+          <span>${tab.label}</span>
+        </div>
+      `).join('');
+    }
+
+    // Switch screen on a specific phone mockup
+    window.switchPhoneScreen = function(phoneId, screenKey) {
+      state.currentView[phoneId] = screenKey;
+      
+      // Update wrapper content
+      const wrapper = document.getElementById(`phone-${phoneId}-wrapper`);
+      if (wrapper) {
+        wrapper.innerHTML = ScreenTemplates[screenKey](phoneId);
+      }
+
+      // Update Nav highlighting
+      const navContainer = document.querySelector(`.phone-nav[data-phone-id="${phoneId}"]`);
+      if (navContainer) {
+        navContainer.innerHTML = buildNavbar(phoneId, screenKey);
+      }
+
+      // Re-attach DOM events for the new screen
+      attachLocalEvents(phoneId, screenKey);
+      
+      // Sync elements
+      updateAllTerminals();
+      syncUIStats();
+    };
+
+    // ==========================================================================
+    // SIMULATORS & EVENT HANDLERS
+    // ==========================================================================
+    
+    // Toggle Scanner Simulator
+    function toggleScanSimulation() {
+      state.isScanning = !state.isScanning;
+      if (state.isScanning) {
+        addLog('BLE scanning scanner engaged.', 'info');
+        addLog('Active hopping channel frequency: 2402-2480 MHz', 'info');
+        startScanInterval();
+      } else {
+        addLog('BLE scanner paused.', 'warn');
+        stopScanInterval();
+      }
+      
+      // Redraw active screens if they are displaying dashboard or scanner
+      refreshActiveScreens();
+    }
+
+    let scanTimer = null;
+    function startScanInterval() {
+      if (scanTimer) clearInterval(scanTimer);
+      scanTimer = setInterval(() => {
+        if (!state.isScanning) return;
+        
+        // Randomly adjust signal strengths
+        state.devices.forEach(device => {
+          const delta = Math.floor(Math.random() * 9) - 4; // -4 to +4
+          device.rssi = Math.min(-40, Math.max(-95, device.rssi + delta));
+        });
+
+        // Chance of finding a new temporary beacon
+        if (Math.random() > 0.7 && state.devices.length < 8) {
+          const randId = Math.floor(Math.random() * 1000);
+          const mac = `88:C2:55:01:A2:${(Math.floor(Math.random()*240)+15).toString(16).toUpperCase()}`;
+          const newDevice = {
+            id: `temp-${randId}`,
+            name: `Beacon_x${Math.floor(Math.random()*90)+10}`,
+            mac: mac,
+            rssi: -85,
+            type: 'BEACON',
+            threat: Math.random() > 0.6 ? 'low' : 'none',
+            secure: false
+          };
+          state.devices.push(newDevice);
+          state.stats.discovered = state.devices.length;
+          addLog(`Discovered new beacon: ${newDevice.name} [${newDevice.mac}]`, 'info');
+        }
+
+        refreshActiveScreens();
+        syncUIStats();
+      }, 2500);
+    }
+
+    function stopScanInterval() {
+      if (scanTimer) clearInterval(scanTimer);
+    }
+
+    // Toggle Fuzzer Simulator
+    function toggleFuzzSimulation() {
+      state.isFuzzing = !state.isFuzzing;
+      if (state.isFuzzing) {
+        addLog('Fuzzing mutation engine: ENGAGED', 'warn');
+        startFuzzInterval();
+      } else {
+        addLog('Fuzzing mutation engine: PAUSED', 'info');
+        stopFuzzInterval();
+      }
+      refreshActiveScreens();
+    }
+
+    let fuzzTimer = null;
+    function startFuzzInterval() {
+      if (fuzzTimer) clearInterval(fuzzTimer);
+      
+      fuzzTimer = setInterval(() => {
+        if (!state.isFuzzing) return;
+
+        // Progress increment
+        state.fuzzProgress += (state.fuzzSpeed / 500);
+        if (state.fuzzProgress >= 100) {
+          state.fuzzProgress = 0;
+          addLog('Fuzz sequence cycle completed. Resetting mutation indexes.', 'info');
+        }
+
+        // Increment payloads
+        state.fuzzPayloads += Math.floor(state.fuzzSpeed / 10);
+        
+        // Random crash probability
+        if (Math.random() > 0.985) {
+          state.fuzzCrashes += 1;
+          state.stats.vulns += 1;
+          addLog(`CRASH ENCOUNTERED: Target dropped L2CAP ping. Stack reset payload sent.`, 'danger');
+        }
+
+        // Periodic log output
+        if (Math.random() > 0.8) {
+          const hexDump = Array.from({length: 4}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase()).join(' ');
+          addLog(`[MUTATION ATT] Payload sent: [0x${hexDump}]`, 'info');
+        }
+
+        refreshActiveScreens();
+        syncUIStats();
+      }, 400);
+    }
+
+    function stopFuzzInterval() {
+      if (fuzzTimer) clearInterval(fuzzTimer);
+    }
+
+    // Run Vulnerability Audit Simulator
+    function runVulnAuditSimulation() {
+      if (state.isVulnScanning) return;
+      state.isVulnScanning = true;
+      state.vulnAuditComplete = false;
+      addLog('Engaging vulnerability audit on Polar H10 HRM...', 'info');
+      refreshActiveScreens();
+
+      setTimeout(() => {
+        addLog('Audit stage 1/3: Reading GATT database mapping...', 'info');
+      }, 600);
+
+      setTimeout(() => {
+        addLog('Audit stage 2/3: Executing Just Works pairing attack vector...', 'warn');
+      }, 1300);
+
+      setTimeout(() => {
+        addLog('Audit stage 3/3: Verifying entropy key limits...', 'info');
+      }, 2000);
+
+      setTimeout(() => {
+        state.isVulnScanning = false;
+        state.vulnAuditComplete = true;
+        state.stats.vulns = Math.max(state.stats.vulns, 3);
+        addLog('Audit complete: 1 vulnerabilities found, 1 warning generated.', 'danger');
+        
+        refreshActiveScreens();
+        syncUIStats();
+      }, 3000);
+    }
+
+    // Global Stats Syncer
+    function syncUIStats() {
+      // Find all dashboard instances
+      Object.keys(state.currentView).forEach(phoneId => {
+        const discoveredEl = document.getElementById(`stat-discovered-${phoneId}`);
+        const fuzzEl = document.getElementById(`stat-fuzz-${phoneId}`);
+        const vulnsEl = document.getElementById(`stat-vulns-${phoneId}`);
+
+        if (discoveredEl) discoveredEl.innerText = state.stats.discovered;
+        if (fuzzEl) fuzzEl.innerText = `${Math.floor(state.fuzzProgress)}%`;
+        if (vulnsEl) vulnsEl.innerText = state.stats.vulns;
+
+        // Fuzzer status items
+        const fillEl = document.getElementById(`fuzz-progress-fill-${phoneId}`);
+        const ppsValEl = document.getElementById(`pps-val-${phoneId}`);
+        const pldEl = document.getElementById(`fuzz-stat-payloads-${phoneId}`);
+        const crsEl = document.getElementById(`fuzz-stat-crashes-${phoneId}`);
+        
+        if (fillEl) fillEl.style.width = `${state.fuzzProgress}%`;
+        if (ppsValEl) ppsValEl.innerText = `${state.fuzzSpeed} PPS`;
+        if (pldEl) pldEl.innerText = state.fuzzPayloads.toLocaleString();
+        if (crsEl) crsEl.innerText = state.fuzzCrashes;
+      });
+    }
+
+    function refreshActiveScreens() {
+      Object.keys(state.currentView).forEach(phoneId => {
+        const curView = state.currentView[phoneId];
+        const wrapper = document.getElementById(`phone-${phoneId}-wrapper`);
+        if (!wrapper) return;
+        if (curView === 'settings') return; 
+
+        const screenScroll = wrapper.scrollTop;
+        wrapper.innerHTML = ScreenTemplates[curView](phoneId);
+        wrapper.scrollTop = screenScroll;
+
+        attachLocalEvents(phoneId, curView);
+      });
+    }
+
+    // Attach interaction handlers to dynamically injected templates
+    function attachLocalEvents(phoneId, curView) {
+      if (curView === 'scanner') {
+        const btn = document.getElementById(`scan-toggle-btn-${phoneId}`);
+        if (btn) btn.onclick = toggleScanSimulation;
+      }
+      else if (curView === 'fuzzer') {
+        const btn = document.getElementById(`fuzz-toggle-btn-${phoneId}`);
+        if (btn) btn.onclick = toggleFuzzSimulation;
+
+        const slider = document.getElementById(`fuzz-speed-range-${phoneId}`);
+        if (slider) {
+          slider.oninput = (e) => {
+            state.fuzzSpeed = parseInt(e.target.value);
+            const valLabel = document.getElementById(`pps-val-${phoneId}`);
+            if (valLabel) valLabel.innerText = `${state.fuzzSpeed} PPS`;
+            if (state.isFuzzing) {
+              startFuzzInterval();
+            }
+          };
+        }
+      }
+      else if (curView === 'vulnscanner') {
+        const btn = document.getElementById(`vuln-audit-btn-${phoneId}`);
+        if (btn) btn.onclick = runVulnAuditSimulation;
+      }
+      else if (curView === 'settings') {
+        const hwSelect = document.getElementById(`setting-hw-select-${phoneId}`);
+        if (hwSelect) {
+          hwSelect.onchange = (e) => {
+            state.transceiverHardware = e.target.value;
+            addLog(`Hardware transceivers configured to: ${state.transceiverHardware}`, 'info');
+          };
+        }
+        
+        const spoofToggle = document.getElementById(`setting-spoof-${phoneId}`);
+        if (spoofToggle) {
+          spoofToggle.onchange = (e) => {
+            state.macSpoofing = e.target.checked;
+            addLog(`MAC address spoofing sequence ${state.macSpoofing ? 'enabled' : 'disabled'}`, state.macSpoofing ? 'info' : 'warn');
+          };
+        }
+
+        const verbSelect = document.getElementById(`setting-verbosity-${phoneId}`);
+        if (verbSelect) {
+          verbSelect.onchange = (e) => {
+            state.logVerbosity = e.target.value;
+            addLog(`Terminal log level set to: ${state.logVerbosity}`, 'info');
+          };
+        }
+      }
+    }
+
+    // Initialize all phone frames
+    function initAllDevices() {
+      for (let i = 1; i <= 6; i++) {
+        const phoneId = `grid-${i}`;
+        const initialScreen = state.currentView[phoneId];
+        switchPhoneScreen(phoneId, initialScreen);
+      }
+      switchPhoneScreen('focus', state.currentView['focus']);
+    }
+
+    // ==========================================================================
+    // WEB PAGE NAVIGATION (GRID VIEW vs SINGLE DEVICE FOCUS VIEW)
+    // ==========================================================================
+    const gridLayoutBtn = document.getElementById('btn-show-grid');
+    const focusLayoutBtn = document.getElementById('btn-show-focus');
+    const gridViewEl = document.getElementById('grid-layout-view');
+    const focusViewEl = document.getElementById('focus-layout-view');
+    const triggerActionBtn = document.getElementById('btn-trigger-action');
+
+    gridLayoutBtn.onclick = () => {
+      gridLayoutBtn.classList.add('active');
+      focusLayoutBtn.classList.remove('active');
+      gridViewEl.style.display = 'grid';
+      focusViewEl.style.display = 'none';
+      addLog('Display mode: Multi-Screen Grid view active', 'info');
+    };
+
+    focusLayoutBtn.onclick = () => {
+      focusLayoutBtn.classList.add('active');
+      gridLayoutBtn.classList.remove('active');
+      gridViewEl.style.display = 'none';
+      focusViewEl.style.display = 'flex';
+      addLog('Display mode: Single-Device Focus view active', 'info');
+    };
+
+    triggerActionBtn.onclick = () => {
+      if (!state.isScanning) toggleScanSimulation();
+      if (!state.isFuzzing) toggleFuzzSimulation();
+      if (!state.isVulnScanning) runVulnAuditSimulation();
+      
+      triggerActionBtn.classList.add('active');
+      triggerActionBtn.innerHTML = `
+        <span class="pulse-dot"></span>
+        SIMULATIONS ACTIVE
+      `;
+    };
+
+    const focusMenuBtns = document.querySelectorAll('.focus-menu-btn');
+    focusMenuBtns.forEach(btn => {
+      btn.onclick = () => {
+        focusMenuBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const targetScreen = btn.getAttribute('data-target-screen');
+        const focusScreenLabel = document.getElementById('focus-screen-label');
+        if (focusScreenLabel) {
+          focusScreenLabel.innerText = `SCR_${targetScreen.toUpperCase()}`;
+        }
+        switchPhoneScreen('focus', targetScreen);
+      };
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initAllDevices();
+      addLog('BTSec security tool suite initialized successfully.', 'info');
+    });
+
+  </script>
+</body>
+</html>

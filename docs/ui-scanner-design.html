@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBERBULWARK - Bluetooth Security Scanner</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Design Tokens */
+    :root {
+      --bg-dark: #121212;
+      --bg-surface: #1E1E1E;
+      --bg-surface-glass: rgba(30, 30, 30, 0.75);
+      --accent-cyan: #00BCD4;
+      --accent-cyan-glow: rgba(0, 188, 212, 0.35);
+      --accent-green: #00E676;
+      --accent-green-glow: rgba(0, 230, 118, 0.35);
+      --accent-red: #FF1744;
+      --accent-red-glow: rgba(255, 23, 68, 0.35);
+      --accent-warning: #FFC107;
+      --accent-warning-glow: rgba(255, 193, 7, 0.35);
+      --text-primary: #FFFFFF;
+      --text-secondary: #9E9E9E;
+      --text-muted: #616161;
+      --border-cyan: rgba(0, 188, 212, 0.2);
+    }
+
+    /* Reset & Page Style */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #232d30 0%, #0d0d0d 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    /* Screen Preview Container */
+    .phone-container {
+      width: 375px;
+      height: 812px;
+      background-color: var(--bg-dark);
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                  0 0 0 12px #222,
+                  0 0 0 13px #333,
+                  0 0 40px rgba(0, 188, 212, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Phone Notch & Camera */
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 30px;
+      background-color: #222;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .notch-camera {
+      width: 12px;
+      height: 12px;
+      background-color: #0b0b0b;
+      border-radius: 50%;
+      margin-left: 20px;
+      border: 2px solid #1a1a1a;
+      box-shadow: inset 0 0 4px rgba(0, 188, 212, 0.5);
+    }
+
+    .notch-speaker {
+      width: 40px;
+      height: 4px;
+      background-color: #1a1a1a;
+      border-radius: 2px;
+    }
+
+    /* iOS-like Status Bar */
+    .status-bar {
+      height: 44px;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      z-index: 99;
+      position: relative;
+    }
+
+    .status-left {
+      margin-bottom: 2px;
+    }
+
+    .status-right {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .status-icon {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* App Header */
+    .header {
+      padding: 12px 20px 8px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .header-title-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-logo {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px rgba(0, 188, 212, 0.4);
+      text-transform: uppercase;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .header-btn:hover {
+      background: rgba(0, 188, 212, 0.15);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px var(--accent-cyan-glow);
+    }
+
+    /* Main Container (Scrollable Details, Static Radar) */
+    .app-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Radar Area Styling */
+    .radar-section {
+      position: relative;
+      height: 290px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .radar-wrapper {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(18, 18, 18, 0.2) 0%, rgba(0, 0, 0, 0.6) 100%);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8),
+                  0 0 15px rgba(0, 188, 212, 0.05);
+      border: 1px solid rgba(0, 188, 212, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Concentric Circles */
+    .radar-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(0, 188, 212, 0.12);
+    }
+
+    .radar-circle.c1 { width: 60px; height: 60px; border-style: dotted; }
+    .radar-circle.c2 { width: 120px; height: 120px; border-style: solid; border-color: rgba(0, 188, 212, 0.08); }
+    .radar-circle.c3 { width: 180px; height: 180px; }
+    .radar-circle.c4 { width: 240px; height: 240px; border-color: rgba(0, 188, 212, 0.2); }
+
+    /* Crosshairs */
+    .radar-line-h {
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(0, 188, 212, 0.08) 50%, transparent 100%);
+    }
+    .radar-line-v {
+      position: absolute;
+      height: 100%;
+      width: 1px;
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 188, 212, 0.08) 50%, transparent 100%);
+    }
+
+    /* Sweeping Radar Scanner Line */
+    .radar-sweep {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      top: 0;
+      left: 50%;
+      background: conic-gradient(from 90deg at 0% 100%, rgba(0, 188, 212, 0.3) 0deg, transparent 90deg);
+      transform-origin: bottom left;
+      border-left: 1.5px solid var(--accent-cyan);
+      filter: drop-shadow(0px 0px 5px var(--accent-cyan-glow));
+      animation: sweep-rotate 5s linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    @keyframes sweep-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Radar Center Dot */
+    .radar-center {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px #fff, 0 0 20px var(--accent-cyan);
+      border: 2.5px solid var(--bg-dark);
+      z-index: 10;
+    }
+
+    /* Device Dots on Radar */
+    .device-dot {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .device-dot::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .device-dot::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      top: -2px;
+      left: -2px;
+      animation: dot-pulse 1.8s infinite ease-out;
+      opacity: 0.8;
+    }
+
+    @keyframes dot-pulse {
+      0% {
+        transform: scale(0.6);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(2.4);
+        opacity: 0;
+      }
+    }
+
+    /* Dot specific positioning and colors */
+    /* Dot 1: Green Accent (Safe) */
+    .dot-safe {
+      color: var(--accent-green);
+      left: 35%;
+      top: 30%;
+      filter: drop-shadow(0 0 5px var(--accent-green-glow));
+    }
+    /* Dot 2: Cyan Accent (Unknown/Evaluating) */
+    .dot-eval {
+      color: var(--accent-cyan);
+      left: 78%;
+      top: 45%;
+      filter: drop-shadow(0 0 5px var(--accent-cyan-glow));
+    }
+    /* Dot 3: Red Accent (Threat) */
+    .dot-threat {
+      color: var(--accent-red);
+      left: 60%;
+      top: 75%;
+      filter: drop-shadow(0 0 5px var(--accent-red-glow));
+    }
+
+    .device-dot.active {
+      transform: translate(-50%, -50%) scale(1.4);
+      z-index: 6;
+    }
+    .device-dot.active::after {
+      animation: dot-pulse-active 1.2s infinite ease-in-out;
+    }
+
+    @keyframes dot-pulse-active {
+      0% {
+        transform: scale(0.8);
+        border-width: 3px;
+        opacity: 1;
+      }
+      100% {
+        transform: scale(3);
+        border-width: 1px;
+        opacity: 0;
+      }
+    }
+
+    /* Details Panel Container */
+    .details-panel {
+      flex: 1;
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
+      padding: 24px 20px 10px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      margin-bottom: 70px; /* Leave space for navigation */
+    }
+
+    /* Webkit scrollbar tuning */
+    .details-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+    .details-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    /* Scan Stats Banner */
+    .status-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 188, 212, 0.05);
+      border: 1px solid var(--border-cyan);
+      border-radius: 16px;
+      padding: 12px 16px;
+    }
+
+    .status-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pulse-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-cyan);
+      animation: indicator-pulse 1.5s infinite alternate;
+      box-shadow: 0 0 8px var(--accent-cyan-glow);
+    }
+
+    @keyframes indicator-pulse {
+      0% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .status-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+
+    .device-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      background: rgba(0, 188, 212, 0.15);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    /* Device List */
+    .device-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .device-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .device-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .device-card.selected {
+      background: rgba(0, 188, 212, 0.06);
+      border-color: rgba(0, 188, 212, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 188, 212, 0.05);
+    }
+
+    .device-card.threat-selected {
+      background: rgba(255, 23, 68, 0.06);
+      border-color: rgba(255, 23, 68, 0.3);
+      box-shadow: 0 4px 15px rgba(255, 23, 68, 0.05);
+    }
+
+    .device-card-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .device-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .device-icon-wrapper.safe {
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--accent-green);
+    }
+
+    .device-icon-wrapper.eval {
+      background: rgba(0, 188, 212, 0.1);
+      color: var(--accent-cyan);
+    }
+
+    .device-icon-wrapper.threat {
+      background: rgba(255, 23, 68, 0.1);
+      color: var(--accent-red);
+      animation: alert-flash 1.5s infinite alternate;
+    }
+
+    @keyframes alert-flash {
+      0% { background: rgba(255, 23, 68, 0.1); }
+      100% { background: rgba(255, 23, 68, 0.25); }
+    }
+
+    .device-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .device-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .device-mac {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-secondary);
+      letter-spacing: -0.2px;
+    }
+
+    .device-card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .device-rssi {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .device-status {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .device-status.safe {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+    }
+    
+    .device-status.eval {
+      background: rgba(255, 193, 7, 0.15);
+      color: var(--accent-warning);
+    }
+
+    .device-status.threat {
+      background: rgba(255, 23, 68, 0.15);
+      color: var(--accent-red);
+    }
+
+    /* Active Protection CTA button */
+    .protection-btn {
+      margin-top: 6px;
+      background: linear-gradient(135deg, #0097A7 0%, #00BCD4 100%);
+      color: #000;
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 188, 212, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .protection-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: 0.5s;
+    }
+
+    .protection-btn:hover::before {
+      left: 100%;
+    }
+
+    .protection-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 188, 212, 0.45);
+      filter: brightness(1.1);
+    }
+
+    .protection-btn:active {
+      transform: translateY(1px);
+    }
+
+    .protection-btn.active {
+      background: linear-gradient(135deg, #00E676 0%, #00B0FF 100%);
+      box-shadow: 0 8px 24px rgba(0, 230, 118, 0.3);
+    }
+
+    /* Bottom Tab Bar */
+    .tab-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: rgba(18, 18, 18, 0.85);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 12px;
+      z-index: 50;
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      gap: 4px;
+      cursor: pointer;
+      width: 60px;
+      height: 100%;
+      transition: color 0.3s;
+    }
+
+    .tab-item.active {
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px var(--accent-cyan-glow);
+    }
+
+    .tab-item svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2px;
+      transition: transform 0.3s;
+    }
+
+    .tab-item:hover svg {
+      transform: translateY(-2px);
+    }
+
+    /* Modal Styling for Detail Screen */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: var(--bg-surface);
+      border-top: 2px solid var(--accent-cyan);
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+      width: 100%;
+      padding: 24px 20px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-overlay.open .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: none;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .metric-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .metric-value.cyan { color: var(--accent-cyan); }
+    .metric-value.green { color: var(--accent-green); }
+    .metric-value.red { color: var(--accent-red); }
+    .metric-value.warning { color: var(--accent-warning); }
+
+    .modal-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      background: rgba(255, 255, 255, 0.01);
+      border-left: 3px solid currentColor;
+      padding: 10px 12px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 20px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-btn.primary {
+      background: var(--accent-red);
+      color: #fff;
+    }
+    
+    .modal-btn.primary:hover {
+      box-shadow: 0 0 15px var(--accent-red-glow);
+      filter: brightness(1.1);
+    }
+
+    .modal-btn.secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Screen Frame Overlay & Corner curves on phone screen */
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 5px;
+      background-color: rgba(255, 255, 255, 0.4);
+      border-radius: 3px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Phone Screen Frame -->
+  <div class="phone-container">
+    
+    <!-- Notch -->
+    <div class="notch">
+      <div class="notch-speaker"></div>
+      <div class="notch-camera"></div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-left">15:05</div>
+      <div class="status-right">
+        <!-- Signal Strength -->
+        <svg class="status-icon" viewBox="0 0 24 24">
+          <path d="M2 22h20V2z" fill="currentColor"/>
+        </svg>
+        <!-- Wifi -->
+        <svg class="status-icon" viewBox="0 0 24 24">
+          <path d="M12 21l-12-12c6.627-6.627 17.373-6.627 24 0z" fill="currentColor"/>
+        </svg>
+        <!-- Battery -->
+        <svg class="status-icon" viewBox="0 0 24 24" style="transform: rotate(90deg)">
+          <path d="M17 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-1 11H4V8h12v8m4-7v6c.8 0 1-.2 1-1V10c0-.8-.2-1-1-1z" fill="currentColor"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title-container">
+        <span class="header-logo">CyberBulwark</span>
+        <h1 class="header-title">Threat Scanner</h1>
+      </div>
+      <button class="header-btn" title="Refresh/Scan" onclick="triggerScanFlash()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.72 2.78L21-1.5M21 3v6h-6"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="app-content">
+      <!-- Radar Visualization -->
+      <div class="radar-section">
+        <div class="radar-wrapper" id="radar">
+          <!-- Crosshairs -->
+          <div class="radar-line-h"></div>
+          <div class="radar-line-v"></div>
+          
+          <!-- Concentric circles -->
+          <div class="radar-circle c1"></div>
+          <div class="radar-circle c2"></div>
+          <div class="radar-circle c3"></div>
+          <div class="radar-circle c4"></div>
+          
+          <!-- Sweeper scanner line -->
+          <div class="radar-sweep" id="radarSweep"></div>
+          
+          <!-- Center Dot -->
+          <div class="radar-center"></div>
+
+          <!-- Device Dots -->
+          <!-- Dot 1: Green (Safe) -->
+          <div class="device-dot dot-safe" id="dot-0" onclick="selectDevice(0)" title="Safe Watch"></div>
+          <!-- Dot 2: Cyan (Unknown/Evaluation) -->
+          <div class="device-dot dot-eval" id="dot-1" onclick="selectDevice(1)" title="Unknown BLE"></div>
+          <!-- Dot 3: Red (Threat) -->
+          <div class="device-dot dot-threat" id="dot-2" onclick="selectDevice(2)" title="SDR Spoofer"></div>
+        </div>
+      </div>
+
+      <!-- Details Scrollable Panel -->
+      <div class="details-panel">
+        
+        <!-- Status Banner -->
+        <div class="status-banner">
+          <div class="status-info">
+            <div class="pulse-indicator"></div>
+            <div class="status-text" id="scan-status-text">ACTIVE SCANNING...</div>
+          </div>
+          <div class="device-count"><span id="live-count">3</span> ALIVE</div>
+        </div>
+
+        <!-- Detected Devices List -->
+        <div class="device-list">
+          
+          <!-- Card 1: Safe -->
+          <div class="device-card" id="card-0" onclick="selectDevice(0)">
+            <div class="device-card-left">
+              <div class="device-icon-wrapper safe">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <div class="device-info">
+                <h4 class="device-name">AuraBand X1 (Watch)</h4>
+                <span class="device-mac">E4:F2:01:BC:88:51</span>
+              </div>
+            </div>
+            <div class="device-card-right">
+              <span class="device-rssi">-48 dBm</span>
+              <span class="device-status safe">Secure</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Warning -->
+          <div class="device-card" id="card-1" onclick="selectDevice(1)">
+            <div class="device-card-left">
+              <div class="device-icon-wrapper eval">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div class="device-info">
+                <h4 class="device-name">Unknown Beacon</h4>
+                <span class="device-mac">7C:89:DF:11:02:AA</span>
+              </div>
+            </div>
+            <div class="device-card-right">
+              <span class="device-rssi">-72 dBm</span>
+              <span class="device-status eval">Unverified</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Threat -->
+          <div class="device-card" id="card-2" onclick="selectDevice(2)">
+            <div class="device-card-left">
+              <div class="device-icon-wrapper threat">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div class="device-info">
+                <h4 class="device-name">Flipper Zero (Spoofer)</h4>
+                <span class="device-mac">A0:5B:34:F1:C9:FF</span>
+              </div>
+            </div>
+            <div class="device-card-right">
+              <span class="device-rssi">-32 dBm</span>
+              <span class="device-status threat">Threat</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Shield/Protection Jamming CTA -->
+        <button class="protection-btn" id="shieldBtn" onclick="toggleShield()">
+          <svg id="shieldIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span id="shieldBtnText">ENGAGE THREAT SHIELD</span>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="tab-bar">
+      <div class="tab-item active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.9 8.4-5.5-5.5 8.4-2.9z"/>
+        </svg>
+        <span>Radar</span>
+      </div>
+      <div class="tab-item" onclick="alert('Demo: Already showing scanned devices!')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+        </svg>
+        <span>Devices</span>
+      </div>
+      <div class="tab-item" onclick="alert('Demo: Threat log is clear except for Flipper Spoof.')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/>
+        </svg>
+        <span>Alerts</span>
+      </div>
+      <div class="tab-item" onclick="alert('Demo: Settings are pre-configured for High Security.')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>Settings</span>
+      </div>
+    </nav>
+
+    <!-- iOS Home Indicator bar -->
+    <div class="home-indicator"></div>
+
+    <!-- Detail/Action Modal -->
+    <div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        
+        <div class="modal-header">
+          <div class="modal-header-left">
+            <div class="device-icon-wrapper" id="modal-icon-bg">
+              <!-- Replaced dynamically -->
+              <svg id="modal-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
+            </div>
+            <div class="modal-title-wrap">
+              <h3 class="modal-title" id="modal-name">Device Name</h3>
+              <span class="device-mac" style="font-size: 12px;" id="modal-mac">MAC Address</span>
+            </div>
+          </div>
+          <button class="modal-close" onclick="closeModal(null)">&times;</button>
+        </div>
+
+        <div class="modal-description" id="modal-desc" style="color: var(--accent-cyan); border-color: currentColor;">
+          Detailed warning description goes here...
+        </div>
+
+        <!-- Metric Grid -->
+        <div class="metric-grid">
+          <div class="metric-box">
+            <div class="metric-label">Signal (RSSI)</div>
+            <div class="metric-value cyan" id="modal-rssi">-45 dBm</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Security Protocol</div>
+            <div class="metric-value" id="modal-protocol">Encrypted</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Estimated Distance</div>
+            <div class="metric-value" id="modal-distance">~1.2m</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Threat Level</div>
+            <div class="metric-value" id="modal-threat-lvl">LOW</div>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+          <button class="modal-btn secondary" onclick="closeModal(null)">Dismiss</button>
+          <button class="modal-btn primary" id="modal-primary-btn" onclick="takeAction()">Block Device</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Mock Data for Devices
+    const devices = [
+      {
+        id: 0,
+        name: "AuraBand X1 (Watch)",
+        mac: "E4:F2:01:BC:88:51",
+        rssi: "-48 dBm",
+        distance: "~0.8 meters",
+        protocol: "BLE Secure V5.3",
+        threatLvl: "SAFE",
+        statusClass: "safe",
+        description: "Known paired smart band. Connected via secure encrypted channel with low threat footprint.",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`
+      },
+      {
+        id: 1,
+        name: "Unknown Beacon",
+        mac: "7C:89:DF:11:02:AA",
+        rssi: "-72 dBm",
+        distance: "~4.5 meters",
+        protocol: "iBeacon Standard",
+        threatLvl: "EVALUATING",
+        statusClass: "eval",
+        description: "Unverified physical beacon broadcasting standard proximity packets. Encryption is not active.",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+      },
+      {
+        id: 2,
+        name: "Flipper Zero (Spoofer)",
+        mac: "A0:5B:34:F1:C9:FF",
+        rssi: "-32 dBm",
+        distance: "~1.5 meters",
+        protocol: "Raw BLE Broadcast",
+        threatLvl: "CRITICAL THREAT",
+        statusClass: "threat",
+        description: "Active MAC spoofing & packet injection signature detected. Originating RSSI indicates close proximity.",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+      }
+    ];
+
+    let selectedDeviceId = null;
+    let shieldActive = false;
+
+    // Select Device handler (updates cards, dots, and opens modal)
+    function selectDevice(id) {
+      selectedDeviceId = id;
+      const device = devices[id];
+
+      // Remove selected class from all cards and dots
+      document.querySelectorAll('.device-card').forEach(card => {
+        card.classList.remove('selected', 'threat-selected');
+      });
+      document.querySelectorAll('.device-dot').forEach(dot => {
+        dot.classList.remove('active');
+      });
+
+      // Highlight selected card
+      const activeCard = document.getElementById(`card-${id}`);
+      if (device.statusClass === 'threat') {
+        activeCard.classList.add('threat-selected');
+      } else {
+        activeCard.classList.add('selected');
+      }
+
+      // Highlight selected dot
+      document.getElementById(`dot-${id}`).classList.add('active');
+
+      // Populate Modal Content
+      document.getElementById('modal-name').innerText = device.name;
+      document.getElementById('modal-mac').innerText = device.mac;
+      document.getElementById('modal-desc').innerText = device.description;
+      document.getElementById('modal-rssi').innerText = device.rssi;
+      document.getElementById('modal-protocol').innerText = device.protocol;
+      document.getElementById('modal-distance').innerText = device.distance;
+      
+      const threatVal = document.getElementById('modal-threat-lvl');
+      threatVal.innerText = device.threatLvl;
+      threatVal.className = 'metric-value';
+      
+      const modalIconBg = document.getElementById('modal-icon-bg');
+      modalIconBg.className = 'device-icon-wrapper';
+      
+      const modalDesc = document.getElementById('modal-desc');
+
+      const primaryBtn = document.getElementById('modal-primary-btn');
+
+      if (device.statusClass === 'safe') {
+        threatVal.classList.add('green');
+        modalIconBg.classList.add('safe');
+        modalDesc.style.color = 'var(--accent-green)';
+        primaryBtn.style.display = 'none'; // No block needed
+      } else if (device.statusClass === 'eval') {
+        threatVal.classList.add('warning');
+        modalIconBg.classList.add('eval');
+        modalDesc.style.color = 'var(--accent-warning)';
+        primaryBtn.style.display = 'flex';
+        primaryBtn.innerText = "Blacklist Node";
+        primaryBtn.className = "modal-btn primary";
+        primaryBtn.style.backgroundColor = 'var(--accent-warning)';
+      } else {
+        threatVal.classList.add('red');
+        modalIconBg.classList.add('threat');
+        modalDesc.style.color = 'var(--accent-red)';
+        primaryBtn.style.display = 'flex';
+        primaryBtn.innerText = "Neutralize Signal";
+        primaryBtn.className = "modal-btn primary";
+        primaryBtn.style.backgroundColor = 'var(--accent-red)';
+      }
+
+      document.getElementById('modal-icon').outerHTML = device.svg;
+      // Re-get element because outerHTML replaces it
+      const newIcon = modalIconBg.querySelector('svg');
+      newIcon.id = 'modal-icon';
+
+      // Open Modal
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    function closeModal(event) {
+      if (!event || event.target === document.getElementById('detailModal') || event.target.className === 'modal-close') {
+        document.getElementById('detailModal').classList.remove('open');
+        // Keep active states in cards and dots so the user sees connection
+      }
+    }
+
+    // Toggle active threat shield
+    function toggleShield() {
+      shieldActive = !shieldActive;
+      const shieldBtn = document.getElementById('shieldBtn');
+      const shieldIcon = document.getElementById('shieldIcon');
+      const shieldBtnText = document.getElementById('shieldBtnText');
+      const statusText = document.getElementById('scan-status-text');
+
+      if (shieldActive) {
+        shieldBtn.classList.add('active');
+        shieldBtnText.innerText = "SHIELD ACTIVE";
+        statusText.innerText = "ACTIVE JAMMING SECURE...";
+        statusText.style.color = 'var(--accent-green)';
+        document.querySelector('.pulse-indicator').style.backgroundColor = 'var(--accent-green)';
+        document.querySelector('.pulse-indicator').style.boxShadow = '0 0 8px var(--accent-green-glow)';
+        
+        // Change shield lock icon to locked
+        shieldIcon.innerHTML = `
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        `;
+        // Turn flipper zero threat status to 'Neutralized'
+        devices[2].threatLvl = "NEUTRALIZED";
+        devices[2].statusClass = "safe";
+        document.getElementById('card-2').querySelector('.device-status').innerText = "Blocked";
+        document.getElementById('card-2').querySelector('.device-status').className = "device-status safe";
+        document.getElementById('card-2').querySelector('.device-icon-wrapper').className = "device-icon-wrapper safe";
+        document.getElementById('dot-2').style.color = 'var(--accent-green)';
+      } else {
+        shieldBtn.classList.remove('active');
+        shieldBtnText.innerText = "ENGAGE THREAT SHIELD";
+        statusText.innerText = "ACTIVE SCANNING...";
+        statusText.style.color = '';
+        document.querySelector('.pulse-indicator').style.backgroundColor = '';
+        document.querySelector('.pulse-indicator').style.boxShadow = '';
+
+        // Reset Flipper threat state
+        devices[2].threatLvl = "CRITICAL THREAT";
+        devices[2].statusClass = "threat";
+        document.getElementById('card-2').querySelector('.device-status').innerText = "Threat";
+        document.getElementById('card-2').querySelector('.device-status').className = "device-status threat";
+        document.getElementById('card-2').querySelector('.device-icon-wrapper').className = "device-icon-wrapper threat";
+        document.getElementById('dot-2').style.color = 'var(--accent-red)';
+      }
+    }
+
+    // Modal Primary action trigger
+    function takeAction() {
+      alert(`Action executed: Countermeasures deployed for device ${devices[selectedDeviceId].name}!`);
+      closeModal(null);
+      if (selectedDeviceId === 2 && !shieldActive) {
+        toggleShield();
+      }
+    }
+
+    // Radar scan flash refresh trigger
+    function triggerScanFlash() {
+      const radarSweep = document.getElementById('radarSweep');
+      
+      // Speed up animation temporarily to simulate active scan burst
+      radarSweep.style.animation = 'sweep-rotate 0.8s linear infinite';
+      document.getElementById('scan-status-text').innerText = "BURST SCANNING...";
+      
+      setTimeout(() => {
+        radarSweep.style.animation = 'sweep-rotate 5s linear infinite';
+        document.getElementById('scan-status-text').innerText = shieldActive ? "ACTIVE JAMMING SECURE..." : "ACTIVE SCANNING...";
+      }, 2400);
+    }
+  </script>
+</body>
+</html>

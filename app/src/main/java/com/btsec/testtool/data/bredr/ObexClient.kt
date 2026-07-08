@@ -371,7 +371,7 @@ class ObexClient(
     }
 
     private fun buildAbortPacket(): ByteArray {
-        return byteArrayOf(OP_ABORT, 0x00, 0x03)
+        return byteArrayOf(OP_ABORT.toByte(), 0x00, 0x03)
     }
 
     // ── Header writers ──
