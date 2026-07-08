@@ -12,9 +12,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import com.btsec.testtool.domain.model.InfoRequestType
 import com.btsec.testtool.domain.model.L2capFixedChannel
-import com.btsec.testtool.domain.model.L2capPacket
 import com.btsec.testtool.domain.model.L2capSignalCommand
 import com.btsec.testtool.domain.model.L2capTestReport
 import com.btsec.testtool.domain.repository.L2capSecurityRepository
@@ -25,7 +23,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import java.io.IOException
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -114,9 +111,10 @@ class L2capSecurityRepositoryImpl
                     sock.outputStream.flush()
 
                     val buffer = ByteArray(1024)
-                    val read = withTimeoutOrNull(timeoutMs) {
-                        sock.inputStream.read(buffer)
-                    }
+                    val read =
+                        withTimeoutOrNull(timeoutMs) {
+                            sock.inputStream.read(buffer)
+                        }
 
                     if (read != null && read > 0) {
                         buffer.copyOf(read)
@@ -143,12 +141,13 @@ class L2capSecurityRepositoryImpl
             // Build L2CAP Information Request signaling packet
             val identifier = nextIdentifier()
             val infoRequestPayload = buildInformationRequestPayload(infoType)
-            val signalPacket = buildL2capSignalingPacket(
-                L2capFixedChannel.SIGNALING.cid,
-                L2capSignalCommand.INFORMATION_REQUEST,
-                identifier,
-                infoRequestPayload,
-            )
+            val signalPacket =
+                buildL2capSignalingPacket(
+                    L2capFixedChannel.SIGNALING.cid,
+                    L2capSignalCommand.INFORMATION_REQUEST,
+                    identifier,
+                    infoRequestPayload,
+                )
 
             val sock = l2capSocket
             if (sock != null && connected.value) {
@@ -157,9 +156,10 @@ class L2capSecurityRepositoryImpl
                     sock.outputStream.flush()
 
                     val buffer = ByteArray(256)
-                    val read = withTimeoutOrNull(5000L) {
-                        sock.inputStream.read(buffer)
-                    }
+                    val read =
+                        withTimeoutOrNull(5000L) {
+                            sock.inputStream.read(buffer)
+                        }
 
                     if (read != null && read > 0) {
                         // Parse the Information Response: skip L2CAP header (4 bytes)
@@ -194,8 +194,7 @@ class L2capSecurityRepositoryImpl
         /**
          * Builds a well-formed L2CAP signaling packet.
          *
-         * Format:
-         * - [Length(2)] [CID(2)] [Code(1)] [Identifier(1)] [Length(2)] [Data...]
+         * Format: Length(2), CID(2), Code(1), Identifier(1), Length(2), Data.
          */
         internal fun buildL2capSignalingPacket(
             channelId: Int,
@@ -251,22 +250,23 @@ class L2capSecurityRepositoryImpl
                 // Try L2CAP LE channel (Android 10+)
                 // Note: createL2capChannel was deprecated in API 33; use
                 // L2capSocket (hidden API) or reflection as fallback.
-                val socket = try {
-                    @Suppress("DEPRECATION")
-                    device.createL2capChannel(
-                        LE_SIGNALING_PSM,
-                        BluetoothSocket.TRANSPORT_LE,
-                    )
-                } catch (e: NoSuchMethodError) {
-                    Timber.d("createL2capChannel(channel, transport) not available, trying single-arg")
+                val socket =
                     try {
                         @Suppress("DEPRECATION")
-                        device.createL2capChannel(LE_SIGNALING_PSM)
-                    } catch (e2: Exception) {
-                        Timber.d("L2CAP channel creation not supported: ${e2.message}")
-                        return null
+                        device.createL2capChannel(
+                            LE_SIGNALING_PSM,
+                            BluetoothSocket.TRANSPORT_LE,
+                        )
+                    } catch (e: NoSuchMethodError) {
+                        Timber.d("createL2capChannel(channel, transport) not available, trying single-arg")
+                        try {
+                            @Suppress("DEPRECATION")
+                            device.createL2capChannel(LE_SIGNALING_PSM)
+                        } catch (e2: Exception) {
+                            Timber.d("L2CAP channel creation not supported: ${e2.message}")
+                            return null
+                        }
                     }
-                }
 
                 socket.connect()
                 l2capSocket = socket
@@ -276,9 +276,10 @@ class L2capSecurityRepositoryImpl
                 socket.outputStream.flush()
 
                 val buffer = ByteArray(1024)
-                val read = withTimeoutOrNull(timeoutMs) {
-                    socket.inputStream.read(buffer)
-                }
+                val read =
+                    withTimeoutOrNull(timeoutMs) {
+                        socket.inputStream.read(buffer)
+                    }
 
                 if (read != null && read > 0) {
                     buffer.copyOf(read)

@@ -127,12 +127,13 @@ class L2capSecurityRepositoryImplTest {
             // Build an Information Request packet via the public helper
             val command = com.btsec.testtool.domain.model.L2capSignalCommand.INFORMATION_REQUEST
             val payload = byteArrayOf(0x00, 0x01) // Connectionless MTU
-            val packet = repository.buildL2capSignalingPacket(
-                channelId = 0x0001,
-                command = command,
-                identifier = 0x01,
-                data = payload,
-            )
+            val packet =
+                repository.buildL2capSignalingPacket(
+                    channelId = 0x0001,
+                    command = command,
+                    identifier = 0x01,
+                    data = payload,
+                )
 
             // L2CAP header: length(2) + CID(2) = 4 bytes
             // Signaling header: code(1) + identifier(1) + length(2) = 4 bytes
