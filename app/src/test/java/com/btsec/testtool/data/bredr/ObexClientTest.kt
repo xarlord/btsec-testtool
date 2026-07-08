@@ -65,7 +65,7 @@ class ObexClientTest {
     fun `buildDisconnectPacket has correct opcode`() {
         val (client, outputCapture) = createClient(emptyList())
         // Manually set connected state
-        client.connect(emptyList()) // Will fail but we just check the packet
+        client.connect(null) // Will fail but we just check the packet
         val sent = outputCapture.toByteArray()
         // First packet should be CONNECT
         assertEquals(0x80.toByte(), sent[0])
