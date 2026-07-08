@@ -13,6 +13,7 @@ import com.btsec.testtool.data.bredr.strategy.DirectFileSnoopStrategy
 import com.btsec.testtool.data.bredr.strategy.ShizukuSnoopStrategy
 import com.btsec.testtool.domain.repository.SnoopCaptureStrategy
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
@@ -20,7 +21,7 @@ import dagger.multibindings.ElementsIntoSet
 /**
  * Hilt module that provides the ordered set of [SnoopCaptureStrategy] implementations.
  *
- * Strategies are injected into [SnoopCaptureRepositoryImpl] as a `List<SnoopCaptureStrategy>`.
+ * Strategies are injected into [SnoopCaptureRepositoryImpl] as a `Set<SnoopCaptureStrategy>`.
  * The repository iterates through them to find the first available one.
  *
  * The order matters: strategies listed first are preferred. Currently:
@@ -35,19 +36,18 @@ import dagger.multibindings.ElementsIntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 object SnoopStrategyModule {
-
+    @Provides
     @ElementsIntoSet
-    @JvmStatic
     fun provideDirectFileStrategy(strategy: DirectFileSnoopStrategy): Set<SnoopCaptureStrategy> =
         setOf(strategy)
 
+    @Provides
     @ElementsIntoSet
-    @JvmStatic
     fun provideShizukuStrategy(strategy: ShizukuSnoopStrategy): Set<SnoopCaptureStrategy> =
         setOf(strategy)
 
+    @Provides
     @ElementsIntoSet
-    @JvmStatic
     fun provideBugreportStrategy(strategy: BugreportSnoopStrategy): Set<SnoopCaptureStrategy> =
         setOf(strategy)
 }

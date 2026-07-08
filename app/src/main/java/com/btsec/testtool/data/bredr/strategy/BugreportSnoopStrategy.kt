@@ -50,122 +50,128 @@ import javax.inject.Singleton
  * Issues: #375 (root-free snoop capture), #412 (strategy pattern refactor)
  */
 @Singleton
-class BugreportSnoopStrategy @Inject constructor() : SnoopCaptureStrategy {
+class BugreportSnoopStrategy
+    @Inject
+    constructor() : SnoopCaptureStrategy {
+        /** The path to the bugreport zip file, set by the user. */
+        @Volatile
+        private var bugreportZipPath: String? = null
 
-    /** The path to the bugreport zip file, set by the user. */
-    @Volatile
-    private var bugreportZipPath: String? = null
+        /**
+         * Set the path to the bugreport zip file.
+         *
+         * @param path Absolute path to the bugreport zip file.
+         */
+        fun setBugreportZip(path: String) {
+            bugreportZipPath = path
+            Timber.d("Bugreport strategy: zip path set to %s", path)
+        }
 
-    /**
-     * Set the path to the bugreport zip file.
-     *
-     * @param path Absolute path to the bugreport zip file.
-     */
-    fun setBugreportZip(path: String) {
-        bugreportZipPath = path
-        Timber.d("Bugreport strategy: zip path set to %s", path)
-    }
+        /**
+         * Clear the bugreport zip path.
+         */
+        fun clearBugreportZip() {
+            bugreportZipPath = null
+        }
 
-    /**
-     * Clear the bugreport zip path.
-     */
-    fun clearBugreportZip() {
-        bugreportZipPath = null
-    }
+        override fun getName(): String = "Bugreport"
 
-    override fun getName(): String = "Bugreport"
+        override fun isAvailable(): Boolean {
+            // The bugreport strategy is available as long as a zip path has been set
+            // and the file exists.
+            val path = bugreportZipPath ?: return false
+            return File(path).exists()
+        }
 
-    override fun isAvailable(): Boolean {
-        // The bugreport strategy is available as long as a zip path has been set
-        // and the file exists.
-        val path = bugreportZipPath ?: return false
-        return File(path).exists()
-    }
+        override fun canReadSnoopLog(): Boolean {
+            val path = bugreportZipPath ?: return false
+            val zipFile = File(path)
+            if (!zipFile.exists() || !zipFile.canRead()) return false
 
-    override fun canReadSnoopLog(): Boolean {
-        val path = bugreportZipPath ?: return false
-        val zipFile = File(path)
-        if (!zipFile.exists() || !zipFile.canRead()) return false
-
-        return try {
-            // Peek into the zip to check if it contains a btsnoop entry
-            ZipFile(zipFile).use { zip ->
-                zip.entries().asSequence().any { entry ->
-                    !entry.isDirectory && SNOOP_ENTRY_SUFFIXES.any { suffix ->
-                        entry.name.endsWith(suffix)
+            return try {
+                // Peek into the zip to check if it contains a btsnoop entry
+                ZipFile(zipFile).use { zip ->
+                    zip.entries().asSequence().any { entry ->
+                        !entry.isDirectory &&
+                            SNOOP_ENTRY_SUFFIXES.any { suffix ->
+                                entry.name.endsWith(suffix)
+                            }
                     }
                 }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to inspect bugreport zip")
+                false
             }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to inspect bugreport zip")
-            false
-        }
-    }
-
-    override fun readSnoopLog(): Result<InputStream> {
-        val path = bugreportZipPath
-            ?: return Result.failure(
-                IllegalStateException("No bugreport zip path set. Call setBugreportZip() first."),
-            )
-
-        val zipFile = File(path)
-        if (!zipFile.exists()) {
-            return Result.failure(FileNotFoundException("Bugreport zip not found: $path"))
         }
 
-        return try {
-            val zip = ZipFile(zipFile)
-            val snoopEntry = findSnoopEntry(zip)
-                ?: return Result.failure(
-                    FileNotFoundException(
-                        "No btsnoop_hci.log entry found in bugreport zip. " +
-                            "Ensure HCI snoop logging was enabled when the bugreport was generated.",
-                    ),
-                )
+        override fun readSnoopLog(): Result<InputStream> {
+            val path =
+                bugreportZipPath
+                    ?: return Result.failure(
+                        IllegalStateException("No bugreport zip path set. Call setBugreportZip() first."),
+                    )
 
-            // Extract the entry to a temporary file (needed because ZipInputStream
-            // doesn't support efficient seeking, and the caller may need random access)
-            val tempFile = File.createTempFile("btsnoop_extracted_", ".log")
-            tempFile.deleteOnExit()
-            zip.getInputStream(snoopEntry).use { input ->
-                tempFile.outputStream().use { output ->
-                    input.copyTo(output)
+            val zipFile = File(path)
+            if (!zipFile.exists()) {
+                return Result.failure(FileNotFoundException("Bugreport zip not found: $path"))
+            }
+
+            return try {
+                val zip = ZipFile(zipFile)
+                val snoopEntry =
+                    findSnoopEntry(zip)
+                        ?: return Result.failure(
+                            FileNotFoundException(
+                                "No btsnoop_hci.log entry found in bugreport zip. " +
+                                    "Ensure HCI snoop logging was enabled when the bugreport was generated.",
+                            ),
+                        )
+
+                // Extract the entry to a temporary file (needed because ZipInputStream
+                // doesn't support efficient seeking, and the caller may need random access)
+                val tempFile = File.createTempFile("btsnoop_extracted_", ".log")
+                tempFile.deleteOnExit()
+                zip.getInputStream(snoopEntry).use { input ->
+                    tempFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
                 }
+                Timber.i("Extracted btsnoop_hci.log from bugreport (%d bytes)", tempFile.length())
+                Result.success(BufferedInputStream(FileInputStream(tempFile)))
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to extract snoop log from bugreport")
+                Result.failure(e)
             }
-            Timber.i("Extracted btsnoop_hci.log from bugreport (%d bytes)", tempFile.length())
-            Result.success(BufferedInputStream(FileInputStream(tempFile)))
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to extract snoop log from bugreport")
-            Result.failure(e)
+        }
+
+        /**
+         * Find the btsnoop_hci.log entry inside the zip.
+         *
+         * Searches entries whose name ends with known suffix patterns.
+         * Prefers the exact filename "btsnoop_hci.log" when multiple matches exist.
+         */
+        internal fun findSnoopEntry(zip: ZipFile): ZipEntry? {
+            val entries =
+                zip.entries().asSequence()
+                    .filter { !it.isDirectory }
+                    .filter { entry ->
+                        SNOOP_ENTRY_SUFFIXES.any { suffix -> entry.name.endsWith(suffix) }
+                    }
+                    .toList()
+
+            // Prefer exact match
+            return entries.find { it.name.endsWith("btsnoop_hci.log") }
+                ?: entries.firstOrNull()
+        }
+
+        companion object {
+            /**
+             * Known suffix patterns for btsnoop entries inside bugreport zips.
+             * Covers different bugreport formats across Android versions.
+             */
+            private val SNOOP_ENTRY_SUFFIXES =
+                listOf(
+                    "btsnoop_hci.log",
+                )
         }
     }
-
-    /**
-     * Find the btsnoop_hci.log entry inside the zip.
-     *
-     * Searches entries whose name ends with known suffix patterns.
-     * Prefers the exact filename "btsnoop_hci.log" when multiple matches exist.
-     */
-    internal fun findSnoopEntry(zip: ZipFile): ZipEntry? {
-        val entries = zip.entries().asSequence()
-            .filter { !it.isDirectory }
-            .filter { entry ->
-                SNOOP_ENTRY_SUFFIXES.any { suffix -> entry.name.endsWith(suffix) }
-            }
-            .toList()
-
-        // Prefer exact match
-        return entries.find { it.name.endsWith("btsnoop_hci.log") }
-            ?: entries.firstOrNull()
-    }
-
-    companion object {
-        /**
-         * Known suffix patterns for btsnoop entries inside bugreport zips.
-         * Covers different bugreport formats across Android versions.
-         */
-        private val SNOOP_ENTRY_SUFFIXES = listOf(
-            "btsnoop_hci.log",
-        )
-    }
-}

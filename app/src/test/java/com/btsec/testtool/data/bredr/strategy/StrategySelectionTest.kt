@@ -10,7 +10,6 @@ package com.btsec.testtool.data.bredr.strategy
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.Test
  */
 @DisplayName("Strategy Selection Logic")
 class StrategySelectionTest {
-
     @Test
     fun `DirectFileStrategy is always available and selected first when file is readable`() {
         val direct = DirectFileSnoopStrategy()
@@ -52,22 +50,24 @@ class StrategySelectionTest {
 
     @Test
     fun `all strategies have unique names`() {
-        val strategies = listOf(
-            DirectFileSnoopStrategy(),
-            ShizukuSnoopStrategy(),
-            BugreportSnoopStrategy(),
-        )
+        val strategies =
+            listOf(
+                DirectFileSnoopStrategy(),
+                ShizukuSnoopStrategy(),
+                BugreportSnoopStrategy(),
+            )
         val names = strategies.map { it.getName() }
         assertEquals(names.toSet().size, names.size, "Strategy names must be unique")
     }
 
     @Test
     fun `strategy names are non-empty`() {
-        val strategies = listOf(
-            DirectFileSnoopStrategy(),
-            ShizukuSnoopStrategy(),
-            BugreportSnoopStrategy(),
-        )
+        val strategies =
+            listOf(
+                DirectFileSnoopStrategy(),
+                ShizukuSnoopStrategy(),
+                BugreportSnoopStrategy(),
+            )
         for (strategy in strategies) {
             assertTrue(strategy.getName().isNotEmpty(), "Strategy name should not be empty")
         }
@@ -76,11 +76,12 @@ class StrategySelectionTest {
     @Test
     fun `autoSelectPreference is DirectFile then Shizuku then Bugreport`() {
         // Verify the intended priority order
-        val strategies = listOf(
-            DirectFileSnoopStrategy(),
-            ShizukuSnoopStrategy(),
-            BugreportSnoopStrategy(),
-        )
+        val strategies =
+            listOf(
+                DirectFileSnoopStrategy(),
+                ShizukuSnoopStrategy(),
+                BugreportSnoopStrategy(),
+            )
         assertEquals("Direct File", strategies[0].getName())
         assertEquals("Shizuku", strategies[1].getName())
         assertEquals("Bugreport", strategies[2].getName())
@@ -90,11 +91,12 @@ class StrategySelectionTest {
     fun `no strategy can read in bare test environment`() {
         // In a unit test environment, none of the strategies should be able to
         // read a real snoop log (no root, no Shizuku, no bugreport zip set)
-        val strategies = listOf(
-            DirectFileSnoopStrategy(),
-            ShizukuSnoopStrategy(),
-            BugreportSnoopStrategy(),
-        )
+        val strategies =
+            listOf(
+                DirectFileSnoopStrategy(),
+                ShizukuSnoopStrategy(),
+                BugreportSnoopStrategy(),
+            )
         val canReadCount = strategies.count { it.isAvailable() && it.canReadSnoopLog() }
         assertEquals(0, canReadCount, "No strategy should be able to read in test env")
     }

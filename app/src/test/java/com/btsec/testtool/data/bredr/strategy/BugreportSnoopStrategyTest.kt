@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -26,7 +25,6 @@ import java.util.zip.ZipOutputStream
  */
 @DisplayName("BugreportSnoopStrategy")
 class BugreportSnoopStrategyTest {
-
     @TempDir
     lateinit var tempDir: File
 
@@ -144,7 +142,11 @@ class BugreportSnoopStrategyTest {
 
     // ========== Helpers ==========
 
-    private fun createBugreportZip(dir: File, entryName: String, data: ByteArray): File {
+    private fun createBugreportZip(
+        dir: File,
+        entryName: String,
+        data: ByteArray,
+    ): File {
         val zipFile = File(dir, "bugreport_${System.nanoTime()}.zip")
         ZipOutputStream(zipFile.outputStream()).use { zos ->
             zos.putNextEntry(ZipEntry(entryName))
@@ -154,6 +156,10 @@ class BugreportSnoopStrategyTest {
         return zipFile
     }
 
-    private fun createBugreportZip(dir: File, entryName: String, data: String): File =
+    private fun createBugreportZip(
+        dir: File,
+        entryName: String,
+        data: String,
+    ): File =
         createBugreportZip(dir, entryName, data.toByteArray())
 }

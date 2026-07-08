@@ -8,7 +8,6 @@
  */
 package com.btsec.testtool.data.bredr.strategy
 
-import com.btsec.testtool.domain.repository.SnoopCaptureStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -16,16 +15,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayInputStream
-import java.io.File
-import java.io.InputStream
 
 /**
  * Unit tests for [DirectFileSnoopStrategy].
  */
 @DisplayName("DirectFileSnoopStrategy")
 class DirectFileSnoopStrategyTest {
-
     private lateinit var strategy: DirectFileSnoopStrategy
 
     @BeforeEach

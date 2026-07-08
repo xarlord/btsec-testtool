@@ -25,7 +25,6 @@ import java.io.InputStream
  * Issues: #375 (root-free snoop capture), #412 (strategy pattern refactor)
  */
 interface SnoopCaptureStrategy {
-
     /**
      * Human-readable name of this strategy, e.g. "Direct File", "Shizuku".
      * Used for logging and UI display.

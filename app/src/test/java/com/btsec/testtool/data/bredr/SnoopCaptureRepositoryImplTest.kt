@@ -55,11 +55,12 @@ class SnoopCaptureRepositoryImplTest {
         context = mockk(relaxed = true)
         snoopCaptureUseCase = mockk(relaxed = true)
         // Provide the default set of strategies (same order as SnoopStrategyModule)
-        strategies = setOf(
-            DirectFileSnoopStrategy(),
-            ShizukuSnoopStrategy(),
-            BugreportSnoopStrategy(),
-        )
+        strategies =
+            setOf(
+                DirectFileSnoopStrategy(),
+                ShizukuSnoopStrategy(),
+                BugreportSnoopStrategy(),
+            )
         repository = SnoopCaptureRepositoryImpl(context, snoopCaptureUseCase, strategies)
     }
 

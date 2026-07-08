@@ -42,57 +42,62 @@ import javax.inject.Singleton
  * Issues: #375 (root-free snoop capture), #412 (strategy pattern refactor)
  */
 @Singleton
-class ShizukuSnoopStrategy @Inject constructor() : SnoopCaptureStrategy {
+class ShizukuSnoopStrategy
+    @Inject
+    constructor() : SnoopCaptureStrategy {
+        override fun getName(): String = "Shizuku"
 
-    override fun getName(): String = "Shizuku"
-
-    override fun isAvailable(): Boolean {
-        // TODO: Replace with Shizuku.checkSelfPermission() once Shizuku lib is added.
-        //   For now, detect Shizuku by checking if the class can be loaded.
-        return try {
-            Class.forName("rikka.shizuku.Shizuku")
-            Timber.i("Shizuku class found — Shizuku APK is installed")
-            true
-        } catch (e: ClassNotFoundException) {
-            Timber.d("Shizuku not available — APK not installed")
-            false
+        override fun isAvailable(): Boolean {
+            // TODO: Replace with Shizuku.checkSelfPermission() once Shizuku lib is added.
+            //   For now, detect Shizuku by checking if the class can be loaded.
+            return try {
+                Class.forName("rikka.shizuku.Shizuku")
+                Timber.i("Shizuku class found — Shizuku APK is installed")
+                true
+            } catch (e: ClassNotFoundException) {
+                Timber.d("Shizuku not available — APK not installed")
+                false
+            }
         }
-    }
 
-    override fun canReadSnoopLog(): Boolean {
-        // TODO: Once Shizuku lib is integrated, check:
-        //   1. Shizuku.isAppProvidedPermissionGranted()
-        //   2. Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-        //   3. ShizukuService is running
-        if (!isAvailable()) return false
+        override fun canReadSnoopLog(): Boolean {
+            // TODO: Once Shizuku lib is integrated, check:
+            //   1. Shizuku.isAppProvidedPermissionGranted()
+            //   2. Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            //   3. ShizukuService is running
+            if (!isAvailable()) return false
 
-        Timber.w("Shizuku strategy: canReadSnoopLog() not yet implemented — " +
-            "Shizuku library dependencies not added")
-        return false
-    }
+            Timber.w(
+                "Shizuku strategy: canReadSnoopLog() not yet implemented — " +
+                    "Shizuku library dependencies not added",
+            )
+            return false
+        }
 
-    override fun readSnoopLog(): Result<InputStream> {
-        if (!isAvailable()) {
+        override fun readSnoopLog(): Result<InputStream> {
+            if (!isAvailable()) {
+                return Result.failure(
+                    UnsupportedOperationException(
+                        "Shizuku is not installed. Install Shizuku to enable root-free snoop capture.",
+                    ),
+                )
+            }
+
+            // TODO: Implement using Shizuku API:
+            //   val process = Shizuku.newProcess(
+            //       arrayOf("cat", DirectFileSnoopStrategy.SNOOP_LOG_PATH),
+            //       null, null
+            //   )
+            //   return Result.success(process.inputStream)
+            Timber.w(
+                "Shizuku strategy: readSnoopLog() not yet implemented — " +
+                    "Shizuku library dependencies not added",
+            )
             return Result.failure(
                 UnsupportedOperationException(
-                    "Shizuku is not installed. Install Shizuku to enable root-free snoop capture.",
+                    "Shizuku-based snoop reading is not yet implemented. " +
+                        "See docs/Shizuku-RootFree-Snoop-Capture.md for the integration plan.",
                 ),
             )
         }
-
-        // TODO: Implement using Shizuku API:
-        //   val process = Shizuku.newProcess(
-        //       arrayOf("cat", DirectFileSnoopStrategy.SNOOP_LOG_PATH),
-        //       null, null
-        //   )
-        //   return Result.success(process.inputStream)
-        Timber.w("Shizuku strategy: readSnoopLog() not yet implemented — " +
-            "Shizuku library dependencies not added")
-        return Result.failure(
-            UnsupportedOperationException(
-                "Shizuku-based snoop reading is not yet implemented. " +
-                    "See docs/Shizuku-RootFree-Snoop-Capture.md for the integration plan.",
-            ),
-        )
     }
-}

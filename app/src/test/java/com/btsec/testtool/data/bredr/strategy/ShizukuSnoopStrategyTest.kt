@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test
  */
 @DisplayName("ShizukuSnoopStrategy")
 class ShizukuSnoopStrategyTest {
-
     private lateinit var strategy: ShizukuSnoopStrategy
 
     @BeforeEach
