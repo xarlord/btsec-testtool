@@ -67,6 +67,9 @@ object Versions {
     const val timber = "5.0.1"
     const val leakCanary = "2.12"
 
+    // Shizuku (root-free ADB access)
+    const val shizuku = "13.1.5"
+
     // Protobuf
     const val protobuf = "3.25.1"
     const val protobufKotlinLite = "3.25.1"

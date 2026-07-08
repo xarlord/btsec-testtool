@@ -353,6 +353,10 @@ dependencies {
     // ZIP encryption
     implementation("net.lingala.zip4j:zip4j:2.11.5")
 
+    // Shizuku (root-free ADB-level snoop capture)
+    implementation("rikka.shizuku:api:${Versions.shizuku}")
+    implementation("rikka.shizuku:provider:${Versions.shizuku}")
+
     // Logging
     implementation("com.jakewharton.timber:timber:${Versions.timber}")
 
