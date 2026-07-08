@@ -305,7 +305,7 @@ class AvrcpSecurityRepositoryImpl
                 // Extract UID (8 bytes, big-endian)
                 var uid = 0L
                 for (i in 0 until 8) {
-                    uid = (uid shl 8) or (data[offset + i].toInt() and 0xFF)
+                    uid = (uid shl 8) or ((data[offset + i].toInt() and 0xFF).toLong())
                 }
                 offset += 8
 

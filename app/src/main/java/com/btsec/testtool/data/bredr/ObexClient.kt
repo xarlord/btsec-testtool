@@ -99,6 +99,7 @@ class ObexClient(
                 0xB7.toByte(), 0xEF.toByte(), 0xFF.toByte(), 0x18.toByte(),
                 0xE6.toByte(), 0x55.toByte(), 0x7F.toByte(), 0x42.toByte(),
             )
+        private const val MAX_CONTINUATIONS = 20
     }
 
     /**
@@ -286,11 +287,11 @@ class ObexClient(
             }
         val totalLen = 7 + headers.size
         val packet = ByteArray(totalLen)
-        packet[0] = OP_CONNECT
+        packet[0] = OP_CONNECT.toByte()
         packet[1] = ((totalLen shr 8) and 0xFF).toByte()
         packet[2] = (totalLen and 0xFF).toByte()
-        packet[3] = OBEX_VERSION
-        packet[4] = OBEX_FLAGS
+        packet[3] = OBEX_VERSION.toByte()
+        packet[4] = OBEX_FLAGS.toByte()
         packet[5] = ((DEFAULT_MAX_PACKET shr 8) and 0xFF).toByte()
         packet[6] = (DEFAULT_MAX_PACKET and 0xFF).toByte()
         if (headers.isNotEmpty()) {
@@ -308,7 +309,7 @@ class ObexClient(
             }
         val totalLen = 3 + headers.size
         val packet = ByteArray(totalLen)
-        packet[0] = OP_DISCONNECT
+        packet[0] = OP_DISCONNECT.toByte()
         packet[1] = ((totalLen shr 8) and 0xFF).toByte()
         packet[2] = (totalLen and 0xFF).toByte()
         if (headers.isNotEmpty()) {
@@ -358,11 +359,11 @@ class ObexClient(
             }
         val totalLen = 5 + headers.size
         val packet = ByteArray(totalLen)
-        packet[0] = OP_SET_PATH
+        packet[0] = OP_SET_PATH.toByte()
         packet[1] = ((totalLen shr 8) and 0xFF).toByte()
         packet[2] = (totalLen and 0xFF).toByte()
         packet[3] = flags.toByte()
-        packet[4] = 0x00 // constants only
+        packet[4] = 0x00.toByte()
         if (headers.isNotEmpty()) {
             System.arraycopy(headers, 0, packet, 5, headers.size)
         }
@@ -517,9 +518,5 @@ class ObexClient(
             for (i in buf.indices) result[i] = buf[i]
             return result
         }
-    }
-
-    companion object {
-        private const val MAX_CONTINUATIONS = 20
     }
 }
