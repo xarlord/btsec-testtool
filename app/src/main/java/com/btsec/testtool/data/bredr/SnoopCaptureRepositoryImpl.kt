@@ -18,9 +18,11 @@ import com.btsec.testtool.domain.repository.SnoopCaptureRepository
 import com.btsec.testtool.domain.repository.SnoopCaptureStrategy
 import com.btsec.testtool.domain.usecase.SnoopCaptureUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
