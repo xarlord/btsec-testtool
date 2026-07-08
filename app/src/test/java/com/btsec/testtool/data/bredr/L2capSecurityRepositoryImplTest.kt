@@ -107,7 +107,7 @@ class L2capSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `sendSignalingCommand returns null (stub implementation)`() =
+    fun `sendSignalingCommand returns failure (unsupported platform)`() =
         runTest {
             val result =
                 repository.sendSignalingCommand(
@@ -117,11 +117,12 @@ class L2capSecurityRepositoryImplTest {
                     timeoutMs = 1000L,
                 )
 
-            assertEquals(null, result)
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull()!!.message!!.contains("not supported"))
         }
 
     @Test
-    fun `queryInformation returns null (stub implementation)`() =
+    fun `queryInformation returns failure (unsupported platform)`() =
         runTest {
             val result =
                 repository.queryInformation(
@@ -129,7 +130,8 @@ class L2capSecurityRepositoryImplTest {
                     infoType = 1,
                 )
 
-            assertEquals(null, result)
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull()!!.message!!.contains("not supported"))
         }
 
     @Test

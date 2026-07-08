@@ -36,26 +36,28 @@ interface L2capSecurityRepository {
      * @param channelId The L2CAP channel ID.
      * @param payload The signaling command payload.
      * @param timeoutMs Response timeout in milliseconds.
-     * @return The response payload, or null on timeout.
+     * @return Result.success with response payload (null on timeout),
+     *         Result.failure if not supported or an error occurs.
      */
     suspend fun sendSignalingCommand(
         deviceAddress: String,
         channelId: Int,
         payload: ByteArray,
         timeoutMs: Long = 5000,
-    ): ByteArray?
+    ): Result<ByteArray?>
 
     /**
      * Query device information via L2CAP Information Request.
      *
      * @param deviceAddress The target device.
      * @param infoType The information type to query.
-     * @return The information response, or null on failure.
+     * @return Result.success with information response (null on timeout),
+     *         Result.failure if not supported or an error occurs.
      */
     suspend fun queryInformation(
         deviceAddress: String,
         infoType: Int,
-    ): ByteArray?
+    ): Result<ByteArray?>
 
     /**
      * Check whether an L2CAP connection is active.

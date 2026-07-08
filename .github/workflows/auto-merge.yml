@@ -40,4 +40,8 @@ jobs:
           fi
 
           echo "::notice::All checks passed, merging PR #${{ github.event.pull_request.number }}"
-          gh pr merge ${{ github.event.pull_request.number }} --squash --admin || true
+          if ! gh pr merge ${{ github.event.pull_request.number }} --squash --admin; then
+            echo "::error::Auto-merge failed for PR #${{ github.event.pull_request.number }}"
+            gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ Auto-merge failed. Please merge manually or investigate the conflict."
+            exit 1
+          fi

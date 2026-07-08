@@ -84,21 +84,31 @@ class L2capSecurityRepositoryImpl
             channelId: Int,
             payload: ByteArray,
             timeoutMs: Long,
-        ): ByteArray? {
+        ): Result<ByteArray?> {
             // Raw L2CAP signaling requires socket-level access.
             // On Android 10+, use BluetoothSocket.createL2capChannel() for LE L2CAP.
             // For BR/EDR signaling, reflection or native HCI is needed.
             Timber.d("sendSignalingCommand: addr=$deviceAddress cid=$channelId size=${payload.size}")
-            return null
+            return Result.failure(
+                Exception(
+                    "L2CAP signaling not supported on this platform — " +
+                        "requires raw socket access (Android 10+ LE L2CAP or BR/EDR HCI)",
+                ),
+            )
         }
 
         override suspend fun queryInformation(
             deviceAddress: String,
             infoType: Int,
-        ): ByteArray? {
+        ): Result<ByteArray?> {
             // L2CAP Information Request requires raw signaling access.
             Timber.d("queryInformation: addr=$deviceAddress infoType=$infoType")
-            return null
+            return Result.failure(
+                Exception(
+                    "L2CAP information query not supported on this platform — " +
+                        "requires raw signaling access",
+                ),
+            )
         }
 
         override fun isL2capConnected(): Flow<Boolean> = connected
