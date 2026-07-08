@@ -199,6 +199,83 @@ class L2capSecurityUseCase
                     severity = L2capSeverity.INFO,
                     recommendation = "Document channel availability for security posture assessment",
                 ),
+                // Disconnection Attack
+                L2capTestCase(
+                    name = "Disconnection attack: rapid disconnect without cleanup",
+                    category = L2capTestCategory.DISCONNECTION_ATTACK,
+                    signalCommand = L2capSignalCommand.DISCONNECTION_REQUEST,
+                    requestPayload = "<rapid-disconnect>",
+                    expectedBehavior = "Device properly cleans up resources after disconnection",
+                    vulnerabilityIndicator = "Resource leak, stale channel state, or crash after rapid disconnect",
+                    severity = L2capSeverity.HIGH,
+                    recommendation = "Ensure proper resource cleanup on disconnection; verify no stale state remains",
+                ),
+                // LE Signaling: Connection Parameter Update
+                L2capTestCase(
+                    name = "LE signaling: Connection Parameter Update Request",
+                    category = L2capTestCategory.LE_SIGNALING,
+                    signalCommand = L2capSignalCommand.CONNECTION_REQUEST,
+                    requestPayload = "<le-conn-param-update>",
+                    expectedBehavior = "Device accepts or rejects LE connection parameter update with valid response",
+                    vulnerabilityIndicator = "No response, crash, or accepts parameters outside valid ranges",
+                    severity = L2capSeverity.MEDIUM,
+                    recommendation = "Validate LE connection parameter update handling; reject out-of-range values",
+                ),
+                // Credit-based Flow Control Abuse (LE L2CAP)
+                L2capTestCase(
+                    name = "Credit flow control: request maximum credits then flood",
+                    category = L2capTestCategory.CREDIT_FLOW_CONTROL,
+                    signalCommand = L2capSignalCommand.INFORMATION_REQUEST,
+                    requestPayload = "<credit-max-request>",
+                    expectedBehavior = "Device enforces credit limits and rate-limits credit reissue",
+                    vulnerabilityIndicator = "Device grants unlimited credits or crashes under credit exhaustion",
+                    severity = L2capSeverity.HIGH,
+                    recommendation = "Implement strict credit accounting; cap credit grants to prevent memory exhaustion",
+                ),
+                // ACL Connection Flood
+                L2capTestCase(
+                    name = "ACL flood: open multiple L2CAP connections simultaneously",
+                    category = L2capTestCategory.ACL_FLOOD,
+                    signalCommand = L2capSignalCommand.CONNECTION_REQUEST,
+                    requestPayload = "<acl-flood>",
+                    expectedBehavior = "Device limits concurrent connections and rejects excess",
+                    vulnerabilityIndicator = "Device accepts unlimited connections, exhausting resources",
+                    severity = L2capSeverity.HIGH,
+                    recommendation = "Enforce maximum concurrent L2CAP connection limit per ACL link",
+                ),
+                // Configuration Rejection
+                L2capTestCase(
+                    name = "Config rejection: reject all config options systematically",
+                    category = L2capTestCategory.CONFIG_REJECTION,
+                    signalCommand = L2capSignalCommand.CONFIGURATION_RESPONSE,
+                    requestPayload = "<reject-all-options>",
+                    expectedBehavior = "Device handles all-options-rejected gracefully and terminates or retries",
+                    vulnerabilityIndicator = "Device enters infinite negotiation loop, hangs, or crashes",
+                    severity = L2capSeverity.MEDIUM,
+                    recommendation = "Implement retry limit for configuration negotiation; detect loops",
+                ),
+                // Command Reject Fuzzing
+                L2capTestCase(
+                    name = "Command reject fuzzing: invalid/unknown command codes",
+                    category = L2capTestCategory.COMMAND_REJECT_FUZZ,
+                    signalCommand = L2capSignalCommand.COMMAND_REJECT,
+                    requestPayload = "FF00020000",
+                    expectedBehavior = "Device ignores or rejects unknown signaling command codes",
+                    vulnerabilityIndicator = "Device crashes, reboots, or processes unrecognized commands",
+                    severity = L2capSeverity.MEDIUM,
+                    recommendation = "Validate signaling command codes before processing; reject unknown codes",
+                ),
+                // Reconnection Attack
+                L2capTestCase(
+                    name = "Reconnection attack: reconnect without proper cleanup",
+                    category = L2capTestCategory.RECONNECTION_ATTACK,
+                    signalCommand = L2capSignalCommand.CONNECTION_REQUEST,
+                    requestPayload = "<reconnect-without-cleanup>",
+                    expectedBehavior = "Device rejects reconnection to CID not fully torn down or properly cleans up",
+                    vulnerabilityIndicator = "Device accepts connection on stale CID, corrupting state",
+                    severity = L2capSeverity.HIGH,
+                    recommendation = "Ensure full teardown before accepting new connections on same resources",
+                ),
             )
 
         /**

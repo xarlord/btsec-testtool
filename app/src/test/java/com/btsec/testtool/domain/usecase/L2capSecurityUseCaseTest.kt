@@ -37,7 +37,7 @@ class L2capSecurityUseCaseTest {
         @DisplayName("should have at least 14 predefined tests")
         fun testGetTestSuite_hasMinimum14Tests() {
             val suite = useCase.getTestSuite()
-            assertThat(suite).hasSize(16)
+            assertThat(suite).hasSize(23)
             assertThat(suite.size).isAtLeast(14)
         }
 
@@ -49,6 +49,80 @@ class L2capSecurityUseCaseTest {
             assertThat(categories).containsAtLeastElementsIn(
                 L2capTestCategory.entries,
             )
+        }
+
+        @Test
+        @DisplayName("should include disconnection attack test case")
+        fun testGetTestSuite_hasDisconnectionAttack() {
+            val suite = useCase.getTestSuite()
+            val testCase = suite.find { it.category == L2capTestCategory.DISCONNECTION_ATTACK }
+            assertThat(testCase).isNotNull()
+            assertThat(testCase!!.signalCommand).isEqualTo(L2capSignalCommand.DISCONNECTION_REQUEST)
+            assertThat(testCase.severity).isEqualTo(L2capSeverity.HIGH)
+            assertThat(testCase.name).contains("Disconnection attack")
+        }
+
+        @Test
+        @DisplayName("should include LE signaling connection parameter update test")
+        fun testGetTestSuite_hasLeSignaling() {
+            val suite = useCase.getTestSuite()
+            val testCase = suite.find { it.category == L2capTestCategory.LE_SIGNALING }
+            assertThat(testCase).isNotNull()
+            assertThat(testCase!!.severity).isEqualTo(L2capSeverity.MEDIUM)
+            assertThat(testCase.name).contains("Connection Parameter Update")
+        }
+
+        @Test
+        @DisplayName("should include credit-based flow control abuse test")
+        fun testGetTestSuite_hasCreditFlowControl() {
+            val suite = useCase.getTestSuite()
+            val testCase = suite.find { it.category == L2capTestCategory.CREDIT_FLOW_CONTROL }
+            assertThat(testCase).isNotNull()
+            assertThat(testCase!!.severity).isEqualTo(L2capSeverity.HIGH)
+            assertThat(testCase.name).contains("Credit flow control")
+        }
+
+        @Test
+        @DisplayName("should include ACL connection flood test")
+        fun testGetTestSuite_hasAclFlood() {
+            val suite = useCase.getTestSuite()
+            val testCase = suite.find { it.category == L2capTestCategory.ACL_FLOOD }
+            assertThat(testCase).isNotNull()
+            assertThat(testCase!!.severity).isEqualTo(L2capSeverity.HIGH)
+            assertThat(testCase.name).contains("ACL flood")
+        }
+
+        @Test
+        @DisplayName("should include configuration rejection test")
+        fun testGetTestSuite_hasConfigRejection() {
+            val suite = useCase.getTestSuite()
+            val testCase = suite.find { it.category == L2capTestCategory.CONFIG_REJECTION }
+            assertThat(testCase).isNotNull()
+            assertThat(testCase!!.signalCommand).isEqualTo(L2capSignalCommand.CONFIGURATION_RESPONSE)
+            assertThat(testCase.severity).isEqualTo(L2capSeverity.MEDIUM)
+            assertThat(testCase.name).contains("Config rejection")
+        }
+
+        @Test
+        @DisplayName("should include command reject fuzzing test")
+        fun testGetTestSuite_hasCommandRejectFuzz() {
+            val suite = useCase.getTestSuite()
+            val testCase = suite.find { it.category == L2capTestCategory.COMMAND_REJECT_FUZZ }
+            assertThat(testCase).isNotNull()
+            assertThat(testCase!!.signalCommand).isEqualTo(L2capSignalCommand.COMMAND_REJECT)
+            assertThat(testCase.severity).isEqualTo(L2capSeverity.MEDIUM)
+            assertThat(testCase.name).contains("Command reject fuzzing")
+        }
+
+        @Test
+        @DisplayName("should include reconnection attack test")
+        fun testGetTestSuite_hasReconnectionAttack() {
+            val suite = useCase.getTestSuite()
+            val testCase = suite.find { it.category == L2capTestCategory.RECONNECTION_ATTACK }
+            assertThat(testCase).isNotNull()
+            assertThat(testCase!!.signalCommand).isEqualTo(L2capSignalCommand.CONNECTION_REQUEST)
+            assertThat(testCase.severity).isEqualTo(L2capSeverity.HIGH)
+            assertThat(testCase.name).contains("Reconnection attack")
         }
     }
 
