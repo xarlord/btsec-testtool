@@ -1,75 +1,75 @@
-// Project-wide dependency versions
+// Project-wide dependency versions (updated 2026-06-21 for Gradle 8.11.1 / Kotlin 2.1.0)
 object Versions {
     // Android
-    const val compileSdk = 34
+    const val compileSdk = 35
     const val minSdk = 24
-    const val targetSdk = 34
+    const val targetSdk = 35
     const val versionCode = 1
     const val versionName = "1.0.0"
 
     // Kotlin
-    const val kotlin = "1.9.21"
-    const val kotlinCoroutines = "1.7.3"
-    const val kotlinSerialization = "1.6.2"
-    const val kotlinImmutable = "0.3.6"
+    const val kotlin = "2.1.0"
+    const val kotlinCoroutines = "1.9.0"
+    const val kotlinSerialization = "1.7.3"
+    const val kotlinImmutable = "0.3.8"
 
     // AndroidX
-    const val coreKtx = "1.12.0"
-    const val appcompat = "1.6.1"
-    const val activity = "1.8.1"
-    const val lifecycle = "2.6.2"
-    const val navigation = "2.7.5"
-    const val compose = "1.5.6"
-    const val composeBom = "2023.10.01"
+    const val coreKtx = "1.15.0"
+    const val appcompat = "1.7.0"
+    const val activity = "1.9.3"
+    const val lifecycle = "2.8.7"
+    const val navigation = "2.8.5"
+    const val compose = "2.1.0" // matches Kotlin 2.1.0 (managed by kotlin.plugin.compose)
+    const val composeBom = "2024.12.01"
     const val room = "2.6.1"
-    const val work = "2.8.1"
+    const val work = "2.10.0"
     const val startup = "1.1.1"
-    const val dataStore = "1.0.0"
+    const val dataStore = "1.1.1"
     const val security = "1.1.0-alpha06"
 
     // Compose Libraries
-    const val accompanist = "0.32.0"
-    const val composeNavigation = "2.7.5"
-    const val constraintLayout = "1.0.1"
+    const val accompanist = "0.36.0"
+    const val composeNavigation = "2.8.5"
+    const val constraintLayout = "1.1.0"
 
     // Dependency Injection
-    const val hilt = "2.48.1"
-    const val hiltAndroidX = "1.1.0"
-    const val hiltNavigationCompose = "1.1.0"
-    const val hiltWork = "1.1.0"
+    const val hilt = "2.53.1"
+    const val hiltAndroidX = "1.2.0"
+    const val hiltNavigationCompose = "1.2.0"
+    const val hiltWork = "1.2.0"
 
     // Network
     const val okhttp = "4.12.0"
-    const val retrofit = "2.9.0"
+    const val retrofit = "2.11.0"
     const val retrofitSerialization = "1.0.0"
     const val okhttpLogging = "4.12.0"
 
     // PDF Generation
     const val iText7 = "7.2.5"
-    const val apachePdfBox = "2.0.29"
+    const val apachePdfBox = "2.0.32"
 
     // Bluetooth
     const val bthelper = "2.4.0"
 
     // Testing
-    const val junit = "5.10.1"
-    const val junitJupiter = "5.10.1"
-    const val mockk = "1.13.8"
-    const val turbine = "1.1.0"
-    const val androidxTest = "1.5.2"
-    const val espresso = "3.5.1"
-    const val composeTesting = "1.5.4"
-    const val robolectric = "4.11.1"
-    const val truth = "1.1.5"
-    const val androidxJunit = "1.1.5"
+    const val junit = "5.11.4"
+    const val junitJupiter = "5.11.4"
+    const val mockk = "1.13.13"
+    const val turbine = "1.2.0"
+    const val androidxTest = "1.6.1"
+    const val espresso = "3.6.1"
+    const val composeTesting = "1.7.6"
+    const val robolectric = "4.14.1"
+    const val truth = "1.4.4"
+    const val androidxJunit = "1.2.1"
 
     // Debugging
     const val timber = "5.0.1"
-    const val leakCanary = "2.12"
+    const val leakCanary = "2.14"
 
     // Protobuf
-    const val protobuf = "3.25.1"
-    const val protobufKotlinLite = "3.25.1"
+    const val protobuf = "3.25.5"
+    const val protobufKotlinLite = "3.25.5"
 }
 
 object Dependencies {

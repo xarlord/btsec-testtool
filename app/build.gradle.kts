@@ -3,12 +3,13 @@
  * Copyright (c) 2026 Security Research Team
  *
  * Licensed under MIT with additional restrictions:
- * - This application may ONLY be used for authorized security testing
+ * - This application may ONLY be used for AUTHORIZED security testing
  * - See LICENSE for full terms
  */
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
@@ -147,9 +148,8 @@ android {
         shaders = false
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.6"
-    }
+    // NOTE: composeOptions { kotlinCompilerExtensionVersion } removed —
+    // Kotlin 2.0+ with org.jetbrains.kotlin.plugin.compose manages this automatically.
 
     packaging {
         resources {
@@ -249,7 +249,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // NOT tmp/kotlin-classes/debug. The unit tests run against the devDebug variant
     // (testDevDebugUnitTest), so we must point JaCoCo at devDebug's class output.
     val debugTree =
-        fileTree("$buildDir/tmp/kotlin-classes/devDebug") {
+        fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/devDebug") {
             exclude(fileFilter)
         }
 
@@ -259,7 +259,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     sourceDirectories.setFrom(files(listOf(mainSrc, mainKotlinSrc)))
     classDirectories.setFrom(files(listOf(debugTree)))
     executionData.setFrom(
-        fileTree(buildDir) {
+        fileTree(layout.buildDirectory.get()) {
             include(listOf("**/*.exec", "**/*.ec"))
         },
     )
@@ -302,7 +302,7 @@ dependencies {
 
     // Dependency Injection
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")
-    ksp("com.google.dagger:hilt-compiler:${Versions.hilt}")
+    ksp("com.google.dagger:hilt-android-compiler:${Versions.hilt}")
     implementation("androidx.hilt:hilt-navigation-compose:${Versions.hiltNavigationCompose}")
 
     // Coroutines
@@ -331,7 +331,7 @@ dependencies {
     // Work Manager
     implementation("androidx.work:work-runtime-ktx:${Versions.work}")
     implementation("androidx.hilt:hilt-work:${Versions.hiltWork}")
-    ksp("androidx.hilt:hilt-compiler:${Versions.hiltAndroidX}")
+    ksp("androidx.hilt:hilt-compiler:${Versions.hiltWork}")
 
     // Startup
     implementation("androidx.startup:startup-runtime:${Versions.startup}")
@@ -372,9 +372,9 @@ dependencies {
     // Android Testing
     androidTestImplementation("androidx.test.ext:junit:${Versions.androidxJunit}")
     androidTestImplementation("androidx.test.espresso:espresso-core:${Versions.espresso}")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:${Versions.composeTesting}")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("com.google.dagger:hilt-android-testing:${Versions.hilt}")
-    kspAndroidTest("com.google.dagger:hilt-compiler:${Versions.hilt}")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:${Versions.hilt}")
     androidTestImplementation("io.mockk:mockk-android:${Versions.mockk}")
 
     // Debug
