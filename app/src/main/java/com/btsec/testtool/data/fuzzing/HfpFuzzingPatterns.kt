@@ -424,9 +424,9 @@ object HfpFuzzingPatterns {
                 description = "Test RFCOMM channel with null bytes and special chars (CVE-2023-28909)",
                 payloads =
                     listOf(
-                        "AT+CMEE=2\x00\x00\x00",
-                        "AT+CIND?\x00\x01\x02\x03",
-                        "AT+CLIP:\x00\xFF\xFF\xFF\xFF",
+                        "AT+CMEE=2\u0000\u0000\u0000",
+                        "AT+CIND?\u0000\u0001\u0002\u0003",
+                        "AT+CLIP:\u0000\u00FF\u00FF\u00FF\u00FF",
                     ),
                 cveReferences = listOf("CVE-2023-28909"),
             ),
