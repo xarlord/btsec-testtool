@@ -1,0 +1,88 @@
+name: Stale Issue Triage
+
+on:
+  schedule:
+    # Run daily at 09:00 UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # --- Phase 1: Mark issues stale after 14 days of inactivity ---
+          days-before-stale: 14
+          days-before-close: 7
+
+          # Only triage issues (not PRs)
+          only-issues: true
+
+          # Stale label management
+          stale-issue-label: 'stale'
+          stale-issue-message: >
+            This issue has had no activity for 14 days and has been marked as stale.
+            It will be auto-closed in 7 days if there is no further activity.
+            Comment or remove the `stale` label to keep it open.
+
+          # Close message
+          close-issue-message: >
+            Auto-closed: No activity for 21 days. Reopen if still relevant.
+
+          # --- Exceptions: never close these ---
+          exempt-issue-labels: 'bug,security,p0,critical,blocked'
+
+          # --- Hard cap: aggressive closing when repo is overloaded ---
+          # If repo has >100 open issues, also close unassigned issues after 7 days
+          operations-per-run: 100
+
+          # Remove stale label when issue gets activity
+          remove-stale-when-updated: true
+
+          # Don't mark issues with specific labels as stale at all
+          exempt-all-issue-labels: 'bug,security,p0,critical,blocked,enhancement,good first issue'
+
+          # Timestamp for staleness: only consider issues older than this
+          # to avoid triaging very recent issues
+          start-date: '2024-01-01'
+
+  aggressive-prune:
+    needs: stale
+    runs-on: ubuntu-latest
+    if: ${{ needs.stale.result == 'success' }}
+    steps:
+      - name: Check if hard cap is needed
+        id: check-count
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN_COUNT=$(gh issue list --state open --json number -q '. | length' 2>/dev/null || echo "0")
+          echo "count=$OPEN_COUNT" >> "$GITHUB_OUTPUT"
+          echo "Open issues: $OPEN_COUNT"
+
+      - name: Aggressively close unassigned inactive issues
+        if: steps.check-count.outputs.count > 100
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Repo has ${{ steps.check-count.outputs.count }} open issues (>100). Running aggressive prune..."
+          # Close issues with no assignee, no special labels, and 7+ days inactive
+          gh issue list \
+            --state open \
+            --search "no:assignee -label:bug -label:security -label:p0 -label:critical -label:blocked -label:stale -label:enhancement" \
+            --json number,updatedAt,labels,assignees \
+            --jq '.[] | select(.assignees | length == 0) | select((now - (.updatedAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) > 604800) | .number' \
+          | while read -r issue_num; do
+              if [ -n "$issue_num" ]; then
+                echo "Closing issue #$issue_num (unassigned, 7+ days inactive, repo overloaded)"
+                gh issue close "$issue_num" -c "Auto-closed: Repo has >100 open issues. This unassigned issue had no activity for 7+ days. Reopen if still relevant."
+              fi
+            done
+          echo "Aggressive prune complete."
