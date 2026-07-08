@@ -202,7 +202,7 @@ class L2capSecurityRepositoryImpl
             identifier: Int,
             data: ByteArray,
         ): ByteArray {
-            val signalingPayloadLen = 2 + data.size // sig length field + data
+            val signalingPayloadLen = 4 + data.size // sig header (4) + data
             val totalLen = 4 + signalingPayloadLen // L2CAP header + sig payload
 
             val packet = ByteArray(totalLen)
