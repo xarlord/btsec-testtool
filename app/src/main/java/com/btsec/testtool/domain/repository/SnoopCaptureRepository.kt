@@ -18,6 +18,11 @@ import kotlinx.coroutines.flow.Flow
  * Provides capabilities for monitoring the HCI snoop log file,
  * parsing new packets, and managing capture sessions.
  *
+ * Supports multiple capture strategies via [SnoopCaptureStrategy]:
+ * - Direct file read (requires root)
+ * - Shizuku shell (root-free, requires Shizuku)
+ * - Bugreport zip extraction (root-free, post-capture)
+ *
  * All operations require prior AUTHORIZATION.
  */
 interface SnoopCaptureRepository {
@@ -60,4 +65,41 @@ interface SnoopCaptureRepository {
      * @return Flow of all saved sessions.
      */
     fun getSavedSessions(): Flow<List<SnoopCaptureSession>>
+
+    /**
+     * Get a list of all registered capture strategies and their availability.
+     *
+     * Each entry contains the strategy name and whether it is currently available
+     * on this device. This is useful for UI that lets the user pick a strategy.
+     *
+     * @return List of [StrategyInfo] describing each strategy.
+     */
+    fun getAvailableStrategies(): List<StrategyInfo>
+
+    /**
+     * Get the name of the currently active (selected) capture strategy.
+     *
+     * @return The strategy name, or null if no strategy is active.
+     */
+    fun getActiveStrategyName(): String?
+
+    /**
+     * Force selection of a specific capture strategy by name.
+     *
+     * If the named strategy is available and can read the snoop log, it becomes
+     * the active strategy. Otherwise, the call fails silently and the current
+     * strategy remains.
+     *
+     * @param name The exact name returned by [SnoopCaptureStrategy.getName].
+     */
+    fun selectStrategy(name: String)
+
+    /**
+     * Descriptor for a capture strategy's availability.
+     */
+    data class StrategyInfo(
+        val name: String,
+        val isAvailable: Boolean,
+        val canRead: Boolean,
+    )
 }
