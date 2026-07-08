@@ -253,19 +253,10 @@ class L2capSecurityRepositoryImpl
                 val socket =
                     try {
                         @Suppress("DEPRECATION")
-                        device.createL2capChannel(
-                            LE_SIGNALING_PSM,
-                            BluetoothSocket.TRANSPORT_LE,
-                        )
-                    } catch (e: NoSuchMethodError) {
-                        Timber.d("createL2capChannel(channel, transport) not available, trying single-arg")
-                        try {
-                            @Suppress("DEPRECATION")
-                            device.createL2capChannel(LE_SIGNALING_PSM)
-                        } catch (e2: Exception) {
-                            Timber.d("L2CAP channel creation not supported: ${e2.message}")
-                            return null
-                        }
+                        device.createL2capChannel(LE_SIGNALING_PSM)
+                    } catch (e: Exception) {
+                        Timber.d("L2CAP channel creation not supported: ${e.message}")
+                        return null
                     }
 
                 socket.connect()
