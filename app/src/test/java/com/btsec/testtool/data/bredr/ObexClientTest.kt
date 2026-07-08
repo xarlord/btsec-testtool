@@ -76,11 +76,21 @@ class ObexClientTest {
         // Build a fake OBEX OK response (0xA0) with Connection ID header
         val fakeResponse =
             byteArrayOf(
-                0xA0.toByte(), // Response code: OK
-                0x00, 0x09, // Packet length: 9
-                0xCB.toByte(), // Header: Connection ID (4-byte header)
-                0x00, 0x05, // Header length: 5
-                0x01, 0x00, 0x00, 0x00, // Connection ID value
+                // Response code: OK
+                0xA0.toByte(),
+                0x00,
+                0x09,
+                // Packet length: 9
+                // Header: Connection ID (4-byte header)
+                0xCB.toByte(),
+                0x00,
+                0x05,
+                // Header length: 5
+                0x01,
+                0x00,
+                0x00,
+                0x00,
+                // Connection ID value
             )
 
         val (client, outputCapture) = createClient(listOf(fakeResponse))
@@ -97,9 +107,11 @@ class ObexClientTest {
     fun `OBEX response parsing handles Unauthorized`() {
         val fakeResponse =
             byteArrayOf(
-                0xC1.toByte(), // Response code: Unauthorized
+                // Response code: Unauthorized
+                0xC1.toByte(),
                 0x00,
-                0x03, // Packet length: 3 (no headers)
+                // Packet length: 3 (no headers)
+                0x03,
             )
 
         val (client, _) = createClient(listOf(fakeResponse))
@@ -128,9 +140,13 @@ class ObexClientTest {
         // GET OK response with body
         val getResponse =
             byteArrayOf(
-                0xA0.toByte(), // OK
-                0x00, bodyLen.toByte(), // Packet length
-                0x48.toByte(), // Header: Body
+                // OK
+                0xA0.toByte(),
+                0x00,
+                bodyLen.toByte(),
+                // Packet length
+                // Header: Body
+                0x48.toByte(),
                 ((bodyLen shr 8) and 0xFF).toByte(),
                 (bodyLen and 0xFF).toByte(),
             ) + bodyBytes
@@ -153,8 +169,11 @@ class ObexClientTest {
 
         val response =
             byteArrayOf(
-                0xA0.toByte(), 0x00, nameHeaderLen.toByte(),
-                0x01.toByte(), // Header: Name
+                0xA0.toByte(),
+                0x00,
+                nameHeaderLen.toByte(),
+                // Header: Name
+                0x01.toByte(),
                 ((nameHeaderLen shr 8) and 0xFF).toByte(),
                 (nameHeaderLen and 0xFF).toByte(),
             ) + nameEncoded
@@ -179,10 +198,18 @@ class ObexClientTest {
     fun `OBEX response 4-byte header is decoded`() {
         val response =
             byteArrayOf(
-                0xA0.toByte(), 0x00, 0x08,
-                0xCB.toByte(), // Connection ID
-                0x00, 0x05, // 4-byte header has length 5
-                0xDE.toByte(), 0xAD.toByte(), 0xBE.toByte(), 0xEF.toByte(),
+                0xA0.toByte(),
+                0x00,
+                0x08,
+                // Connection ID
+                0xCB.toByte(),
+                0x00,
+                0x05,
+                // 4-byte header has length 5
+                0xDE.toByte(),
+                0xAD.toByte(),
+                0xBE.toByte(),
+                0xEF.toByte(),
             )
 
         val (client, _) = createClient(listOf(response))
@@ -217,11 +244,13 @@ class ObexClientTest {
                 0xA0.toByte(),
                 0x00,
                 0x07,
-                0xC3.toByte(), // Header: Length
+                // Header: Length
+                0xC3.toByte(),
                 0x00,
                 0x05,
                 0x20.toByte(),
-                0x00.toByte(), // Max packet 8192
+                // Max packet 8192
+                0x00.toByte(),
             )
 
         val (client, outputCapture) = createClient(listOf(response))
@@ -252,11 +281,13 @@ class ObexClientTest {
                 0xA0.toByte(),
                 0x00,
                 0x07,
-                0xC3.toByte(), // Header: Length
+                // Header: Length
+                0xC3.toByte(),
                 0x00,
                 0x05,
                 0x40.toByte(),
-                0x00.toByte(), // Max packet 16384
+                // Max packet 16384
+                0x00.toByte(),
             )
 
         val (client, _) = createClient(listOf(connectResp))

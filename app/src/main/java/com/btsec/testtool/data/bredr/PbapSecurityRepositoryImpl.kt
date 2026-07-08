@@ -223,15 +223,20 @@ class PbapSecurityRepositoryImpl
             // Request: N, TEL, EMAIL, ORG, NOTE
             val propertySelector = 0x00003FFF.toInt()
             return byteArrayOf(
-                0x01, // Tag: PropertySelector
-                0x04, // Length: 4 bytes
+                // Tag: PropertySelector
+                0x01,
+                // Length: 4 bytes
+                0x04,
                 (propertySelector shr 24).toByte(),
                 (propertySelector shr 16).toByte(),
                 (propertySelector shr 8).toByte(),
                 propertySelector.toByte(),
-                0x02, // Tag: Format
-                0x01, // Length: 1 byte
-                0x00.toByte(), // vCard 2.1
+                // Tag: Format
+                0x02,
+                // Length: 1 byte
+                0x01,
+                // vCard 2.1
+                0x00.toByte(),
             )
         }
 
@@ -239,7 +244,10 @@ class PbapSecurityRepositoryImpl
          * Parses vCard 2.1 entries from OBEX GET response body.
          * Extracts name, phone numbers, emails, organization, and notes.
          */
-        private fun parseVcardEntries(data: ByteArray, type: PhonebookType): List<PhonebookEntry> {
+        private fun parseVcardEntries(
+            data: ByteArray,
+            type: PhonebookType,
+        ): List<PhonebookEntry> {
             val entries = mutableListOf<PhonebookEntry>()
             val content = String(data, Charsets.UTF_8)
             val cards = content.split("BEGIN:VCARD").filter { it.contains("END:VCARD") }
@@ -256,7 +264,10 @@ class PbapSecurityRepositoryImpl
         /**
          * Parses a single vCard entry, extracting fields.
          */
-        private fun parseVcard(card: String, type: PhonebookType): PhonebookEntry {
+        private fun parseVcard(
+            card: String,
+            type: PhonebookType,
+        ): PhonebookEntry {
             val lines = card.lines().map { it.trim() }.filter { it.isNotEmpty() }
             val phones = mutableListOf<String>()
             val emails = mutableListOf<String>()

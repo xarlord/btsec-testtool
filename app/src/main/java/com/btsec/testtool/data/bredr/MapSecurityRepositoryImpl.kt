@@ -241,17 +241,28 @@ class MapSecurityRepositoryImpl
          */
         private fun buildMapListParams(): ByteArray {
             return byteArrayOf(
-                0x01, // Tag: MaxListCount
-                0x02, // Length: 2 bytes
-                0xFF.toByte(), 0xFF.toByte(), // List all messages
-                0x02, // Tag: ListStartOffset
-                0x02, // Length: 2 bytes
-                0x00, 0x00, // Start at 0
-                0x03, // Tag: ParameterMask
-                0x08, // Length: 8 bytes
+                // Tag: MaxListCount
+                0x01,
+                // Length: 2 bytes
+                0x02,
+                0xFF.toByte(),
+                0xFF.toByte(),
+                // List all messages
+                0x02,
+                // Tag: ListStartOffset
+                // Length: 2 bytes
+                0x02,
+                0x00,
+                0x00,
+                // Start at 0
+                0x03,
+                // Tag: ParameterMask
+                // Length: 8 bytes
+                0x08,
                 0x00.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte(),
                 0x00.toByte(), 0x03.toByte(),
-                0xD0.toByte(), // Subject | Sender | DateTime | Type bits
+                // Subject | Sender | DateTime | Type bits
+                0xD0.toByte(),
                 0x00.toByte(),
             )
         }
@@ -259,7 +270,10 @@ class MapSecurityRepositoryImpl
         /**
          * Parses MAP message listing response (bMessage format).
          */
-        private fun parseMapMessages(data: ByteArray, folder: MapFolder): List<MessageEntry> {
+        private fun parseMapMessages(
+            data: ByteArray,
+            folder: MapFolder,
+        ): List<MessageEntry> {
             val content = String(data, Charsets.UTF_8)
             val messages = mutableListOf<MessageEntry>()
             val entries = content.split("BEGIN:BMSG").filter { it.contains("END:BMSG") }
@@ -276,7 +290,10 @@ class MapSecurityRepositoryImpl
         /**
          * Parses a single bMessage entry.
          */
-        private fun parseBmessage(entry: String, folder: MapFolder): MessageEntry {
+        private fun parseBmessage(
+            entry: String,
+            folder: MapFolder,
+        ): MessageEntry {
             val lines = entry.lines().map { it.trim() }.filter { it.isNotEmpty() }
             var sender: String? = null
             var subject: String? = null
@@ -289,7 +306,8 @@ class MapSecurityRepositoryImpl
                 when {
                     line.startsWith("X-MESSAGE-TYPE:") -> {
                         val value = line.substringAfter(":").trim()
-                        type = when (value.uppercase()) {
+                        type =
+                            when (value.uppercase()) {
                             "SMS_GSM", "SMS_CDMA" -> MessageType.SMS
                             "MMS" -> MessageType.MMS
                             "EMAIL" -> MessageType.EMAIL
