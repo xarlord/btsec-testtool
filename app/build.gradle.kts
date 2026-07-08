@@ -370,16 +370,18 @@ dependencies {
     testImplementation("org.json:json:20231013")
 
     // Android Testing
+    androidTestImplementation(platform("androidx.compose:compose-bom:${Versions.composeBom}"))
     androidTestImplementation("androidx.test.ext:junit:${Versions.androidxJunit}")
     androidTestImplementation("androidx.test.espresso:espresso-core:${Versions.espresso}")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:${Versions.composeTesting}")
     androidTestImplementation("com.google.dagger:hilt-android-testing:${Versions.hilt}")
     kspAndroidTest("com.google.dagger:hilt-android-compiler:${Versions.hilt}")
     androidTestImplementation("io.mockk:mockk-android:${Versions.mockk}")
 
     // Debug
+    debugImplementation(platform("androidx.compose:compose-bom:${Versions.composeBom}"))
     debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:${Versions.composeTesting}")
 }
 
 // OWASP Dependency Check Configuration
