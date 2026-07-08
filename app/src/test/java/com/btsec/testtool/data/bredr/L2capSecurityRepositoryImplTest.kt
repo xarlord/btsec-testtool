@@ -107,7 +107,7 @@ class L2capSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `sendSignalingCommand returns null (stub implementation)`() =
+    fun `sendSignalingCommand returns null when no L2CAP socket available`() =
         runTest {
             val result =
                 repository.sendSignalingCommand(
@@ -117,11 +117,56 @@ class L2capSecurityRepositoryImplTest {
                     timeoutMs = 1000L,
                 )
 
+            // No BluetoothSocket in JVM tests — returns null when socket cannot be established
             assertEquals(null, result)
         }
 
     @Test
-    fun `queryInformation returns null (stub implementation)`() =
+    fun `sendSignalingCommand builds well-formed signaling packet`() =
+        runTest {
+            // Build an Information Request packet via the public helper
+            val command = com.btsec.testtool.domain.model.L2capSignalCommand.INFORMATION_REQUEST
+            val payload = byteArrayOf(0x00, 0x01) // Connectionless MTU
+            val packet = repository.buildL2capSignalingPacket(
+                channelId = 0x0001,
+                command = command,
+                identifier = 0x01,
+                data = payload,
+            )
+
+            // L2CAP header: length(2) + CID(2) = 4 bytes
+            // Signaling header: code(1) + identifier(1) + length(2) = 4 bytes
+            // Data: 2 bytes
+            assertEquals(10, packet.size, "Packet should be 10 bytes total")
+
+            // L2CAP header
+            assertEquals(0x00, packet[0].toInt() and 0xFF, "Length high byte")
+            assertEquals(0x06, packet[1].toInt() and 0xFF, "Length low byte (sig payload = 6)")
+            assertEquals(0x00, packet[2].toInt() and 0xFF, "CID high byte")
+            assertEquals(0x01, packet[3].toInt() and 0xFF, "CID low byte (0x0001 signaling)")
+
+            // Signaling header
+            assertEquals(0x0A, packet[4].toInt() and 0xFF, "Code should be INFORMATION_REQUEST (0x0A)")
+            assertEquals(0x01, packet[5].toInt() and 0xFF, "Identifier")
+            assertEquals(0x00, packet[6].toInt() and 0xFF, "Sig length high byte")
+            assertEquals(0x02, packet[7].toInt() and 0xFF, "Sig length low byte (payload = 2)")
+
+            // Data payload
+            assertEquals(0x00, packet[8].toInt(), "Data byte 0")
+            assertEquals(0x01, packet[9].toInt(), "Data byte 1")
+        }
+
+    @Test
+    fun `buildInformationRequestPayload produces correct bytes`() =
+        runTest {
+            val payload = repository.buildInformationRequestPayload(0x0002) // Extended Features
+            assertEquals(2, payload.size)
+            assertEquals(0x00, payload[0].toInt())
+            assertEquals(0x02, payload[1].toInt())
+        }
+
+    @Test
+    fun `queryInformation returns null when no L2CAP socket available`() =
         runTest {
             val result =
                 repository.queryInformation(
@@ -129,6 +174,7 @@ class L2capSecurityRepositoryImplTest {
                     infoType = 1,
                 )
 
+            // No BluetoothSocket in JVM tests — returns null
             assertEquals(null, result)
         }
 
