@@ -149,8 +149,8 @@ class SnoopCaptureRepositoryImplTest {
     @Test
     fun `selectStrategy selects by name`() =
         runTest {
-            repository.selectStrategy("Bugreport")
-            assertEquals("Bugreport", repository.getActiveStrategyName())
+            repository.selectStrategy("Direct File")
+            assertEquals("Direct File", repository.getActiveStrategyName())
         }
 
     @Test
@@ -166,8 +166,9 @@ class SnoopCaptureRepositoryImplTest {
             repository.selectStrategy("Direct File")
             assertEquals("Direct File", repository.getActiveStrategyName())
 
+            // Selecting an unavailable strategy keeps the previous selection
             repository.selectStrategy("Bugreport")
-            assertEquals("Bugreport", repository.getActiveStrategyName())
+            assertEquals("Direct File", repository.getActiveStrategyName())
         }
 
     // ========== readNewRecords parser (regression tests for #379) ==========
