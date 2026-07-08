@@ -1,3 +1,12 @@
+/*
+ * Bluetooth Security Testing Tool
+ * Copyright (c) 2026 Security Research Team
+ *
+ * Licensed under MIT with additional restrictions:
+ * - This application may ONLY be used for AUTHORIZED security testing
+ * - See LICENSE for full terms
+ */
+
 // Project-wide dependency versions (updated 2026-06-21 for Gradle 8.11.1 / Kotlin 2.1.0)
 object Versions {
     // Android
