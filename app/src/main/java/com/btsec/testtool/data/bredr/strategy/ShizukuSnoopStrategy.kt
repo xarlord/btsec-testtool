@@ -14,14 +14,15 @@ import com.btsec.testtool.domain.repository.SnoopCaptureStrategy
 import rikka.shizuku.Shizuku
 import timber.log.Timber
 import java.io.InputStream
+import java.lang.reflect.Method
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Reads the HCI snoop log via Shizuku (root-free ADB access).
  *
- * This strategy uses Shizuku's `newProcess()` to run shell commands with
- * ADB-level privileges, enabling snoop log reading without root.
+ * This strategy uses Shizuku's internal `newProcess()` (via reflection) to run
+ * shell commands with ADB-level privileges, enabling snoop log reading without root.
  *
  * Requirements:
  * - Shizuku APK must be installed and running
@@ -36,7 +37,6 @@ class ShizukuSnoopStrategy
     constructor(
         private val context: Context,
     ) : SnoopCaptureStrategy {
-
         companion object {
             private const val SHIZUKU_PERMISSION_REQUEST_CODE = 100
 
@@ -44,15 +44,59 @@ class ShizukuSnoopStrategy
             private const val SNOOP_LOG_PATH = "/data/misc/bluetooth/logs/btsnoop_hci.log"
 
             /** Fallback locations on some devices/Android versions. */
-            private val FALLBACK_SNOOP_PATHS = arrayOf(
-                "/data/misc/bluetooth/logs/btsnoop_hci.log",
-                "/data/log/bt/btsnoop_hci.log",
-                "/sdcard/btsnoop_hci.log",
-                "/data/local/tmp/btsnoop_hci.log",
-            )
+            private val FALLBACK_SNOOP_PATHS =
+                arrayOf(
+                    "/data/misc/bluetooth/logs/btsnoop_hci.log",
+                    "/data/log/bt/btsnoop_hci.log",
+                    "/sdcard/btsnoop_hci.log",
+                    "/data/local/tmp/btsnoop_hci.log",
+                )
 
             private const val SHELL_CMD_TEMPLATE = "cat %s"
             private const val SHELL_CMD_FILE_EXISTS = "test -f %s && echo EXISTS || echo MISSING"
+
+            @Volatile
+            private var cachedNewProcess: Method? = null
+
+            /**
+             * Obtain the hidden `Shizuku.newProcess(String[], String[], String?)` method via reflection.
+             * Returns null if not available (e.g., Shizuku not installed or method signature changed).
+             */
+            private fun getNewProcessMethod(): Method? {
+                cachedNewProcess?.let { return it }
+                return try {
+                    val method =
+                        Shizuku::class.java.getDeclaredMethod(
+                            "newProcess",
+                            Array<String>::class.java,
+                            Array<String>::class.java,
+                            String::class.java,
+                        )
+                    method.isAccessible = true
+                    cachedNewProcess = method
+                    method
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to get Shizuku.newProcess via reflection")
+                    null
+                }
+            }
+
+            /**
+             * Run a shell command via Shizuku's hidden newProcess API (ADB-level privileges).
+             */
+            internal fun executeViaShizuku(
+                command: String,
+                env: Array<String>? = null,
+                dir: String? = null,
+            ): Process? {
+                val method = getNewProcessMethod() ?: return null
+                return try {
+                    method.invoke(null, arrayOf("sh", "-c", command), env, dir) as? Process
+                } catch (e: Exception) {
+                    Timber.w(e, "Shizuku.newProcess invocation failed for: %s", command)
+                    null
+                }
+            }
         }
 
         /** Whether Shizuku permission has been granted by the user. */
@@ -64,10 +108,18 @@ class ShizukuSnoopStrategy
         override fun isAvailable(): Boolean {
             return try {
                 Class.forName("rikka.shizuku.Shizuku")
-                Timber.i("Shizuku class found — Shizuku APK is installed")
+                // Check that Shizuku server is actually running, not just that the class exists
+                if (!Shizuku.pingBinder()) {
+                    Timber.d("Shizuku class found but binder not ready — server not running")
+                    return false
+                }
+                Timber.i("Shizuku class found and binder ready")
                 true
             } catch (e: ClassNotFoundException) {
                 Timber.d("Shizuku not available — APK not installed")
+                false
+            } catch (e: Exception) {
+                Timber.d("Shizuku not available — binder check failed: %s", e.message)
                 false
             }
         }
@@ -78,8 +130,8 @@ class ShizukuSnoopStrategy
                 Timber.w("Shizuku available but permission not yet granted")
                 return false
             }
-            if (!Shizuku.isAppProvidedPermissionGranted()) {
-                Timber.w("Shizuku app-provided permission not granted")
+            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+                Timber.w("Shizuku permission not granted (checkSelfPermission)")
                 permissionGranted = false
                 return false
             }
@@ -95,7 +147,7 @@ class ShizukuSnoopStrategy
                 )
             }
 
-            if (!permissionGranted || !Shizuku.isAppProvidedPermissionGranted()) {
+            if (!permissionGranted || Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
                 return Result.failure(
                     SecurityException(
                         "Shizuku permission not granted. Request permission before reading snoop log.",
@@ -130,10 +182,9 @@ class ShizukuSnoopStrategy
 
             for (path in FALLBACK_SNOOP_PATHS) {
                 try {
-                    val process = Shizuku.newProcess(
-                        arrayOf("sh", "-c", SHELL_CMD_FILE_EXISTS.format(path)),
-                        null, null,
-                    )
+                    val process =
+                        executeViaShizuku(SHELL_CMD_FILE_EXISTS.format(path))
+                            ?: return null
                     val output = process.inputStream.bufferedReader().use { it.readText().trim() }
                     process.waitFor()
                     if (output == "EXISTS") {
@@ -153,10 +204,7 @@ class ShizukuSnoopStrategy
         fun getSnoopLogSize(path: String = SNOOP_LOG_PATH): Long {
             if (!isAvailable() || !permissionGranted) return -1L
             return try {
-                val process = Shizuku.newProcess(
-                    arrayOf("sh", "-c", "stat -c%s $path"),
-                    null, null,
-                )
+                val process = executeViaShizuku("stat -c%s $path") ?: return -1L
                 val output = process.inputStream.bufferedReader().use { it.readText().trim() }
                 process.waitFor()
                 output.toLongOrNull() ?: -1L
@@ -175,7 +223,7 @@ class ShizukuSnoopStrategy
                 Timber.w("Cannot request Shizuku permission — Shizuku not installed")
                 return
             }
-            if (Shizuku.isAppProvidedPermissionGranted()) {
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                 Timber.i("Shizuku permission already granted")
                 permissionGranted = true
                 return
@@ -188,7 +236,10 @@ class ShizukuSnoopStrategy
          * Handle Shizuku permission result.
          * Call from Shizuku.OnRequestPermissionResultListener.onRequestPermissionResult().
          */
-        fun onPermissionResult(requestCode: Int, grantResult: Int) {
+        fun onPermissionResult(
+            requestCode: Int,
+            grantResult: Int,
+        ) {
             if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE) {
                 if (grantResult == PackageManager.PERMISSION_GRANTED) {
                     Timber.i("Shizuku permission granted")
@@ -216,10 +267,9 @@ class ShizukuSnoopStrategy
 
         private fun tryReadSnoopLog(path: String): Result<InputStream> {
             return try {
-                val process = Shizuku.newProcess(
-                    arrayOf("sh", "-c", SHELL_CMD_TEMPLATE.format(path)),
-                    null, null,
-                )
+                val process =
+                    executeViaShizuku(SHELL_CMD_TEMPLATE.format(path))
+                        ?: return Result.failure(java.io.IOException("Failed to create Shizuku process"))
                 Thread.sleep(100)
                 if (process.inputStream == null) {
                     process.destroy()
