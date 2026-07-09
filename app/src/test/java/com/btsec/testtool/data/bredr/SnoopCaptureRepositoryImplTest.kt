@@ -59,7 +59,7 @@ class SnoopCaptureRepositoryImplTest {
         strategies =
             setOf(
                 DirectFileSnoopStrategy(),
-                ShizukuSnoopStrategy(),
+                ShizukuSnoopStrategy(context),
                 BugreportSnoopStrategy(),
             )
         repository = SnoopCaptureRepositoryImpl(context, snoopCaptureUseCase, strategies)

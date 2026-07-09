@@ -26,7 +26,7 @@ import dagger.multibindings.ElementsIntoSet
  *
  * The order matters: strategies listed first are preferred. Currently:
  * 1. DirectFileStrategy — tried first (works on rooted devices)
- * 2. ShizukuStrategy — root-free when Shizuku is installed (placeholder)
+ * 2. ShizukuStrategy — root-free when Shizuku is installed (uses Shizuku API for snoop reading)
  * 3. BugreportStrategy — root-free post-capture analysis
  *
  * To change priority, reorder the `@Provides` methods below.

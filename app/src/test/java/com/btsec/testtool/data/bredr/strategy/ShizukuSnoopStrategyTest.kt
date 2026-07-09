@@ -8,8 +8,12 @@
  */
 package com.btsec.testtool.data.bredr.strategy
 
+import android.content.Context
+import android.content.pm.PackageManager
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -19,16 +23,17 @@ import org.junit.jupiter.api.Test
  * Unit tests for [ShizukuSnoopStrategy].
  *
  * Since Shizuku is not available in the test environment, all availability
- * checks should return false. When Shizuku is integrated, these tests should
- * be updated or replaced with integration tests.
+ * checks return false. Tests verify behavior when Shizuku is absent.
  */
 @DisplayName("ShizukuSnoopStrategy")
 class ShizukuSnoopStrategyTest {
     private lateinit var strategy: ShizukuSnoopStrategy
+    private lateinit var mockContext: Context
 
     @BeforeEach
     fun setup() {
-        strategy = ShizukuSnoopStrategy()
+        mockContext = mockk(relaxed = true)
+        strategy = ShizukuSnoopStrategy(mockContext)
     }
 
     @Test
@@ -38,7 +43,6 @@ class ShizukuSnoopStrategyTest {
 
     @Test
     fun `isAvailable returns false when Shizuku APK is not installed`() {
-        // Shizuku class won't be available in unit test environment
         assertFalse(strategy.isAvailable())
     }
 
@@ -61,5 +65,37 @@ class ShizukuSnoopStrategyTest {
     fun `readSnoopLog returns UnsupportedOperationException`() {
         val result = strategy.readSnoopLog()
         assertTrue(result.exceptionOrNull() is UnsupportedOperationException)
+    }
+
+    @Test
+    fun `detectSnoopLogPath returns null when Shizuku not available`() {
+        assertNull(strategy.detectSnoopLogPath())
+    }
+
+    @Test
+    fun `getSnoopLogSize returns negative when Shizuku not available`() {
+        assertEquals(-1L, strategy.getSnoopLogSize())
+    }
+
+    @Test
+    fun `requestPermission does not throw when Shizuku not available`() {
+        strategy.requestPermission()
+    }
+
+    @Test
+    fun `onPermissionResult handles denied`() {
+        strategy.onPermissionResult(100, PackageManager.PERMISSION_DENIED)
+        assertFalse(strategy.canReadSnoopLog())
+    }
+
+    @Test
+    fun `onPermissionResult ignores wrong request code`() {
+        strategy.onPermissionResult(999, PackageManager.PERMISSION_GRANTED)
+        assertFalse(strategy.canReadSnoopLog())
+    }
+
+    @Test
+    fun `bindUserService returns false when Shizuku not available`() {
+        assertFalse(strategy.bindUserService())
     }
 }

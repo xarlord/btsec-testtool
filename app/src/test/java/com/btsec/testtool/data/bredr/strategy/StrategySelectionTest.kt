@@ -8,9 +8,12 @@
  */
 package com.btsec.testtool.data.bredr.strategy
 
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -22,6 +25,16 @@ import org.junit.jupiter.api.Test
  */
 @DisplayName("Strategy Selection Logic")
 class StrategySelectionTest {
+    private val mockContext = mockk<android.content.Context>(relaxed = true)
+
+    @BeforeEach
+    fun setup() {
+        // Shizuku class not available in test env
+        every { mockContext.packageName } returns "com.btsec.testtool.test"
+    }
+
+    private fun shizukuStrategy() = ShizukuSnoopStrategy(mockContext)
+
     @Test
     fun `DirectFileStrategy is always available and selected first when file is readable`() {
         val direct = DirectFileSnoopStrategy()
@@ -36,9 +49,10 @@ class StrategySelectionTest {
 
     @Test
     fun `ShizukuStrategy not available without Shizuku APK`() {
-        val shizuku = ShizukuSnoopStrategy()
-        assertFalse(shizuku.isAvailable())
-        assertFalse(shizuku.canReadSnoopLog())
+        // Shizuku is on the classpath but the server is not running in test env.
+        // isAvailable() checks pingBinder() which returns false when the server is absent.
+        assertFalse(shizukuStrategy().isAvailable())
+        assertFalse(shizukuStrategy().canReadSnoopLog())
     }
 
     @Test
@@ -53,7 +67,7 @@ class StrategySelectionTest {
         val strategies =
             listOf(
                 DirectFileSnoopStrategy(),
-                ShizukuSnoopStrategy(),
+                shizukuStrategy(),
                 BugreportSnoopStrategy(),
             )
         val names = strategies.map { it.getName() }
@@ -65,7 +79,7 @@ class StrategySelectionTest {
         val strategies =
             listOf(
                 DirectFileSnoopStrategy(),
-                ShizukuSnoopStrategy(),
+                shizukuStrategy(),
                 BugreportSnoopStrategy(),
             )
         for (strategy in strategies) {
@@ -79,7 +93,7 @@ class StrategySelectionTest {
         val strategies =
             listOf(
                 DirectFileSnoopStrategy(),
-                ShizukuSnoopStrategy(),
+                shizukuStrategy(),
                 BugreportSnoopStrategy(),
             )
         assertEquals("Direct File", strategies[0].getName())
@@ -94,7 +108,7 @@ class StrategySelectionTest {
         val strategies =
             listOf(
                 DirectFileSnoopStrategy(),
-                ShizukuSnoopStrategy(),
+                shizukuStrategy(),
                 BugreportSnoopStrategy(),
             )
         val canReadCount = strategies.count { it.isAvailable() && it.canReadSnoopLog() }
