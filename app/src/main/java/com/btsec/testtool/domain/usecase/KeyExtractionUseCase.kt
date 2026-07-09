@@ -18,7 +18,6 @@ import javax.inject.Inject
  * Use case for Bluetooth key extraction operations.
  *
  * Handles analysis and extraction of Bluetooth encryption keys.
- * ALL key extraction operations require explicit authorization and consent.
  *
  * WARNING: Key extraction is sensitive - all operations are logged.
  */
@@ -26,8 +25,6 @@ class KeyExtractionUseCase
     @Inject
     constructor(
         private val keyExtractionRepository: KeyExtractionRepository,
-        private val authorizationUseCase: AuthorizationUseCase,
-        private val consentRepository: ConsentRepository,
     ) {
         /**
          * Extract a specific key type from a device.
@@ -42,31 +39,9 @@ class KeyExtractionUseCase
             keyType: KeyType,
             method: ExtractionMethod,
         ): KeyExtractionStartResult {
-            // Verify authorization for key extraction
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.EXTRACT_KEYS,
-                    getDeviceInfo(),
-                )
-
-            when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    // Check device in scope
-                    if (!authorizationUseCase.isTargetInScope(device.address)) {
-                        return KeyExtractionStartResult.DeviceNotInScope
-                    }
-
-                    // Start extraction
-                    keyExtractionRepository.extractKey(device, keyType, method)
-                    return KeyExtractionStartResult.Started
-                }
-                is ActionAuthorizationResult.ConsentDenied -> {
-                    return KeyExtractionStartResult.ConsentRequired
-                }
-                else -> {
-                    return KeyExtractionStartResult.NotAuthorized
-                }
-            }
+            // Start extraction directly — no authorization gating
+            keyExtractionRepository.extractKey(device, keyType, method)
+            return KeyExtractionStartResult.Started
         }
 
         /**
@@ -76,31 +51,9 @@ class KeyExtractionUseCase
          * @return Result of extraction start
          */
         suspend fun extractAllKeys(device: BluetoothDevice): KeyExtractionStartResult {
-            // Verify authorization for key extraction
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.EXTRACT_KEYS,
-                    getDeviceInfo(),
-                )
-
-            when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    // Check device in scope
-                    if (!authorizationUseCase.isTargetInScope(device.address)) {
-                        return KeyExtractionStartResult.DeviceNotInScope
-                    }
-
-                    // Start extraction
-                    keyExtractionRepository.extractAllKeys(device)
-                    return KeyExtractionStartResult.Started
-                }
-                is ActionAuthorizationResult.ConsentDenied -> {
-                    return KeyExtractionStartResult.ConsentRequired
-                }
-                else -> {
-                    return KeyExtractionStartResult.NotAuthorized
-                }
-            }
+            // Start extraction directly — no authorization gating
+            keyExtractionRepository.extractAllKeys(device)
+            return KeyExtractionStartResult.Started
         }
 
         /**
@@ -160,25 +113,7 @@ class KeyExtractionUseCase
          * @return Key security analysis
          */
         suspend fun analyzeKeySecurity(device: BluetoothDevice): KeySecurityAnalysis {
-            // Verify authorization
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.EXTRACT_KEYS,
-                    getDeviceInfo(),
-                )
-
-            return when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    if (!authorizationUseCase.isTargetInScope(device.address)) {
-                        createAnalysisError("Device not in scope")
-                    } else {
-                        keyExtractionRepository.analyzeKeySecurity(device)
-                    }
-                }
-                else -> {
-                    createAnalysisError("Authorization required")
-                }
-            }
+            return keyExtractionRepository.analyzeKeySecurity(device)
         }
 
         /**
@@ -188,25 +123,7 @@ class KeyExtractionUseCase
          * @return List of weak key findings
          */
         suspend fun checkForWeakKeys(device: BluetoothDevice): List<WeakKeyFinding> {
-            // Verify authorization
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.EXTRACT_KEYS,
-                    getDeviceInfo(),
-                )
-
-            return when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    if (authorizationUseCase.isTargetInScope(device.address)) {
-                        keyExtractionRepository.checkForWeakKeys(device)
-                    } else {
-                        emptyList()
-                    }
-                }
-                else -> {
-                    emptyList()
-                }
-            }
+            return keyExtractionRepository.checkForWeakKeys(device)
         }
 
         /**
@@ -255,25 +172,7 @@ class KeyExtractionUseCase
          * @return Encryption analysis
          */
         suspend fun analyzeEncryptionStrength(device: BluetoothDevice): EncryptionAnalysis {
-            // Verify authorization
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.SCAN_VULNERABILITIES,
-                    getDeviceInfo(),
-                )
-
-            return when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    if (!authorizationUseCase.isTargetInScope(device.address)) {
-                        createEncryptionError("Device not in scope")
-                    } else {
-                        keyExtractionRepository.analyzeEncryptionStrength(device)
-                    }
-                }
-                else -> {
-                    createEncryptionError("Authorization required")
-                }
-            }
+            return keyExtractionRepository.analyzeEncryptionStrength(device)
         }
 
         /**
@@ -283,22 +182,7 @@ class KeyExtractionUseCase
          * @return true if LESC is supported
          */
         suspend fun supportsSecureConnections(device: BluetoothDevice): Boolean {
-            // Verify authorization
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.SCAN_VULNERABILITIES,
-                    getDeviceInfo(),
-                )
-
-            return when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    authorizationUseCase.isTargetInScope(device.address) &&
-                        keyExtractionRepository.supportsSecureConnections(device)
-                }
-                else -> {
-                    false
-                }
-            }
+            return keyExtractionRepository.supportsSecureConnections(device)
         }
 
         /**
@@ -327,41 +211,6 @@ class KeyExtractionUseCase
             )
         }
 
-        private fun createAnalysisError(message: String): KeySecurityAnalysis {
-            return KeySecurityAnalysis(
-                deviceAddress = "unknown",
-                deviceName = null,
-                analysisDate = java.time.Instant.now(),
-                overallScore = SecurityScore.CRITICAL,
-                findings =
-                    listOf(
-                        KeySecurityFinding(
-                            severity = VulnerabilitySeverity.CRITICAL,
-                            category = KeyFindingCategory.IMPLEMENTATION_FLAW,
-                            description = message,
-                            affectedKey = null,
-                            recommendation = "Ensure proper authorization before key analysis",
-                        ),
-                    ),
-                extractedKeys = emptyList(),
-                encryptionStrength = EncryptionStrength.UNKNOWN,
-                recommendations = listOf(message),
-            )
-        }
-
-        private fun createEncryptionError(message: String): EncryptionAnalysis {
-            return EncryptionAnalysis(
-                deviceAddress = "unknown",
-                encryptionEnabled = false,
-                encryptionKeySize = null,
-                supportsSecureConnections = false,
-                usingSecureConnections = false,
-                pairingMethod = null,
-                encryptionMode = EncryptionMode.UNKNOWN,
-                findings = listOf(message),
-            )
-        }
-
         private fun getDeviceInfo(): DeviceInfo {
             return DeviceInfo(
                 platform = android.os.Build.MANUFACTURER,
@@ -378,12 +227,6 @@ class KeyExtractionUseCase
  */
 sealed class KeyExtractionStartResult {
     data object Started : KeyExtractionStartResult()
-
-    data object ConsentRequired : KeyExtractionStartResult()
-
-    data object NotAuthorized : KeyExtractionStartResult()
-
-    data object DeviceNotInScope : KeyExtractionStartResult()
 
     data class Error(val message: String) : KeyExtractionStartResult()
 }

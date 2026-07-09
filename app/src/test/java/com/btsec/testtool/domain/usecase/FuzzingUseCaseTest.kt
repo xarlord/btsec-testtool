@@ -9,7 +9,6 @@
 package com.btsec.testtool.domain.usecase
 
 import com.btsec.testtool.domain.repository.BluetoothRepository
-import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.FuzzingRepository
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -22,12 +21,10 @@ class FuzzingUseCaseTest {
     private lateinit var useCase: FuzzingUseCase
     private val fuzzRepo: FuzzingRepository = mockk(relaxed = true)
     private val btRepo: BluetoothRepository = mockk(relaxed = true)
-    private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
-    private val consentRepo: ConsentRepository = mockk(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        useCase = FuzzingUseCase(fuzzRepo, btRepo, authUseCase, consentRepo)
+        useCase = FuzzingUseCase(fuzzRepo, btRepo)
     }
 
     @Test

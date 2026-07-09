@@ -177,10 +177,6 @@ class BluetoothScanningUseCase
 sealed class ScanResult {
     data object Started : ScanResult()
 
-    data object ConsentRequired : ScanResult()
-
-    data object NotAuthorized : ScanResult()
-
     data object ActionNotAllowed : ScanResult()
 
     data object OutsideValidWindow : ScanResult()

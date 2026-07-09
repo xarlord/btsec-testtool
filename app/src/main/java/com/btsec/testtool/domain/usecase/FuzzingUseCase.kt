@@ -18,15 +18,12 @@ import javax.inject.Inject
  * Use case for Bluetooth fuzzing operations.
  *
  * Fuzzing sends malformed/mutated packets to discover vulnerabilities.
- * All fuzzing operations require authorization and user consent.
  */
 class FuzzingUseCase
     @Inject
     constructor(
         private val fuzzingRepository: FuzzingRepository,
         private val bluetoothRepository: BluetoothRepository,
-        private val authorizationUseCase: AuthorizationUseCase,
-        private val consentRepository: ConsentRepository,
     ) {
         /**
          * Start a fuzzing test.
@@ -35,40 +32,9 @@ class FuzzingUseCase
          * @return Result of fuzzing start
          */
         suspend fun startFuzzing(config: FuzzConfig): FuzzingStartResult {
-            // Verify authorization for fuzzing
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.START_FUZZING,
-                    getDeviceInfo(),
-                )
-
-            when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    // Check rate limit
-                    val maxRate =
-                        authorizationUseCase.getCurrentScope().first()?.maxPacketsPerSecond
-                            ?: 100
-
-                    if (config.packetsPerSecond > maxRate) {
-                        return FuzzingStartResult.RateLimitExceeded(maxRate)
-                    }
-
-                    // Check device in scope
-                    if (!authorizationUseCase.isTargetInScope(config.targetDevice.address)) {
-                        return FuzzingStartResult.DeviceNotInScope
-                    }
-
-                    // Start fuzzing
-                    fuzzingRepository.startFuzzing(config)
-                    return FuzzingStartResult.Started
-                }
-                is ActionAuthorizationResult.ConsentDenied -> {
-                    return FuzzingStartResult.ConsentRequired
-                }
-                else -> {
-                    return FuzzingStartResult.NotAuthorized
-                }
-            }
+            // Start fuzzing directly — no authorization gating
+            fuzzingRepository.startFuzzing(config)
+            return FuzzingStartResult.Started
         }
 
         /**
@@ -169,17 +135,13 @@ class FuzzingUseCase
          * @return Recommended configuration
          */
         suspend fun createRecommendedConfig(device: BluetoothDevice): FuzzConfig {
-            val maxRate =
-                authorizationUseCase.getCurrentScope().first()?.maxPacketsPerSecond
-                    ?: 100
-
             return FuzzConfig(
                 targetDevice = device,
                 targetService = null,
                 targetCharacteristic = null,
                 fuzzMethod = FuzzMethod.MUTATION,
                 packetCount = 1000,
-                packetsPerSecond = maxRate.coerceAtMost(50),
+                packetsPerSecond = 50,
                 randomSeed = null,
                 dataPatterns = getDefaultPatterns(),
                 durationSeconds = 300,
@@ -195,17 +157,13 @@ class FuzzingUseCase
          * Use with caution - may cause device crashes.
          */
         suspend fun createAggressiveConfig(device: BluetoothDevice): FuzzConfig {
-            val maxRate =
-                authorizationUseCase.getCurrentScope().first()?.maxPacketsPerSecond
-                    ?: 100
-
             return FuzzConfig(
                 targetDevice = device,
                 targetService = null,
                 targetCharacteristic = null,
                 fuzzMethod = FuzzMethod.RANDOM,
                 packetCount = 10000,
-                packetsPerSecond = maxRate,
+                packetsPerSecond = 100,
                 randomSeed = null,
                 dataPatterns = getAggressivePatterns(),
                 durationSeconds = 1800,
@@ -286,12 +244,6 @@ class FuzzingUseCase
  */
 sealed class FuzzingStartResult {
     data object Started : FuzzingStartResult()
-
-    data object ConsentRequired : FuzzingStartResult()
-
-    data object NotAuthorized : FuzzingStartResult()
-
-    data object DeviceNotInScope : FuzzingStartResult()
 
     data class RateLimitExceeded(val maxRate: Int) : FuzzingStartResult()
 

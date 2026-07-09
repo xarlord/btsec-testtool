@@ -12,9 +12,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.btsec.testtool.data.local.dao.AuthorizationDao
 import com.btsec.testtool.data.local.dao.BluetoothDao
-import com.btsec.testtool.data.local.dao.ConsentDao
 import com.btsec.testtool.data.local.dao.FuzzingDao
 import com.btsec.testtool.data.local.dao.KeyExtractionDao
 import com.btsec.testtool.data.local.dao.ReportDao
@@ -69,18 +67,6 @@ object DatabaseModule {
     @Singleton
     fun provideBluetoothDao(database: BtSecDatabase): BluetoothDao {
         return database.bluetoothDao()
-    }
-
-    @Provides
-    @Singleton
-    fun provideAuthorizationDao(database: BtSecDatabase): AuthorizationDao {
-        return database.authorizationDao()
-    }
-
-    @Provides
-    @Singleton
-    fun provideConsentDao(database: BtSecDatabase): ConsentDao {
-        return database.consentDao()
     }
 
     @Provides

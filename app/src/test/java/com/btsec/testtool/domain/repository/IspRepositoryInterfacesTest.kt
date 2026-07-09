@@ -75,23 +75,7 @@ class IspRepositoryInterfacesTest {
         )
     }
 
-    // ========== ConsentRepository ==========
 
-    @Test
-    fun consentRepository_extendsConsentReader() {
-        assertTrue(
-            "ConsentRepository should extend ConsentReader",
-            ConsentReader::class.java.isAssignableFrom(ConsentRepository::class.java),
-        )
-    }
-
-    @Test
-    fun consentRepository_extendsConsentWriter() {
-        assertTrue(
-            "ConsentRepository should extend ConsentWriter",
-            ConsentWriter::class.java.isAssignableFrom(ConsentRepository::class.java),
-        )
-    }
 
     // ========== VulnerabilityRepository ==========
 

@@ -23,7 +23,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.btsec.testtool.data.authorization.AuthorizationBackend
 import com.btsec.testtool.service.BluetoothState
 import com.btsec.testtool.service.BluetoothStateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -149,74 +148,6 @@ fun SettingsScreen(onBack: () -> Unit) {
                 }
             }
 
-            // Authorization Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Authorization", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
-
-                        val focusManager = LocalFocusManager.current
-                        var serverUrl by remember { mutableStateOf(uiState.serverUrl) }
-                        OutlinedTextField(
-                            value = serverUrl,
-                            onValueChange = { serverUrl = it },
-                            label = { Text("Server URL") },
-                            placeholder = { Text("https://auth.btsec.example.com") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            keyboardActions =
-                                KeyboardActions(
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        viewModel.updateServerUrl(serverUrl)
-                                    },
-                                ),
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        FilledTonalButton(
-                            onClick = { viewModel.updateServerUrl(serverUrl) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Icon(Icons.Default.Save, contentDescription = "Save settings")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Save Server URL")
-                        }
-
-                        Spacer(Modifier.height(12.dp))
-                        Divider()
-                        Spacer(Modifier.height(12.dp))
-
-                        Text("Demo Mode", style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            "Use BTSEC-DEMO-XXXXXXXX format for offline testing without server verification.",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = { viewModel.generateDemoAuth() },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Icon(Icons.Default.VpnKey, contentDescription = "Demo authorization")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Generate Demo Authorization ID")
-                        }
-
-                        if (uiState.demoAuthId != null) {
-                            Spacer(Modifier.height(8.dp))
-                            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-                                Text(
-                                    uiState.demoAuthId!!,
-                                    modifier = Modifier.padding(12.dp),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
             // Data Management Card
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
@@ -224,15 +155,6 @@ fun SettingsScreen(onBack: () -> Unit) {
                         Text("Data Management", style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
 
-                        OutlinedButton(
-                            onClick = { viewModel.clearAuthorization() },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Icon(Icons.Default.Logout, contentDescription = "Sign out")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Clear Authorization")
-                        }
-                        Spacer(Modifier.height(8.dp))
                         OutlinedButton(
                             onClick = { viewModel.clearAllData() },
                             modifier = Modifier.fillMaxWidth(),
@@ -272,7 +194,6 @@ fun SettingsScreen(onBack: () -> Unit) {
 class SettingsViewModel
     @Inject
     constructor(
-        private val authBackend: AuthorizationBackend,
         private val btStateManager: BluetoothStateManager,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(SettingsUiState())
@@ -297,7 +218,6 @@ class SettingsViewModel
             viewModelScope.launch {
                 _uiState.update {
                     it.copy(
-                        serverUrl = authBackend.getServerUrl(),
                         hasBtScan = btStateManager.checkPermissions(),
                         hasBtConnect = true,
                     )
@@ -305,25 +225,12 @@ class SettingsViewModel
             }
         }
 
-        fun updateServerUrl(url: String) {
-            viewModelScope.launch { authBackend.setServerUrl(url) }
-        }
-
-        fun generateDemoAuth() {
-            val demoId = authBackend.generateDemoAuthId()
-            _uiState.update { it.copy(demoAuthId = demoId) }
-        }
-
         fun requestPermissions() {
             btStateManager.checkPermissions()
         }
 
-        fun clearAuthorization() {
-            viewModelScope.launch { authBackend.clearCachedAuthorization() }
-        }
-
         fun clearAllData() {
-            viewModelScope.launch { authBackend.clearCachedAuthorization() }
+            // Auth data cleared by destructive DB migration (version 2)
         }
     }
 
@@ -333,6 +240,4 @@ data class SettingsUiState(
     val hasBtScan: Boolean = false,
     val hasBtConnect: Boolean = false,
     val hasLocation: Boolean = false,
-    val serverUrl: String = "",
-    val demoAuthId: String? = null,
 )
