@@ -20,7 +20,6 @@ import javax.inject.Inject
  * Use case for security report generation and management.
  *
  * Handles creation, storage, export, and sharing of security assessment reports.
- * All reports are tied to an authorization ID for audit purposes.
  */
 class ReportGenerationUseCase
     @Inject
@@ -29,7 +28,6 @@ class ReportGenerationUseCase
         private val vulnerabilityRepository: VulnerabilityRepository,
         private val fuzzingRepository: FuzzingRepository,
         private val keyExtractionRepository: KeyExtractionRepository,
-        private val authorizationUseCase: AuthorizationUseCase,
     ) {
         /**
          * Generate a comprehensive security assessment report.
@@ -38,31 +36,10 @@ class ReportGenerationUseCase
          * @return Result of report generation
          */
         suspend fun generateReport(config: ReportConfig): ReportGenerationResult {
-            // Get current authorization
-            val authorization =
-                authorizationUseCase.getCurrentAuthorization().first()
-                    ?: return ReportGenerationResult.NotAuthorized
-
-            // Check authorization for report generation
-            val authResult =
-                authorizationUseCase.requestActionAuthorization(
-                    TestAction.GENERATE_REPORT,
-                    getDeviceInfo(),
-                )
-
-            when (authResult) {
-                is ActionAuthorizationResult.Authorized -> {
-                    // Generate report
-                    reportRepository.generateReport(authorization.authId, config)
-                    return ReportGenerationResult.Started(authorization.authId)
-                }
-                is ActionAuthorizationResult.ConsentDenied -> {
-                    return ReportGenerationResult.ConsentRequired
-                }
-                else -> {
-                    return ReportGenerationResult.NotAuthorized
-                }
-            }
+            // Generate report directly — no authorization gating
+            val authId = "local"
+            reportRepository.generateReport(authId, config)
+            return ReportGenerationResult.Started(authId)
         }
 
         /**
@@ -72,11 +49,7 @@ class ReportGenerationUseCase
          * @return Generated report or error
          */
         suspend fun generateSummaryReport(deviceAddress: String? = null): Result<SecurityReport> {
-            val authorization =
-                authorizationUseCase.getCurrentAuthorization().first()
-                    ?: return Result.failure(Exception("Not authorized"))
-
-            return reportRepository.generateSummaryReport(authorization.authId, deviceAddress)
+            return reportRepository.generateSummaryReport("local", deviceAddress)
         }
 
         /**
@@ -85,13 +58,9 @@ class ReportGenerationUseCase
          * @return Generated report or error
          */
         suspend fun generateVulnerabilityReport(): Result<SecurityReport> {
-            val authorization =
-                authorizationUseCase.getCurrentAuthorization().first()
-                    ?: return Result.failure(Exception("Not authorized"))
-
             val vulnerabilities = vulnerabilityRepository.getAllDiscoveredVulnerabilities().first()
 
-            return reportRepository.generateVulnerabilityReport(authorization.authId, vulnerabilities)
+            return reportRepository.generateVulnerabilityReport("local", vulnerabilities)
         }
 
         /**
@@ -100,13 +69,9 @@ class ReportGenerationUseCase
          * @return Generated report or error
          */
         suspend fun generateFuzzingReport(): Result<SecurityReport> {
-            val authorization =
-                authorizationUseCase.getCurrentAuthorization().first()
-                    ?: return Result.failure(Exception("Not authorized"))
-
             val fuzzingResults = fuzzingRepository.getAllFuzzingResults().first()
 
-            return reportRepository.generateFuzzingReport(authorization.authId, fuzzingResults)
+            return reportRepository.generateFuzzingReport("local", fuzzingResults)
         }
 
         /**
@@ -374,10 +339,6 @@ class ReportGenerationUseCase
  */
 sealed class ReportGenerationResult {
     data class Started(val authId: String) : ReportGenerationResult()
-
-    data object ConsentRequired : ReportGenerationResult()
-
-    data object NotAuthorized : ReportGenerationResult()
 
     data class Error(val message: String) : ReportGenerationResult()
 }

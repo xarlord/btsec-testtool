@@ -425,12 +425,6 @@ class ScannerViewModel
                 _uiState.value = _uiState.value.copy(error = null)
                 when (val result = scanningUseCase.startScan()) {
                     is ScanResult.Started -> { /* scan started */ }
-                    is ScanResult.ConsentRequired -> {
-                        _uiState.value = _uiState.value.copy(error = "Consent required for scanning")
-                    }
-                    is ScanResult.NotAuthorized -> {
-                        _uiState.value = _uiState.value.copy(error = "Not authorized for scanning")
-                    }
                     is ScanResult.Error -> {
                         _uiState.value = _uiState.value.copy(error = result.message)
                     }
