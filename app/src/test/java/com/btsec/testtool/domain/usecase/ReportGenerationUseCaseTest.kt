@@ -26,11 +26,10 @@ class ReportGenerationUseCaseTest {
     private val vulnRepo: VulnerabilityRepository = mockk(relaxed = true)
     private val fuzzRepo: FuzzingRepository = mockk(relaxed = true)
     private val keyRepo: KeyExtractionRepository = mockk(relaxed = true)
-    private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        useCase = ReportGenerationUseCase(reportRepo, vulnRepo, fuzzRepo, keyRepo, authUseCase)
+        useCase = ReportGenerationUseCase(reportRepo, vulnRepo, fuzzRepo, keyRepo)
     }
 
     @Test

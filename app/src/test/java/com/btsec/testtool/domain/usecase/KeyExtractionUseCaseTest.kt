@@ -9,7 +9,6 @@
 package com.btsec.testtool.domain.usecase
 
 import com.btsec.testtool.TestHelpers
-import com.btsec.testtool.domain.repository.ConsentRepository
 import com.btsec.testtool.domain.repository.ExtractionStatus
 import com.btsec.testtool.domain.repository.KeyExtractionRepository
 import io.mockk.coEvery
@@ -27,12 +26,10 @@ import java.time.Instant
 class KeyExtractionUseCaseTest {
     private lateinit var useCase: KeyExtractionUseCase
     private val keyRepo: KeyExtractionRepository = mockk(relaxed = true)
-    private val authUseCase: AuthorizationUseCase = mockk(relaxed = true)
-    private val consentRepo: ConsentRepository = mockk(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        useCase = KeyExtractionUseCase(keyRepo, authUseCase, consentRepo)
+        useCase = KeyExtractionUseCase(keyRepo)
     }
 
     @Test

@@ -69,8 +69,8 @@ class ScannerViewModelTest {
     @DisplayName("clearError should remove error from state")
     fun testClearError() =
         runTest {
-            // Trigger error via consent required
-            coEvery { mockScanningUseCase.startScan() } returns ScanResult.ConsentRequired
+            // Trigger error via scan error
+            coEvery { mockScanningUseCase.startScan() } returns ScanResult.Error("Test error")
             viewModel.startScan()
 
             viewModel.uiState.test {
@@ -79,32 +79,6 @@ class ScannerViewModelTest {
                 viewModel.clearError()
                 val clearedState = awaitItem()
                 assertNull(clearedState.error)
-            }
-        }
-
-    @Test
-    @DisplayName("startScan with NotAuthorized result should set error state")
-    fun testStartScanNotAuthorized() =
-        runTest {
-            coEvery { mockScanningUseCase.startScan() } returns ScanResult.NotAuthorized
-            viewModel.startScan()
-
-            viewModel.uiState.test {
-                val state = awaitItem()
-                assertEquals("Not authorized for scanning", state.error)
-            }
-        }
-
-    @Test
-    @DisplayName("startScan with ConsentRequired result should set error state")
-    fun testStartScanConsentRequired() =
-        runTest {
-            coEvery { mockScanningUseCase.startScan() } returns ScanResult.ConsentRequired
-            viewModel.startScan()
-
-            viewModel.uiState.test {
-                val state = awaitItem()
-                assertEquals("Consent required for scanning", state.error)
             }
         }
 

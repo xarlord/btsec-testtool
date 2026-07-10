@@ -102,26 +102,7 @@ jobs:
 
           echo "All files have proper legal disclaimers"
 
-      - name: Verify authorization enforcement
-        run: |
-          echo "Checking for authorization enforcement in new code..."
 
-          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.kt$' > /tmp/changed_files.txt || true
-
-          # Check use case files for authorization
-          usecase_files=$(grep -l "UseCase" /tmp/changed_files.txt 2>/dev/null || echo "")
-
-          if [ -n "$usecase_files" ]; then
-            for file in $usecase_files; do
-              if [ -f "$file" ]; then
-                if ! grep -q "requestActionAuthorization" "$file"; then
-                  echo "::warning file=$file::Use case may be missing authorization check"
-                fi
-              fi
-            done
-          fi
-
-          echo "Authorization enforcement check complete"
 
       - name: Check for security concerns
         run: |

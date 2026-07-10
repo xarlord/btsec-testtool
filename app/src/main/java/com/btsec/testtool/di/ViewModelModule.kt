@@ -8,7 +8,6 @@
  */
 package com.btsec.testtool.di
 
-import com.btsec.testtool.data.authorization.AuthorizationRepositoryImpl
 import com.btsec.testtool.data.bluetooth.BluetoothRepositoryImpl
 import com.btsec.testtool.data.bredr.AvrcpSecurityRepositoryImpl
 import com.btsec.testtool.data.bredr.HfpSecurityRepositoryImpl
@@ -19,21 +18,16 @@ import com.btsec.testtool.data.bredr.RfcommFuzzingRepositoryImpl
 import com.btsec.testtool.data.bredr.SapSecurityRepositoryImpl
 import com.btsec.testtool.data.bredr.SdpEnumerationRepositoryImpl
 import com.btsec.testtool.data.bredr.SnoopCaptureRepositoryImpl
-import com.btsec.testtool.data.consent.ConsentRepositoryImpl
 import com.btsec.testtool.data.fuzzing.FuzzingRepositoryImpl
 import com.btsec.testtool.data.keyextraction.KeyExtractionRepositoryImpl
 import com.btsec.testtool.data.report.ReportRepositoryImpl
 import com.btsec.testtool.data.vulnerability.ProductionBtProbe
 import com.btsec.testtool.data.vulnerability.VulnerabilityProbe
 import com.btsec.testtool.data.vulnerability.VulnerabilityRepositoryImpl
-import com.btsec.testtool.domain.repository.AuthorizationRepository
 import com.btsec.testtool.domain.repository.AvrcpSecurityRepository
 import com.btsec.testtool.domain.repository.BluetoothOperationsWriter
 import com.btsec.testtool.domain.repository.BluetoothRepository
 import com.btsec.testtool.domain.repository.BluetoothStateReader
-import com.btsec.testtool.domain.repository.ConsentReader
-import com.btsec.testtool.domain.repository.ConsentRepository
-import com.btsec.testtool.domain.repository.ConsentWriter
 import com.btsec.testtool.domain.repository.FuzzingReader
 import com.btsec.testtool.domain.repository.FuzzingRepository
 import com.btsec.testtool.domain.repository.FuzzingWriter
@@ -68,15 +62,11 @@ import javax.inject.Singleton
 abstract class RepositoryModule {
     @Binds
     @Singleton
-    abstract fun bindAuthorizationRepository(impl: AuthorizationRepositoryImpl): AuthorizationRepository
-
-    @Binds
-    @Singleton
     abstract fun bindBluetoothRepository(impl: BluetoothRepositoryImpl): BluetoothRepository
 
     // Segregated sub-interfaces (ISP) — bound to the same impl so narrow
     // read/write contracts can be injected without depending on the full
-    // repository. See issue #368 (Hilt MissingBinding for ConsentReader).
+    // repository.
     @Binds
     @Singleton
     abstract fun bindBluetoothStateReader(impl: BluetoothRepositoryImpl): BluetoothStateReader
@@ -84,18 +74,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBluetoothOperationsWriter(impl: BluetoothRepositoryImpl): BluetoothOperationsWriter
-
-    @Binds
-    @Singleton
-    abstract fun bindConsentRepository(impl: ConsentRepositoryImpl): ConsentRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindConsentReader(impl: ConsentRepositoryImpl): ConsentReader
-
-    @Binds
-    @Singleton
-    abstract fun bindConsentWriter(impl: ConsentRepositoryImpl): ConsentWriter
 
     @Binds
     @Singleton
