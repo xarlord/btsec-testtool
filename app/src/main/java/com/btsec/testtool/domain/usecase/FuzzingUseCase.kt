@@ -11,7 +11,6 @@ package com.btsec.testtool.domain.usecase
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**

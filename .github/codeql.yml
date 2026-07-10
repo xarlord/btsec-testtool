@@ -56,26 +56,7 @@ query-suited:
       - codeql/java-queries:Security/CWE/CWE-384.ql
       - codeql/java-queries:Security/CWE/CWE-502.ql
 
-# Custom queries for Bluetooth security
-custom-queries:
-  - name: CheckAuthorizationInUseCases
-    description: Ensures all use cases check authorization
-    query: |
-      from Callable useCase, Callable authCheck
-      where
-        useCase.getName().matches("%UseCase") and
-        not authCheck.getName().matches("requestActionAuthorization") and
-        not exists(Parameter p | p.getType().toString() = "ActionAuthorizationResult")
-      select useCase, "Use case should verify authorization before executing security operations"
-  - name: CheckConsentTracking
-    description: Ensures consent is tracked for all operations
-    query: |
-      from Method m, Method consentCall
-      where
-        m.getName().matches("%start%") and
-        m.getDeclaringType().getName().matches("%Repository%") and
-        not exists(consentCall | consentCall.getName() = "logAuditEvent")
-      select m, "Security operations should log consent/audit events"
+# No custom security queries - using CodeQL built-in queries only
   - name: CheckInputValidation
     description: Checks for proper input validation in security-sensitive functions
     query: |

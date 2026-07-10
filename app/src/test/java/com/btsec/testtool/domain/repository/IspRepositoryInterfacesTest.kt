@@ -75,8 +75,6 @@ class IspRepositoryInterfacesTest {
         )
     }
 
-
-
     // ========== VulnerabilityRepository ==========
 
     @Test
