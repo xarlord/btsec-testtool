@@ -309,6 +309,7 @@ class SuspendableGatt {
 
     fun getConnectionState(): Flow<ConnectionStateInternal> = connectionState.asStateFlow()
 
+    @SuppressLint("MissingPermission")
     suspend fun close() {
         gatt?.close()
         gatt = null

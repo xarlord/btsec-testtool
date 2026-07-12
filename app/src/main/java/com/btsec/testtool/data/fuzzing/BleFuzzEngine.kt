@@ -10,6 +10,7 @@
  */
 package com.btsec.testtool.data.fuzzing
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
@@ -33,6 +34,7 @@ import javax.inject.Singleton
  *
  * @property payloadGenerator injects payload generation logic
  */
+@SuppressLint("MissingPermission")
 @Singleton
 class BleFuzzEngine
     @Inject

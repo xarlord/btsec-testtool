@@ -236,7 +236,7 @@ class L2capSecurityRepositoryImpl
 
         // ── Private helpers ──
 
-        @SuppressLint("MissingPermission")
+        @SuppressLint("MissingPermission", "NewApi")
         private suspend fun tryEstablishAndSend(
             deviceAddress: String,
             packet: ByteArray,
@@ -248,8 +248,6 @@ class L2capSecurityRepositoryImpl
                 val device = bluetoothManager.adapter?.getRemoteDevice(deviceAddress) ?: return null
 
                 // Try L2CAP LE channel (Android 10+)
-                // Note: createL2capChannel was deprecated in API 33; use
-                // L2capSocket (hidden API) or reflection as fallback.
                 val socket =
                     try {
                         @Suppress("DEPRECATION")

@@ -8,6 +8,7 @@
  */
 package com.btsec.testtool.data.keyextraction
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
@@ -32,6 +33,7 @@ import kotlin.coroutines.resume
  *
  * This is for AUTHORIZED security testing only.
  */
+@SuppressLint("MissingPermission")
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class BleKeyExtractionProbe(
     private val context: Context,

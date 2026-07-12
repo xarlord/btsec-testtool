@@ -50,6 +50,7 @@
     <!-- Foreground service for background scanning -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- Wake lock for long-running operations -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -111,7 +112,9 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:mimeType="application/json" />
+                <data android:scheme="content" />
             </intent-filter>
         </activity>
 

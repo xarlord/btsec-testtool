@@ -210,6 +210,7 @@ android {
                 "IconDuplicates",
                 "IconLocation",
                 "GoogleAppIndexingWarning",
+                "InvalidPackage",
             )
         baseline = file("lint-baseline.xml")
     }

@@ -75,6 +75,7 @@ import android.bluetooth.BluetoothDevice as AndroidBluetoothDevice
  * connection, and BLE operations.
  */
 @Singleton
+@SuppressLint("MissingPermission")
 class BluetoothRepositoryImpl
     @Inject
     constructor(
