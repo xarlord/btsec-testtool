@@ -9,12 +9,17 @@
 package com.btsec.testtool.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.btsec.testtool.bluetoothRuntimePermissionRule
+import com.btsec.testtool.presentation.InstrumentationHiltActivity
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,10 +32,22 @@ import org.junit.runner.RunWith
  * Updated for the 1.15.x screen refactor: the ScannerScreen composable no
  * longer takes an `authId` parameter. See issue #367.
  */
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class ScannerScreenTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule(order = 0)
+    val bluetoothPermissionsRule = bluetoothRuntimePermissionRule()
+
+    @get:Rule(order = 1)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 2)
+    val composeTestRule = createAndroidComposeRule<InstrumentationHiltActivity>()
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+    }
 
     // ── Initial state rendering ──────────────────────────────────────
 
@@ -95,7 +112,7 @@ class ScannerScreenTest {
         }
 
         composeTestRule
-            .onNodeWithText("No devices found. Start a scan to discover Bluetooth devices.")
+            .onNodeWithText("No devices found. Tap Start Scan to discover Bluetooth devices.")
             .assertIsDisplayed()
     }
 
@@ -119,9 +136,9 @@ class ScannerScreenTest {
             .onNodeWithText("Start Scan")
             .performClick()
 
-        // Should now show Stop Scan (scanning state)
+        // Should now show Stop (scanning state)
         composeTestRule
-            .onNodeWithText("Stop Scan")
+            .onNodeWithText("Stop")
             .assertIsDisplayed()
 
         // Should show scanning indicator text
@@ -145,12 +162,12 @@ class ScannerScreenTest {
 
         // Verify we're in scanning state
         composeTestRule
-            .onNodeWithText("Stop Scan")
+            .onNodeWithText("Stop")
             .assertIsDisplayed()
 
         // Stop scanning
         composeTestRule
-            .onNodeWithText("Stop Scan")
+            .onNodeWithText("Stop")
             .performClick()
 
         // Should return to Start Scan button
@@ -179,11 +196,11 @@ class ScannerScreenTest {
                 .performClick()
 
             composeTestRule
-                .onNodeWithText("Stop Scan")
+                .onNodeWithText("Stop")
                 .assertIsDisplayed()
 
             composeTestRule
-                .onNodeWithText("Stop Scan")
+                .onNodeWithText("Stop")
                 .performClick()
 
             composeTestRule

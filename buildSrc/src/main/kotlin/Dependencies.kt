@@ -1,3 +1,12 @@
+/*
+ * Bluetooth Security Testing Tool
+ * Copyright (c) 2026 Security Research Team
+ *
+ * Licensed under MIT with additional restrictions:
+ * - This build configuration may ONLY be used for authorized security testing
+ * - See LICENSE for full terms
+ */
+
 // Project-wide dependency versions
 object Versions {
     // Android
@@ -57,6 +66,7 @@ object Versions {
     const val mockk = "1.13.8"
     const val turbine = "1.1.0"
     const val androidxTest = "1.5.2"
+    const val androidxTestRules = "1.5.0"
     const val espresso = "3.5.1"
     const val composeTesting = "1.5.4"
     const val robolectric = "4.11.1"

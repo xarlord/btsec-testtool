@@ -9,6 +9,7 @@
 package com.btsec.testtool.e2e
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.btsec.testtool.bluetoothRuntimePermissionRule
 import com.btsec.testtool.domain.model.BluetoothDevice
 import com.btsec.testtool.domain.model.BluetoothType
 import com.btsec.testtool.domain.model.BondState
@@ -42,6 +43,9 @@ import javax.inject.Inject
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class ScanFlowE2ETest {
+    @get:Rule
+    val bluetoothConnectPermissionRule = bluetoothRuntimePermissionRule()
+
     @get:Rule
     val hiltRule = HiltAndroidRule(this)
 
