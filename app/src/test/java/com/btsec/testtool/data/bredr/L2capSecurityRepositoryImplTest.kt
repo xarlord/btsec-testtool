@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 /**
@@ -158,6 +159,69 @@ class L2capSecurityRepositoryImplTest {
             assertEquals(0x34, payload[0].toInt() and 0xFF)
             assertEquals(0x12, payload[1].toInt() and 0xFF)
         }
+
+    @Test
+    fun `buildL2capSignalingPacket accepts maximum encodable data length`() {
+        val packet =
+            repository.buildL2capSignalingPacket(
+                channelId = 0x0001,
+                command = com.btsec.testtool.domain.model.L2capSignalCommand.ECHO_REQUEST,
+                identifier = 0xFF,
+                data = ByteArray(0xFFFB),
+            )
+
+        assertEquals(0xFF, packet[0].toInt() and 0xFF)
+        assertEquals(0xFF, packet[1].toInt() and 0xFF)
+        assertEquals(0xFB, packet[6].toInt() and 0xFF)
+        assertEquals(0xFF, packet[7].toInt() and 0xFF)
+    }
+
+    @Test
+    fun `buildL2capSignalingPacket rejects overflowing data length`() {
+        assertThrows<IllegalArgumentException> {
+            repository.buildL2capSignalingPacket(
+                channelId = 0x0001,
+                command = com.btsec.testtool.domain.model.L2capSignalCommand.ECHO_REQUEST,
+                identifier = 0x01,
+                data = ByteArray(0xFFFC),
+            )
+        }
+    }
+
+    @Test
+    fun `buildL2capSignalingPacket rejects out-of-range fields`() {
+        assertThrows<IllegalArgumentException> {
+            repository.buildL2capSignalingPacket(-1, null, 1, byteArrayOf())
+        }
+        assertThrows<IllegalArgumentException> {
+            repository.buildL2capSignalingPacket(0x10000, null, 1, byteArrayOf())
+        }
+        assertThrows<IllegalArgumentException> {
+            repository.buildL2capSignalingPacket(1, null, 0, byteArrayOf())
+        }
+        assertThrows<IllegalArgumentException> {
+            repository.buildL2capSignalingPacket(1, null, 0x100, byteArrayOf())
+        }
+    }
+
+    @Test
+    fun `buildInformationRequestPayload rejects out-of-range info type`() {
+        assertThrows<IllegalArgumentException> {
+            repository.buildInformationRequestPayload(-1)
+        }
+        assertThrows<IllegalArgumentException> {
+            repository.buildInformationRequestPayload(0x10000)
+        }
+    }
+
+    @Test
+    fun `nextIdentifier wraps from 255 to 1 without emitting zero`() {
+        repeat(255) {
+            assertTrue(repository.nextIdentifier() in 1..0xFF)
+        }
+
+        assertEquals(1, repository.nextIdentifier())
+    }
 
     @Test
     fun `queryInformation returns null when no L2CAP socket available`() =
