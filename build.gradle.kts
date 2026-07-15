@@ -29,3 +29,15 @@ allprojects {
 tasks.register("clean", Delete::class) {
     delete(rootProject.layout.buildDirectory)
 }
+
+tasks.register<Exec>("ktlint") {
+    group = "verification"
+    description = "Checks Kotlin source and Gradle scripts with the repository ktlint runner."
+
+    val isWindows = System.getProperty("os.name").lowercase().contains("windows")
+    if (isWindows) {
+        commandLine("cmd", "/c", "scripts\\lint-ktlint.bat")
+    } else {
+        commandLine("bash", "scripts/lint-ktlint.sh")
+    }
+}
