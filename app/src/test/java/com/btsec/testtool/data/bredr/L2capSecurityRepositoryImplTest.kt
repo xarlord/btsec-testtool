@@ -122,48 +122,41 @@ class L2capSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `sendSignalingCommand builds well-formed signaling packet`() =
+    fun `sendSignalingCommand builds little-endian signaling packet`() =
         runTest {
-            // Build an Information Request packet via the public helper
             val command = com.btsec.testtool.domain.model.L2capSignalCommand.INFORMATION_REQUEST
-            val payload = byteArrayOf(0x00, 0x01) // Connectionless MTU
+            val payload = ByteArray(0x0102)
             val packet =
                 repository.buildL2capSignalingPacket(
-                    channelId = 0x0001,
+                    channelId = 0x1234,
                     command = command,
                     identifier = 0x01,
                     data = payload,
                 )
 
-            // L2CAP header: length(2) + CID(2) = 4 bytes
-            // Signaling header: code(1) + identifier(1) + length(2) = 4 bytes
-            // Data: 2 bytes
-            assertEquals(10, packet.size, "Packet should be 10 bytes total")
+            // L2CAP header: length(2 LE) + CID(2 LE) = 4 bytes
+            // Signaling header: code(1) + identifier(1) + length(2 LE) = 4 bytes
+            assertEquals(4 + 4 + payload.size, packet.size)
 
-            // L2CAP header
-            assertEquals(0x00, packet[0].toInt() and 0xFF, "Length high byte")
-            assertEquals(0x06, packet[1].toInt() and 0xFF, "Length low byte (sig payload = 6)")
-            assertEquals(0x00, packet[2].toInt() and 0xFF, "CID high byte")
-            assertEquals(0x01, packet[3].toInt() and 0xFF, "CID low byte (0x0001 signaling)")
+            // L2CAP payload length is 0x0106; CID is 0x1234.
+            assertEquals(0x06, packet[0].toInt() and 0xFF, "Length low byte")
+            assertEquals(0x01, packet[1].toInt() and 0xFF, "Length high byte")
+            assertEquals(0x34, packet[2].toInt() and 0xFF, "CID low byte")
+            assertEquals(0x12, packet[3].toInt() and 0xFF, "CID high byte")
 
-            // Signaling header
             assertEquals(0x0A, packet[4].toInt() and 0xFF, "Code should be INFORMATION_REQUEST (0x0A)")
             assertEquals(0x01, packet[5].toInt() and 0xFF, "Identifier")
-            assertEquals(0x00, packet[6].toInt() and 0xFF, "Sig length high byte")
-            assertEquals(0x02, packet[7].toInt() and 0xFF, "Sig length low byte (payload = 2)")
-
-            // Data payload
-            assertEquals(0x00, packet[8].toInt(), "Data byte 0")
-            assertEquals(0x01, packet[9].toInt(), "Data byte 1")
+            assertEquals(0x02, packet[6].toInt() and 0xFF, "Sig length low byte")
+            assertEquals(0x01, packet[7].toInt() and 0xFF, "Sig length high byte")
         }
 
     @Test
-    fun `buildInformationRequestPayload produces correct bytes`() =
+    fun `buildInformationRequestPayload uses little-endian info type`() =
         runTest {
-            val payload = repository.buildInformationRequestPayload(0x0002) // Extended Features
+            val payload = repository.buildInformationRequestPayload(0x1234)
             assertEquals(2, payload.size)
-            assertEquals(0x00, payload[0].toInt())
-            assertEquals(0x02, payload[1].toInt())
+            assertEquals(0x34, payload[0].toInt() and 0xFF)
+            assertEquals(0x12, payload[1].toInt() and 0xFF)
         }
 
     @Test
