@@ -203,6 +203,16 @@ class L2capSecurityRepositoryImpl
             identifier: Int,
             data: ByteArray,
         ): ByteArray {
+            require(channelId in 0..MAX_UNSIGNED_SHORT) {
+                "L2CAP channel ID must fit an unsigned 16-bit field: $channelId"
+            }
+            require(identifier in 1..MAX_SIGNALING_IDENTIFIER) {
+                "L2CAP signaling identifier must be in 1..255: $identifier"
+            }
+            require(data.size <= MAX_SIGNALING_DATA_LENGTH) {
+                "L2CAP signaling data exceeds $MAX_SIGNALING_DATA_LENGTH bytes: ${data.size}"
+            }
+
             val signalingPayloadLen = 4 + data.size // sig header (4) + data
             val totalLen = 4 + signalingPayloadLen // L2CAP header + sig payload
 
@@ -229,6 +239,9 @@ class L2capSecurityRepositoryImpl
          * Builds a little-endian Information Request payload.
          */
         internal fun buildInformationRequestPayload(infoType: Int): ByteArray {
+            require(infoType in 0..MAX_UNSIGNED_SHORT) {
+                "L2CAP information type must fit an unsigned 16-bit field: $infoType"
+            }
             return byteArrayOf(
                 (infoType and 0xFF).toByte(),
                 ((infoType shr 8) and 0xFF).toByte(),
@@ -289,12 +302,21 @@ class L2capSecurityRepositoryImpl
             }
         }
 
-        private fun nextIdentifier(): Int {
-            signalIdentifier = (signalIdentifier + 1) and 0xFF
+        internal fun nextIdentifier(): Int {
+            signalIdentifier =
+                if (signalIdentifier == MAX_SIGNALING_IDENTIFIER) {
+                    1
+                } else {
+                    signalIdentifier + 1
+                }
             return signalIdentifier
         }
 
         companion object {
             private const val LE_SIGNALING_PSM = 0x0005
+            private const val MAX_UNSIGNED_SHORT = 0xFFFF
+            private const val MAX_SIGNALING_IDENTIFIER = 0xFF
+            private const val SIGNALING_HEADER_SIZE = 4
+            private const val MAX_SIGNALING_DATA_LENGTH = MAX_UNSIGNED_SHORT - SIGNALING_HEADER_SIZE
         }
     }
