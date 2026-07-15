@@ -194,7 +194,8 @@ class L2capSecurityRepositoryImpl
         /**
          * Builds a well-formed L2CAP signaling packet.
          *
-         * Format: Length(2), CID(2), Code(1), Identifier(1), Length(2), Data.
+         * Multi-byte L2CAP fields use little-endian byte order:
+         * Length(2), CID(2), Code(1), Identifier(1), Length(2), Data.
          */
         internal fun buildL2capSignalingPacket(
             channelId: Int,
@@ -206,16 +207,16 @@ class L2capSecurityRepositoryImpl
             val totalLen = 4 + signalingPayloadLen // L2CAP header + sig payload
 
             val packet = ByteArray(totalLen)
-            // L2CAP header
-            packet[0] = ((signalingPayloadLen shr 8) and 0xFF).toByte()
-            packet[1] = (signalingPayloadLen and 0xFF).toByte()
-            packet[2] = ((channelId shr 8) and 0xFF).toByte()
-            packet[3] = (channelId and 0xFF).toByte()
+            // L2CAP header (little-endian)
+            packet[0] = (signalingPayloadLen and 0xFF).toByte()
+            packet[1] = ((signalingPayloadLen shr 8) and 0xFF).toByte()
+            packet[2] = (channelId and 0xFF).toByte()
+            packet[3] = ((channelId shr 8) and 0xFF).toByte()
             // Signaling header
             packet[4] = command?.code?.toByte() ?: data.firstOrNull()?.toByte() ?: 0x08
             packet[5] = identifier.toByte()
-            packet[6] = ((data.size shr 8) and 0xFF).toByte()
-            packet[7] = (data.size and 0xFF).toByte()
+            packet[6] = (data.size and 0xFF).toByte()
+            packet[7] = ((data.size shr 8) and 0xFF).toByte()
             // Data payload
             if (data.isNotEmpty()) {
                 System.arraycopy(data, 0, packet, 8, minOf(data.size, packet.size - 8))
@@ -225,12 +226,12 @@ class L2capSecurityRepositoryImpl
         }
 
         /**
-         * Builds an Information Request payload.
+         * Builds a little-endian Information Request payload.
          */
         internal fun buildInformationRequestPayload(infoType: Int): ByteArray {
             return byteArrayOf(
-                (infoType shr 8).toByte(),
                 (infoType and 0xFF).toByte(),
+                ((infoType shr 8) and 0xFF).toByte(),
             )
         }
 
