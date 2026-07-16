@@ -63,9 +63,12 @@ class SnoopCaptureUseCase
             val drops = buf.int
             val timestampMicros = buf.long
 
+            require(originalLength >= 0) { "Invalid negative original length: $originalLength" }
+            require(includedLength >= 0) { "Invalid negative included length: $includedLength" }
             val dataOffset = offset + RECORD_HEADER_SIZE
-            require(dataOffset + includedLength <= data.size) {
-                "Not enough data for record payload at offset $dataOffset (need $includedLength, available: ${data.size - dataOffset})"
+            val availablePayloadBytes = data.size - dataOffset
+            require(includedLength <= availablePayloadBytes) {
+                "Not enough data for record payload at offset $dataOffset (need $includedLength, available: $availablePayloadBytes)"
             }
             val recordData = data.copyOfRange(dataOffset, dataOffset + includedLength)
 
@@ -106,10 +109,12 @@ class SnoopCaptureUseCase
             val records = mutableListOf<SnoopRecord>()
             var offset = BTSNOOP_HEADER_SIZE
             while (offset + RECORD_HEADER_SIZE <= fileData.size) {
-                val buf = ByteBuffer.wrap(fileData, offset, 4).order(ByteOrder.BIG_ENDIAN)
-                val includedLength = buf.int
-                val recordEnd = offset + RECORD_HEADER_SIZE + includedLength
-                if (recordEnd > fileData.size) break
+                val includedLengthBuffer =
+                    ByteBuffer.wrap(fileData, offset + Int.SIZE_BYTES, Int.SIZE_BYTES)
+                        .order(ByteOrder.BIG_ENDIAN)
+                val includedLength = includedLengthBuffer.int
+                val availablePayloadBytes = fileData.size - offset - RECORD_HEADER_SIZE
+                if (includedLength < 0 || includedLength > availablePayloadBytes) break
                 val (record, consumed) = parseBtsnoopRecord(fileData, offset)
                 records.add(record)
                 offset += consumed
