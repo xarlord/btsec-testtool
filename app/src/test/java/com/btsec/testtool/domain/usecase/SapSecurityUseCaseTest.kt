@@ -161,18 +161,57 @@ class SapSecurityUseCaseTest {
         @Test
         @DisplayName("should extract valid IMSI from BCD data")
         fun testExtractImsi_validData() {
-            // IMSI: 08 (length=8) then BCD-encoded digits
-            // BCD: 29 01 04 10 10 30 15 05 -> IMSI starting with parity nibble
+            // IMSI 310150123456789 encoded per 3GPP TS 24.008 mobile identity.
             val data =
                 byteArrayOf(
                     // length
                     0x08.toByte(),
-                    0x29.toByte(), 0x01.toByte(), 0x04.toByte(), 0x10.toByte(),
-                    0x10.toByte(), 0x30.toByte(), 0x15.toByte(), 0x05.toByte(),
+                    0x39.toByte(), 0x01.toByte(), 0x51.toByte(), 0x10.toByte(),
+                    0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
                 )
             val imsi = useCase.extractImsi(data)
-            assertThat(imsi).isNotNull()
-            assertThat(imsi).isNotEmpty()
+            assertThat(imsi).isEqualTo("310150123456789")
+        }
+
+        @Test
+        @DisplayName("should decode an even-length IMSI with a final filler nibble")
+        fun testExtractImsi_evenDigitCount() {
+            val data =
+                byteArrayOf(
+                    0x08.toByte(),
+                    // Digit 1 = 3; even parity; mobile identity type = IMSI.
+                    0x31.toByte(),
+                    0x01.toByte(), 0x51.toByte(), 0x10.toByte(), 0x32.toByte(),
+                    0x54.toByte(), 0x76.toByte(), 0xF8.toByte(),
+                )
+
+            assertThat(useCase.extractImsi(data)).isEqualTo("31015012345678")
+        }
+
+        @Test
+        @DisplayName("should reject non-decimal BCD digits")
+        fun testExtractImsi_invalidBcdDigit() {
+            val data =
+                byteArrayOf(
+                    0x08.toByte(),
+                    0x39.toByte(), 0x0A.toByte(), 0x51.toByte(), 0x10.toByte(),
+                    0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
+                )
+
+            assertThat(useCase.extractImsi(data)).isNull()
+        }
+
+        @Test
+        @DisplayName("should reject a filler nibble before the final octet")
+        fun testExtractImsi_earlyFiller() {
+            val data =
+                byteArrayOf(
+                    0x08.toByte(),
+                    0x39.toByte(), 0xF1.toByte(), 0x51.toByte(), 0x10.toByte(),
+                    0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
+                )
+
+            assertThat(useCase.extractImsi(data)).isNull()
         }
 
         @Test
