@@ -17,6 +17,9 @@ jobs:
       github.event.sender.login == 'xarlord' ||
       contains(github.event.pull_request.head.ref, 'auto-review')
     steps:
+      - name: Check out repository for gh merge
+        uses: actions/checkout@v4
+
       - name: Wait for required checks
         uses: lewagon/wait-on-check-action@v1.3.4
         with:

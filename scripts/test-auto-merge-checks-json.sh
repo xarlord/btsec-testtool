@@ -10,6 +10,13 @@ if ! grep -Fq -- "--jq '[.check_runs[] | select(" "$workflow"; then
   exit 1
 fi
 
+checkout_line=$(grep -nF -- 'uses: actions/checkout@v4' "$workflow" | cut -d: -f1 | head -n1 || true)
+merge_line=$(grep -nF -- 'name: Auto-merge PR' "$workflow" | cut -d: -f1 | head -n1 || true)
+if [[ -z "$checkout_line" || -z "$merge_line" || "$checkout_line" -ge "$merge_line" ]]; then
+  echo "FAIL: auto-merge workflow must check out the repository before invoking gh pr merge" >&2
+  exit 1
+fi
+
 sample='[
   {"name":"Unit Tests","status":"completed","conclusion":"SUCCESS"},
   {"name":"Kotlin Linting","status":"in_progress","conclusion":null},
