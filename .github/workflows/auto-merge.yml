@@ -29,7 +29,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CHECKS=$(gh api repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs[] | select(.name == "build-and-test" or .name == "lint" or .name == "TDD" or .name == "Unit Tests" or .name == "Kotlin Linting" or .name == "Android Lint")')
+          CHECKS=$(gh api repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '[.check_runs[] | select(.name == "build-and-test" or .name == "lint" or .name == "TDD" or .name == "Unit Tests" or .name == "Kotlin Linting" or .name == "Android Lint")]')
 
           FAILED=$(echo "$CHECKS" | jq -r '[.[] | select(.conclusion == "FAILURE")] | length')
           PENDING=$(echo "$CHECKS" | jq -r '[.[] | select(.status != "completed")] | length')
