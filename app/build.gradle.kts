@@ -375,6 +375,7 @@ dependencies {
 
     // Android Testing
     androidTestImplementation("androidx.test.ext:junit:${Versions.androidxJunit}")
+    androidTestImplementation("androidx.test:rules:${Versions.androidxTestRules}")
     androidTestImplementation("androidx.test.espresso:espresso-core:${Versions.espresso}")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:${Versions.composeTesting}")
     androidTestImplementation("com.google.dagger:hilt-android-testing:${Versions.hilt}")

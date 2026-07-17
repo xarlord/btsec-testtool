@@ -9,14 +9,9 @@
 
   androidTest manifest.
 
-  Overrides android:name to HiltTestApplication so that @HiltAndroidTest
-  classes run against a valid Hilt test component graph instead of the
-  production BtSecTestToolApplication. The HiltTestRunner also overrides
-  newApplication() as a belt-and-suspenders fallback. See issue #368.
+  Application selection is intentionally delegated only to HiltTestRunner.
+  Declaring HiltTestApplication here makes Android load it through the base
+  application classloader before the runner can resolve the test dependency,
+  which crashes UI instrumentation tests. See issue #441.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <application
-        android:name="dagger.hilt.android.testing.HiltTestApplication" />
-
-</manifest>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
