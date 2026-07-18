@@ -95,6 +95,9 @@ def _gh_json(repo: str, endpoint: str, *, paginate: bool = False) -> Any:
 def _pr_numbers(event: dict[str, Any]) -> list[int]:
     if isinstance(event.get("pull_request"), dict) and event["pull_request"].get("number"):
         return [int(event["pull_request"]["number"])]
+    workflow_pulls = event.get("workflow_run", {}).get("pull_requests", [])
+    if workflow_pulls:
+        return [int(x["number"]) for x in workflow_pulls if isinstance(x, dict) and x.get("number")]
     pulls = event.get("check_suite", {}).get("pull_requests", [])
     return [int(x["number"]) for x in pulls if isinstance(x, dict) and x.get("number")]
 

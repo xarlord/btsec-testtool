@@ -110,6 +110,20 @@ class ProcessPrTests(unittest.TestCase):
                 gate.process_pr("owner/repo", 7)
 
 
+class EventTests(unittest.TestCase):
+    def test_completed_ci_workflow_run_exposes_pull_request_numbers(self):
+        event = {
+            "workflow_run": {
+                "event": "pull_request",
+                "pull_requests": [{"number": 7}, {"number": 8}],
+            }
+        }
+        self.assertEqual(gate._pr_numbers(event), [7, 8])
+
+    def test_workflow_run_without_pull_requests_fails_closed(self):
+        self.assertEqual(gate._pr_numbers({"workflow_run": {"pull_requests": []}}), [])
+
+
 class WorkflowPermissionTests(unittest.TestCase):
     def test_workflow_declares_only_required_token_permissions(self):
         workflow = Path(".github/workflows/auto-merge.yml").read_text(encoding="utf-8")
@@ -120,6 +134,16 @@ class WorkflowPermissionTests(unittest.TestCase):
             {"contents: write", "pull-requests: write", "checks: read"},
         )
         self.assertNotIn("--admin", workflow)
+
+    def test_workflow_evaluates_after_ci_completion_not_pr_open(self):
+        workflow = Path(".github/workflows/auto-merge.yml").read_text(encoding="utf-8")
+        trigger = workflow.split("on:\n", 1)[1].split("\npermissions:\n", 1)[0]
+        self.assertIn("workflow_run:", trigger)
+        self.assertIn("workflows: [CI/CD]", trigger)
+        self.assertIn("types: [completed]", trigger)
+        self.assertNotIn("check_suite:", trigger)
+        self.assertNotIn("pull_request:", trigger)
+        self.assertIn("github.event.workflow_run.event == 'pull_request'", workflow)
 
 
 if __name__ == "__main__":
