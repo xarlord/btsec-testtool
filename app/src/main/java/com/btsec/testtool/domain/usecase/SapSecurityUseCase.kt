@@ -265,32 +265,32 @@ class SapSecurityUseCase {
     fun extractImsi(data: ByteArray): String? {
         if (data.isEmpty()) return null
 
-        try {
-            val length = data[0].toInt() and 0xFF
-            if (length <= 0 || length > data.size - 1) return null
+        val length = data[0].toInt() and 0xFF
+        if (length <= 0 || length > data.size - 1) return null
 
-            val bcdData = data.copyOfRange(1, 1 + length)
-            val sb = StringBuilder()
+        val bcdData = data.copyOfRange(1, 1 + length)
+        val firstOctet = bcdData.first().toInt() and 0xFF
+        val firstDigit = firstOctet shr 4
+        if (firstDigit > 9) return null
+        if (firstOctet and IMSI_IDENTITY_TYPE_MASK != IMSI_IDENTITY_TYPE) return null
 
-            for (i in bcdData.indices) {
-                val byte = bcdData[i].toInt() and 0xFF
-                val low = byte and 0x0F
-                val high = (byte shr 4) and 0x0F
+        val expectsOddDigitCount = firstOctet and ODD_DIGIT_COUNT_FLAG != 0
+        val imsi = StringBuilder(length * 2 - 1).append(firstDigit)
+        for (index in 1 until bcdData.size) {
+            val octet = bcdData[index].toInt() and 0xFF
+            val low = octet and 0x0F
+            val high = octet shr 4
 
-                // Skip first nibble (parity/type byte)
-                if (i == 0) {
-                    sb.append(low)
-                    if (high != 0x0F) sb.append(high)
-                } else {
-                    if (low != 0x0F) sb.append(low)
-                    if (high != 0x0F) sb.append(high)
-                }
+            if (low > 9) return null
+            imsi.append(low)
+            when {
+                high <= 9 -> imsi.append(high)
+                high == BCD_FILLER && index == bcdData.lastIndex -> Unit
+                else -> return null
             }
-
-            return sb.toString()
-        } catch (e: Exception) {
-            return null
         }
+
+        return imsi.toString().takeIf { (it.length % 2 != 0) == expectsOddDigitCount }
     }
 
     /**
@@ -463,4 +463,11 @@ class SapSecurityUseCase {
     }
 
     private fun ByteArray.toHexString(): String = joinToString(" ") { "%02X".format(it) }
+
+    private companion object {
+        const val IMSI_IDENTITY_TYPE_MASK = 0x07
+        const val IMSI_IDENTITY_TYPE = 0x01
+        const val ODD_DIGIT_COUNT_FLAG = 0x08
+        const val BCD_FILLER = 0x0F
+    }
 }
