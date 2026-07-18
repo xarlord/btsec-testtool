@@ -178,40 +178,44 @@ class SapSecurityUseCaseTest {
         @Test
         @DisplayName("should decode the exact odd-length EF_IMSI value")
         fun testExtractImsi_exactOddLengthValue() {
-            val data = byteArrayOf(
-                0x08.toByte(), 0x39.toByte(), 0x01.toByte(), 0x51.toByte(),
-                0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
-            )
+            val data =
+                byteArrayOf(
+                    0x08.toByte(), 0x39.toByte(), 0x01.toByte(), 0x51.toByte(),
+                    0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
+                )
             assertThat(useCase.extractImsi(data)).isEqualTo("310150123456789")
         }
 
         @Test
         @DisplayName("should decode an even-length EF_IMSI with a final filler")
         fun testExtractImsi_evenLengthWithFiller() {
-            val data = byteArrayOf(
-                0x08.toByte(), 0x31.toByte(), 0x01.toByte(), 0x51.toByte(),
-                0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0xF8.toByte(),
-            )
+            val data =
+                byteArrayOf(
+                    0x08.toByte(), 0x31.toByte(), 0x01.toByte(), 0x51.toByte(),
+                    0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0xF8.toByte(),
+                )
             assertThat(useCase.extractImsi(data)).isEqualTo("31015012345678")
         }
 
         @Test
         @DisplayName("should reject non-decimal EF_IMSI nibbles")
         fun testExtractImsi_rejectsNonDecimalNibble() {
-            val data = byteArrayOf(
-                0x08.toByte(), 0x39.toByte(), 0x0A.toByte(), 0x51.toByte(),
-                0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
-            )
+            val data =
+                byteArrayOf(
+                    0x08.toByte(), 0x39.toByte(), 0x0A.toByte(), 0x51.toByte(),
+                    0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
+                )
             assertThat(useCase.extractImsi(data)).isNull()
         }
 
         @Test
         @DisplayName("should reject a filler before the final EF_IMSI octet")
         fun testExtractImsi_rejectsEarlyFiller() {
-            val data = byteArrayOf(
-                0x08.toByte(), 0x39.toByte(), 0xF1.toByte(), 0x51.toByte(),
-                0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
-            )
+            val data =
+                byteArrayOf(
+                    0x08.toByte(), 0x39.toByte(), 0xF1.toByte(), 0x51.toByte(),
+                    0x10.toByte(), 0x32.toByte(), 0x54.toByte(), 0x76.toByte(), 0x98.toByte(),
+                )
             assertThat(useCase.extractImsi(data)).isNull()
         }
 
