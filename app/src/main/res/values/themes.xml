@@ -12,8 +12,10 @@
         <item name="android:colorAccent">@color/btsec_secondary</item>
 
         <!-- Status bar -->
-        <item name="android:statusBarColor">@color/btsec_primary_dark</item>
+        <item name="android:statusBarColor">@color/btsec_background</item>
+        <item name="android:navigationBarColor">@color/btsec_background</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
 
         <!-- Background -->
         <item name="android:colorBackground">@color/btsec_background</item>
@@ -30,6 +32,6 @@
 
     <!-- Splash theme for cold start -->
     <style name="Theme.BTSecTestTool.Splash" parent="Theme.BTSecTestTool">
-        <item name="android:windowBackground">@color/btsec_primary</item>
+        <item name="android:windowBackground">@color/btsec_background</item>
     </style>
 </resources>
