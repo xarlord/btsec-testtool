@@ -7,10 +7,11 @@ pagination, ambiguity, and race cases can be tested without network access.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import subprocess
 import sys
-import urllib.parse
+
 from dataclasses import dataclass
 from typing import Any, Iterable
 
@@ -139,6 +140,48 @@ def _gh_json(repo: str, endpoint: str, *, paginate: bool = False) -> Any:
         raise ReadinessError(f"GitHub API returned invalid JSON for {endpoint}") from exc
 
 
+def _gh_graphql(repo: str, query: str) -> Any:
+    owner, name = repo.split("/", 1)
+    result = subprocess.run(
+        ["gh", "api", "graphql", "-f", f"query={query}", "-F", f"owner={owner}", "-F", f"name={name}"],
+        check=False, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise ReadinessError(f"GitHub GraphQL API failed: {result.stderr.strip()}")
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise ReadinessError("GitHub GraphQL API returned invalid JSON") from exc
+    if payload.get("errors"):
+        raise ReadinessError(f"GitHub GraphQL API returned errors: {payload['errors']}")
+    return payload
+
+
+def _live_protection(repo: str, branch: str) -> dict[str, Any]:
+    # GITHUB_TOKEN cannot read the REST administration endpoint. GraphQL
+    # exposes the live rule and contexts. Its schema has no app IDs, so the
+    # check-run app IDs are matched below and conflicting apps fail closed.
+    query = """query($owner:String!, $name:String!) {
+      repository(owner:$owner, name:$name) {
+        branchProtectionRules(first:100) {
+          nodes { pattern requiresStatusChecks requiredStatusChecks { context } }
+        }
+      }
+    }"""
+    payload = _gh_graphql(repo, query)
+    nodes = payload.get("data", {}).get("repository", {}).get("branchProtectionRules", {}).get("nodes")
+    if not isinstance(nodes, list):
+        raise ReadinessError("live branch protection rules are unavailable")
+    matches = [x for x in nodes if isinstance(x, dict) and fnmatch.fnmatch(branch, x.get("pattern", ""))]
+    if len(matches) != 1:
+        raise ReadinessError(f"ambiguous live branch protection rules for {branch}")
+    rule = matches[0]
+    contexts = rule.get("requiredStatusChecks")
+    if rule.get("requiresStatusChecks") is not True or not isinstance(contexts, list) or not contexts:
+        raise ReadinessError(f"live branch protection has no required checks for {branch}")
+    return {"required_status_checks": {"checks": [{"context": x.get("context"), "app_id": None} for x in contexts]}}
+
+
 def _pr_numbers(event: dict[str, Any]) -> list[int]:
     if isinstance(event.get("pull_request"), dict) and event["pull_request"].get("number"):
         return [int(event["pull_request"]["number"])]
@@ -157,8 +200,7 @@ def process_pr(repo: str, number: int) -> None:
     author = pr.get("user", {}).get("login")
     if author != "xarlord" and "auto-review" not in head.get("ref", ""):
         raise ReadinessError("PR is outside the auto-merge allowlist")
-    encoded_branch = urllib.parse.quote(branch, safe="")
-    protection = {"required_status_checks": _gh_json(repo, f"branches/{encoded_branch}/protection/required_status_checks")}
+    protection = _live_protection(repo, branch)
     runs = _gh_json(repo, f"commits/{sha}/check-runs", paginate=True)
     statuses = _gh_json(repo, f"commits/{sha}/status", paginate=True)
     evaluate_readiness(protection, runs, statuses, sha)

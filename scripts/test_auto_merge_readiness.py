@@ -44,7 +44,8 @@ class ReadinessTests(unittest.TestCase):
         gate.evaluate_readiness(PROTECTION, [[ready_runs()[0]], [{"check_runs": [ready_runs()[1]]}]], [], SHA)
 
     def test_api_error_blocks_before_merge(self):
-        with patch.object(gate, "_gh_json", side_effect=gate.ReadinessError("network")), \
+        with patch.object(gate, "_live_protection", return_value=PROTECTION), \
+             patch.object(gate, "_gh_json", side_effect=gate.ReadinessError("network")), \
              patch.object(gate.subprocess, "run") as merge:
             with self.assertRaises(gate.ReadinessError):
                 gate.process_pr("owner/repo", 7)
@@ -58,8 +59,9 @@ class ReadinessTests(unittest.TestCase):
     def test_head_race_blocks_merge(self):
         pr = {"head": {"sha": SHA}, "base": {"ref": "main"}, "user": {"login": "xarlord"}}
         changed = {"head": {"sha": "b" * 40}, "base": {"ref": "main"}, "user": {"login": "xarlord"}}
-        responses = [pr, PROTECTION, {"check_runs": ready_runs()}, {"statuses": []}, changed]
-        with patch.object(gate, "_gh_json", side_effect=responses), \
+        responses = [pr, {"check_runs": ready_runs()}, {"statuses": []}, changed]
+        with patch.object(gate, "_live_protection", return_value=PROTECTION), \
+             patch.object(gate, "_gh_json", side_effect=responses), \
              patch.object(gate.subprocess, "run") as merge:
             with self.assertRaises(gate.ReadinessError):
                 gate.process_pr("owner/repo", 7)
