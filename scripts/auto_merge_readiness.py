@@ -158,7 +158,7 @@ def process_pr(repo: str, number: int) -> None:
     if author != "xarlord" and "auto-review" not in head.get("ref", ""):
         raise ReadinessError("PR is outside the auto-merge allowlist")
     encoded_branch = urllib.parse.quote(branch, safe="")
-    protection = _gh_json(repo, f"branches/{encoded_branch}/protection")
+    protection = {"required_status_checks": _gh_json(repo, f"branches/{encoded_branch}/protection/required_status_checks")}
     runs = _gh_json(repo, f"commits/{sha}/check-runs", paginate=True)
     statuses = _gh_json(repo, f"commits/{sha}/status", paginate=True)
     evaluate_readiness(protection, runs, statuses, sha)
