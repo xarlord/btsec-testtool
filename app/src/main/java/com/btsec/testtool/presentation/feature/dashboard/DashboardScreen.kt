@@ -10,18 +10,19 @@ package com.btsec.testtool.presentation.feature.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Scanner
-import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Assessment
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Key
+import androidx.compose.material.icons.outlined.Scanner
+import androidx.compose.material.icons.outlined.Science
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.btsec.testtool.R
+import com.btsec.testtool.presentation.theme.accessibleDescriptionColor
 
 /**
  * Dashboard Screen - Main hub for the application (entry point).
@@ -44,7 +45,7 @@ fun DashboardScreen(
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
+                            imageVector = Icons.Outlined.Settings,
                             contentDescription = "Settings",
                         )
                     }
@@ -93,16 +94,16 @@ private fun FeatureGrid(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             FeatureCard(
-                icon = Icons.Filled.Scanner,
+                icon = Icons.Outlined.Scanner,
                 title = stringResource(R.string.nav_scanner),
-                description = "Scan for Bluetooth devices",
+                description = stringResource(R.string.dashboard_scan_desc),
                 onClick = onNavigateToScanner,
                 modifier = Modifier.weight(1f),
             )
             FeatureCard(
-                icon = Icons.Filled.BugReport,
+                icon = Icons.Outlined.BugReport,
                 title = stringResource(R.string.nav_vulns),
-                description = "Scan for vulnerabilities",
+                description = stringResource(R.string.dashboard_vulns_desc),
                 onClick = onNavigateToVulns,
                 modifier = Modifier.weight(1f),
             )
@@ -113,25 +114,25 @@ private fun FeatureGrid(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             FeatureCard(
-                icon = Icons.Filled.Science,
+                icon = Icons.Outlined.Science,
                 title = stringResource(R.string.nav_fuzzer),
-                description = "Fuzz Bluetooth protocols",
+                description = stringResource(R.string.dashboard_fuzz_desc),
                 onClick = onNavigateToFuzzer,
                 modifier = Modifier.weight(1f),
             )
             FeatureCard(
-                icon = Icons.Filled.Key,
+                icon = Icons.Outlined.Key,
                 title = stringResource(R.string.nav_keys),
-                description = "Extract Bluetooth keys",
+                description = stringResource(R.string.dashboard_keys_desc),
                 onClick = onNavigateToKeys,
                 modifier = Modifier.weight(1f),
             )
         }
 
         FeatureCard(
-            icon = Icons.Filled.Assessment,
+            icon = Icons.Outlined.Assessment,
             title = stringResource(R.string.nav_reports),
-            description = "View and generate reports",
+            description = stringResource(R.string.dashboard_reports_desc),
             onClick = onNavigateToReports,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -149,6 +150,7 @@ private fun FeatureCard(
     Card(
         onClick = onClick,
         modifier = modifier.height(120.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
             modifier =
@@ -167,7 +169,12 @@ private fun FeatureCard(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color =
+                    accessibleDescriptionColor(
+                        background = MaterialTheme.colorScheme.surface,
+                        onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant,
+                        onSurface = MaterialTheme.colorScheme.onSurface,
+                    ),
             )
         }
     }

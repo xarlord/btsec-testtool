@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.BTSecTestTool" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/btsec_primary_light</item>
+        <item name="android:colorPrimaryDark">@color/btsec_background_dark</item>
+        <item name="android:colorAccent">@color/btsec_secondary_light</item>
+        <item name="android:statusBarColor">@color/btsec_background_dark</item>
+        <item name="android:navigationBarColor">@color/btsec_background_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:colorBackground">@color/btsec_background_dark</item>
+        <item name="android:windowBackground">@color/btsec_background_dark</item>
+        <item name="android:textColorPrimary">@color/btsec_on_background_dark</item>
+        <item name="android:textColorSecondary">@color/btsec_on_surface_dark</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

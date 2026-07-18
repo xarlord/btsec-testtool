@@ -121,8 +121,16 @@ fun BTSecTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            val systemBarBackground = colorScheme.background
+            window.statusBarColor = systemBarBackground.toArgb()
+            window.navigationBarColor = systemBarBackground.toArgb()
+            val usesLightIcons = usesLightSystemBarIcons(systemBarBackground)
+            WindowCompat.getInsetsController(window, view).apply {
+                isAppearanceLightStatusBars = !usesLightIcons
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    isAppearanceLightNavigationBars = !usesLightIcons
+                }
+            }
         }
     }
 
