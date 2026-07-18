@@ -1,71 +1,125 @@
 #!/usr/bin/env python3
 import importlib.util
 import unittest
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import call, patch
 
 spec = importlib.util.spec_from_file_location("gate", "scripts/auto_merge_readiness.py")
 gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gate)
 
 SHA = "a" * 40
-PROTECTION = {"required_status_checks": {"checks": [{"context": "Unit Tests", "app_id": 15368}], "contexts": ["Unit Tests"]}}
 
 
-def run(name, conclusion, stamp, ident, sha=SHA, app_id=15368):
-    return {"name": name, "head_sha": sha, "status": "completed", "conclusion": conclusion,
-            "completed_at": stamp, "id": ident, "app": {"id": app_id}}
+def run(conclusion, stamp, ident, sha=SHA):
+    return {
+        "name": gate.E2E_NAME,
+        "head_sha": sha,
+        "status": "completed" if conclusion is not None else "in_progress",
+        "conclusion": conclusion,
+        "completed_at": stamp,
+        "id": ident,
+    }
 
 
-def ready_runs():
-    return [run("Unit Tests", "success", "2026-07-18T00:02:00Z", 2),
-            run("E2E Instrumented Tests", "success", "2026-07-18T00:02:00Z", 3)]
+def pull(sha=SHA):
+    return {
+        "head": {"sha": sha, "ref": "fix/issue-471-auto-merge-token"},
+        "base": {"ref": "main"},
+        "user": {"login": "xarlord"},
+    }
 
 
-class ReadinessTests(unittest.TestCase):
-    def assertBlocked(self, runs, protection=PROTECTION, statuses=None, sha=SHA):
+class E2EReadinessTests(unittest.TestCase):
+    def assertBlocked(self, runs, sha=SHA):
         with self.assertRaises(gate.ReadinessError):
-            gate.evaluate_readiness(protection, runs, statuses or [], sha)
+            gate.evaluate_e2e_readiness(runs, sha)
 
-    def test_failure_then_success_on_same_sha_uses_latest(self):
-        gate.evaluate_readiness(PROTECTION, [
-            run("Unit Tests", "failure", "2026-07-18T00:01:00Z", 1),
-            *ready_runs()], [], SHA)
+    def test_latest_success_on_exact_head_is_ready(self):
+        gate.evaluate_e2e_readiness(
+            [
+                run("failure", "2026-07-18T00:01:00Z", 1),
+                run("success", "2026-07-18T00:02:00Z", 2),
+            ],
+            SHA,
+        )
 
-    def test_success_then_failure_on_same_sha_blocks(self):
-        self.assertBlocked([run("Unit Tests", "success", "2026-07-18T00:01:00Z", 1),
-                            run("Unit Tests", "failure", "2026-07-18T00:03:00Z", 4),
-                            ready_runs()[1]])
+    def test_missing_pending_and_failed_e2e_block(self):
+        self.assertBlocked([])
+        self.assertBlocked([run(None, "2026-07-18T00:02:00Z", 2)])
+        self.assertBlocked([run("failure", "2026-07-18T00:02:00Z", 2)])
 
-    def test_missing_and_pending_block(self):
-        self.assertBlocked([ready_runs()[1]])
-        self.assertBlocked([run("Unit Tests", None, "2026-07-18T00:02:00Z", 2), ready_runs()[1]])
+    def test_success_for_other_sha_does_not_count(self):
+        self.assertBlocked([run("success", "2026-07-18T00:02:00Z", 2, sha="b" * 40)])
 
     def test_paginated_slurped_payload_is_flattened(self):
-        gate.evaluate_readiness(PROTECTION, [[ready_runs()[0]], [{"check_runs": [ready_runs()[1]]}]], [], SHA)
+        gate.evaluate_e2e_readiness(
+            [[run("failure", "2026-07-18T00:01:00Z", 1)], {"check_runs": [run("success", "2026-07-18T00:02:00Z", 2)]}],
+            SHA,
+        )
 
-    def test_api_error_blocks_before_merge(self):
-        with patch.object(gate, "_live_protection", return_value=PROTECTION), \
-             patch.object(gate, "_gh_json", side_effect=gate.ReadinessError("network")), \
-             patch.object(gate.subprocess, "run") as merge:
+
+class ProcessPrTests(unittest.TestCase):
+    def test_uses_only_exact_head_checks_then_sha_pinned_protected_merge(self):
+        responses = [pull(), {"check_runs": [run("success", "2026-07-18T00:02:00Z", 2)]}, pull()]
+        with patch.object(gate, "_gh_json", side_effect=responses) as api, patch.object(
+            gate.subprocess, "run", return_value=type("Result", (), {"returncode": 0})()
+        ) as merge:
+            gate.process_pr("owner/repo", 7)
+
+        self.assertEqual(
+            api.call_args_list,
+            [
+                call("owner/repo", "pulls/7"),
+                call("owner/repo", f"commits/{SHA}/check-runs", paginate=True),
+                call("owner/repo", "pulls/7"),
+            ],
+        )
+        merge.assert_called_once_with(
+            ["gh", "pr", "merge", "7", "--squash", "--match-head-commit", SHA],
+            check=False,
+            text=True,
+        )
+        self.assertNotIn("--admin", merge.call_args.args[0])
+
+    def test_check_api_error_blocks_before_merge(self):
+        with patch.object(gate, "_gh_json", side_effect=[pull(), gate.ReadinessError("network")]), patch.object(
+            gate.subprocess, "run"
+        ) as merge:
             with self.assertRaises(gate.ReadinessError):
                 gate.process_pr("owner/repo", 7)
             merge.assert_not_called()
-
-    def test_app_id_ambiguity_blocks(self):
-        protection = {"required_status_checks": {"checks": [{"context": "Unit Tests", "app_id": None}]}}
-        self.assertBlocked([run("Unit Tests", "success", "2026-07-18T00:02:00Z", 2, app_id=1),
-                            run("Unit Tests", "failure", "2026-07-18T00:02:00Z", 3, app_id=2), ready_runs()[1]], protection)
 
     def test_head_race_blocks_merge(self):
-        pr = {"head": {"sha": SHA}, "base": {"ref": "main"}, "user": {"login": "xarlord"}}
-        changed = {"head": {"sha": "b" * 40}, "base": {"ref": "main"}, "user": {"login": "xarlord"}}
-        responses = [pr, {"check_runs": ready_runs()}, {"statuses": []}, changed]
-        with patch.object(gate, "_live_protection", return_value=PROTECTION), \
-             patch.object(gate, "_gh_json", side_effect=responses), \
-             patch.object(gate.subprocess, "run") as merge:
+        responses = [
+            pull(),
+            {"check_runs": [run("success", "2026-07-18T00:02:00Z", 2)]},
+            pull("b" * 40),
+        ]
+        with patch.object(gate, "_gh_json", side_effect=responses), patch.object(gate.subprocess, "run") as merge:
             with self.assertRaises(gate.ReadinessError):
                 gate.process_pr("owner/repo", 7)
             merge.assert_not_called()
+
+    def test_protected_merge_rejection_fails_closed(self):
+        responses = [pull(), {"check_runs": [run("success", "2026-07-18T00:02:00Z", 2)]}, pull()]
+        with patch.object(gate, "_gh_json", side_effect=responses), patch.object(
+            gate.subprocess, "run", return_value=type("Result", (), {"returncode": 1})()
+        ):
+            with self.assertRaises(gate.ReadinessError):
+                gate.process_pr("owner/repo", 7)
+
+
+class WorkflowPermissionTests(unittest.TestCase):
+    def test_workflow_declares_only_required_token_permissions(self):
+        workflow = Path(".github/workflows/auto-merge.yml").read_text(encoding="utf-8")
+        permissions = workflow.split("permissions:\n", 1)[1].split("\njobs:\n", 1)[0]
+        declared = {line.strip() for line in permissions.splitlines() if line.strip()}
+        self.assertEqual(
+            declared,
+            {"contents: write", "pull-requests: write", "checks: read"},
+        )
+        self.assertNotIn("--admin", workflow)
 
 
 if __name__ == "__main__":

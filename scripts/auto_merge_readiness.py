@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-"""Fail-closed readiness gate for the protected auto-merge workflow.
+"""Fail-closed E2E gate for GitHub-enforced protected merges.
 
-The pure evaluator is intentionally separate from GitHub CLI I/O so rerun,
-pagination, ambiguity, and race cases can be tested without network access.
+GitHub's branch-protection engine is the authority for the live required-check
+set and strict-update rule. This script adds the repository's mandatory E2E
+gate on the exact PR head, guards against head races, and requests a normal
+SHA-pinned merge without an administrative bypass.
 """
 from __future__ import annotations
 
 import argparse
-import fnmatch
 import json
 import subprocess
 import sys
 
-from dataclasses import dataclass
 from typing import Any, Iterable
 
 E2E_NAME = "E2E Instrumented Tests"
+PROTECTED_BASE = "main"
 
 
 class ReadinessError(RuntimeError):
@@ -32,10 +33,8 @@ def _items(value: Any) -> list[dict[str, Any]]:
     if isinstance(value, dict):
         if isinstance(value.get("check_runs"), list):
             return [x for x in value["check_runs"] if isinstance(x, dict)]
-        if isinstance(value.get("statuses"), list):
-            return [x for x in value["statuses"] if isinstance(x, dict)]
         # A list element in a slurped fixture may already be one result.
-        if any(key in value for key in ("name", "context", "id", "state", "conclusion")):
+        if any(key in value for key in ("name", "id", "status", "conclusion")):
             return [value]
     return []
 
@@ -62,75 +61,28 @@ def _latest(candidates: Iterable[dict[str, Any]], label: str) -> dict[str, Any]:
         raise ReadinessError(f"missing latest result for {label}")
     newest_rank = max(_rank(x) for x in candidates)
     newest = [x for x in candidates if _rank(x) == newest_rank]
-    # Equal timestamps/IDs with different results cannot be safely ordered.
-    signatures = {(x.get("status"), x.get("conclusion"), x.get("state"), x.get("id")) for x in newest}
+    signatures = {(x.get("status"), x.get("conclusion"), x.get("id")) for x in newest}
     if len(signatures) != 1:
         raise ReadinessError(f"ambiguous latest result for {label}")
     return newest[0]
 
 
-def _required(protection: dict[str, Any]) -> list[tuple[str, int | None]]:
-    required = protection.get("required_status_checks")
-    if not isinstance(required, dict):
-        raise ReadinessError("branch protection has no required status checks")
-    checks = required.get("checks")
-    if isinstance(checks, list) and checks:
-        result = []
-        for check in checks:
-            if not isinstance(check, dict) or not isinstance(check.get("context"), str):
-                raise ReadinessError("invalid protected check definition")
-            app_id = check.get("app_id")
-            if app_id is not None:
-                try:
-                    app_id = int(app_id)
-                except (TypeError, ValueError):
-                    raise ReadinessError("invalid protected check app id")
-            result.append((check["context"], app_id))
-        return result
-    contexts = required.get("contexts")
-    if not isinstance(contexts, list) or not contexts or not all(isinstance(x, str) and x for x in contexts):
-        raise ReadinessError("branch protection has no usable required contexts")
-    return [(x, None) for x in contexts]
-
-
-def evaluate_readiness(protection: dict[str, Any], check_runs: Any, statuses: Any, sha: str) -> None:
-    """Raise ReadinessError unless all required results are latest, current, successful."""
-    required = _required(protection)
-    runs = _items(check_runs)
-    status_items = _items(statuses)
-    for run in runs + status_items:
-        if run.get("head_sha") is not None and run.get("head_sha") != sha:
-            continue
-
-    for context, app_id in required:
-        run_candidates = [
-            x for x in runs
-            if x.get("name") == context
-            and (app_id is None or isinstance(x.get("app"), dict) and x["app"].get("id") == app_id)
-            and (x.get("head_sha") is None or x.get("head_sha") == sha)
-        ]
-        status_candidates = [
-            x for x in status_items
-            if x.get("context") == context and (x.get("sha") is None or x.get("sha") == sha)
-        ]
-        if app_id is not None:
-            candidate = _latest(run_candidates, f"{context} (app {app_id})")
-        else:
-            candidate = _latest(run_candidates + status_candidates, context)
-        if candidate.get("conclusion") != "success" and candidate.get("state") != "success":
-            raise ReadinessError(f"latest {context} result is not successful")
-
-    e2e = [x for x in runs if x.get("name") == E2E_NAME and (x.get("head_sha") is None or x.get("head_sha") == sha)]
-    latest_e2e = _latest(e2e, E2E_NAME)
-    if latest_e2e.get("conclusion") != "success":
+def evaluate_e2e_readiness(check_runs: Any, sha: str) -> None:
+    """Raise unless the latest mandatory E2E run on the exact head succeeded."""
+    candidates = [
+        run
+        for run in _items(check_runs)
+        if run.get("name") == E2E_NAME and run.get("head_sha") == sha
+    ]
+    latest = _latest(candidates, E2E_NAME)
+    if latest.get("status") != "completed" or latest.get("conclusion") != "success":
         raise ReadinessError(f"latest {E2E_NAME} result is not successful")
 
 
 def _gh_json(repo: str, endpoint: str, *, paginate: bool = False) -> Any:
     command = ["gh", "api", f"repos/{repo}/{endpoint}"]
     if paginate:
-        command.append("--paginate")
-        command.append("--slurp")
+        command.extend(("--paginate", "--slurp"))
     result = subprocess.run(command, check=False, capture_output=True, text=True)
     if result.returncode != 0:
         raise ReadinessError(f"GitHub API failed for {endpoint}: {result.stderr.strip()}")
@@ -138,48 +90,6 @@ def _gh_json(repo: str, endpoint: str, *, paginate: bool = False) -> Any:
         return json.loads(result.stdout)
     except json.JSONDecodeError as exc:
         raise ReadinessError(f"GitHub API returned invalid JSON for {endpoint}") from exc
-
-
-def _gh_graphql(repo: str, query: str) -> Any:
-    owner, name = repo.split("/", 1)
-    result = subprocess.run(
-        ["gh", "api", "graphql", "-f", f"query={query}", "-F", f"owner={owner}", "-F", f"name={name}"],
-        check=False, capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        raise ReadinessError(f"GitHub GraphQL API failed: {result.stderr.strip()}")
-    try:
-        payload = json.loads(result.stdout)
-    except json.JSONDecodeError as exc:
-        raise ReadinessError("GitHub GraphQL API returned invalid JSON") from exc
-    if payload.get("errors"):
-        raise ReadinessError(f"GitHub GraphQL API returned errors: {payload['errors']}")
-    return payload
-
-
-def _live_protection(repo: str, branch: str) -> dict[str, Any]:
-    # GITHUB_TOKEN cannot read the REST administration endpoint. GraphQL
-    # exposes the live rule and contexts. Its schema has no app IDs, so the
-    # check-run app IDs are matched below and conflicting apps fail closed.
-    query = """query($owner:String!, $name:String!) {
-      repository(owner:$owner, name:$name) {
-        branchProtectionRules(first:100) {
-          nodes { pattern requiresStatusChecks requiredStatusChecks { context } }
-        }
-      }
-    }"""
-    payload = _gh_graphql(repo, query)
-    nodes = payload.get("data", {}).get("repository", {}).get("branchProtectionRules", {}).get("nodes")
-    if not isinstance(nodes, list):
-        raise ReadinessError("live branch protection rules are unavailable")
-    matches = [x for x in nodes if isinstance(x, dict) and fnmatch.fnmatch(branch, x.get("pattern", ""))]
-    if len(matches) != 1:
-        raise ReadinessError(f"ambiguous live branch protection rules for {branch}")
-    rule = matches[0]
-    contexts = rule.get("requiredStatusChecks")
-    if rule.get("requiresStatusChecks") is not True or not isinstance(contexts, list) or not contexts:
-        raise ReadinessError(f"live branch protection has no required checks for {branch}")
-    return {"required_status_checks": {"checks": [{"context": x.get("context"), "app_id": None} for x in contexts]}}
 
 
 def _pr_numbers(event: dict[str, Any]) -> list[int]:
@@ -197,18 +107,23 @@ def process_pr(repo: str, number: int) -> None:
     branch = base.get("ref")
     if not isinstance(sha, str) or not isinstance(branch, str):
         raise ReadinessError("PR response has no usable head SHA/base branch")
+    if branch != PROTECTED_BASE:
+        raise ReadinessError(f"PR targets unsupported base branch {branch}")
     author = pr.get("user", {}).get("login")
     if author != "xarlord" and "auto-review" not in head.get("ref", ""):
         raise ReadinessError("PR is outside the auto-merge allowlist")
-    protection = _live_protection(repo, branch)
+
     runs = _gh_json(repo, f"commits/{sha}/check-runs", paginate=True)
-    statuses = _gh_json(repo, f"commits/{sha}/status", paginate=True)
-    evaluate_readiness(protection, runs, statuses, sha)
+    evaluate_e2e_readiness(runs, sha)
+
     # The final fetch is the race guard: never merge the SHA we evaluated if head moved.
     final_pr = _gh_json(repo, f"pulls/{number}")
     final_sha = final_pr.get("head", {}).get("sha")
     if final_sha != sha:
         raise ReadinessError(f"PR head changed from {sha} to {final_sha}")
+
+    # No --admin and no custom branch-protection approximation: GitHub enforces
+    # the live protected checks and strict-update rule for this exact SHA.
     command = ["gh", "pr", "merge", str(number), "--squash", "--match-head-commit", sha]
     result = subprocess.run(command, check=False, text=True)
     if result.returncode != 0:
