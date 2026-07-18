@@ -17,6 +17,9 @@ jobs:
       github.event.sender.login == 'xarlord' ||
       contains(github.event.pull_request.head.ref, 'auto-review')
     steps:
+      - name: Check out repository for gh merge
+        uses: actions/checkout@v4
+
       - name: Wait for required checks
         uses: lewagon/wait-on-check-action@v1.3.4
         with:
@@ -29,7 +32,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CHECKS=$(gh api repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs[] | select(.name == "build-and-test" or .name == "lint" or .name == "TDD" or .name == "Unit Tests" or .name == "Kotlin Linting" or .name == "Android Lint")')
+          CHECKS=$(gh api repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '[.check_runs[] | select(.name == "build-and-test" or .name == "lint" or .name == "TDD" or .name == "Unit Tests" or .name == "Kotlin Linting" or .name == "Android Lint")]')
 
           FAILED=$(echo "$CHECKS" | jq -r '[.[] | select(.conclusion == "FAILURE")] | length')
           PENDING=$(echo "$CHECKS" | jq -r '[.[] | select(.status != "completed")] | length')
