@@ -44,6 +44,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Provision Android SDK Platform 34 deterministically
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-34 build-tools;34.0.0'
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
