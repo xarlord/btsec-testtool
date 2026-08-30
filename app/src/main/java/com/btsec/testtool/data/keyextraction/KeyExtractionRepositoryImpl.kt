@@ -429,9 +429,10 @@ class KeyExtractionRepositoryImpl
                     usingSecureConnections = false,
                     pairingMethod = null,
                     encryptionMode = EncryptionMode.UNKNOWN,
-                    findings = listOf(
-                        "Encryption evidence unavailable: stock Android cannot observe negotiated link parameters",
-                    ),
+                    findings =
+                        listOf(
+                            "Encryption evidence unavailable: stock Android cannot observe negotiated link parameters",
+                        ),
                 )
             }
 
@@ -443,9 +444,10 @@ class KeyExtractionRepositoryImpl
                 usingSecureConnections = observed.isSecureConnection,
                 pairingMethod = if (observed.isSecureConnection) PairingMethod.SECURE_CONNECTIONS else null,
                 encryptionMode = if (observed.isSecureConnection) EncryptionMode.SECURE_CONNECTIONS else EncryptionMode.UNKNOWN,
-                findings = listOf(
-                    "Observed ${observed.encryptionType} encryption with ${observed.keySize * Byte.SIZE_BITS}-bit key material",
-                ),
+                findings =
+                    listOf(
+                        "Observed ${observed.encryptionType} encryption with ${observed.keySize * Byte.SIZE_BITS}-bit key material",
+                    ),
             )
         }
 
