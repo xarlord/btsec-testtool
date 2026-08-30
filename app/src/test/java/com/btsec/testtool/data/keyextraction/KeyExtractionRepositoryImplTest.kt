@@ -150,10 +150,11 @@ class KeyExtractionRepositoryImplTest {
                 assertEquals(ExtractionStatus.COMPLETED, progressList.status)
                 assertEquals(100, progressList.progressPercentage)
 
-                // Verify result was saved with extracted=true
+                // Acceptance is vulnerability evidence, not extracted key material.
                 val results = repository.getAllExtractionResults().first()
                 assertEquals(1, results.size)
-                assertTrue(results[0].extracted)
+                assertFalse(results[0].extracted)
+                assertNull(results[0].keyValue)
                 assertEquals(ExtractionConfidence.HIGH, results[0].confidence)
                 assertTrue(results[0].notes?.contains("KNOB vulnerable") == true)
             }
@@ -268,7 +269,8 @@ class KeyExtractionRepositoryImplTest {
                 ).first { it.status == ExtractionStatus.COMPLETED }
 
                 val results = repository.getAllExtractionResults().first()
-                assertTrue(results[0].extracted)
+                assertFalse(results[0].extracted)
+                assertNull(results[0].keyValue)
                 assertEquals(ExtractionConfidence.HIGH, results[0].confidence)
                 assertTrue(results[0].notes?.contains("3-byte") == true)
             }
@@ -528,18 +530,47 @@ class KeyExtractionRepositoryImplTest {
     @DisplayName("Encryption analysis")
     inner class EncryptionAnalysisTests {
         @Test
-        @DisplayName("analyzeEncryptionStrength should return NONE encryption when adapter unavailable")
+        @DisplayName("analyzeEncryptionStrength must mark stock Android evidence unavailable without inferring link security")
         fun encryptionStrengthNoAdapter() =
             runTest {
                 val analysis = repository.analyzeEncryptionStrength(testDevice)
 
                 assertEquals(testDevice.address, analysis.deviceAddress)
                 assertFalse(analysis.encryptionEnabled)
-                assertEquals(0, analysis.encryptionKeySize)
+                assertNull(analysis.encryptionKeySize)
+                assertFalse(analysis.supportsSecureConnections)
                 assertFalse(analysis.usingSecureConnections)
-                assertEquals(PairingMethod.JUST_WORKS, analysis.pairingMethod)
-                assertEquals(EncryptionMode.NONE, analysis.encryptionMode)
-                assertTrue(analysis.findings.isNotEmpty())
+                assertNull(analysis.pairingMethod)
+                assertEquals(EncryptionMode.UNKNOWN, analysis.encryptionMode)
+                assertTrue(analysis.findings.any { it.contains("unavailable", ignoreCase = true) })
+            }
+
+        @Test
+        @DisplayName("analyzeEncryptionStrength should report only probe-observed link evidence")
+        fun encryptionStrengthObservedByProbe() =
+            runTest {
+                repository =
+                    KeyExtractionRepositoryImpl(
+                        context,
+                        TestProbe(
+                            encryptionInfo =
+                                EncryptionInfo(
+                                    keySize = 16,
+                                    encryptionType = "AES-CCM",
+                                    isSecureConnection = true,
+                                ),
+                        ),
+                    )
+
+                val analysis = repository.analyzeEncryptionStrength(testDevice)
+
+                assertTrue(analysis.encryptionEnabled)
+                assertEquals(128, analysis.encryptionKeySize)
+                assertTrue(analysis.supportsSecureConnections)
+                assertTrue(analysis.usingSecureConnections)
+                assertEquals(PairingMethod.SECURE_CONNECTIONS, analysis.pairingMethod)
+                assertEquals(EncryptionMode.SECURE_CONNECTIONS, analysis.encryptionMode)
+                assertTrue(analysis.findings.single().contains("Observed AES-CCM"))
             }
 
         @Test

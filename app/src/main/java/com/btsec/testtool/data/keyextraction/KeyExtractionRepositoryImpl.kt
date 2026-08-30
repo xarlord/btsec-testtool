@@ -198,8 +198,11 @@ class KeyExtractionRepositoryImpl
                     }
                 }
 
-                // Step 3: Determine result based on evidence
-                val extracted = vulnerableKeySize != null
+                // Step 3: Determine result based on evidence. Accepting a short key
+                // proves a KNOB weakness, but it never exposes key material through
+                // the public Android APIs. Do not represent that probe outcome as an
+                // extracted key.
+                val extracted = false
                 val confidence =
                     when {
                         vulnerableKeySize != null -> ExtractionConfidence.HIGH
@@ -224,7 +227,7 @@ class KeyExtractionRepositoryImpl
                         targetDevice = device,
                         keyType = keyType,
                         extracted = extracted,
-                        keyValue = if (extracted) "weak-${vulnerableKeySize}byte".toByteArray() else null,
+                        keyValue = null,
                         method = method,
                         confidence = confidence,
                         timestamp = Instant.now(),
@@ -416,92 +419,43 @@ class KeyExtractionRepositoryImpl
         }
 
         override suspend fun analyzeEncryptionStrength(device: BluetoothDevice): EncryptionAnalysis {
-            return try {
-                val btDevice = bluetoothAdapter?.getRemoteDevice(device.address)
-                val bondState = btDevice?.bondState ?: android.bluetooth.BluetoothDevice.BOND_NONE
-                val isBonded = bondState == android.bluetooth.BluetoothDevice.BOND_BONDED
-                val deviceType = btDevice?.type ?: android.bluetooth.BluetoothDevice.DEVICE_TYPE_UNKNOWN
-
-                val supportsSC = deviceType != android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC
-                val usingSC = isBonded && supportsSC
-                val keySize =
-                    if (usingSC) {
-                        256
-                    } else if (isBonded) {
-                        128
-                    } else {
-                        0
-                    }
-
-                EncryptionAnalysis(
-                    deviceAddress = device.address,
-                    encryptionEnabled = isBonded,
-                    encryptionKeySize = keySize,
-                    supportsSecureConnections = supportsSC,
-                    usingSecureConnections = usingSC,
-                    pairingMethod =
-                        if (usingSC) {
-                            PairingMethod.SECURE_CONNECTIONS
-                        } else if (isBonded) {
-                            PairingMethod.LEGACY_PAIRING
-                        } else {
-                            PairingMethod.JUST_WORKS
-                        },
-                    encryptionMode =
-                        if (usingSC) {
-                            EncryptionMode.SECURE_CONNECTIONS
-                        } else if (isBonded) {
-                            EncryptionMode.LEGACY
-                        } else {
-                            EncryptionMode.NONE
-                        },
-                    findings =
-                        buildList {
-                            if (isBonded) {
-                                add("Device is bonded")
-                            } else {
-                                add("Device is not bonded — encryption status unknown")
-                            }
-                            if (supportsSC) {
-                                add("Device supports LE Secure Connections")
-                            } else {
-                                add("Device may not support LE Secure Connections")
-                            }
-                            if (!usingSC && isBonded) add("WARNING: Legacy pairing in use — vulnerable to KNOB attack")
-                        },
-                )
-            } catch (e: SecurityException) {
-                EncryptionAnalysis(
+            val observed = probe.getEncryptionInfo()
+            if (observed == null) {
+                return EncryptionAnalysis(
                     deviceAddress = device.address,
                     encryptionEnabled = false,
-                    encryptionKeySize = 0,
+                    encryptionKeySize = null,
                     supportsSecureConnections = false,
                     usingSecureConnections = false,
-                    pairingMethod = PairingMethod.JUST_WORKS,
-                    encryptionMode = EncryptionMode.NONE,
-                    findings = listOf("Missing Bluetooth permissions — cannot analyze encryption"),
+                    pairingMethod = null,
+                    encryptionMode = EncryptionMode.UNKNOWN,
+                    findings =
+                        listOf(
+                            "Encryption evidence unavailable: stock Android cannot observe negotiated link parameters",
+                        ),
                 )
             }
+
+            return EncryptionAnalysis(
+                deviceAddress = device.address,
+                encryptionEnabled = true,
+                encryptionKeySize = observed.keySize * Byte.SIZE_BITS,
+                supportsSecureConnections = observed.isSecureConnection,
+                usingSecureConnections = observed.isSecureConnection,
+                pairingMethod = if (observed.isSecureConnection) PairingMethod.SECURE_CONNECTIONS else null,
+                encryptionMode = if (observed.isSecureConnection) EncryptionMode.SECURE_CONNECTIONS else EncryptionMode.UNKNOWN,
+                findings =
+                    listOf(
+                        "Observed ${observed.encryptionType} encryption with ${observed.keySize * Byte.SIZE_BITS}-bit key material",
+                    ),
+            )
         }
 
-        override suspend fun supportsSecureConnections(device: BluetoothDevice): Boolean {
-            return try {
-                val btDevice = bluetoothAdapter?.getRemoteDevice(device.address)
-                if (btDevice == null) false else btDevice.type != android.bluetooth.BluetoothDevice.DEVICE_TYPE_CLASSIC
-            } catch (_: SecurityException) {
-                false
-            }
-        }
+        override suspend fun supportsSecureConnections(device: BluetoothDevice): Boolean =
+            probe.getEncryptionInfo()?.isSecureConnection ?: false
 
-        override suspend fun getEncryptionKeySize(device: BluetoothDevice): Int? {
-            return try {
-                val btDevice = bluetoothAdapter?.getRemoteDevice(device.address)
-                val isBonded = btDevice?.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED
-                if (isBonded) 128 else null
-            } catch (_: SecurityException) {
-                null
-            }
-        }
+        override suspend fun getEncryptionKeySize(device: BluetoothDevice): Int? =
+            probe.getEncryptionInfo()?.keySize?.times(Byte.SIZE_BITS)
 
         override fun getKeyExtractionStatistics(): Flow<KeyExtractionStatistics> {
             return flow {
