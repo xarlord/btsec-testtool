@@ -10,6 +10,7 @@ package com.btsec.testtool.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -170,15 +171,13 @@ class ScannerScreenTest {
             .onNodeWithText("Stop")
             .performClick()
 
-        // Should return to Start Scan button
-        composeTestRule
-            .onNodeWithText("Start Scan")
-            .assertIsDisplayed()
-
-        // Should return to empty state
-        composeTestRule
-            .onNodeWithText("No devices found")
-            .assertIsDisplayed()
+        // Wait for the observable idle control transition. Scan discovery can legitimately
+        // retain devices from earlier tests, so the empty-list copy is not an invariant here.
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.onAllNodesWithText("Start Scan").fetchSemanticsNodes().isNotEmpty() &&
+                composeTestRule.onAllNodesWithText("Stop").fetchSemanticsNodes().isEmpty()
+        }
+        composeTestRule.onNodeWithText("Start Scan").assertIsDisplayed()
     }
 
     @Test
