@@ -77,6 +77,32 @@ class BuildGradleConfigTest {
     }
 
     // ------------------------------------------------------------------
+    // Issue #462: LeakCanary must not add a second launcher entry to dev debug.
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `debug resources must hide LeakCanary launcher icon without removing LeakCanary`() {
+        val resourceCandidates =
+            listOf(
+                File("src/debug/res/values/leakcanary.xml"),
+                File("app/src/debug/res/values/leakcanary.xml"),
+            )
+        val resourceFile = resourceCandidates.firstOrNull { it.exists() }
+        assertTrue(resourceFile != null) {
+            "A debug-only LeakCanary resource override must exist. See issue #462."
+        }
+        val resourceContent = resourceFile?.readText().orEmpty()
+        assertTrue(resourceContent.contains("<bool name=\"leak_canary_add_launcher_icon\">false</bool>")) {
+            "Debug resources must disable only the LeakCanary launcher icon. See issue #462."
+        }
+
+        val buildContent = buildGradleFile.readText()
+        assertTrue(buildContent.contains("debugImplementation(\"com.squareup.leakcanary:leakcanary-android:")) {
+            "LeakCanary debug dependency must remain enabled for leak analysis. See issue #462."
+        }
+    }
+
+    // ------------------------------------------------------------------
     // Issue #366: E2E instrumented tests must run on an Ubuntu runner with KVM
     // (GitHub-hosted macOS runners can't host the Android emulator).
     // ------------------------------------------------------------------
