@@ -39,12 +39,13 @@ interface AvrcpSecurityRepository {
      *
      * @param path The virtual path to browse (e.g. "/", "/Music").
      * @param depth Maximum browsing depth.
-     * @return List of media items found.
+     * @return Result.success with media items, or Result.failure with
+     * UnsupportedOperationException when native AVRCP browsing is unavailable.
      */
     suspend fun browseMedia(
         path: String,
         depth: Int = 1,
-    ): List<AvrcpMediaItem>
+    ): Result<List<AvrcpMediaItem>>
 
     /**
      * Send a media control command (play, pause, next, previous, etc.).

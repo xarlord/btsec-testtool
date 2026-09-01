@@ -45,7 +45,7 @@ class PbapSecurityUseCase
 
             val (accessible, severity, recommendation) =
                 when {
-                    entryCount > 0 && !requiredAuth -> {
+                    entryCount > 0 && requiredAuth == false -> {
                         val sev =
                             if (phonebookType in CRITICAL_TYPES) {
                                 PbmapSeverity.CRITICAL
@@ -80,7 +80,7 @@ class PbapSecurityUseCase
                 profile = "PBAP",
                 dataType = dataType,
                 accessible = accessible,
-                authRequired = requiredAuth,
+                authRequired = requiredAuth == true,
                 dataVolume = volume,
                 severity = severity,
                 recommendation = recommendation,
@@ -95,7 +95,7 @@ class PbapSecurityUseCase
                 analyzeAccessResult(
                     phonebookType = result.phonebookType,
                     entryCount = result.entryCount,
-                    requiredAuth = result.requiredAuth,
+                    requiredAuth = result.requiredAuth == true,
                 )
             }
         }

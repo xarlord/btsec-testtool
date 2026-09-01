@@ -36,6 +36,7 @@ class ReportRepositoryImplTest {
     private lateinit var vulnerabilityDao: VulnerabilityDao
     private lateinit var fuzzingDao: FuzzingDao
     private lateinit var keyExtractionDao: KeyExtractionDao
+    private lateinit var vulnerabilityReader: com.btsec.testtool.domain.repository.VulnerabilityReader
     private lateinit var reportGenerator: ReportGenerator
     private lateinit var exportFormatters: ExportFormatters
     private lateinit var repository: ReportRepositoryImpl
@@ -78,12 +79,13 @@ class ReportRepositoryImplTest {
         vulnerabilityDao = mockk(relaxed = true)
         fuzzingDao = mockk(relaxed = true)
         keyExtractionDao = mockk(relaxed = true)
+        vulnerabilityReader = mockk(relaxed = true)
         reportGenerator = mockk(relaxed = true)
         exportFormatters = mockk(relaxed = true)
         repository =
             ReportRepositoryImpl(
                 context, reportDao, bluetoothDao, vulnerabilityDao,
-                fuzzingDao, keyExtractionDao, reportGenerator, exportFormatters,
+                fuzzingDao, keyExtractionDao, reportGenerator, exportFormatters, vulnerabilityReader,
             )
     }
 

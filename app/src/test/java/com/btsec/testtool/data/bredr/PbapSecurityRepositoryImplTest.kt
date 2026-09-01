@@ -105,7 +105,8 @@ class PbapSecurityRepositoryImplTest {
 
             assertFalse(result.accessible)
             assertEquals(0, result.entryCount)
-            assertTrue(result.requiredAuth)
+            assertTrue(result.requiredAuth == null)
+            assertEquals(com.btsec.testtool.domain.model.EvidenceOutcome.UNSUPPORTED, result.outcome)
             assertEquals(PhonebookType.MAIN_CONTACTS, result.phonebookType)
         }
 
@@ -116,7 +117,8 @@ class PbapSecurityRepositoryImplTest {
                 val result = repository.accessPhonebook(type)
                 assertFalse(result.accessible)
                 assertEquals(type, result.phonebookType)
-                assertTrue(result.requiredAuth)
+                assertTrue(result.requiredAuth == null)
+                assertEquals(com.btsec.testtool.domain.model.EvidenceOutcome.UNSUPPORTED, result.outcome)
             }
         }
 

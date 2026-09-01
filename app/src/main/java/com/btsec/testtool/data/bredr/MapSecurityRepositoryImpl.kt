@@ -88,8 +88,12 @@ class MapSecurityRepositoryImpl
                 accessible = false,
                 messageCount = 0,
                 messages = emptyList(),
-                requiredAuth = true,
+                requiredAuth = null,
                 testDurationMs = System.currentTimeMillis() - startTime,
+                outcome = com.btsec.testtool.domain.model.EvidenceOutcome.UNSUPPORTED,
+                evidenceSource = com.btsec.testtool.domain.model.EvidenceSource.UNAVAILABLE,
+                limitation = "MAP OBEX CONNECT/GET is not implemented in this build",
+                capabilityBoundary = "Requires an authorized target and a native OBEX/RFCOMM implementation",
             )
         }
 

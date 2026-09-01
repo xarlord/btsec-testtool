@@ -45,7 +45,7 @@ class MapSecurityUseCase
 
             val (accessible, severity, recommendation) =
                 when {
-                    messageCount > 0 && !requiredAuth -> {
+                    messageCount > 0 && requiredAuth == false -> {
                         val sev =
                             if (folder in CRITICAL_FOLDERS) {
                                 PbmapSeverity.CRITICAL
@@ -80,7 +80,7 @@ class MapSecurityUseCase
                 profile = "MAP",
                 dataType = dataType,
                 accessible = accessible,
-                authRequired = requiredAuth,
+                authRequired = requiredAuth == true,
                 dataVolume = volume,
                 severity = severity,
                 recommendation = recommendation,
@@ -95,7 +95,7 @@ class MapSecurityUseCase
                 analyzeAccessResult(
                     folder = result.folder,
                     messageCount = result.messageCount,
-                    requiredAuth = result.requiredAuth,
+                    requiredAuth = result.requiredAuth == true,
                 )
             }
         }

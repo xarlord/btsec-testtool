@@ -218,7 +218,7 @@ class BredrRepositoryUnitTest {
             )
 
         assertTrue(result.accessible)
-        assertFalse(result.requiredAuth)
+        assertFalse(result.requiredAuth == true)
         assertEquals(50, result.entryCount)
     }
 

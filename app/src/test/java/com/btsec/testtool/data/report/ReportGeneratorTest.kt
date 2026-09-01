@@ -241,7 +241,7 @@ class ReportGeneratorTest {
             )
         assertTrue(report.vulnerabilities.isEmpty())
         assertTrue(report.recommendations.isEmpty())
-        assertTrue(report.executiveSummary.contains("No critical vulnerabilities detected"))
+        assertTrue(report.executiveSummary.contains("not a clean conclusion"))
     }
 
     @Test
@@ -316,7 +316,7 @@ class ReportGeneratorTest {
     }
 
     @Test
-    @DisplayName("generateReport should have FINAL status")
+    @DisplayName("generateReport should remain DRAFT until an explicit evidence review")
     fun testGenerateReportStatus() {
         val report =
             generator.generateReport(
@@ -327,7 +327,7 @@ class ReportGeneratorTest {
                 fuzzingResults = emptyList(),
                 keyExtractionResults = emptyList(),
             )
-        assertEquals(ReportStatus.FINAL, report.status)
+        assertEquals(ReportStatus.DRAFT, report.status)
     }
 
     @Test
@@ -369,21 +369,21 @@ class ReportGeneratorTest {
         val results =
             listOf(
                 createTestResult(
-                    detected = false,
+                    detected = true,
                     severity = VulnerabilitySeverity.HIGH,
                     cvss = 7.5,
                     category = VulnerabilityCategory.ENCRYPTION,
                     name = "KNOB",
                 ),
                 createTestResult(
-                    detected = false,
+                    detected = true,
                     severity = VulnerabilitySeverity.HIGH,
                     cvss = 7.5,
                     category = VulnerabilityCategory.ENCRYPTION,
                     name = "BLURtooth",
                 ),
                 createTestResult(
-                    detected = false,
+                    detected = true,
                     severity = VulnerabilitySeverity.MEDIUM,
                     cvss = 5.3,
                     category = VulnerabilityCategory.AUTHENTICATION,

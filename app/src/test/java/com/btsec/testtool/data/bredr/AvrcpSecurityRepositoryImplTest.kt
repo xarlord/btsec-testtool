@@ -180,10 +180,11 @@ class AvrcpSecurityRepositoryImplTest {
         }
 
     @Test
-    fun `browseMedia returns empty list (stub implementation)`() =
+    fun `browseMedia reports unsupported protocol instead of empty clean result`() =
         runTest {
-            val items = repository.browseMedia(path = "/", depth = 1)
-            assertTrue(items.isEmpty())
+            val result = repository.browseMedia(path = "/", depth = 1)
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull() is UnsupportedOperationException)
         }
 
     @Test

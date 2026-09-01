@@ -37,6 +37,7 @@ import com.btsec.testtool.domain.repository.ReportStatistics
 import com.btsec.testtool.domain.repository.ReportTemplate
 import com.btsec.testtool.domain.repository.ReportsSummary
 import com.btsec.testtool.domain.repository.VulnerabilityTestResult
+import com.btsec.testtool.domain.repository.VulnerabilityReader
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +68,7 @@ class ReportRepositoryImpl
         private val keyExtractionDao: KeyExtractionDao,
         private val reportGenerator: com.btsec.testtool.data.report.ReportGenerator,
         private val exportFormatters: com.btsec.testtool.data.report.ExportFormatters,
+        private val vulnerabilityReader: VulnerabilityReader,
     ) : ReportRepository {
         // In-memory stores for templates and logs (not Room-backed yet)
         private val templates = MutableStateFlow<List<ReportTemplate>>(emptyList())
@@ -116,19 +118,17 @@ class ReportRepositoryImpl
                             }
                         val vulnResults =
                             try {
-                                vulnerabilityDao.getAllDefinitions().first().toDomainDefinitions().map { def ->
-                                    VulnerabilityTestResult(
-                                        vulnerability = def,
-                                        detected = false,
-                                        confidence = DetectionConfidence.LOW,
-                                        details = "Included from vulnerability definitions database",
-                                        evidence = emptyList(),
-                                        timestamp = Instant.now(),
-                                    )
-                                }
+                                vulnerabilityReader.getLatestScanResults().first()
                             } catch (e: Exception) {
-                                Timber.w(e, "Failed to load vulnerabilities for report")
+                                Timber.w(e, "Failed to load persisted vulnerability scan results for report")
                                 emptyList<VulnerabilityTestResult>()
+                            }
+                        val evidenceLedger =
+                            try {
+                                vulnerabilityReader.getLatestEvidenceLedger().first()
+                            } catch (e: Exception) {
+                                Timber.w(e, "Failed to load persisted evidence ledger for report")
+                                emptyList<EvidenceLedgerEntry>()
                             }
                         val fuzzResults =
                             try {
@@ -152,6 +152,7 @@ class ReportRepositoryImpl
                             vulnerabilityResults = vulnResults,
                             fuzzingResults = fuzzResults,
                             keyExtractionResults = keyResults,
+                            evidenceLedger = evidenceLedger,
                         )
                     } catch (e: Exception) {
                         Timber.e(e, "ReportGenerator failed, creating basic report")

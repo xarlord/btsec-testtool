@@ -55,6 +55,11 @@ data class AvrcpTestResult(
     val evidence: String,
     val severity: AvrcpSeverity,
     val recommendation: String,
+    val outcome: EvidenceOutcome =
+        if (vulnerable) EvidenceOutcome.VULNERABLE else EvidenceOutcome.NOT_VULNERABLE,
+    val evidenceSource: EvidenceSource = EvidenceSource.OBSERVED_PROFILE,
+    val limitation: String? = null,
+    val capabilityBoundary: String? = null,
 )
 
 /** Severity levels for AVRCP test findings. */
@@ -67,6 +72,11 @@ data class AvrcpBrowseResult(
     val itemsFound: Int,
     val traversalSuccessful: Boolean,
     val sensitivePaths: List<String>,
+    val outcome: EvidenceOutcome =
+        if (traversalSuccessful) EvidenceOutcome.VULNERABLE else EvidenceOutcome.NOT_VULNERABLE,
+    val evidenceSource: EvidenceSource = EvidenceSource.OBSERVED_PROFILE,
+    val limitation: String? = null,
+    val capabilityBoundary: String? = null,
 )
 
 /** Overall report for an AVRCP security test session. */
