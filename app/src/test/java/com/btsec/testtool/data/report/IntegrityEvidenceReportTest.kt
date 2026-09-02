@@ -22,8 +22,8 @@ import com.btsec.testtool.domain.repository.VulnerabilityTestResult
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFailsWith
 import java.time.Instant
+import kotlin.test.assertFailsWith
 
 class IntegrityEvidenceReportTest {
     private val now = Instant.parse("2026-07-18T12:00:00Z")

@@ -224,12 +224,13 @@ class ReportGenerator
          */
         fun calculateRiskScore(vulnerabilityResults: List<VulnerabilityTestResult>): Double {
             if (vulnerabilityResults.isEmpty()) return 0.0
-            val unresolved = vulnerabilityResults.any {
-                it.outcome == EvidenceOutcome.INCONCLUSIVE ||
-                    it.outcome == EvidenceOutcome.UNSUPPORTED ||
-                    it.outcome == EvidenceOutcome.ERROR ||
-                    it.outcome == EvidenceOutcome.CANCELLED
-            }
+            val unresolved =
+                vulnerabilityResults.any {
+                    it.outcome == EvidenceOutcome.INCONCLUSIVE ||
+                        it.outcome == EvidenceOutcome.UNSUPPORTED ||
+                        it.outcome == EvidenceOutcome.ERROR ||
+                        it.outcome == EvidenceOutcome.CANCELLED
+                }
             val detected = vulnerabilityResults.filter { it.outcome == EvidenceOutcome.VULNERABLE }
             if (detected.isEmpty()) return if (unresolved) Double.NaN else 0.0
 

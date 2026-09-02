@@ -17,7 +17,6 @@ import com.btsec.testtool.data.local.dao.KeyExtractionDao
 import com.btsec.testtool.data.local.dao.ReportDao
 import com.btsec.testtool.data.local.dao.VulnerabilityDao
 import com.btsec.testtool.data.local.toDomain
-import com.btsec.testtool.data.local.toDomainDefinitions
 import com.btsec.testtool.data.local.toDomainDevices
 import com.btsec.testtool.data.local.toDomainFuzzResults
 import com.btsec.testtool.data.local.toDomainKeyResults
@@ -25,7 +24,6 @@ import com.btsec.testtool.data.local.toDomainReports
 import com.btsec.testtool.data.local.toEntity
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.DateRange
-import com.btsec.testtool.domain.repository.DetectionConfidence
 import com.btsec.testtool.domain.repository.ExportFormat
 import com.btsec.testtool.domain.repository.GenerationStep
 import com.btsec.testtool.domain.repository.ReportConfig
@@ -36,8 +34,8 @@ import com.btsec.testtool.domain.repository.ReportRepository
 import com.btsec.testtool.domain.repository.ReportStatistics
 import com.btsec.testtool.domain.repository.ReportTemplate
 import com.btsec.testtool.domain.repository.ReportsSummary
-import com.btsec.testtool.domain.repository.VulnerabilityTestResult
 import com.btsec.testtool.domain.repository.VulnerabilityReader
+import com.btsec.testtool.domain.repository.VulnerabilityTestResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
