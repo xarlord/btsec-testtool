@@ -135,6 +135,12 @@ class BuildGradleConfigTest {
         assertTrue(e2eSection.contains("99-kvm4all.rules")) {
             "The E2E job must enable KVM group permissions for the emulator. See issue #366."
         }
+        assertTrue(e2eSection.contains("Provision Android SDK Platform 30 deterministically")) {
+            "The E2E job must provision Platform 30 before emulator setup. See issue #480."
+        }
+        assertTrue(e2eSection.contains("packages: 'platforms;android-30'")) {
+            "The E2E job must explicitly provision platforms;android-30. See issue #480."
+        }
     }
 
     private fun resolveWorkflowFile(vararg candidates: String): File = candidates.map { File(it) }.first { it.exists() }
