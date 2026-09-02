@@ -84,22 +84,29 @@ class AvrcpSecurityRepositoryImpl
         override suspend fun browseMedia(
             path: String,
             depth: Int,
-        ): List<AvrcpMediaItem> {
+        ): Result<List<AvrcpMediaItem>> {
             // AVRCP browsing uses a separate BIP channel.
-            // Full implementation requires OBEX browsing protocol.
-            // This skeleton returns empty list; actual browsing is protocol-level.
-            Timber.d("browseMedia: path=$path depth=$depth (stub)")
-            return emptyList()
+            // Full implementation requires the AVRCP browsing protocol.
+            Timber.d("browseMedia: path=$path depth=$depth (unsupported)")
+            return Result.failure(
+                UnsupportedOperationException(
+                    "AVRCP browsing is unavailable: native AV/C/BIP framing is not implemented",
+                ),
+            )
         }
 
         override suspend fun sendMediaCommand(command: String): Result<Unit> {
             val sock = controlSocket ?: return Result.failure(Exception("Not connected"))
             return try {
-                val output = sock.outputStream
-                // AVRCP commands are binary packets (AV/C protocol)
-                // This is a simplified interface; real AVRCP uses AV/C frames
-                Timber.d("sendMediaCommand: $command")
-                Result.success(Unit)
+                // AVRCP commands are binary AV/C packets; no command is sent by this build.
+                Timber.d("sendMediaCommand unavailable: $command")
+                @Suppress("UNUSED_VARIABLE")
+                val unusedSocket = sock
+                Result.failure(
+                    UnsupportedOperationException(
+                        "AVRCP media commands are unavailable: native AV/C framing is not implemented",
+                    ),
+                )
             } catch (e: IOException) {
                 Timber.w(e, "AVRCP command failed")
                 Result.failure(e)

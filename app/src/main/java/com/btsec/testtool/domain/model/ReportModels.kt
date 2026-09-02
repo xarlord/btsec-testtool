@@ -30,6 +30,9 @@ data class SecurityReport(
     val recommendations: List<Recommendation> = emptyList(),
     val appendix: ReportAppendix,
     val status: ReportStatus = ReportStatus.DRAFT,
+    val evidenceLedger: List<EvidenceLedgerEntry> = emptyList(),
+    val reviewedBy: String? = null,
+    @Serializable(with = InstantAsEpochMillisSerializer::class) val reviewedAt: Instant? = null,
 )
 
 /**

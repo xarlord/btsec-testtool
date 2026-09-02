@@ -17,7 +17,6 @@ import com.btsec.testtool.data.local.dao.KeyExtractionDao
 import com.btsec.testtool.data.local.dao.ReportDao
 import com.btsec.testtool.data.local.dao.VulnerabilityDao
 import com.btsec.testtool.data.local.toDomain
-import com.btsec.testtool.data.local.toDomainDefinitions
 import com.btsec.testtool.data.local.toDomainDevices
 import com.btsec.testtool.data.local.toDomainFuzzResults
 import com.btsec.testtool.data.local.toDomainKeyResults
@@ -25,7 +24,6 @@ import com.btsec.testtool.data.local.toDomainReports
 import com.btsec.testtool.data.local.toEntity
 import com.btsec.testtool.domain.model.*
 import com.btsec.testtool.domain.repository.DateRange
-import com.btsec.testtool.domain.repository.DetectionConfidence
 import com.btsec.testtool.domain.repository.ExportFormat
 import com.btsec.testtool.domain.repository.GenerationStep
 import com.btsec.testtool.domain.repository.ReportConfig
@@ -36,6 +34,7 @@ import com.btsec.testtool.domain.repository.ReportRepository
 import com.btsec.testtool.domain.repository.ReportStatistics
 import com.btsec.testtool.domain.repository.ReportTemplate
 import com.btsec.testtool.domain.repository.ReportsSummary
+import com.btsec.testtool.domain.repository.VulnerabilityReader
 import com.btsec.testtool.domain.repository.VulnerabilityTestResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -67,6 +66,7 @@ class ReportRepositoryImpl
         private val keyExtractionDao: KeyExtractionDao,
         private val reportGenerator: com.btsec.testtool.data.report.ReportGenerator,
         private val exportFormatters: com.btsec.testtool.data.report.ExportFormatters,
+        private val vulnerabilityReader: VulnerabilityReader,
     ) : ReportRepository {
         // In-memory stores for templates and logs (not Room-backed yet)
         private val templates = MutableStateFlow<List<ReportTemplate>>(emptyList())
@@ -116,19 +116,17 @@ class ReportRepositoryImpl
                             }
                         val vulnResults =
                             try {
-                                vulnerabilityDao.getAllDefinitions().first().toDomainDefinitions().map { def ->
-                                    VulnerabilityTestResult(
-                                        vulnerability = def,
-                                        detected = false,
-                                        confidence = DetectionConfidence.LOW,
-                                        details = "Included from vulnerability definitions database",
-                                        evidence = emptyList(),
-                                        timestamp = Instant.now(),
-                                    )
-                                }
+                                vulnerabilityReader.getLatestScanResults().first()
                             } catch (e: Exception) {
-                                Timber.w(e, "Failed to load vulnerabilities for report")
+                                Timber.w(e, "Failed to load persisted vulnerability scan results for report")
                                 emptyList<VulnerabilityTestResult>()
+                            }
+                        val evidenceLedger =
+                            try {
+                                vulnerabilityReader.getLatestEvidenceLedger().first()
+                            } catch (e: Exception) {
+                                Timber.w(e, "Failed to load persisted evidence ledger for report")
+                                emptyList<EvidenceLedgerEntry>()
                             }
                         val fuzzResults =
                             try {
@@ -152,6 +150,7 @@ class ReportRepositoryImpl
                             vulnerabilityResults = vulnResults,
                             fuzzingResults = fuzzResults,
                             keyExtractionResults = keyResults,
+                            evidenceLedger = evidenceLedger,
                         )
                     } catch (e: Exception) {
                         Timber.e(e, "ReportGenerator failed, creating basic report")

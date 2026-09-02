@@ -50,8 +50,13 @@ data class PbapAccessResult(
     val accessible: Boolean,
     val entryCount: Int,
     val entries: List<PhonebookEntry>,
-    val requiredAuth: Boolean,
+    val requiredAuth: Boolean? = null,
     val testDurationMs: Long,
+    val outcome: EvidenceOutcome =
+        if (accessible) EvidenceOutcome.VULNERABLE else EvidenceOutcome.UNSUPPORTED,
+    val evidenceSource: EvidenceSource = EvidenceSource.OBSERVED_PROFILE,
+    val limitation: String = "",
+    val capabilityBoundary: String = "",
 )
 
 /**
@@ -92,8 +97,13 @@ data class MapAccessResult(
     val accessible: Boolean,
     val messageCount: Int,
     val messages: List<MessageEntry>,
-    val requiredAuth: Boolean,
+    val requiredAuth: Boolean? = null,
     val testDurationMs: Long,
+    val outcome: EvidenceOutcome =
+        if (accessible) EvidenceOutcome.VULNERABLE else EvidenceOutcome.UNSUPPORTED,
+    val evidenceSource: EvidenceSource = EvidenceSource.OBSERVED_PROFILE,
+    val limitation: String = "",
+    val capabilityBoundary: String = "",
 )
 
 /**

@@ -90,8 +90,12 @@ class PbapSecurityRepositoryImpl
                 accessible = false,
                 entryCount = 0,
                 entries = emptyList(),
-                requiredAuth = true,
+                requiredAuth = null,
                 testDurationMs = System.currentTimeMillis() - startTime,
+                outcome = com.btsec.testtool.domain.model.EvidenceOutcome.UNSUPPORTED,
+                evidenceSource = com.btsec.testtool.domain.model.EvidenceSource.UNAVAILABLE,
+                limitation = "PBAP OBEX CONNECT/PULL is not implemented in this build",
+                capabilityBoundary = "Requires an authorized target and a native OBEX/RFCOMM implementation",
             )
         }
 

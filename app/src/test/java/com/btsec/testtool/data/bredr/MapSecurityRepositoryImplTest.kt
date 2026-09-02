@@ -105,7 +105,8 @@ class MapSecurityRepositoryImplTest {
 
             assertFalse(result.accessible)
             assertEquals(0, result.messageCount)
-            assertTrue(result.requiredAuth)
+            assertTrue(result.requiredAuth == null)
+            assertEquals(com.btsec.testtool.domain.model.EvidenceOutcome.UNSUPPORTED, result.outcome)
             assertEquals(MapFolder.INBOX, result.folder)
         }
 
@@ -115,7 +116,8 @@ class MapSecurityRepositoryImplTest {
             for (folder in MapFolder.entries) {
                 val result = repository.accessFolder(folder)
                 assertFalse(result.accessible)
-                assertTrue(result.requiredAuth)
+                assertTrue(result.requiredAuth == null)
+                assertEquals(com.btsec.testtool.domain.model.EvidenceOutcome.UNSUPPORTED, result.outcome)
                 assertEquals(folder, result.folder)
             }
         }
