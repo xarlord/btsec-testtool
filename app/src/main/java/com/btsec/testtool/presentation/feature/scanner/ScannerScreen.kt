@@ -237,7 +237,7 @@ fun checkBtPermissions(context: android.content.Context): Boolean {
 }
 
 @Composable
-private fun ScanControls(
+internal fun ScanControls(
     isScanning: Boolean,
     deviceCount: Int,
     canScan: Boolean,
