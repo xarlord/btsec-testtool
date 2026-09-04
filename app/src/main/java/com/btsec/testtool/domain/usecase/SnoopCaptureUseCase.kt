@@ -53,7 +53,7 @@ class SnoopCaptureUseCase
             data: ByteArray,
             offset: Int,
         ): Pair<SnoopRecord, Int> {
-            require(offset + RECORD_HEADER_SIZE <= data.size) {
+            require(offset >= 0 && offset <= data.size - RECORD_HEADER_SIZE) {
                 "Not enough data for record header at offset $offset (available: ${data.size})"
             }
             val buf = ByteBuffer.wrap(data, offset, RECORD_HEADER_SIZE).order(ByteOrder.BIG_ENDIAN)
@@ -64,8 +64,9 @@ class SnoopCaptureUseCase
             val timestampMicros = buf.long
 
             val dataOffset = offset + RECORD_HEADER_SIZE
-            require(dataOffset + includedLength <= data.size) {
-                "Not enough data for record payload at offset $dataOffset (need $includedLength, available: ${data.size - dataOffset})"
+            val availablePayloadBytes = data.size - dataOffset
+            require(includedLength >= 0 && includedLength <= availablePayloadBytes) {
+                "Not enough data for record payload at offset $dataOffset (need $includedLength, available: $availablePayloadBytes)"
             }
             val recordData = data.copyOfRange(dataOffset, dataOffset + includedLength)
 
@@ -105,11 +106,15 @@ class SnoopCaptureUseCase
             if (fileData.size < BTSNOOP_HEADER_SIZE) return emptyList()
             val records = mutableListOf<SnoopRecord>()
             var offset = BTSNOOP_HEADER_SIZE
-            while (offset + RECORD_HEADER_SIZE <= fileData.size) {
-                val buf = ByteBuffer.wrap(fileData, offset, 4).order(ByteOrder.BIG_ENDIAN)
-                val includedLength = buf.int
-                val recordEnd = offset + RECORD_HEADER_SIZE + includedLength
-                if (recordEnd > fileData.size) break
+            while (offset <= fileData.size - RECORD_HEADER_SIZE) {
+                // btsnoop record headers store Original Length first, then Included Length.
+                // Only Included Length describes the bytes physically present in the capture.
+                val includedLength =
+                    ByteBuffer.wrap(fileData, offset + Int.SIZE_BYTES, Int.SIZE_BYTES)
+                        .order(ByteOrder.BIG_ENDIAN)
+                        .int
+                val availablePayloadBytes = fileData.size - offset - RECORD_HEADER_SIZE
+                if (includedLength < 0 || includedLength > availablePayloadBytes) break
                 val (record, consumed) = parseBtsnoopRecord(fileData, offset)
                 records.add(record)
                 offset += consumed
