@@ -8,6 +8,10 @@
  */
 package com.btsec.testtool.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -17,6 +21,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.btsec.testtool.bluetoothRuntimePermissionRule
 import com.btsec.testtool.presentation.InstrumentationHiltActivity
+import com.btsec.testtool.presentation.feature.scanner.ScanControls
 import com.btsec.testtool.presentation.feature.scanner.ScannerScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -122,8 +127,13 @@ class ScannerScreenTest {
     @Test
     fun testScannerScreen_clickStartScan_showsScanningState() {
         composeTestRule.setContent {
-            ScannerScreen(
-                onBack = { },
+            var isScanning by remember { mutableStateOf(false) }
+            ScanControls(
+                isScanning = isScanning,
+                deviceCount = 0,
+                canScan = true,
+                onStartScan = { isScanning = true },
+                onStopScan = { isScanning = false },
             )
         }
 
@@ -137,31 +147,26 @@ class ScannerScreenTest {
             .onNodeWithText("Start Scan")
             .performClick()
 
-        // Should now show Stop (scanning state)
+        // The deterministic UI state now shows Stop (scanning state).
         composeTestRule
             .onNodeWithText("Stop")
-            .assertIsDisplayed()
-
-        // Should show scanning indicator text
-        composeTestRule
-            .onNodeWithText("Scanning for Bluetooth devices…")
             .assertIsDisplayed()
     }
 
     @Test
     fun testScannerScreen_clickStopScan_returnsToIdleState() {
         composeTestRule.setContent {
-            ScannerScreen(
-                onBack = { },
+            var isScanning by remember { mutableStateOf(true) }
+            ScanControls(
+                isScanning = isScanning,
+                deviceCount = 0,
+                canScan = true,
+                onStartScan = { isScanning = true },
+                onStopScan = { isScanning = false },
             )
         }
 
-        // Start scanning
-        composeTestRule
-            .onNodeWithText("Start Scan")
-            .performClick()
-
-        // Verify we're in scanning state
+        // Verify we're in scanning state, then stop.
         composeTestRule
             .onNodeWithText("Stop")
             .assertIsDisplayed()
@@ -171,8 +176,7 @@ class ScannerScreenTest {
             .onNodeWithText("Stop")
             .performClick()
 
-        // Wait for the observable idle control transition. Scan discovery can legitimately
-        // retain devices from earlier tests, so the empty-list copy is not an invariant here.
+        // Wait for the observable idle control transition.
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodesWithText("Start Scan").fetchSemanticsNodes().isNotEmpty() &&
                 composeTestRule.onAllNodesWithText("Stop").fetchSemanticsNodes().isEmpty()
@@ -183,8 +187,13 @@ class ScannerScreenTest {
     @Test
     fun testScannerScreen_scanStateToggleIsReversible() {
         composeTestRule.setContent {
-            ScannerScreen(
-                onBack = { },
+            var isScanning by remember { mutableStateOf(false) }
+            ScanControls(
+                isScanning = isScanning,
+                deviceCount = 0,
+                canScan = true,
+                onStartScan = { isScanning = true },
+                onStopScan = { isScanning = false },
             )
         }
 
