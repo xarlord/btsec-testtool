@@ -168,6 +168,33 @@ class SnoopCaptureUseCaseTest {
             assertThat(records[1].packetType).isEqualTo(HciPacketType.EVENT)
             assertThat(records[2].packetType).isEqualTo(HciPacketType.ACL_DATA)
         }
+
+        @Test
+        @DisplayName("retains truncated records using included length and parses following records")
+        fun testParseAllRecords_truncatedRecordUsesIncludedLength() {
+            val truncatedPayload = byteArrayOf(0x01, 0x03, 0x0C, 0x00)
+            val followingPayload = byteArrayOf(0x04, 0x0E, 0x00)
+            val header = ByteBuffer.allocate(16).order(ByteOrder.BIG_ENDIAN)
+            header.put("btsnoop\u0000".toByteArray())
+            header.putInt(1)
+            header.putInt(1001)
+            val truncatedRecordHeader = ByteBuffer.allocate(24).order(ByteOrder.BIG_ENDIAN)
+            truncatedRecordHeader.putInt(64) // original length before capture truncation
+            truncatedRecordHeader.putInt(truncatedPayload.size) // bytes actually included
+            truncatedRecordHeader.putInt(0)
+            truncatedRecordHeader.putInt(0)
+            truncatedRecordHeader.putLong(0L)
+            val followingRecord = buildBtsnoopFile(listOf(followingPayload)).copyOfRange(16, 43)
+            val file = header.array() + truncatedRecordHeader.array() + truncatedPayload + followingRecord
+
+            val records = useCase.parseAllRecords(file)
+
+            assertThat(records).hasSize(2)
+            assertThat(records[0].originalLength).isEqualTo(64)
+            assertThat(records[0].includedLength).isEqualTo(truncatedPayload.size)
+            assertThat(records[0].data).isEqualTo(truncatedPayload)
+            assertThat(records[1].data).isEqualTo(followingPayload)
+        }
     }
 
     // ── decodeAclPacket ────────────────────────────────────────────────────
