@@ -31,23 +31,17 @@ jobs:
         run: |
           npm install -g \
             semantic-release@^22 \
-            @semantic-release/git@^10 \
-            @semantic-release/changelog@^6 \
             @semantic-release/commit-analyzer@^11 \
             @semantic-release/release-notes-generator@^11
 
       - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_AUTHOR_NAME: github-actions[bot]
-          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
         run: |
           npx semantic-release \
             --branches main \
             --tag-format 'v${version}' \
-            --plugins "@semantic-release/commit-analyzer,@semantic-release/release-notes-generator,@semantic-release/changelog,@semantic-release/git,@semantic-release/github"
+            --plugins "@semantic-release/commit-analyzer,@semantic-release/release-notes-generator,@semantic-release/github"
 
   # Build and attach APKs to release
   release-apks:
