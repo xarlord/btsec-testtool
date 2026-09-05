@@ -105,8 +105,10 @@ echo_section "ktlint Results"
 
 if [ -f "$REPORT_DIR/ktlint-report.xml" ]; then
     # Count violations
-    VIOLATIONS=$(grep -c '<error ' "$REPORT_DIR/ktlint-report.xml" 2>/dev/null || echo "0")
-    FILES_WITH_ERRORS=$(grep -c '<file ' "$REPORT_DIR/ktlint-report.xml" 2>/dev/null || echo "0")
+    # grep -c prints a valid zero count but exits 1 when no lines match; do not
+    # append a fallback value or the command substitution becomes multi-line.
+    VIOLATIONS=$(grep -c '<error ' "$REPORT_DIR/ktlint-report.xml" 2>/dev/null || true)
+    FILES_WITH_ERRORS=$(grep -c '<file ' "$REPORT_DIR/ktlint-report.xml" 2>/dev/null || true)
 
     if [ "$VIOLATIONS" -gt 0 ]; then
         echo_error "Found $VIOLATIONS violations in $FILES_WITH_ERRORS files"
