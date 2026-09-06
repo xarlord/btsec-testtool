@@ -26,11 +26,9 @@ import javax.inject.Inject
 /**
  * Foreground service for background Bluetooth scanning operations.
  *
- * This service is designed EXCLUSIVELY for AUTHORIZED security testing.
- * All scanning requires explicit written authorization.
- *
- * Security: All incoming Intents are validated against the authorization system
- * before any scanning operation proceeds.
+ * This service is designed EXCLUSIVELY for authorized security testing.
+ * Incoming intents must use one of the service's explicit actions before any
+ * scanning operation proceeds.
  *
  * Fix for #206: Service now actually performs BLE scanning by collecting the
  * scan flow from BluetoothRepository, maintaining scan state across lifecycle,
@@ -39,11 +37,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class BluetoothScanService : Service() {
     companion object {
-        const val EXTRA_AUTH_ID = "extra_auth_id"
-        const val EXTRA_AUTH_TOKEN = "extra_auth_token"
         const val ACTION_START_SCAN = "com.btsec.testtool.action.START_SCAN"
         const val ACTION_STOP_SCAN = "com.btsec.testtool.action.STOP_SCAN"
-        private val AUTH_ID_PATTERN = Regex("^BTSEC-(\\d{8}|DEMO)-[A-Z0-9]{8}$")
+
+        internal fun isSupportedAction(action: String?): Boolean =
+            action == ACTION_START_SCAN || action == ACTION_STOP_SCAN
     }
 
     @Inject lateinit var bluetoothRepository: BluetoothRepository
@@ -64,17 +62,16 @@ class BluetoothScanService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
-        if (!validateAuthorization(intent)) {
-            Timber.w("Unauthorized intent received — stopping service")
+        if (!isSupportedAction(intent?.action)) {
+            Timber.w("Unsupported scan service action received — stopping service")
             stopSelf()
             return START_NOT_STICKY
         }
 
         when (intent?.action) {
             ACTION_START_SCAN -> {
-                val authId = intent.getStringExtra(EXTRA_AUTH_ID) ?: ""
                 val filter = intent.getStringExtra("filter_address")
-                startBleScan(authId, filter)
+                startBleScan(filter)
             }
             ACTION_STOP_SCAN -> {
                 Timber.i("Stopping BLE scan via action")
@@ -90,10 +87,7 @@ class BluetoothScanService : Service() {
      * Start actual BLE scanning by collecting the scan flow from BluetoothRepository.
      * Results are tracked in discoveredDevices and the notification is updated.
      */
-    private fun startBleScan(
-        authId: String,
-        filterAddress: String?,
-    ) {
+    private fun startBleScan(filterAddress: String?) {
         if (isScanning) {
             Timber.w("Scan already in progress — ignoring duplicate start")
             return
@@ -123,7 +117,7 @@ class BluetoothScanService : Service() {
                 }
             }
 
-        Timber.i("Started BLE scan with auth: ${authId.take(10)}***")
+        Timber.i("Started BLE scan")
     }
 
     /**
@@ -151,37 +145,6 @@ class BluetoothScanService : Service() {
         serviceScope.cancel()
         Timber.d("BluetoothScanService destroyed — found ${discoveredDevices.size} devices total")
         super.onDestroy()
-    }
-
-    /**
-     * Validate that the incoming Intent carries proper authorization.
-     */
-    private fun validateAuthorization(intent: Intent?): Boolean {
-        if (intent == null) return false
-        if (intent.action != ACTION_START_SCAN && intent.action != ACTION_STOP_SCAN) return false
-
-        // STOP_SCAN doesn't require full auth (it's a cancellation)
-        if (intent.action == ACTION_STOP_SCAN) return true
-
-        val authId = intent.getStringExtra(EXTRA_AUTH_ID)
-        val authToken = intent.getStringExtra(EXTRA_AUTH_TOKEN)
-
-        if (authId.isNullOrBlank()) {
-            Timber.w("Missing auth ID in scan intent")
-            return false
-        }
-
-        if (!AUTH_ID_PATTERN.matches(authId)) {
-            Timber.w("Invalid auth ID format in scan intent: ${authId.take(10)}***")
-            return false
-        }
-
-        if (authToken.isNullOrBlank()) {
-            Timber.w("Missing auth token in scan intent")
-            return false
-        }
-
-        return true
     }
 
     private fun startForegroundNotification(text: String) {
