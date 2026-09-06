@@ -29,3 +29,13 @@ allprojects {
 tasks.register("clean", Delete::class) {
     delete(rootProject.layout.buildDirectory)
 }
+
+/**
+ * Runs the same repository-local ktlint checker used by CI on Unix-like hosts.
+ * Security testing must remain authorized.
+ */
+tasks.register<Exec>("ktlint") {
+    group = "verification"
+    description = "Runs the repository ktlint style checker."
+    commandLine("bash", rootProject.file("scripts/lint-ktlint.sh").absolutePath)
+}
