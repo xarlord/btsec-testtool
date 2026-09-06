@@ -373,7 +373,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency check
-        run: ./gradlew dependencyCheckAnalyze || echo "::warning::Dependency check plugin not configured"
+        run: ./gradlew dependencyCheckAnalyze
 
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
@@ -381,6 +381,7 @@ jobs:
         with:
           name: dependency-check-report
           path: app/build/reports/dependency-check-report.html
+          if-no-files-found: error
 
       - name: Comment PR with results
         uses: actions/github-script@v7

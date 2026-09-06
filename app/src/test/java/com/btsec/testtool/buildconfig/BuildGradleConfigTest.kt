@@ -143,5 +143,26 @@ class BuildGradleConfigTest {
         }
     }
 
+    // ------------------------------------------------------------------
+    // Issue #459: Dependency scanning must never report success when the
+    // scanner is unavailable or when no report is generated.
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `dependency vulnerability scan must fail closed and require a report`() {
+        val ciFile = resolveWorkflowFile("../.github/workflows/ci.yml", ".github/workflows/ci.yml")
+        val dependencyCheckSection = ciFile.readText().substringAfter("dependency-check:").substringBefore("docs-check:")
+
+        assertTrue(dependencyCheckSection.contains("./gradlew dependencyCheckAnalyze")) {
+            "Dependency Vulnerability Scan must invoke the configured OWASP scanner. See issue #459."
+        }
+        assertFalse(dependencyCheckSection.contains("|| echo")) {
+            "Dependency Vulnerability Scan must not convert an unavailable scanner into a passing check. See issue #459."
+        }
+        assertTrue(dependencyCheckSection.contains("if-no-files-found: error")) {
+            "Dependency Vulnerability Scan must fail if no scanner report is produced. See issue #459."
+        }
+    }
+
     private fun resolveWorkflowFile(vararg candidates: String): File = candidates.map { File(it) }.first { it.exists() }
 }
